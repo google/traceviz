@@ -61,7 +61,8 @@ func (uc *UpdateComparator) Compare(t *testing.T) (string, bool) {
 		for idx, str := range data.StringTable {
 			t.Logf("%3d: %s", idx, str)
 		}
-		return fmt.Sprintf("Got series %s, diff (-want +got):\n%s", data.DataSeries[0], diff), true
+		dt := newDataTraversal(data)
+		return fmt.Sprintf("Got series %s, diff (-want +got):\n%s", dt.prettyPrintDataSeries(data.DataSeries[0]), diff), true
 	}
 	return "", false
 }
@@ -213,6 +214,14 @@ func (dt *dataTraversal) prettyPrintDataSeries(series *util.DataSeries) []string
 	return ret
 }
 
+func newDataTraversal(d *util.Data) *dataTraversal {
+	return &dataTraversal{
+		stringTable: d.StringTable,
+		depth:       0,
+		indent:      "  ",
+	}
+}
+
 // PrettyPrintData returns a well-formatted, deterministic rendering of the
 // provided Data proto.  In this rendering,
 //   - All repeated fields (Data.DataSeries, DataSeries.Series, Datum.Children,
@@ -232,11 +241,7 @@ func (dt *dataTraversal) prettyPrintDataSeries(series *util.DataSeries) []string
 // In testing, PrettyPrintData output should only be compared against other
 // PrettyPrintData output: its specific output formatting is subject to change.
 func PrettyPrintData(d *util.Data) []string {
-	dt := &dataTraversal{
-		stringTable: d.StringTable,
-		depth:       0,
-		indent:      "  ",
-	}
+	dt := newDataTraversal(d)
 	ret := []string{"Data"}
 	dt.depth++
 	ret = append(ret, dt.indentation()+"Global filters:")
