@@ -1,0 +1,13 @@
+{
+  "reporters": [
+    {
+      "name": "jasmine-spec-reporter#SpecReporter",
+      "options": {
+	"displayStacktrace": "all"
+      }
+    }
+  ],
+  "jsLoader": "require",
+  "spec_dir": "lib",
+  "spec_files": ["**/*_test.js"]
+}
