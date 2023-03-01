@@ -17,11 +17,7 @@ package testutil
 
 import (
 	"fmt"
-	"sort"
-	"strconv"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/traceviz/server/go/util"
@@ -58,218 +54,23 @@ func (uc *UpdateComparator) WithWantUpdates(want ...util.PropertyUpdate) *Update
 // the two are different (true) or not (false).  Repeated-field ordering must
 // be preserved, but string-table ordering need not be preserved.
 func (uc *UpdateComparator) Compare(t *testing.T) (string, bool) {
-	drb := util.NewDataResponseBuilder(&util.DataRequest{})
+	drb := util.NewDataResponseBuilder()
 	resp := drb.DataSeries(&util.DataSeriesRequest{})
 	resp.Child().With(uc.got...)  // 'got': provided test updates
 	resp.Child().With(uc.want...) // 'want': expected equivalent updates
-	_, err := drb.ToJSON()
+	data, err := drb.Data()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	data := drb.D
 	seriesChildren := data.DataSeries[0].Root.Children
-	diff := cmp.Diff(seriesChildren[1], seriesChildren[0])
+	diff := cmp.Diff(
+		seriesChildren[1].PrettyPrint("", data.StringTable),
+		seriesChildren[0].PrettyPrint("", data.StringTable))
 	if diff != "" {
-		t.Logf("String table:")
-		for idx, str := range data.StringTable {
-			t.Logf("%3d: %s", idx, str)
-		}
-		dt := newDataTraversal(data)
-		return fmt.Sprintf("Got series %s, diff (-want +got):\n%s", dt.prettyPrintDataSeries(data.DataSeries[0]), diff), true
+		return fmt.Sprintf("Got series %s, diff (-want +got):\n%s",
+			data.DataSeries[0].PrettyPrint("", data.StringTable), diff), true
 	}
 	return "", false
-}
-
-type dataTraversal struct {
-	stringTable []string
-	depth       int
-	indent      string
-}
-
-func (dt *dataTraversal) indentation() string {
-	ret := ""
-	for i := 0; i < dt.depth; i++ {
-		ret = ret + dt.indent
-	}
-	return ret
-}
-
-func (dt *dataTraversal) prettyPrintValue(v *util.V) string {
-	if v == nil {
-		return "<nil>"
-	}
-	switch v.T {
-	case util.StringValueType:
-		return fmt.Sprintf("%q", v.V.(string))
-	case util.StringIndexValueType:
-		return "'" + dt.stringTable[int(v.V.(int64))] + "'"
-	case util.StringsValueType:
-		strs := v.V.([]string)
-		ret := make([]string, len(strs))
-		for idx, str := range strs {
-			ret[idx] = fmt.Sprintf("%q", str)
-		}
-		return "[" + strings.Join(ret, ", ") + "]"
-	case util.StringIndicesValueType:
-		strIdxs := v.V.([]int64)
-		ret := make([]string, len(strIdxs))
-		for idx, strIdx := range strIdxs {
-			ret[idx] = fmt.Sprintf("%q", dt.stringTable[strIdx])
-		}
-		return "[" + strings.Join(ret, ", ") + "]"
-	case util.IntegerValueType:
-		return fmt.Sprintf("%d", v.V.(int64))
-	case util.IntegersValueType:
-		ints := v.V.([]int64)
-		ret := make([]string, len(ints))
-		for idx, ival := range ints {
-			ret[idx] = strconv.Itoa(int(ival))
-		}
-		return "[" + strings.Join(ret, ", ") + "]"
-	case util.DoubleValueType:
-		return fmt.Sprintf("%.4f", v.V.(float64))
-	case util.DurationValueType:
-		return v.V.(time.Duration).String()
-	case util.TimestampValueType:
-		return v.V.(time.Time).String()
-	default:
-		return "<<UNKNOWN>>"
-	}
-}
-
-func (dt *dataTraversal) prettyPrintStringIndexValueMap(vm map[int64]*util.V) []string {
-	ret := []string{}
-	type keyPair struct {
-		name string
-		idx  int64
-	}
-	keys := make([]keyPair, 0, len(vm))
-	for keyIdx := range vm {
-		keys = append(keys, keyPair{
-			name: dt.stringTable[keyIdx],
-			idx:  keyIdx,
-		})
-	}
-	sort.Slice(keys, func(a, b int) bool {
-		return keys[a].name < keys[b].name
-	})
-	for _, key := range keys {
-		ret = append(ret, fmt.Sprintf("%s%s: %s", dt.indentation(), key.name, dt.prettyPrintValue(vm[key.idx])))
-	}
-	return ret
-}
-
-func (dt *dataTraversal) prettyPrintDatum(datum *util.Datum) []string {
-	ret := []string{}
-	if len(datum.Properties) > 0 {
-		ret = append(ret, dt.indentation()+"Properties:")
-		dt.depth++
-		ret = append(ret, dt.prettyPrintStringIndexValueMap(datum.Properties)...)
-		dt.depth--
-	}
-	if len(datum.Children) > 0 {
-		for _, child := range datum.Children {
-			ret = append(ret, dt.indentation()+"Child:")
-			dt.depth++
-			ret = append(ret, dt.prettyPrintDatum(child)...)
-			dt.depth--
-		}
-	}
-	return ret
-}
-
-func (dt *dataTraversal) prettyPrintStringValueMap(vm map[string]*util.V) []string {
-	ret := []string{}
-	keys := make([]string, 0, len(vm))
-	for key := range vm {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	for _, key := range keys {
-		ret = append(ret, fmt.Sprintf("%s%s: %s", dt.indentation(), key, dt.prettyPrintValue(vm[key])))
-	}
-	return ret
-}
-
-func (dt *dataTraversal) prettyPrintDataSeriesRequest(req *util.DataSeriesRequest) []string {
-	ret := []string{}
-	ret = append(ret, dt.indentation()+"Query Name: "+req.QueryName)
-	ret = append(ret, dt.indentation()+"Series Name: "+req.SeriesName)
-	if len(req.Options) > 0 {
-		ret = append(ret, dt.indentation()+"Options: ")
-		dt.depth++
-		ret = append(ret, dt.prettyPrintStringValueMap(req.Options)...)
-		dt.depth--
-	}
-	return ret
-}
-
-func (dt *dataTraversal) prettyPrintDataSeries(series *util.DataSeries) []string {
-	ret := []string{}
-	ret = append(ret, dt.indentation()+"Request:")
-	dt.depth++
-	ret = append(ret, dt.prettyPrintDataSeriesRequest(series.Request)...)
-	dt.depth--
-	if len(series.Root.Properties) > 0 {
-		ret = append(ret, dt.indentation()+"Properties: ")
-		dt.depth++
-		ret = append(ret, dt.prettyPrintStringIndexValueMap(series.Root.Properties)...)
-		dt.depth--
-	}
-	if len(series.Root.Children) > 0 {
-		ret = append(ret, dt.indentation()+"Series: ")
-		dt.depth++
-		for _, datum := range series.Root.Children {
-			ret = append(ret, dt.prettyPrintDatum(datum)...)
-		}
-		dt.depth--
-	}
-	return ret
-}
-
-func newDataTraversal(d *util.Data) *dataTraversal {
-	return &dataTraversal{
-		stringTable: d.StringTable,
-		depth:       0,
-		indent:      "  ",
-	}
-}
-
-// PrettyPrintData returns a well-formatted, deterministic rendering of the
-// provided Data proto.  In this rendering,
-//   - All repeated fields (Data.DataSeries, DataSeries.Series, Datum.Children,
-//     Value.Strs, Value.StrIdxs, Value.Ints) are rendered in declaration order.
-//   - All map fields (Data.GlobalFilters, DataSeriesRequest.Options,
-//     DataSeries.Properties, Datum.Properties) are rendered in increasing
-//     key alphabetic order.
-//   - All string-indices (Value.StrIdx, Value.StrIdxs, Datum.Children keys) are
-//     dereferenced.
-//   - Subordinate fields are indented beneath their parents.
-//
-// PrettyPrintData output is equal for two Data protos /a/ and /b/ if /a/ and
-// /b/ are equivalent.  If /a/ and /b/ yield the same PrettyPrintData output,
-// they should be treated identically by all frontend components; conversely,
-// if /a/ and /b/ do not yield the same PrettyPrintData, they are categorically
-// different.
-// In testing, PrettyPrintData output should only be compared against other
-// PrettyPrintData output: its specific output formatting is subject to change.
-func PrettyPrintData(d *util.Data) []string {
-	dt := newDataTraversal(d)
-	ret := []string{"Data"}
-	dt.depth++
-	ret = append(ret, dt.indentation()+"Global filters:")
-	dt.depth++
-	ret = append(ret, dt.prettyPrintStringValueMap(d.GlobalFilters)...)
-	dt.depth--
-	if len(d.DataSeries) > 0 {
-		ret = append(ret, dt.indentation()+"Series:")
-		dt.depth++
-		for _, series := range d.DataSeries {
-			ret = append(ret, dt.prettyPrintDataSeries(series)...)
-		}
-		dt.depth--
-	}
-	return ret
 }
 
 // TestDataBuilder is implemented by types that can assemble TraceViz responses
@@ -337,7 +138,7 @@ func (tdb *testDataBuilder) Parent() TestDataBuilder {
 // util.DataBuilder or a TestDataBuilder.
 func CompareResponses(t *testing.T, buildGotIf, buildWantIf any) error {
 	t.Helper()
-	gotDrb := util.NewDataResponseBuilder(&util.DataRequest{})
+	gotDrb := util.NewDataResponseBuilder()
 	switch buildGot := buildGotIf.(type) {
 	case func(util.DataBuilder):
 		buildGot(gotDrb.DataSeries(&util.DataSeriesRequest{}))
@@ -349,12 +150,11 @@ func CompareResponses(t *testing.T, buildGotIf, buildWantIf any) error {
 		t.Fatalf("expected buildGot to be func(util.DataBuilder) or func(testutil.TestDataBuilder)")
 	}
 	// ToJSON forces gotDrb.D's string table to update.
-	_, err := gotDrb.ToJSON()
+	gotData, err := gotDrb.Data()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	gotData := gotDrb.D
-	wantDrb := util.NewDataResponseBuilder(&util.DataRequest{})
+	wantDrb := util.NewDataResponseBuilder()
 	switch buildWant := buildWantIf.(type) {
 	case func(util.DataBuilder):
 		buildWant(wantDrb.DataSeries(&util.DataSeriesRequest{}))
@@ -365,15 +165,12 @@ func CompareResponses(t *testing.T, buildGotIf, buildWantIf any) error {
 	default:
 		t.Fatalf("expected buildWant to be func(util.DataBuilder) or func(testutil.TestDataBuilder)")
 	}
-	_, err = wantDrb.ToJSON()
+	wantData, err := wantDrb.Data()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	wantData := wantDrb.D
-	got := PrettyPrintData(gotData)
-	want := PrettyPrintData(wantData)
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("Got data %s, diff (-want, +got) %s", strings.Join(got, "\n"), diff)
+	if diff := cmp.Diff(wantData.PrettyPrint(), gotData.PrettyPrint()); diff != "" {
+		t.Errorf("Got data %v, diff (-want, +got) %s", gotData, diff)
 	}
 	return nil
 }

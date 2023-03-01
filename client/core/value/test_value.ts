@@ -12,7 +12,7 @@
 */
 
 /**
- * @fileoverview Test helpers for building Values and Value protos.
+ * @fileoverview Test helpers for building TraceViz Values.
  */
 
 import {Duration} from '../duration/duration';

@@ -29,6 +29,8 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"sort"
+	"strconv"
 
 	"fmt"
 	"strings"
@@ -58,38 +60,115 @@ type V struct {
 	T valueType
 }
 
-// UnmarshalJSON unmarshals the provided JSON bytes into the receiving V.
-func (v *V) UnmarshalJSON(data []byte) error {
-	type tmpV struct {
-		V any
-		T valueType
+// PrettyPrint returns the receiver, deterministically prettyprinted.
+// String-index-type values prettyprint the same as the corresponding
+// literal-string-type values.  Only for use in tests.
+func (v *V) PrettyPrint(st []string) string {
+	var ret string
+	var err error
+	switch v.T {
+	case unsetValue:
+		ret = "unset"
+	case StringValueType:
+		ret, err = ExpectStringValue(v)
+		ret = "'" + ret + "'"
+	case StringIndexValueType:
+		var strIdx int64
+		strIdx, err = expectStringIndexValue(v)
+		if err == nil {
+			ret = "'" + st[strIdx] + "'"
+		}
+	case StringsValueType:
+		var strs []string
+		strs, err = ExpectStringsValue(v)
+		ret = "[ '" + strings.Join(strs, "', '") + "' ]"
+	case StringIndicesValueType:
+		var strIdxs []int64
+		strIdxs, err = expectStringIndicesValue(v)
+		if err == nil {
+			var strs = make([]string, len(strIdxs))
+			for idx, strIdx := range strIdxs {
+				strs[idx] = st[strIdx]
+			}
+			ret = "[ '" + strings.Join(strs, "', '") + "' ]"
+		}
+	case IntegerValueType:
+		var i int64
+		i, err = ExpectIntegerValue(v)
+		if err == nil {
+			ret = strconv.Itoa(int(i))
+		}
+	case IntegersValueType:
+		var ints []int64
+		ints, err = ExpectIntegersValue(v)
+		if err == nil {
+			strs := make([]string, len(ints))
+			for idx, i := range ints {
+				strs[idx] = strconv.Itoa(int(i))
+			}
+			ret = "[ " + strings.Join(strs, ", ") + " ]"
+		}
+	case DoubleValueType:
+		var d float64
+		d, err = ExpectDoubleValue(v)
+		if err == nil {
+			ret = fmt.Sprintf("%.6f", d)
+		}
+	case DurationValueType:
+		var dur time.Duration
+		dur, err = ExpectDurationValue(v)
+		ret = dur.String()
+	case TimestampValueType:
+		var ts time.Time
+		ts, err = ExpectTimestampValue(v)
+		ret = ts.String()
 	}
-	tv := &tmpV{}
-	dec := json.NewDecoder(bytes.NewReader(data))
-	dec.UseNumber()
-	if err := dec.Decode(tv); err != nil {
+	if err != nil {
+		return "error: " + err.Error()
+	}
+	return ret
+}
+
+type timestamp struct {
+	UnixSeconds int64
+	UnixNanos   int64
+}
+
+func (ts timestamp) MarshalJSON() ([]byte, error) {
+	return json.Marshal([2]int64{ts.UnixSeconds, ts.UnixNanos})
+}
+
+// MarshalJSON overrides the default JSON marshaling behavior for V.
+func (v *V) MarshalJSON() ([]byte, error) {
+	ret := [2]any{v.T, v.V}
+	return json.Marshal(ret)
+}
+
+func (v *V) fromAny(got []any) error {
+	t, err := got[0].(json.Number).Int64()
+	if err != nil {
 		return err
 	}
-	v.T = tv.T
-	var err error
-	switch tv.T {
+	v.T = valueType(t)
+	tv := got[1]
+	switch v.T {
 	case StringIndexValueType, IntegerValueType:
-		if v.V, err = tv.V.(json.Number).Int64(); err != nil {
+		if v.V, err = tv.(json.Number).Int64(); err != nil {
 			return err
 		}
 	case StringsValueType:
-		strIfs := tv.V.([]any)
+		strIfs := tv.([]any)
 		strs := make([]string, len(strIfs))
 		for idx, strIf := range strIfs {
 			strs[idx] = strIf.(string)
 		}
 		v.V = strs
 	case DoubleValueType:
-		if v.V, err = tv.V.(json.Number).Float64(); err != nil {
+		if v.V, err = tv.(json.Number).Float64(); err != nil {
 			return err
 		}
 	case StringIndicesValueType, IntegersValueType:
-		nums := tv.V.([]any)
+		nums := tv.([]any)
 		ints := make([]int64, len(nums))
 		for idx, num := range nums {
 			ints[idx], err = num.(json.Number).Int64()
@@ -99,28 +178,132 @@ func (v *V) UnmarshalJSON(data []byte) error {
 		}
 		v.V = ints
 	case DurationValueType:
-		durNs, err := tv.V.(json.Number).Int64()
+		durNs, err := tv.(json.Number).Int64()
 		if err != nil {
 			return err
 		}
 		v.V = time.Duration(durNs)
 	case TimestampValueType:
-		ts := &time.Time{}
-		tsStr := tv.V.(string)
-		if err := ts.UnmarshalJSON([]byte(`"` + tsStr + `"`)); err != nil {
+		parts := tv.([]any)
+		if len(parts) != 2 {
+			return fmt.Errorf("timestamp Value is improperly formed")
+		}
+		unixSecs, err := parts[0].(json.Number).Int64()
+		if err != nil {
 			return err
 		}
-		v.V = *ts
+		unixNanos, err := parts[1].(json.Number).Int64()
+		if err != nil {
+			return err
+		}
+		v.V = timestamp{
+			UnixSeconds: unixSecs,
+			UnixNanos:   unixNanos,
+		}
 	default:
-		v.V = tv.V
+		v.V = tv
 	}
 	return err
+}
+
+// UnmarshalJSON unmarshals the provided JSON bytes into the receiving V.
+func (v *V) UnmarshalJSON(data []byte) error {
+	var got []any
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	if err := dec.Decode(&got); err != nil {
+		return err
+	}
+	return v.fromAny(got)
 }
 
 // Datum represents a single Datum in a TraceViz data series response.
 type Datum struct {
 	Properties map[int64]*V
 	Children   []*Datum
+}
+
+// PrettyPrint returns the receiver deterministically prettyprinted.
+// Only for use in tests.
+func (d *Datum) PrettyPrint(indent string, st []string) string {
+	ret := []string{}
+	// Emit properties in increasing alphabetic order.
+	keys := make([]int64, 0, len(d.Properties))
+	for k := range d.Properties {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(a, b int) bool {
+		return st[keys[a]] < st[keys[b]]
+	})
+	for _, k := range keys {
+		ret = append(ret,
+			fmt.Sprintf("%sProp '%s': %s", indent, st[k], d.Properties[k].PrettyPrint(st)),
+		)
+	}
+	for _, child := range d.Children {
+		ret = append(ret,
+			fmt.Sprintf("%sChild:", indent),
+			child.PrettyPrint(indent+"  ", st),
+		)
+	}
+	return strings.Join(ret, "\n")
+}
+
+// MarshalJSON overrides the default JSON marshaling behavior for Datum.
+func (d *Datum) MarshalJSON() ([]byte, error) {
+	props := make([]any, len(d.Properties))
+	children := make([]any, len(d.Children))
+	keys := make([]int64, 0, len(d.Properties))
+	for k := range d.Properties {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(a, b int) bool {
+		return keys[a] < keys[b]
+	})
+	for idx, k := range keys {
+		props[idx] = []any{k, d.Properties[k]}
+	}
+	for idx, child := range d.Children {
+		children[idx] = child
+	}
+	return json.Marshal([]any{props, children})
+}
+
+func (d *Datum) fromAny(sd []any) error {
+	props := sd[0]
+	children := sd[1]
+	d.Properties = make(map[int64]*V, len(props.([]any)))
+	d.Children = make([]*Datum, len(children.([]any)))
+	for _, val := range props.([]any) {
+		k, err := ((val.([]any))[0].(json.Number)).Int64()
+		if err != nil {
+			return err
+		}
+		v := &V{}
+		if err := v.fromAny((val.([]any))[1].([]any)); err != nil {
+			return err
+		}
+		d.Properties[k] = v
+	}
+	for idx, val := range children.([]any) {
+		child := &Datum{}
+		if err := child.fromAny(val.([]any)); err != nil {
+			return err
+		}
+		d.Children[idx] = child
+	}
+	return nil
+}
+
+// UnmarshalJSON unmarshals the provided JSON bytes into the receiving V.
+func (d *Datum) UnmarshalJSON(data []byte) error {
+	var sd = []any{}
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	if err := dec.Decode(&sd); err != nil {
+		return err
+	}
+	return d.fromAny(sd)
 }
 
 // DataSeriesRequest is a request for a specific data series from a TraceViz
@@ -133,8 +316,18 @@ type DataSeriesRequest struct {
 
 // DataSeries represents a complete TraceViz data series response.
 type DataSeries struct {
-	Request *DataSeriesRequest
-	Root    *Datum
+	SeriesName string
+	Root       *Datum
+}
+
+// PrettyPrint returns the receiver deterministically prettyprinted.
+// Only for use in tests.
+func (ds *DataSeries) PrettyPrint(indent string, st []string) string {
+	return strings.Join([]string{
+		fmt.Sprintf("%sSeries %s", indent, ds.SeriesName),
+		indent + "  " + "Root:",
+		ds.Root.PrettyPrint(indent+"    ", st),
+	}, "\n")
 }
 
 // DataRequest is a request for one or more data series from a TraceViz client.
@@ -153,9 +346,18 @@ func DataRequestFromJSON(j []byte) (*DataRequest, error) {
 
 // Data represents a complete TraceViz data response.
 type Data struct {
-	GlobalFilters map[string]*V
-	StringTable   []string
-	DataSeries    []*DataSeries
+	StringTable []string
+	DataSeries  []*DataSeries
+}
+
+// PrettyPrint returns the receiver deterministically prettyprinted.
+// Only for use in tests.
+func (d *Data) PrettyPrint() string {
+	ret := []string{"Data:"}
+	for _, series := range d.DataSeries {
+		ret = append(ret, series.PrettyPrint("  ", d.StringTable))
+	}
+	return strings.Join(ret, "\n")
 }
 
 // stringTable provides a string table associating strings to unique integers.
@@ -240,18 +442,19 @@ func (errs *errors) toError() error {
 type DataResponseBuilder struct {
 	st   *stringTable
 	errs *errors
-	D    *Data
+	d    *Data
 	mu   sync.Mutex
 }
 
 // NewDataResponseBuilder returns a new DataResponseBuilder configured with the
 // provided DataRequest.
-func NewDataResponseBuilder(req *DataRequest) *DataResponseBuilder {
+func NewDataResponseBuilder() *DataResponseBuilder {
 	return &DataResponseBuilder{
 		st:   newStringTable(),
 		errs: &errors{},
-		D: &Data{
-			GlobalFilters: req.GlobalFilters,
+		d: &Data{
+			StringTable: []string{},
+			DataSeries:  []*DataSeries{},
 		},
 	}
 }
@@ -265,82 +468,23 @@ type DataBuilder interface {
 // DataSeries returns a new DataBuilder for assembling the response to the
 // provided DataSeriesRequest.  DataSeries is safe for concurrent use.
 func (drb *DataResponseBuilder) DataSeries(req *DataSeriesRequest) DataBuilder {
-	vmb := newIndexedValueMapBuilder(drb.errs, drb.st)
+	ret := newDatumBuilder(drb.errs, drb.st)
 	ds := &DataSeries{
-		Root: &Datum{
-			Properties: vmb.indexedValueMap(),
-		},
+		SeriesName: req.SeriesName,
+		Root:       ret.d,
 	}
 	drb.mu.Lock()
-	drb.D.DataSeries = append(drb.D.DataSeries, ds)
+	drb.d.DataSeries = append(drb.d.DataSeries, ds)
 	drb.mu.Unlock()
-	ret := &dataBuilder{
-		st:  drb.st,
-		ds:  ds,
-		vmb: vmb,
-	}
-	return ret.withRequest(req)
+	return ret
 }
 
-// dataBuilder provides a mechanism for fluently assembling Datum or DataSeries
-// responses.
-type dataBuilder struct {
-	st *stringTable
-	// Exactly one of d and ds must be nonnull.
-	d   *Datum
-	ds  *DataSeries
-	vmb *valueMapBuilder
-}
-
-// withRequest sets the Request property of the DataSeries under construction.
-// Has no effect if no DataSeries is under construction.  It supports chaining.
-func (db *dataBuilder) withRequest(req *DataSeriesRequest) *dataBuilder {
-	if db == nil {
-		return nil
-	}
-	if db.ds != nil {
-		db.ds.Request = req
-	}
-	return db
-}
-
-// With applies the provided PropertyUpdate to the receiver in order.
-func (db *dataBuilder) With(updates ...PropertyUpdate) DataBuilder {
-	if db != nil {
-		db.vmb.with(updates...)
-	}
-	return db
-}
-
-// Child adds a child Datum to the receiver, returning a DataBuilder
-// for that child.  It supports chaining.
-func (db *dataBuilder) Child() DataBuilder {
-	if db == nil || db.vmb.errs.hasError {
-		return nil
-	}
-	vmb := newIndexedValueMapBuilder(db.vmb.errs, db.st)
-	child := &dataBuilder{
-		st: db.st,
-		d: &Datum{
-			Properties: vmb.indexedValueMap(),
-		},
-		vmb: vmb,
-	}
-	if db.d != nil {
-		db.d.Children = append(db.d.Children, child.d)
-	} else {
-		db.ds.Root.Children = append(db.ds.Root.Children, child.d)
-	}
-	return child
-}
-
-// ToJSON returns the constructed Data response as JSON.
-func (drb *DataResponseBuilder) ToJSON() ([]byte, error) {
+func (drb *DataResponseBuilder) Data() (*Data, error) {
 	if drb.errs.hasError {
 		return nil, drb.errs.toError()
 	}
-	drb.D.StringTable = drb.st.stringsByIndex
-	return json.Marshal(drb.D)
+	drb.d.StringTable = drb.st.stringsByIndex
+	return drb.d, nil
 }
 
 // Quick builders for Value types.
@@ -387,9 +531,7 @@ func IntegerValue(i int64) *V {
 }
 
 // IntValue is an alias of IntegerValue.
-func IntValue(i int64) *V {
-	return IntegerValue(i)
-}
+var IntValue = IntegerValue
 
 // IntegersValue returns a new Value wrapping the provided int64s.
 func IntegersValue(ints ...int64) *V {
@@ -400,9 +542,7 @@ func IntegersValue(ints ...int64) *V {
 }
 
 // IntsValue is an alias of IntegersValue.
-func IntsValue(ints ...int64) *V {
-	return IntegersValue(ints...)
-}
+var IntsValue = IntegersValue
 
 // DoubleValue returns a new Value wrapping the provided float64.
 func DoubleValue(f float64) *V {
@@ -421,7 +561,11 @@ func DurationValue(dur time.Duration) *V {
 }
 
 // TimestampValue returns a new Value wrapping the provided Timestamp.
-func TimestampValue(ts time.Time) *V {
+func TimestampValue(t time.Time) *V {
+	ts := timestamp{
+		UnixSeconds: t.Unix(),
+		UnixNanos:   t.UnixNano() % int64(time.Second),
+	}
 	return &V{
 		V: ts,
 		T: TimestampValueType,
@@ -435,6 +579,13 @@ func ExpectStringValue(val *V) (string, error) {
 		return "", fmt.Errorf("expected value type 'str'")
 	}
 	return val.V.(string), nil
+}
+
+func expectStringIndexValue(val *V) (int64, error) {
+	if val.T != StringIndexValueType {
+		return 0, fmt.Errorf("expect value type 'str_idx'")
+	}
+	return val.V.(int64), nil
 }
 
 // ExpectStringsValue expects the provided Value to be a Strings, returning
@@ -498,12 +649,13 @@ func ExpectTimestampValue(val *V) (time.Time, error) {
 	if val.T != TimestampValueType {
 		return time.Time{}, fmt.Errorf("expected value type 'duration'")
 	}
-	return val.V.(time.Time), nil
+	ts := val.V.(timestamp)
+	return time.Unix(ts.UnixSeconds, ts.UnixNanos), nil
 }
 
 // PropertyUpdate is a function that updates a provided valueMapBuilder.  A nil
 // PropertyUpdate does nothing.
-type PropertyUpdate func(vmb *valueMapBuilder) error
+type PropertyUpdate func(db *datumBuilder) error
 
 // Value specifies a value for a PropertyValue whose key is not yet
 // specified.  It returns a function accepting a key and returning the
@@ -515,173 +667,129 @@ var EmptyUpdate PropertyUpdate = nil
 
 // ErrorProperty injects an error into the Data response under construction.
 func ErrorProperty(err error) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
+	return func(db *datumBuilder) error {
 		return err
 	}
 }
 
-// valueMapBuilder provides a utility for programmatically assembling
+// datumBuilder provides a utility for programmatically assembling
 // maps of Properties.
-type valueMapBuilder struct {
-	errs         *errors
-	st           *stringTable
-	valsByKey    map[string]*V
-	valsByKeyIdx map[int64]*V
+type datumBuilder struct {
+	errs      *errors
+	st        *stringTable
+	valsByKey map[int64]*V
+	d         *Datum
 }
 
-// newValueMapBuilder returns a new, empty valueMapBuilder configured to use
-// raw strings for map keys and string values.
-func newValueMapBuilder(errs *errors) *valueMapBuilder {
-	return &valueMapBuilder{
+// newDatumBuilder returns a new, empty datumBuilder.
+func newDatumBuilder(errs *errors, st *stringTable) *datumBuilder {
+	valsByKey := map[int64]*V{}
+	return &datumBuilder{
 		errs:      errs,
-		valsByKey: map[string]*V{},
-	}
-}
-
-// newIndexedValueMapBuilder returns a new, empty valueMapBuilder configured
-// to use string table indices for map keys and string values.
-func newIndexedValueMapBuilder(errs *errors, st *stringTable) *valueMapBuilder {
-	return &valueMapBuilder{
-		errs:         errs,
-		st:           st,
-		valsByKeyIdx: map[int64]*V{},
+		st:        st,
+		valsByKey: valsByKey,
+		d: &Datum{
+			Properties: valsByKey,
+			Children:   []*Datum{},
+		},
 	}
 }
 
 // With applies the provided PropertyUpdate to the receiver in order.
-func (vmb *valueMapBuilder) with(updates ...PropertyUpdate) {
-	if !vmb.errs.hasError {
+func (db *datumBuilder) With(updates ...PropertyUpdate) DataBuilder {
+	if !db.errs.hasError {
 		for _, update := range updates {
 			if update != nil {
-				if err := update(vmb); err != nil {
-					vmb.errs.add(err)
+				if err := update(db); err != nil {
+					db.errs.add(err)
 					break
 				}
 			}
 		}
 	}
+	return db
+}
+
+func (db *datumBuilder) Child() DataBuilder {
+	child := newDatumBuilder(db.errs, db.st)
+	db.d.Children = append(db.d.Children, child.d)
+	return child
 }
 
 // withStr sets the specified string value to the specified key within the map.
 // It supports chaining.
-func (vmb *valueMapBuilder) withStr(key, value string) *valueMapBuilder {
-	if vmb.st == nil {
-		vmb.valsByKey[key] = StringValue(value)
-	} else {
-		vmb.valsByKeyIdx[vmb.st.stringIndex(key)] = StringIndexValue(vmb.st.stringIndex(value))
-	}
-	return vmb
+func (db *datumBuilder) withStr(key, value string) *datumBuilder {
+	db.valsByKey[db.st.stringIndex(key)] = StringIndexValue(db.st.stringIndex(value))
+	return db
 }
 
 // withStrs sets the specified string slice value to the specified key within
 // the map.  It supports chaining.
-func (vmb *valueMapBuilder) withStrs(key string, values ...string) *valueMapBuilder {
-	if vmb.st == nil {
-		vmb.valsByKey[key] = StringsValue(values...)
-	} else {
-		valIdxs := []int64{}
-		for _, val := range values {
-			valIdxs = append(valIdxs, vmb.st.stringIndex(val))
-		}
-		vmb.valsByKeyIdx[vmb.st.stringIndex(key)] = StringIndicesValue(valIdxs...)
+func (db *datumBuilder) withStrs(key string, values ...string) *datumBuilder {
+	valIdxs := []int64{}
+	for _, val := range values {
+		valIdxs = append(valIdxs, db.st.stringIndex(val))
 	}
-	return vmb
+	db.valsByKey[db.st.stringIndex(key)] = StringIndicesValue(valIdxs...)
+	return db
 }
 
 // appendStrs appends the specified string slices to the value associated with
 // the specified key within the map.  It supports chaining.
-func (vmb *valueMapBuilder) appendStrs(key string, values ...string) *valueMapBuilder {
-	if vmb.st == nil {
-		val, ok := vmb.valsByKey[key]
-		if !ok {
-			return vmb.withStrs(key, values...)
-		}
-		strs, err := ExpectStringsValue(val)
-		if err != nil {
-			vmb.errs.add(err)
-		}
-		strs = append(strs, values...)
-		val.V = strs
-	} else {
-		val, ok := vmb.valsByKeyIdx[vmb.st.stringIndex(key)]
-		if !ok {
-			return vmb.withStrs(key, values...)
-		}
-		strIdxs, err := expectStringIndicesValue(val)
-		if err != nil {
-			vmb.errs.add(err)
-		}
-		for _, val := range values {
-			strIdxs = append(strIdxs, vmb.st.stringIndex(val))
-		}
-		val.V = strIdxs
+func (db *datumBuilder) appendStrs(key string, values ...string) *datumBuilder {
+	val, ok := db.valsByKey[db.st.stringIndex(key)]
+	if !ok {
+		return db.withStrs(key, values...)
 	}
-	return vmb
+	strIdxs, err := expectStringIndicesValue(val)
+	if err != nil {
+		db.errs.add(err)
+	}
+	for _, val := range values {
+		strIdxs = append(strIdxs, db.st.stringIndex(val))
+	}
+	val.V = strIdxs
+	return db
 }
 
 // withInt sets the specified int64 value to the specified key within the map.
 // It supports chaining.
-func (vmb *valueMapBuilder) withInt(key string, value int64) *valueMapBuilder {
-	if vmb.st == nil {
-		vmb.valsByKey[key] = IntValue(value)
-	} else {
-		vmb.valsByKeyIdx[vmb.st.stringIndex(key)] = IntValue(value)
-	}
-	return vmb
+func (db *datumBuilder) withInt(key string, value int64) *datumBuilder {
+	db.valsByKey[db.st.stringIndex(key)] = IntValue(value)
+	return db
 }
 
 // withInts sets the specified int64 slice value to the specified key within
 // the map. It supports chaining.
-func (vmb *valueMapBuilder) withInts(key string, values ...int64) *valueMapBuilder {
-	if vmb.st == nil {
-		vmb.valsByKey[key] = IntsValue(values...)
-	} else {
-		vmb.valsByKeyIdx[vmb.st.stringIndex(key)] = IntsValue(values...)
-	}
-	return vmb
+func (db *datumBuilder) withInts(key string, values ...int64) *datumBuilder {
+	db.valsByKey[db.st.stringIndex(key)] = IntsValue(values...)
+	return db
 }
 
 // withDbl sets the specified float64 value to the specified key within the
 // map.  It supports chaining.
-func (vmb *valueMapBuilder) withDbl(key string, value float64) *valueMapBuilder {
-	if vmb.st == nil {
-		vmb.valsByKey[key] = DoubleValue(value)
-	} else {
-		vmb.valsByKeyIdx[vmb.st.stringIndex(key)] = DoubleValue(value)
-	}
-	return vmb
+func (db *datumBuilder) withDbl(key string, value float64) *datumBuilder {
+	db.valsByKey[db.st.stringIndex(key)] = DoubleValue(value)
+	return db
 }
 
 // withDuration sets the specified duration value to the specified key within
 // the map.  It supports chaining.
-func (vmb *valueMapBuilder) withDuration(key string, value time.Duration) *valueMapBuilder {
-	if vmb.st == nil {
-		vmb.valsByKey[key] = DurationValue(value)
-	} else {
-		vmb.valsByKeyIdx[vmb.st.stringIndex(key)] = DurationValue(value)
-	}
-	return vmb
+func (db *datumBuilder) withDuration(key string, value time.Duration) *datumBuilder {
+	db.valsByKey[db.st.stringIndex(key)] = DurationValue(value)
+	return db
 }
 
 // withTimestamp sets the specified timestamp value to the specified key within
 // the map.  It supports chaining.
-func (vmb *valueMapBuilder) withTimestamp(key string, value time.Time) *valueMapBuilder {
-	if vmb.st == nil {
-		vmb.valsByKey[key] = TimestampValue(value)
-	} else {
-		vmb.valsByKeyIdx[vmb.st.stringIndex(key)] = TimestampValue(value)
-	}
-	return vmb
-}
-
-// valueMap returns the raw string value map.
-func (vmb *valueMapBuilder) valueMap() map[string]*V {
-	return vmb.valsByKey
+func (db *datumBuilder) withTimestamp(key string, value time.Time) *datumBuilder {
+	db.valsByKey[db.st.stringIndex(key)] = TimestampValue(value)
+	return db
 }
 
 // indexedValueMap returns the string-indexing value map.
-func (vmb *valueMapBuilder) indexedValueMap() map[int64]*V {
-	return vmb.valsByKeyIdx
+func (db *datumBuilder) indexedValueMap() map[int64]*V {
+	return db.valsByKey
 }
 
 // If applies the provided PropertyUpdate if the provided predicate is true.
@@ -695,18 +803,18 @@ func If(predicate bool, du PropertyUpdate) PropertyUpdate {
 // IfElse applies PropertyUpdate t if the provided predicate is true, and applies
 // f otherwise.
 func IfElse(predicate bool, t, f PropertyUpdate) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
+	return func(db *datumBuilder) error {
 		if predicate {
-			return t(vmb)
+			return t(db)
 		}
-		return f(vmb)
+		return f(db)
 	}
 }
 
 // Chain applies the provided Dataupdates in order.
 func Chain(updates ...PropertyUpdate) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.with(updates...)
+	return func(db *datumBuilder) error {
+		db.With(updates...)
 		return nil
 	}
 }
@@ -776,8 +884,8 @@ func Error(err error) Value {
 
 // StringProperty returns a PropertyUpdate adding the specified string property.
 func StringProperty(key, value string) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.withStr(key, value)
+	return func(db *datumBuilder) error {
+		db.withStr(key, value)
 		return nil
 	}
 }
@@ -785,8 +893,8 @@ func StringProperty(key, value string) PropertyUpdate {
 // StringsProperty returns a PropertyUpdate adding the specified string slice
 // property.
 func StringsProperty(key string, values ...string) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.withStrs(key, values...)
+	return func(db *datumBuilder) error {
+		db.withStrs(key, values...)
 		return nil
 	}
 }
@@ -794,16 +902,16 @@ func StringsProperty(key string, values ...string) PropertyUpdate {
 // StringsPropertyExtended returns a PropertyUpdate extending the specified string
 // slice property.
 func StringsPropertyExtended(key string, values ...string) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.appendStrs(key, values...)
+	return func(db *datumBuilder) error {
+		db.appendStrs(key, values...)
 		return nil
 	}
 }
 
 // IntegerProperty returns a PropertyUpdate adding the specified integer property.
 func IntegerProperty(key string, value int64) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.withInt(key, value)
+	return func(db *datumBuilder) error {
+		db.withInt(key, value)
 		return nil
 	}
 }
@@ -811,24 +919,24 @@ func IntegerProperty(key string, value int64) PropertyUpdate {
 // IntegersProperty returns a PropertyUpdate adding the specified integer slice
 // property.
 func IntegersProperty(key string, values ...int64) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.withInts(key, values...)
+	return func(db *datumBuilder) error {
+		db.withInts(key, values...)
 		return nil
 	}
 }
 
 // DoubleProperty returns a PropertyUpdate adding the specified double property.
 func DoubleProperty(key string, value float64) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.withDbl(key, value)
+	return func(db *datumBuilder) error {
+		db.withDbl(key, value)
 		return nil
 	}
 }
 
 // DurationProperty returns a PropertyUpdate adding the specified duration property.
 func DurationProperty(key string, value time.Duration) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.withDuration(key, value)
+	return func(db *datumBuilder) error {
+		db.withDuration(key, value)
 		return nil
 	}
 }
@@ -836,8 +944,8 @@ func DurationProperty(key string, value time.Duration) PropertyUpdate {
 // TimestampProperty returns a PropertyUpdate adding the specified timestamp
 // property.
 func TimestampProperty(key string, value time.Time) PropertyUpdate {
-	return func(vmb *valueMapBuilder) error {
-		vmb.withTimestamp(key, value)
+	return func(db *datumBuilder) error {
+		db.withTimestamp(key, value)
 		return nil
 	}
 }

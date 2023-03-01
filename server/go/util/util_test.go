@@ -14,6 +14,7 @@
 package util
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -57,15 +58,15 @@ func epochNs(dur int64) time.Time {
 	return time.Unix(0, dur)
 }
 
-func TestValueMapBuilder(t *testing.T) {
+func TestDatumBuilder(t *testing.T) {
 	for _, test := range []struct {
 		description string
-		vmbFn       func(*valueMapBuilder) error
-		wantMap     map[string]*V
+		dbFn        func(*datumBuilder) error
+		wantMap     map[int64]*V
 	}{{
 		description: "override scalars, append to strings",
-		vmbFn: func(vmb *valueMapBuilder) error {
-			vmb.
+		dbFn: func(db *datumBuilder) error {
+			db.
 				withStr("string", "hello").
 				withDbl("double", 1.1).
 				appendStrs("strings", "a", "b", "c").
@@ -74,18 +75,18 @@ func TestValueMapBuilder(t *testing.T) {
 				appendStrs("strings", "d", "e", "f")
 			return nil
 		},
-		wantMap: map[string]*V{
-			"string":  StringValue("goodbye"),
-			"double":  DoubleValue(2.2),
-			"strings": StringsValue("a", "b", "c", "d", "e", "f"),
+		wantMap: map[int64]*V{
+			0: StringIndexValue(7),
+			2: DoubleValue(2.2),
+			3: StringIndicesValue(4, 5, 6, 8, 9, 10),
 		},
 	}} {
 		t.Run(test.description, func(t *testing.T) {
-			vmb := newValueMapBuilder(&errors{})
-			if err := test.vmbFn(vmb); err != nil {
-				t.Fatalf("error in vmbFn: %s", err)
+			db := newDatumBuilder(&errors{}, newStringTable())
+			if err := test.dbFn(db); err != nil {
+				t.Fatalf("error in dbFn: %s", err)
 			}
-			gotMap := vmb.valueMap()
+			gotMap := db.valsByKey
 			if diff := cmp.Diff(test.wantMap, gotMap); diff != "" {
 				t.Errorf("Got map %v, diff (-want +got) %s", gotMap, diff)
 			}
@@ -127,23 +128,53 @@ func TestParseDataRequest(t *testing.T) {
 		description: "with global filters",
 		reqJSON: `{
 			  "GlobalFilters": {
-					"name_regex": {"T": 1, "V": ".*egg.*"}
+					"str": [ 1, "hello" ],
+					"strs": [ 3, [ "hello", "goodbye" ] ],
+					"int": [ 5, 100 ],
+					"ints": [ 6, [ 50, 150, 250 ] ],
+					"dbl": [ 7, 3.14159 ],
+					"dur": [ 8, 150000000 ],
+					"ts": [ 9, [ 500, 100 ] ]
 				},
 			  "Requests": [
 			    {
 			      "QueryName": "q1",
-						"SeriesName": "1"
+						"SeriesName": "1",
+						"Options": {
+							"str": [ 1, "hello" ],
+							"strs": [ 3, [ "hello", "goodbye" ] ],
+							"int": [ 5, 100 ],
+							"ints": [ 6, [ 50, 150, 250 ] ],
+							"dbl": [ 7, 3.14159 ],
+							"dur": [ 8, 150000000 ],
+							"ts": [ 9, [ 500, 100 ] ]
+						}
 			    }
 			  ]
 			}`,
 		wantReq: &DataRequest{
 			GlobalFilters: map[string]*V{
-				"name_regex": StringValue(".*egg.*"),
+				"str":  StringValue("hello"),
+				"strs": StringsValue("hello", "goodbye"),
+				"int":  IntValue(100),
+				"ints": IntsValue(50, 150, 250),
+				"dbl":  DoubleValue(3.14159),
+				"dur":  DurationValue(time.Millisecond * 150),
+				"ts":   TimestampValue(time.Unix(500, 100)),
 			},
 			Requests: []*DataSeriesRequest{
 				&DataSeriesRequest{
 					QueryName:  "q1",
 					SeriesName: "1",
+					Options: map[string]*V{
+						"str":  StringValue("hello"),
+						"strs": StringsValue("hello", "goodbye"),
+						"int":  IntValue(100),
+						"ints": IntsValue(50, 150, 250),
+						"dbl":  DoubleValue(3.14159),
+						"dur":  DurationValue(time.Millisecond * 150),
+						"ts":   TimestampValue(time.Unix(500, 100)),
+					},
 				},
 			},
 		},
@@ -155,7 +186,7 @@ func TestParseDataRequest(t *testing.T) {
 			      "QueryName": "q1",
 						"SeriesName": "1",
 						"Options": {
-							"max_elements": {"T": 5, "V": 10}
+							"max_elements": [5, 10]
 						}
 			    }
 			  ]
@@ -184,7 +215,82 @@ func TestParseDataRequest(t *testing.T) {
 	}
 }
 
+func TestResponseEncoding(t *testing.T) {
+	// Compare encoded Data response with expected JSON.  This also serves as
+	// a reference for the generated JSON.
+	d := &Data{
+		StringTable: []string{
+			"stridx", "stridxs", "int", "ints", "dbl", "dur", "ts",
+			"hello", "goodbye",
+		},
+		DataSeries: []*DataSeries{
+			&DataSeries{
+				SeriesName: "0",
+				Root: &Datum{
+					Properties: map[int64]*V{},
+					Children: []*Datum{
+						&Datum{
+							Properties: map[int64]*V{
+								0: StringIndexValue(7),
+								1: StringIndicesValue(7, 8),
+								2: IntValue(100),
+								3: IntsValue(50, 150, 250),
+								4: DoubleValue(3.14159),
+								5: DurationValue(time.Millisecond * 150),
+								6: TimestampValue(time.Unix(500, 100)),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	want := `{
+		"StringTable": [
+			"stridx", "stridxs", "int", "ints", "dbl", "dur", "ts",
+			"hello", "goodbye"
+		],
+		"DataSeries": [
+			{
+				"SeriesName": "0",
+				"Root": [ [],
+					[
+						[
+							[
+								[ 0, [ 2, 7 ] ],
+								[ 1, [ 4, [ 7, 8 ] ] ],
+								[ 2, [ 5, 100 ] ],
+								[ 3, [ 6, [ 50, 150, 250 ] ] ],
+								[ 4, [ 7, 3.14159 ] ],
+								[ 5, [ 8, 150000000 ] ],
+								[ 6, [ 9, [ 500, 100 ] ] ]
+							],
+							[]
+						]
+					]
+				]
+			}
+		]
+	}`
+	dj, err := json.Marshal(d)
+	if err != nil {
+		t.Fatalf("failed to marshal Data: %s", err)
+	}
+	var gotBuf bytes.Buffer
+	if err := json.Indent(&gotBuf, dj, "", "  "); err != nil {
+		t.Fatalf("failed to format Data: %s", err)
+	}
+	var wantBuf bytes.Buffer
+	if err := json.Indent(&wantBuf, []byte(want), "", "  "); err != nil {
+		t.Fatalf("failed to format Want: %s", err)
+	}
+	if diff := cmp.Diff(wantBuf.String(), gotBuf.String()); diff != "" {
+		t.Errorf("Got Data:\n%s\n, diff (-want +got) %s", gotBuf.String(), diff)
+	}
+}
+
 func TestValueEncodingAndDecoding(t *testing.T) {
+	// Test that a round-trip to and from JSON yields the same Value as before.
 	for _, test := range []struct {
 		description string
 		value       *V
@@ -221,6 +327,7 @@ func TestValueEncodingAndDecoding(t *testing.T) {
 			if err != nil {
 				t.Fatalf("failed to marshal value %v: %s", test.value, err)
 			}
+			t.Logf("%s: '%s'", test.description, vj)
 			decodedValue := &V{}
 			if err := json.Unmarshal(vj, decodedValue); err != nil {
 				t.Fatalf("failed to unmarshal JSON value '%s': %s", vj, err)
@@ -234,7 +341,6 @@ func TestValueEncodingAndDecoding(t *testing.T) {
 
 func TestDataResponseBuilding(t *testing.T) {
 	// Ensure that the response we built is the one we mean to build.
-	// For good measure, convert to and from JSON before comparing.
 	seriesReq := &DataSeriesRequest{
 		QueryName:  "series",
 		SeriesName: "1",
@@ -254,9 +360,10 @@ func TestDataResponseBuilding(t *testing.T) {
 		wantData: &Data{
 			DataSeries: []*DataSeries{
 				&DataSeries{
-					Request: seriesReq,
+					SeriesName: "1",
 					Root: &Datum{
 						Properties: map[int64]*V{},
+						Children:   []*Datum{},
 					},
 				},
 			},
@@ -282,7 +389,7 @@ func TestDataResponseBuilding(t *testing.T) {
 		wantData: &Data{
 			DataSeries: []*DataSeries{
 				&DataSeries{
-					Request: seriesReq,
+					SeriesName: seriesReq.SeriesName,
 					Root: &Datum{
 						Properties: map[int64]*V{},
 						Children: []*Datum{
@@ -297,6 +404,7 @@ func TestDataResponseBuilding(t *testing.T) {
 											5: StringIndexValue(6),
 											7: DurationValue(36 * time.Hour),
 										},
+										Children: []*Datum{},
 									},
 								},
 							},
@@ -307,6 +415,7 @@ func TestDataResponseBuilding(t *testing.T) {
 									10: IntsValue(7, 8, 9),
 									11: TimestampValue(time.Unix(100, 1000)),
 								},
+								Children: []*Datum{},
 							},
 						},
 					},
@@ -316,16 +425,12 @@ func TestDataResponseBuilding(t *testing.T) {
 		},
 	}} {
 		t.Run(test.description, func(t *testing.T) {
-			drb := NewDataResponseBuilder(req)
+			drb := NewDataResponseBuilder()
 			ds := drb.DataSeries(req.Requests[0])
 			test.buildResponse(ds)
-			gotDataJSON, err := drb.ToJSON()
+			gotData, err := drb.Data()
 			if err != nil {
-				t.Fatalf("ToJSON yielded unexpected error %s", err)
-			}
-			gotData := &Data{}
-			if err := json.Unmarshal(gotDataJSON, gotData); err != nil {
-				t.Fatalf("Failed to unmarshal gotData from JSON: %s", err)
+				t.Fatalf("Data yielded unexpected error %s", err)
 			}
 			if diff := cmp.Diff(
 				test.wantData,
@@ -499,6 +604,7 @@ func TestPropertyUpdates(t *testing.T) {
 				0: IntValue(1),
 				1: IntValue(0),
 			},
+			Children: []*Datum{},
 		},
 	}, {
 		description: "Nothing",
@@ -509,6 +615,7 @@ func TestPropertyUpdates(t *testing.T) {
 		},
 		wantDatum: &Datum{
 			Properties: map[int64]*V{},
+			Children:   []*Datum{},
 		},
 	}, {
 		description: "Error",
@@ -524,25 +631,79 @@ func TestPropertyUpdates(t *testing.T) {
 				QueryName:  "series",
 				SeriesName: "1",
 			}
-			drb := NewDataResponseBuilder(&DataRequest{
-				Requests: []*DataSeriesRequest{seriesReq},
-			})
+			drb := NewDataResponseBuilder()
 			test.applyUpdates(drb.DataSeries(seriesReq))
-			respJSON, err := drb.ToJSON()
+			resp, err := drb.Data()
 			if (err != nil) != test.wantErr {
-				t.Fatalf("ToJSON() yielded error %v, wanted error: %t", err, test.wantErr)
+				t.Fatalf("Data() yielded error %v, wanted error: %t", err, test.wantErr)
 			}
 			if err != nil {
 				return
 			}
-			decodedResp := &Data{}
-			if err := json.Unmarshal(respJSON, decodedResp); err != nil {
-				t.Fatalf("failed to unmarshal data response: %s", err)
-			}
-			gotDatum := decodedResp.DataSeries[0].Root
+			gotDatum := resp.DataSeries[0].Root
 			if diff := cmp.Diff(test.wantDatum, gotDatum); diff != "" {
 				t.Errorf("Got datum %v, diff (-want +got) %s", gotDatum, diff)
 			}
 		})
+	}
+}
+
+func TestPrettyPrint(t *testing.T) {
+	for _, test := range []struct {
+		description string
+		builder     func() *DataResponseBuilder
+		want        string
+	}{{
+		description: "multiple series",
+		builder: func() *DataResponseBuilder {
+			req1 := &DataSeriesRequest{
+				QueryName:  "query1",
+				SeriesName: "0",
+				Options: map[string]*V{
+					"pivot": StringValue("thing"),
+				},
+			}
+			req2 := &DataSeriesRequest{
+				QueryName:  "query2",
+				SeriesName: "1",
+			}
+			drb := NewDataResponseBuilder()
+			drb.DataSeries(req1).
+				Child().With(
+				StringProperty("greeting", "Hello!"),
+				IntegerProperty("count", 100),
+			).
+				Child().With(
+				StringsProperty("addressees", "mom", "dad"),
+			)
+			drb.DataSeries(req2).
+				Child().With(
+				StringsProperty("items", "apple", "banana", "coconut"),
+				DoubleProperty("temp_f", 60),
+			)
+			return drb
+		},
+		want: `Data:
+  Series 0
+    Root:
+      Child:
+        Prop 'count': 100
+        Prop 'greeting': 'Hello!'
+        Child:
+          Prop 'addressees': [ 'mom', 'dad' ]
+  Series 1
+    Root:
+      Child:
+        Prop 'items': [ 'apple', 'banana', 'coconut' ]
+        Prop 'temp_f': 60.000000`,
+	}} {
+		drb := test.builder()
+		got, err := drb.Data()
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
+		if diff := cmp.Diff(test.want, got.PrettyPrint()); diff != "" {
+			t.Errorf("Got data %s, diff (-want, +got) %s", got.PrettyPrint(), diff)
+		}
 	}
 }

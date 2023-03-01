@@ -49,10 +49,10 @@ export interface StringTableBuilder {
 }
 
 /**
- * Returns a Value from the provided ValueProto, or undefined if no such
+ * Returns a Value from the provided V object, or undefined if no such
  * conversion is possible.  The provided stringTable is used to dereference
  * string-type values provided as string table indices; this stringTable should
- * generally come from the backend DataProto response.
+ * generally come from the backend Data response.
  */
 export function fromV(v: V, stringTable: string[]): Value|undefined {
   switch (v[0]) {
@@ -159,10 +159,10 @@ export type ExportedValue = {}|number|string|number[]|string[]|ExportedTimestamp
 
 /**
  * Extended by types containing a subscribable and updatable datum.  This file
- * includes implementations for (at least) all OneOf types in
- * traceviz.proto:Value.  Value serves as the medium of communication to and
- * from a TraceViz backend, and via a global key-Value mapping, the medium of
- * all intra-frontend communication.
+ * includes implementations for (at least) all distinct backend Value types.
+ * Value serves as the medium of communication to and from a TraceViz backend,
+ * and via a global key-Value mapping, the medium of all intra-frontend
+ * communication.
  */
 export interface Value extends ReplaySubject<Value> {
   importFrom(exportedValue: ExportedValue): boolean;
@@ -171,7 +171,6 @@ export interface Value extends ReplaySubject<Value> {
   toString(): string;
 
   toV(stringTableBuilder?: StringTableBuilder): V|undefined;
-  //toProto(stringTableBuilder?: StringTableBuilder): ValueProto|undefined;
   // fold folds `other`'s Value into the receiver's, returning false if this
   // cannot be done due to incompatible types.
   //
