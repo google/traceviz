@@ -138,7 +138,17 @@ func (ts timestamp) MarshalJSON() ([]byte, error) {
 	return json.Marshal([2]int64{ts.UnixSeconds, ts.UnixNanos})
 }
 
-// MarshalJSON overrides the default JSON marshaling behavior for V.
+// MarshalJSON overrides the default JSON marshaling behavior for V to reduce
+// response sizes.  A V is encoded as the JS object `V`:
+//
+//	 type V = [number,                 ; from valueType, above
+//	  null     |                      ; if unset
+//	  string   |                      ; if string
+//	  number   |                      ; if integer, string index, double, or duration
+//	  string[] |                      ; if strings
+//	  number[] |                      ; if integers or string indices
+//	  [number, number]                ; if timestamp ([secs, nanos] from epoch)
+//	]
 func (v *V) MarshalJSON() ([]byte, error) {
 	ret := [2]any{v.T, v.V}
 	return json.Marshal(ret)
@@ -249,7 +259,15 @@ func (d *Datum) PrettyPrint(indent string, st []string) string {
 	return strings.Join(ret, "\n")
 }
 
-// MarshalJSON overrides the default JSON marshaling behavior for Datum.
+// MarshalJSON overrides the default JSON marshaling behavior for Datum to
+// reduce response sizes.  A Datum is encoded as the JS object `Datum`:
+//
+//	type V as defined above
+//	type KV = [number | string, V]
+//	type Datum = [
+//	  KV[],                        ; its Properties
+//	  Datum[],                     ; its Children
+//	]
 func (d *Datum) MarshalJSON() ([]byte, error) {
 	props := make([]any, len(d.Properties))
 	children := make([]any, len(d.Children))
@@ -332,8 +350,8 @@ func (ds *DataSeries) PrettyPrint(indent string, st []string) string {
 
 // DataRequest is a request for one or more data series from a TraceViz client.
 type DataRequest struct {
-	GlobalFilters map[string]*V
-	Requests      []*DataSeriesRequest
+	GlobalFilters  map[string]*V
+	SeriesRequests []*DataSeriesRequest
 }
 
 // DataRequestFromJSON attempts to construct a DataRequest from the provided
@@ -479,6 +497,7 @@ func (drb *DataResponseBuilder) DataSeries(req *DataSeriesRequest) DataBuilder {
 	return ret
 }
 
+// Data completes and returns the Data under construction.
 func (drb *DataResponseBuilder) Data() (*Data, error) {
 	if drb.errs.hasError {
 		return nil, drb.errs.toError()

@@ -102,7 +102,7 @@ func TestParseDataRequest(t *testing.T) {
 	}{{
 		description: "simple requests",
 		reqJSON: `{
-			  "Requests": [
+			  "SeriesRequests": [
 			    {
 			      "QueryName": "q1",
 						"SeriesName": "1"
@@ -113,7 +113,7 @@ func TestParseDataRequest(t *testing.T) {
 			  ]
 			}`,
 		wantReq: &DataRequest{
-			Requests: []*DataSeriesRequest{
+			SeriesRequests: []*DataSeriesRequest{
 				&DataSeriesRequest{
 					QueryName:  "q1",
 					SeriesName: "1",
@@ -136,7 +136,7 @@ func TestParseDataRequest(t *testing.T) {
 					"dur": [ 8, 150000000 ],
 					"ts": [ 9, [ 500, 100 ] ]
 				},
-			  "Requests": [
+			  "SeriesRequests": [
 			    {
 			      "QueryName": "q1",
 						"SeriesName": "1",
@@ -162,7 +162,7 @@ func TestParseDataRequest(t *testing.T) {
 				"dur":  DurationValue(time.Millisecond * 150),
 				"ts":   TimestampValue(time.Unix(500, 100)),
 			},
-			Requests: []*DataSeriesRequest{
+			SeriesRequests: []*DataSeriesRequest{
 				&DataSeriesRequest{
 					QueryName:  "q1",
 					SeriesName: "1",
@@ -181,7 +181,7 @@ func TestParseDataRequest(t *testing.T) {
 	}, {
 		description: "with options",
 		reqJSON: `{
-			  "Requests": [
+			  "SeriesRequests": [
 			    {
 			      "QueryName": "q1",
 						"SeriesName": "1",
@@ -192,7 +192,7 @@ func TestParseDataRequest(t *testing.T) {
 			  ]
 			}`,
 		wantReq: &DataRequest{
-			Requests: []*DataSeriesRequest{
+			SeriesRequests: []*DataSeriesRequest{
 				&DataSeriesRequest{
 					QueryName:  "q1",
 					SeriesName: "1",
@@ -346,7 +346,7 @@ func TestDataResponseBuilding(t *testing.T) {
 		SeriesName: "1",
 	}
 	req := &DataRequest{
-		Requests: []*DataSeriesRequest{
+		SeriesRequests: []*DataSeriesRequest{
 			seriesReq,
 		},
 	}
@@ -426,7 +426,7 @@ func TestDataResponseBuilding(t *testing.T) {
 	}} {
 		t.Run(test.description, func(t *testing.T) {
 			drb := NewDataResponseBuilder()
-			ds := drb.DataSeries(req.Requests[0])
+			ds := drb.DataSeries(req.SeriesRequests[0])
 			test.buildResponse(ds)
 			gotData, err := drb.Data()
 			if err != nil {
@@ -512,7 +512,7 @@ func TestExpectValues(t *testing.T) {
 	}, {
 		description: "expect successful options",
 		req: &DataRequest{
-			Requests: []*DataSeriesRequest{
+			SeriesRequests: []*DataSeriesRequest{
 				&DataSeriesRequest{
 					Options: map[string]*V{
 						"str":  StringValue("option"),
@@ -527,7 +527,7 @@ func TestExpectValues(t *testing.T) {
 			},
 		},
 		expect: func(req *DataRequest) error {
-			seriesReqOpts := req.Requests[0].Options
+			seriesReqOpts := req.SeriesRequests[0].Options
 			if got, err := ExpectStringValue(seriesReqOpts["str"]); err != nil {
 				return err
 			} else if got != "option" {
