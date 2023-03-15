@@ -1,27 +1,3 @@
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-// import { NgxTracevizComponent } from './value.directive';
-
-// describe('NgxTracevizComponent', () => {
-//   let component: NgxTracevizComponent;
-//   let fixture: ComponentFixture<NgxTracevizComponent>;
-
-//   beforeEach(async () => {
-//     await TestBed.configureTestingModule({
-//       declarations: [ NgxTracevizComponent ]
-//     })
-//     .compileComponents();
-
-//     fixture = TestBed.createComponent(NgxTracevizComponent);
-//     component = fixture.componentInstance;
-//     fixture.detectChanges();
-//   });
-
-//   it('should create', () => {
-//     expect(component).toBeTruthy();
-//   });
-// });
-
 /*
         Copyright 2023 Google Inc.
         Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,9 +17,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {ValueMapDirective} from './value.directive';
 import {keyedValue, value, intLit, intsLit, intSetLit, globalRef, localRef, strLit, strsLit, strSetLit} from './test_value';
 
-import {str, strs, strSet, int, ints, intSet} from 'traceviz-client-core/src/core';
-import {ValueMap, IntegerValue, StringValue, Value} from 'traceviz-client-core/src/core';
-import {GlobalState} from 'traceviz-client-core/src/core';
+import {str, strs, strSet, int, ints, intSet} from 'traceviz-client-core';
+import {ValueMap, IntegerValue, StringValue, Value} from 'traceviz-client-core';
+import {GlobalState} from 'traceviz-client-core';
 
 describe('value directives test', () => {
   it('creates string Value from literal', () => {

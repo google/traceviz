@@ -2,11 +2,14 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
+    "noImplicitAny": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,

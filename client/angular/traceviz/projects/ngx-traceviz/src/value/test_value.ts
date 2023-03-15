@@ -16,7 +16,7 @@
  */
 
 import {GlobalRefDirective, IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, LocalRefDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, ValueDirective, ValueMapDirective, ValueWrapperDirective} from './value.directive';
-import {GlobalStateInterface, Value, ValueMap} from 'traceviz-client-core/src/core';
+import {GlobalStateInterface, Value, ValueMap} from 'traceviz-client-core';
 
 /** Wraps a Value as a ValueDirective for testing. */
 export class WrapValue extends ValueDirective {

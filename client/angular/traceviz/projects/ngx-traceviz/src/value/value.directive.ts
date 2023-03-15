@@ -1,19 +1,3 @@
-// import { Component } from '@angular/core';
-
-// @Component({
-//   selector: 'lib-ngx-traceviz',
-//   template: `
-//     <p>
-//       ngx-traceviz works!
-//     </p>
-//   `,
-//   styles: [
-//   ]
-// })
-// export class NgxTracevizComponent {
-
-// }
-
 /*
         Copyright 2023 Google Inc.
         Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,11 +17,11 @@
  */
 
 import {AfterContentInit, ContentChild, ContentChildren, Directive, ElementRef, forwardRef, Input, QueryList} from '@angular/core';
-import {ConfigurationError, Severity} from 'traceviz-client-core/src/core';
-import {GlobalStateInterface} from 'traceviz-client-core/src/core';
-import {Timestamp} from 'traceviz-client-core/src/core';
-import {DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value} from 'traceviz-client-core/src/core';
-import {ValueMap} from 'traceviz-client-core/src/core';
+import {ConfigurationError, Severity} from 'traceviz-client-core';
+import {GlobalStateInterface} from 'traceviz-client-core';
+import {Timestamp} from 'traceviz-client-core';
+import {DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value} from 'traceviz-client-core';
+import {ValueMap} from 'traceviz-client-core';
 
 const SOURCE = 'directives/value';
 

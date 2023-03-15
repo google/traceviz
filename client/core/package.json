@@ -11,14 +11,14 @@
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.11.1"
   },
-  "name": "core",
+  "name": "traceviz-client-core",
   "version": "1.0.0",
   "description": "A platform for building highly-reusable performance tools.",
-  "main": "./index.js",
+  "main": "./src/core.ts",
   "dependencies": {
     "balanced-match": "^1.0.2",
     "brace-expansion": "^1.1.11",
@@ -35,10 +35,11 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "build": "tsc",
+    "build": "npm i && tsc",
     "test": "jasmine",
     "bt": "npm run build && npm run test"
   },
+  "type": "commonjs",
   "author": "Lee Baugh",
   "license": "Apache-2.0"
 }
