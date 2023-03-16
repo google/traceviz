@@ -19,6 +19,9 @@
   "name": "traceviz-client-core",
   "version": "1.0.0",
   "description": "A platform for building highly-reusable performance tools.",
+  "exports": {
+    ".": "./lib/src/core.js"
+  },
   "main": "./src/core.ts",
   "dependencies": {
     "balanced-match": "^1.0.2",
@@ -37,7 +40,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "build": "npm i && tsc",
+    "build": "npm i && tsc --declaration",
     "test": "jasmine",
     "bt": "npm run build && npm run test"
   },

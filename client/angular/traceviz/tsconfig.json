@@ -19,6 +19,7 @@
         "dist/ngx-traceviz"
       ]
     },
+    "preserveSymlinks": true,
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
