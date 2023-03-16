@@ -15,11 +15,11 @@
  * @fileoverview Test helpers for building TraceViz Values.
  */
 
-import {Duration} from '../duration/duration';
-import {Timestamp} from '../timestamp/timestamp';
+import {Duration} from '../duration/duration.js';
+import {Timestamp} from '../timestamp/timestamp.js';
 
-import {DoubleValue, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringTableBuilder, StringValue, TimestampValue, Value} from './value';
-import {ValueMap} from './value_map';
+import {DoubleValue, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringTableBuilder, StringValue, TimestampValue, Value} from './value.js';
+import {ValueMap} from './value_map.js';
 
 /** Builds a StringValue. */
 export function str(str: string): StringValue {

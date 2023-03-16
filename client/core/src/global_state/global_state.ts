@@ -16,11 +16,11 @@
  * with Values, representing global filters, selections, and similar things.
  */
 
-import {ConfigurationError, Severity} from '../errors/errors';
-import {Value} from '../value/value';
+import {ConfigurationError, Severity} from '../errors/errors.js';
+import {Value} from '../value/value.js';
 import {BehaviorSubject} from 'rxjs';
 
-import {GlobalStateInterface} from './global_state_interface';
+import {GlobalStateInterface} from './global_state_interface.js';
 
 const SOURCE = 'global_state';
 

@@ -17,8 +17,8 @@
  * associated with string keys.
  */
 
-import {Duration} from '../duration/duration';
-import {Timestamp} from '../timestamp/timestamp';
+import {Duration} from '../duration/duration.js';
+import {Timestamp} from '../timestamp/timestamp.js';
 import {ReplaySubject} from 'rxjs';
 
 export enum ValueType {

@@ -11,10 +11,10 @@
         limitations under the License.
 */
 
-import {Duration} from '../duration/duration';
-import {ConfigurationError, Severity} from '../errors/errors';
-import {Timestamp} from '../timestamp/timestamp';
-import {DoubleValue, DurationValue, ExportedValue, fromV, IntegerListValue, IntegerValue, StringListValue, StringTableBuilder, StringValue, TimestampValue, V, Value} from './value';
+import {Duration} from '../duration/duration.js';
+import {ConfigurationError, Severity} from '../errors/errors.js';
+import {Timestamp} from '../timestamp/timestamp.js';
+import {DoubleValue, DurationValue, ExportedValue, fromV, IntegerListValue, IntegerValue, StringListValue, StringTableBuilder, StringValue, TimestampValue, V, Value} from './value.js';
 import {merge, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 

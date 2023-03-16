@@ -13,7 +13,7 @@
 
 import 'jasmine';
 
-import {ConfigurationError, Severity} from './errors';
+import {ConfigurationError, Severity} from './errors.js';
 
 describe('errors test', () => {
   it('converts to string', () => {

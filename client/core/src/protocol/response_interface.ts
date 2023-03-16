@@ -11,15 +11,18 @@
         limitations under the License.
 */
 
-export * from './duration/duration.js';
-export * from './errors/errors.js';
-export * from './global_state/global_state.js';
-export * from './global_state/global_state_interface.js';
-export * from './protocol/json_request.js';
-export * from './protocol/json_response.js';
-export * from './protocol/request_interface.js';
-export * from './protocol/response_interface.js';
-export * from './timestamp/timestamp.js';
-export * from './value/test_value.js';
-export * from './value/value.js';
-export * from './value/value_map.js';
+import {ValueMap} from '../value/value_map.js';
+
+/** Represents a single node in a server-side response. */
+export interface ResponseNode {
+  properties: ValueMap;
+  children: ResponseNode[];
+}
+
+/**
+ * Represents a backend response, comprising a root ResponseNode for each
+ * returned DataSeries.
+ */
+export interface Response {
+  series: ReadonlyMap<string, ResponseNode>;
+}

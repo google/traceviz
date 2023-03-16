@@ -1,8 +1,9 @@
 {
   "devDependencies": {
+    "@types/d3": "^7.4.0",
     "@types/jasmine": "^4.3.1",
     "@types/node": "^18.14.1",
-    "jasmine": "^4.5.0",
+    "jasmine": "^4.6.0",
     "jasmine-spec-reporter": "^7.0.0",
     "jasmine-ts-console-reporter": "^3.1.1",
     "rimraf": "^4.1.2",
@@ -23,6 +24,7 @@
     "balanced-match": "^1.0.2",
     "brace-expansion": "^1.1.11",
     "concat-map": "^0.0.1",
+    "d3": "^7.8.2",
     "fs.realpath": "^1.0.0",
     "glob": "^7.2.3",
     "inflight": "^1.0.6",
@@ -39,7 +41,7 @@
     "test": "jasmine",
     "bt": "npm run build && npm run test"
   },
-  "type": "commonjs",
+  "type": "module",
   "author": "Lee Baugh",
   "license": "Apache-2.0"
 }

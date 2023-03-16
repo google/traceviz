@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-import {Value} from '../value/value';
+import {Value} from '../value/value.js';
 import {Subject} from 'rxjs';
 
 /**

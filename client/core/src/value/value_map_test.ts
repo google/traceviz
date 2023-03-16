@@ -13,11 +13,11 @@
 
 import 'jasmine';
 
-import {Value} from './value';
-import {int, strs, str, ints, dbl, dur, ts, st, valueMap} from './test_value';
-import {ValueMap} from './value_map';
-import {Duration} from '../duration/duration';
-import {Timestamp} from '../timestamp/timestamp';
+import {Value} from './value.js';
+import {int, strs, str, ints, dbl, dur, ts, st, valueMap} from './test_value.js';
+import {ValueMap} from './value_map.js';
+import {Duration} from '../duration/duration.js';
+import {Timestamp} from '../timestamp/timestamp.js';
 
 describe('value map test', () => {
   it('constructs from object with stridx keys', () => {
