@@ -11,17 +11,17 @@
         limitations under the License.
 */
 
-export * from './app_core/app_core.js';
-export * from './duration/duration.js';
-export * from './errors/errors.js';
-export * from './global_state/global_state.js';
-export * from './global_state/global_state_interface.js';
-export * from './protocol/json_request.js';
-export * from './protocol/json_response.js';
-export * from './protocol/request_interface.js';
-export * from './protocol/response_interface.js';
-export * from './timestamp/timestamp.js';
-export * from './value/test_value.js';
-export * from './value/value.js';
-export * from './value/value_map.js';
-export * from './value/value_reference.js';
+/**
+ * @fileoverview An injectable Angular service providing a global AppCore.
+ */
+
+import { Injectable } from '@angular/core';
+import { AppCore } from 'traceviz-client-core';
+
+/** An injectable service providing a global AppCore. */
+@Injectable({
+    providedIn: 'root',
+})
+export class AppCoreService {
+    readonly appCore = new AppCore();
+}

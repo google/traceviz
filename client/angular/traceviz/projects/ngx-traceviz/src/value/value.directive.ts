@@ -16,23 +16,23 @@
  * in TraceViz templates.
  */
 
-import {AfterContentInit, ContentChild, ContentChildren, Directive, ElementRef, forwardRef, Input, QueryList} from '@angular/core';
-import {ConfigurationError, Severity} from 'traceviz-client-core';
-import {GlobalStateInterface} from 'traceviz-client-core';
-import {Timestamp} from 'traceviz-client-core';
-import {DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value} from 'traceviz-client-core';
-import {ValueMap} from 'traceviz-client-core';
+import { AppCoreService } from '../app_core_service/app_core_service';
+
+import { AfterContentInit, ContentChild, ContentChildren, Directive, ElementRef, forwardRef, Input, QueryList } from '@angular/core';
+import { ConfigurationError, Severity } from 'traceviz-client-core';
+import { Timestamp } from 'traceviz-client-core';
+import { DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value } from 'traceviz-client-core';
+import { ValueRef } from 'traceviz-client-core';
+import { ValueMap } from 'traceviz-client-core';
+import { AppCore } from 'traceviz-client-core';
 
 const SOURCE = 'directives/value';
 
 /** A base class for directives specifying Values. */
-export abstract class ValueDirective {
-  abstract getValue(
-      globalState: GlobalStateInterface|undefined,
-      localState: ValueMap|undefined): Value|undefined;
-  abstract description(
-      globalState: GlobalStateInterface|undefined,
-      localState: ValueMap|undefined): string;
+export abstract class ValueDirective implements ValueRef {
+  abstract get(
+    localState: ValueMap | undefined): Value | undefined;
+  abstract label(): string;
 }
 
 /** An EmptyValue literal in a TraceViz template. */
@@ -48,18 +48,15 @@ export class EmptyLiteralDirective extends ValueDirective {
     super();
   }
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new EmptyValue();
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal empty Value`;
   }
 }
+
 /** A string literal in a TraceViz template. */
 @Directive({
   selector: 'string',
@@ -69,7 +66,7 @@ export class EmptyLiteralDirective extends ValueDirective {
   }],
 })
 export class StringLiteralDirective extends ValueDirective implements
-    AfterContentInit {
+  AfterContentInit {
   val: string = '';
 
   constructor(readonly elementRef?: ElementRef) {
@@ -84,15 +81,11 @@ export class StringLiteralDirective extends ValueDirective implements
     }
   }
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new StringValue(this.val);
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal '${this.val.toString()}'`;
   }
 }
@@ -106,7 +99,7 @@ export class StringLiteralDirective extends ValueDirective implements
   }],
 })
 export class StringLiteralListDirective extends ValueDirective implements
-    AfterContentInit {
+  AfterContentInit {
   val: string[] = [];
   @ContentChildren(StringLiteralDirective)
   strs = new QueryList<StringLiteralDirective>();
@@ -117,15 +110,11 @@ export class StringLiteralListDirective extends ValueDirective implements
     }
   }
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new StringListValue(this.val);
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal ${this.val.toString()}`;
   }
 }
@@ -139,7 +128,7 @@ export class StringLiteralListDirective extends ValueDirective implements
   }],
 })
 export class StringLiteralSetDirective extends ValueDirective implements
-    AfterContentInit {
+  AfterContentInit {
   val = new Set<string>([]);
 
   @ContentChildren(StringLiteralDirective)
@@ -151,15 +140,11 @@ export class StringLiteralSetDirective extends ValueDirective implements
     }
   }
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new StringSetValue(this.val);
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal ${this.val.toString()}`;
   }
 }
@@ -173,7 +158,7 @@ export class StringLiteralSetDirective extends ValueDirective implements
   }],
 })
 export class IntLiteralDirective extends ValueDirective implements
-    AfterContentInit {
+  AfterContentInit {
   val: number = NaN;
 
   constructor(readonly elementRef?: ElementRef) {
@@ -187,15 +172,11 @@ export class IntLiteralDirective extends ValueDirective implements
     }
   }
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new IntegerValue(this.val);
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal ${this.val.toString()}`;
   }
 }
@@ -209,7 +190,7 @@ export class IntLiteralDirective extends ValueDirective implements
   }],
 })
 export class IntLiteralListDirective extends ValueDirective implements
-    AfterContentInit {
+  AfterContentInit {
   val: number[] = [];
   @ContentChildren(IntLiteralDirective)
   ints = new QueryList<IntLiteralDirective>();
@@ -220,15 +201,11 @@ export class IntLiteralListDirective extends ValueDirective implements
     }
   }
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new IntegerListValue(this.val);
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal ${this.val.toString()}`;
   }
 }
@@ -242,7 +219,7 @@ export class IntLiteralListDirective extends ValueDirective implements
   }],
 })
 export class IntLiteralSetDirective extends ValueDirective implements
-    AfterContentInit {
+  AfterContentInit {
   val = new Set<number>([]);
 
   @ContentChildren(IntLiteralDirective)
@@ -254,15 +231,11 @@ export class IntLiteralSetDirective extends ValueDirective implements
     }
   }
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new IntegerSetValue(this.val);
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal ${this.val.toString()}`;
   }
 }
@@ -276,7 +249,7 @@ export class IntLiteralSetDirective extends ValueDirective implements
   }],
 })
 export class DblLiteralDirective extends ValueDirective implements
-    AfterContentInit {
+  AfterContentInit {
   val: number = NaN;
 
   constructor(readonly elementRef?: ElementRef) {
@@ -290,15 +263,11 @@ export class DblLiteralDirective extends ValueDirective implements
     }
   }
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new DoubleValue(this.val);
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal ${this.val.toString()}`;
   }
 }
@@ -307,21 +276,17 @@ export class DblLiteralDirective extends ValueDirective implements
 @Directive({
   selector: 'timestamp',
   providers: [
-    {provide: ValueDirective, useExisting: forwardRef(() => TimestampDirective)}
+    { provide: ValueDirective, useExisting: forwardRef(() => TimestampDirective) }
   ],
 })
 export class TimestampDirective extends ValueDirective {
   val = new Timestamp(0, 0);
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return new TimestampValue(this.val);
   }
 
-  description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  label(): string {
     return `literal ${this.val.toString()}`;
   }
 }
@@ -330,20 +295,18 @@ export class TimestampDirective extends ValueDirective {
 @Directive({
   selector: 'local-ref',
   providers: [
-    {provide: ValueDirective, useExisting: forwardRef(() => LocalRefDirective)}
+    { provide: ValueDirective, useExisting: forwardRef(() => LocalRefDirective) }
   ],
 })
 export class LocalRefDirective extends ValueDirective {
   @Input() key: string = '';
 
-  getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      localState: ValueMap|undefined): Value|undefined {
+  get(localState: ValueMap | undefined): Value | undefined {
     if (localState == null) {
       throw new ConfigurationError(
-          `Can't look up local reference with no local ValueMap`)
-          .at(Severity.FATAL)
-          .from(SOURCE);
+        `Can't look up local reference with no local ValueMap`)
+        .at(Severity.FATAL)
+        .from(SOURCE);
     }
     if (!localState.has(this.key)) {
       return undefined;
@@ -351,17 +314,8 @@ export class LocalRefDirective extends ValueDirective {
     return localState.get(this.key);
   }
 
-  description(
-      globalState: GlobalStateInterface|undefined,
-      localState: ValueMap|undefined): string {
-    if (localState == null) {
-      return `local value '${this.key}'`;
-    }
-    const localVal = this.getValue(globalState, localState);
-    if (localVal == null) {
-      return `local undefined value '${this.key}'`;
-    }
-    return `local ${localVal.typeName()} '${this.key}'`;
+  label(): string {
+    return `local value '${this.key}'`;
   }
 }
 
@@ -369,40 +323,40 @@ export class LocalRefDirective extends ValueDirective {
 @Directive({
   selector: 'global-ref',
   providers: [
-    {provide: ValueDirective, useExisting: forwardRef(() => GlobalRefDirective)}
+    { provide: ValueDirective, useExisting: forwardRef(() => GlobalRefDirective) }
   ],
 })
-export class GlobalRefDirective extends ValueDirective {
+export class GlobalRefDirective extends ValueDirective implements AfterContentInit {
   @Input() key: string = '';
-  getValue(
-      globalState: GlobalStateInterface,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
-    if (globalState == null) {
-      throw new ConfigurationError(
-          `Can't look up global reference with no GlobalStateInterface`)
-          .at(Severity.FATAL)
-          .from(SOURCE);
-    }
-    const value = globalState.get(this.key);
-    if (value == null) {
-      throw new ConfigurationError(`No global value has the key '${this.key}'`)
-          .at(Severity.FATAL)
-          .from(SOURCE);
-    }
-    return value;
+  private val: Value | undefined;
+
+  constructor(private readonly appCoreService: AppCoreService) {
+    super();
   }
 
-  description(
-      globalState: GlobalStateInterface|undefined,
-      localState: ValueMap|undefined): string {
-    if (globalState == null) {
-      return `global value '${this.key}'`;
+  ngAfterContentInit() {
+    const key = this.key;
+    this.appCoreService.appCore.onPublish(
+      (appCore: AppCore) => {
+        this.val = appCore.globalState.get(this.key);
+      }
+    );
+  }
+
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+    if (this.val == null) {
+      throw new ConfigurationError(`No global value has the key '${this.key}'`)
+        .at(Severity.FATAL)
+        .from(SOURCE);
     }
-    const globalVal = this.getValue(globalState, localState);
-    if (globalVal == null) {
+    return this.val;
+  }
+
+  label(): string {
+    if (this.val == null) {
       return `global undefined value '${this.key}'`;
     }
-    return `global ${globalVal.typeName()} '${this.key}'`;
+    return `global ${this.val.typeName()} '${this.key}'`;
   }
 }
 
@@ -412,58 +366,53 @@ export class GlobalRefDirective extends ValueDirective {
  * literal, or the referenced Value for local and global refs.
  * It may specify a string key, for example for building a value map.
  */
-@Directive({selector: 'value'})
+@Directive({ selector: 'value' })
 export class ValueWrapperDirective {
   // If specified, a key to associate with this Value.
-  @Input() key: string|undefined;
+  @Input() key: string | undefined;
 
-  @ContentChild(ValueDirective) val: ValueDirective|undefined;
+  @ContentChild(ValueDirective) val: ValueDirective | undefined;
 
-  getValue(
-      globalState: GlobalStateInterface|undefined,
-      localState: ValueMap|undefined): Value|undefined {
+  get(localState: ValueMap | undefined): Value | undefined {
     if (!this.val) {
       throw new ConfigurationError(
-          `<value> does not define a valid ValueDirective for key '${
-              this.key}'`)
-          .at(Severity.FATAL)
-          .from(SOURCE);
+        `<value> does not define a valid ValueDirective for key '${this.key}'`)
+        .at(Severity.FATAL)
+        .from(SOURCE);
     }
-    return this.val.getValue(globalState, localState);
+    return this.val.get(localState);
   }
 
-  description(
-      globalState: GlobalStateInterface|undefined,
-      localState: ValueMap|undefined): string {
+  label(): string {
     if (this.val) {
-      return this.val.description(globalState, localState);
+      return this.val.label();
     }
     return 'unspecified value';
   }
 }
 
 /** A mapping from string keys to Values. */
-@Directive({selector: 'value-map'})
+@Directive({ selector: 'value-map' })
 export class ValueMapDirective {
   @ContentChildren(ValueWrapperDirective)
   valueWrappers = new QueryList<ValueWrapperDirective>();
 
-  getValueMap(globalState?: GlobalStateInterface, localState?: ValueMap):
-      ValueMap {
+  getValueMap(localState?: ValueMap):
+    ValueMap {
     const ret = new Map<string, Value>();
     for (const valueWrapper of this.valueWrappers) {
       if (valueWrapper.key == null) {
         throw new ConfigurationError(`values within a value-map must have keys`)
-            .at(Severity.FATAL)
-            .from(SOURCE);
+          .at(Severity.FATAL)
+          .from(SOURCE);
       }
       if (ret.has(valueWrapper.key)) {
         throw new ConfigurationError(
-            `values within a value-map must have unique keys`)
-            .at(Severity.FATAL)
-            .from(SOURCE);
+          `values within a value-map must have unique keys`)
+          .at(Severity.FATAL)
+          .from(SOURCE);
       }
-      const val = valueWrapper.getValue(globalState, localState);
+      const val = valueWrapper.get(localState);
       if (val != null) {
         ret.set(valueWrapper.key, val);
       }

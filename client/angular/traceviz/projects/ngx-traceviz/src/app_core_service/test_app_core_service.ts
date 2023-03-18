@@ -11,17 +11,14 @@
         limitations under the License.
 */
 
-export * from './app_core/app_core.js';
-export * from './duration/duration.js';
-export * from './errors/errors.js';
-export * from './global_state/global_state.js';
-export * from './global_state/global_state_interface.js';
-export * from './protocol/json_request.js';
-export * from './protocol/json_response.js';
-export * from './protocol/request_interface.js';
-export * from './protocol/response_interface.js';
-export * from './timestamp/timestamp.js';
-export * from './value/test_value.js';
-export * from './value/value.js';
-export * from './value/value_map.js';
-export * from './value/value_reference.js';
+import { AppCoreService } from "./app_core_service";
+
+/**
+ * @fileoverview An app core service for testing.
+ */
+
+export function testAppCoreService(): AppCoreService {
+    const ret = new AppCoreService();
+    ret.appCore.publish();
+    return ret;
+}

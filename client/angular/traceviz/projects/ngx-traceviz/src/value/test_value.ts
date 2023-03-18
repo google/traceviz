@@ -15,8 +15,9 @@
  * @fileoverview Test helpers for building value directives.
  */
 
-import {GlobalRefDirective, IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, LocalRefDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, ValueDirective, ValueMapDirective, ValueWrapperDirective} from './value.directive';
-import {GlobalStateInterface, Value, ValueMap} from 'traceviz-client-core';
+import { GlobalRefDirective, IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, LocalRefDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, ValueDirective, ValueMapDirective, ValueWrapperDirective } from './value.directive';
+import { Value, ValueMap } from 'traceviz-client-core';
+import { AppCoreService } from '../app_core_service/app_core_service';
 
 /** Wraps a Value as a ValueDirective for testing. */
 export class WrapValue extends ValueDirective {
@@ -24,14 +25,10 @@ export class WrapValue extends ValueDirective {
     super();
   }
 
-  override getValue(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): Value|undefined {
+  override get(unusedLocalState: ValueMap | undefined): Value | undefined {
     return this.value;
   }
-  override description(
-      unusedGlobalState: GlobalStateInterface|undefined,
-      unusedLocalState: ValueMap|undefined): string {
+  override label(): string {
     return `wrapped ${this.value.typeName()}`;
   }
 }
@@ -86,9 +83,10 @@ export function localRef(key: string): LocalRefDirective {
 }
 
 /** Returns a new GlobalRef value specifier. */
-export function globalRef(key: string): GlobalRefDirective {
-  const ref = new GlobalRefDirective();
+export function globalRef(appCoreService: AppCoreService, key: string): GlobalRefDirective {
+  const ref = new GlobalRefDirective(appCoreService);
   ref.key = key;
+  ref.ngAfterContentInit();
   return ref;
 }
 
@@ -107,7 +105,7 @@ export function valueMapDirective(valueMap: ValueMap): ValueMapDirective {
  * if one of the specifiers is unrecognized.
  */
 export function keyedValue(
-    key: string, specifier: ValueDirective): ValueWrapperDirective {
+  key: string, specifier: ValueDirective): ValueWrapperDirective {
   const val = new ValueWrapperDirective();
   val.key = key;
   val.val = specifier;

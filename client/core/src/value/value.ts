@@ -167,9 +167,7 @@ export type ExportedValue = {}|number|string|number[]|string[]|ExportedTimestamp
 export interface Value extends ReplaySubject<Value> {
   importFrom(exportedValue: ExportedValue): boolean;
   exportTo(): ExportedValue;
-
   toString(): string;
-
   toV(stringTableBuilder?: StringTableBuilder): V|undefined;
   // fold folds `other`'s Value into the receiver's, returning false if this
   // cannot be done due to incompatible types.

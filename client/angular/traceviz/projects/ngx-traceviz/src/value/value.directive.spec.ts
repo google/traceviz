@@ -11,46 +11,42 @@
         limitations under the License.
 */
 
-// import 'jasmine';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import {ValueMapDirective} from './value.directive';
-import {keyedValue, value, intLit, intsLit, intSetLit, globalRef, localRef, strLit, strsLit, strSetLit} from './test_value';
-
-import {str, strs, strSet, int, ints, intSet} from 'traceviz-client-core';
-import {ValueMap, IntegerValue, StringValue, Value} from 'traceviz-client-core';
-import {GlobalState} from 'traceviz-client-core';
+import { ValueMapDirective } from './value.directive';
+import { keyedValue, value, intLit, intsLit, intSetLit, globalRef, localRef, strLit, strsLit, strSetLit } from './test_value';
+import { str, strs, strSet, int, ints, intSet } from 'traceviz-client-core';
+import { ValueMap, IntegerValue, StringValue, Value } from 'traceviz-client-core';
+import { testAppCoreService } from '../app_core_service/test_app_core_service';
 
 describe('value directives test', () => {
   it('creates string Value from literal', () => {
     const val = value(strLit('hello'));
-    expect(val.getValue(undefined, undefined)).toEqual(str('hello'));
+    expect(val.get(undefined)).toEqual(str('hello'));
   });
 
   it('creates string list Value from literal', () => {
     const val = value(strsLit('hello', 'goodbye'));
-    expect(val.getValue(undefined, undefined))
-        .toEqual(strs('hello', 'goodbye'));
+    expect(val.get(undefined))
+      .toEqual(strs('hello', 'goodbye'));
   });
 
   it('creates string set Value from literal', () => {
     const val = value(strSetLit('a', 'b', 'c'));
-    expect(val.getValue(undefined, undefined)).toEqual(strSet('a', 'b', 'c'));
+    expect(val.get(undefined)).toEqual(strSet('a', 'b', 'c'));
   });
 
   it('creates int Value from literal', () => {
     const val = value(intLit(100));
-    expect(val.getValue(undefined, undefined)).toEqual(int(100));
+    expect(val.get(undefined)).toEqual(int(100));
   });
 
   it('creates int list Value from literal', () => {
     const val = value(intsLit(100, 200));
-    expect(val.getValue(undefined, undefined)).toEqual(ints(100, 200));
+    expect(val.get(undefined)).toEqual(ints(100, 200));
   });
 
   it('creates int set Value from literal', () => {
     const val = value(intSetLit(300, 100, 200));
-    expect(val.getValue(undefined, undefined)).toEqual(intSet(100, 200, 300));
+    expect(val.get(undefined)).toEqual(intSet(100, 200, 300));
   });
 
   it('references local Values properly', () => {
@@ -59,7 +55,7 @@ describe('value directives test', () => {
       ['greeting', localVal],
     ]));
     const val = value(localRef('greeting'));
-    const gotVal = val.getValue(undefined, localState) as StringValue;
+    const gotVal = val.get(localState) as StringValue;
     // Expect the value we got from the wrapper to have 'hello'.
     expect(gotVal.val).toEqual('hello');
     // Expect a change to the local value to reflect in the got value.
@@ -71,12 +67,12 @@ describe('value directives test', () => {
   });
 
   it('references global Values properly', () => {
-    const globalState = new GlobalState();
+    const appCoreService = testAppCoreService();
     const globalVal = int(3);
-    globalState.set('weight', globalVal);
+    appCoreService.appCore.globalState.set('weight', globalVal);
 
-    const val = value(globalRef('weight'));
-    const gotVal = val.getValue(globalState, undefined) as IntegerValue;
+    const val = value(globalRef(appCoreService, 'weight'));
+    const gotVal = val.get(undefined) as IntegerValue;
     // Expect the value we got from the wrapper to have 'hello'.
     expect(gotVal.val).toEqual(3);
     // Expect a change to the local value to reflect in the got value.
@@ -100,9 +96,9 @@ describe('value directives test', () => {
   });
 
   it('throws on a GlobalRef without a GlobalState', () => {
-    const val = value(globalRef('missing'));
+    const appCoreService = testAppCoreService();
     expect(() => {
-      val.getValue(undefined, undefined);
+      const val = value(globalRef(appCoreService, 'missing'));
     }).toThrow();
   });
 });

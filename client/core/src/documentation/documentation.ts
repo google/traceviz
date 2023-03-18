@@ -16,40 +16,38 @@
  * entities.
  */
 
-import {GlobalStateInterface} from '../global_state/global_state_interface.js';
-import {ValueMap} from '../value/value_map.js';
+/** Supported types of documenters. */
+export enum DocumenterType {
+  /** Documents an update in response to some user action. */
+  Update = 0,
+  /** Documents a predicate controlling some reaction. */
+  Predicate,
+  /** Documents a watch on a set of Values. */
+  Watch,
+  /** Documents some user action and its resulting updates. */
+  Action,
+  /** Documents some reaction and the predicates that control it. */
+  Reaction,
+  /** Documents a set of interactions: Watches, Actions, and Reactions. */
+  Interactions,
+  /** Documents a tool component. */
+  Component,
+  /** Documents a tool. */
+  Tool,
+}
 
 /** Implemented by self-documenting types. */
 export interface Documenter {
-  document(
-      globalState: GlobalStateInterface|undefined,
-      localState: ValueMap|undefined): string;
+  // An automatically generated document string for this Documenter.
+  autoDocument: string;
+  // A manually-generated document string for this Documenter.  If nonempty,
+  // this should override 'autoDocument'.
+  overrideDocument: string;
+  // This Documenter's type.
+  documenterType: DocumenterType;
+  // Whether to recursively document this Documenter's children.
+  documentChildren: boolean;
+  // This Documenter's children.
+  children: Documenter[];
 }
 
-/** Implemented by self-documenting Actions. */
-export interface ActionDocumenter {
-  type: string;
-  target: string;
-  updates: Documenter[];
-}
-
-/** Implemented by self-documenting Reactions. */
-export interface ReactionDocumenter {
-  type: string;
-  target: string;
-  predicate: Documenter|undefined;
-}
-
-/** Implemented by self-documenting Interactions. */
-export interface InteractionDocumenter {
-  actions: ActionDocumenter[];
-  reactions: ReactionDocumenter[];
-  watches: Documenter[];
-}
-
-/** Documentation for a single component. */
-export interface ComponentDocumenter {
-  componentName: string;
-  componentDocumentation: string;
-  interactionDocumenter: InteractionDocumenter|undefined;
-}
