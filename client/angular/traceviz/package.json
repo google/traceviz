@@ -23,6 +23,10 @@
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"
   },
+  "peerDependencies": {
+    "ngx-traceviz": "file:projects/ngx-traceviz",
+    "traceviz-client-core": "file:../../core"
+  },
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.2.2",
     "@angular/cli": "~15.2.1",

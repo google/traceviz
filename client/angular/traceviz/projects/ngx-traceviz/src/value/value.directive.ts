@@ -74,6 +74,7 @@ export class StringLiteralDirective extends ValueDirective implements
   }
 
   ngAfterContentInit() {
+    console.log('well');
     if (this.elementRef != null) {
       this.val = this.elementRef.nativeElement.innerText;
       // Clear out the innerText so that it doesn't get rendered.
@@ -181,7 +182,7 @@ export class IntLiteralDirective extends ValueDirective implements
   }
 }
 
-/** An ordered list of string literals in a TraceViz template. */
+/** An ordered list of integer literals in a TraceViz template. */
 @Directive({
   selector: 'int-list',
   providers: [{
@@ -210,7 +211,7 @@ export class IntLiteralListDirective extends ValueDirective implements
   }
 }
 
-/** An unordered set of unique string literals in a TraceViz template. */
+/** An unordered set of unique integer literals in a TraceViz template. */
 @Directive({
   selector: 'int-set',
   providers: [{

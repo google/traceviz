@@ -2,8 +2,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
@@ -14,17 +12,16 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "paths": {
-      "ngx-traceviz": [
-        "dist/ngx-traceviz"
-      ]
-    },
-    "preserveSymlinks": true,
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
+    "paths": {
+      "ngx-traceviz": [
+        "dist/ngx-traceviz"
+      ]
+    },
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,

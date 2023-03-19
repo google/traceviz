@@ -11,13 +11,17 @@
         limitations under the License.
 */
 
-import { ValueMapDirective } from './value.directive';
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+
+import { Component } from '@angular/core';
+
+import { StringLiteralDirective, ValueMapDirective } from './value.directive';
 import { keyedValue, value, intLit, intsLit, intSetLit, globalRef, localRef, strLit, strsLit, strSetLit } from './test_value';
 import { str, strs, strSet, int, ints, intSet } from 'traceviz-client-core';
 import { ValueMap, IntegerValue, StringValue, Value } from 'traceviz-client-core';
 import { testAppCoreService } from '../app_core_service/test_app_core_service';
 
-describe('value directives test', () => {
+describe('value directives test 2', () => {
   it('creates string Value from literal', () => {
     const val = value(strLit('hello'));
     expect(val.get(undefined)).toEqual(str('hello'));

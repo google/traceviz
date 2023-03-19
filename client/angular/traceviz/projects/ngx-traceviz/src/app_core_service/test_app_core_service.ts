@@ -14,9 +14,10 @@
 import { AppCoreService } from "./app_core_service";
 
 /**
- * @fileoverview An app core service for testing.
+ * @fileoverview Utilities for tests that require an AppCoreService..
  */
 
+/** Returns a pre-published AppCoreService. */
 export function testAppCoreService(): AppCoreService {
     const ret = new AppCoreService();
     ret.appCore.publish();
