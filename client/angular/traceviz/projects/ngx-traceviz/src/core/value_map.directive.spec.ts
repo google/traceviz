@@ -16,47 +16,73 @@ import { Component, ViewChild } from '@angular/core';
 
 import { AppCoreDirective } from './app_core.directive';
 import { AppCoreService } from '../app_core_service/app_core.service';
-import { GlobalRefDirective } from './global_ref.directive';
-import { StringValue } from 'traceviz-client-core';
+import { ValueMap, str, valueMap } from 'traceviz-client-core';
 import { CoreModule } from './core.module';
+import { ValueMapDirective } from './value_map.directive';
 
 @Component({
     template: `
+    <!--
+      -- The value-map goes first so that ViewChild doesn't pick up the one
+      -- in the global-state :\
+      -->
+  <value-map>
+    <value key="name">
+        <global-ref key="name"></global-ref>
+    </value>
+    <value key="age">
+        <int>56</int>
+    </value>
+    <value key="species">
+        <local-ref key="species"></local-ref>
+    </value>
+  </value-map>
   <app-core>
     <global-state>
       <value-map>
-        <value key="str"><string>yay</string></value>
+        <value key="name"><string>clyde</string></value>
       </value-map>
     </global-state>
   </app-core>
-  <global-ref key="str"></global-ref>
 `
 })
-class GlobalTestComponent {
-    @ViewChild(GlobalRefDirective) globalRefDir!: GlobalRefDirective;
+class ValueMapTestComponent {
+    @ViewChild(ValueMapDirective) valueMapDir!: ValueMapDirective;
     @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
 }
 
-describe('global value directive test', () => {
-    let fixture: ComponentFixture<GlobalTestComponent>;
+describe('value map directive test', () => {
+    let fixture: ComponentFixture<ValueMapTestComponent>;
     const appCoreService = new AppCoreService();
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [GlobalTestComponent],
+            declarations: [ValueMapTestComponent],
             imports: [CoreModule],
             providers: [{
                 provide: AppCoreService,
                 useValue: appCoreService,
             }]
         })
-        fixture = TestBed.createComponent(GlobalTestComponent);
+        fixture = TestBed.createComponent(ValueMapTestComponent);
     });
 
-    it('handles global Values', () => {
+    it('handles value map', () => {
         fixture.detectChanges();
         const tc = fixture.componentInstance;
-        expect((tc.globalRefDir.get(undefined) as StringValue).val).toEqual('yay');
+        const localVm = valueMap(
+            { key: 'species', val: str('cloud') },
+        );
+        const vmDir = tc.valueMapDir as ValueMapDirective;
+        let vm: ValueMap | undefined;
+        expect(() => {
+            vm = vmDir.getValueMap(localVm);
+        }).not.toThrow();
+        expect(Array.from(vm!.entries()).map(([key, val]) => [key, val.toString()])).toEqual([
+            ['name', 'clyde'],
+            ['age', '56'],
+            ['species', 'cloud']
+        ]);
     });
 });
 

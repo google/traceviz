@@ -25,10 +25,6 @@ import { CoreModule } from './core.module';
     <global-state>
       <value-map>
         <value key="counter"><int>0</int></value>
-        <value key="lower_bound"><int>5</int></value>
-        <value key="upper_bound"><int>10</int></value>
-        <value key="forbidden"><int>7</int></value>
-        <value key="allowed"><int-set><int>12</int></int-set></value>
       </value-map>
     </global-state>
   </app-core>

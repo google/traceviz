@@ -45,13 +45,6 @@ export class ValueWrapperDirective {
         }
         return this.val.get(localState);
     }
-
-    label(): string {
-        if (this.val) {
-            return this.val.label();
-        }
-        return 'unspecified value';
-    }
 }
 
 /** A mapping from string keys to Values. */

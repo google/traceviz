@@ -55,7 +55,7 @@ class LiteralTestComponent {
     @ViewChild(TimestampLiteralDirective) tsLitDir!: TimestampLiteralDirective;
 }
 
-describe('value literal directives test', () => {
+describe('value literal directive test', () => {
     let fixture: ComponentFixture<LiteralTestComponent>;
 
     beforeEach(() => {
