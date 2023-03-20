@@ -11,12 +11,7 @@
         limitations under the License.
 */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing'
-
-import { Component } from '@angular/core';
-
-import { StringLiteralDirective, ValueMapDirective } from './value.directive';
-import { keyedValue, value, intLit, intsLit, intSetLit, globalRef, localRef, strLit, strsLit, strSetLit } from './test_value';
+import { value, intLit, intsLit, intSetLit, globalRef, localRef, strLit, strsLit, strSetLit } from '../core/test_value';
 import { str, strs, strSet, int, ints, intSet } from 'traceviz-client-core';
 import { ValueMap, IntegerValue, StringValue, Value } from 'traceviz-client-core';
 import { testAppCoreService } from '../app_core_service/test_app_core_service';
@@ -85,18 +80,6 @@ describe('value directives test 2', () => {
     // Expect a change to the got value to reflect in the local value.
     gotVal.val = 2;
     expect(globalVal.val).toEqual(2);
-  });
-
-  it('builds a value map', () => {
-    const valueMap = new ValueMapDirective();
-    valueMap.valueWrappers.reset([
-      keyedValue('weight', intLit(100)),
-      keyedValue('greetings', strLit('hello')),
-    ]);
-    expect(valueMap.getValueMap()).toEqual(new ValueMap(new Map<string, Value>([
-      ['weight', int(100)],
-      ['greetings', str('hello')],
-    ])));
   });
 
   it('throws on a GlobalRef without a GlobalState', () => {

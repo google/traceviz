@@ -16,22 +16,11 @@
  */
 
 import { ContentChild, Directive, AfterContentInit } from '@angular/core';
-import { ValueMapDirective } from '../public-api';
-import { AppCore, ConfigurationError, Severity } from 'traceviz-client-core';
-import { AppCoreService } from '../app_core_service/app_core_service';
+import { ConfigurationError, Severity } from 'traceviz-client-core';
+import { AppCoreService } from '../app_core_service/app_core.service';
+import { GlobalStateDirective } from './global_state.directive';
 
 const SOURCE = 'app_core.directive';
-
-@Directive({ selector: 'global-state' })
-export class GlobalStateDirective {
-    @ContentChild(ValueMapDirective) values = new ValueMapDirective();
-
-    populate(appCore: AppCore) {
-        for (const [key, value] of this.values.getValueMap().entries()) {
-            appCore.globalState.set(key, value);
-        }
-    }
-}
 
 @Directive({ selector: 'app-core' })
 export class AppCoreDirective implements AfterContentInit {

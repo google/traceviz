@@ -15,9 +15,12 @@
  * @fileoverview Test helpers for building value directives.
  */
 
-import { GlobalRefDirective, IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, LocalRefDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, ValueDirective, ValueMapDirective, ValueWrapperDirective } from './value.directive';
+import { IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, ValueDirective } from './literal_value.directive';
+import { GlobalRefDirective } from './global_ref.directive';
+import { ValueMapDirective, ValueWrapperDirective } from './value_map.directive';
 import { Value, ValueMap } from 'traceviz-client-core';
-import { AppCoreService } from '../app_core_service/app_core_service';
+import { AppCoreService } from '../app_core_service/app_core.service';
+import { LocalRefDirective } from './local_ref.directive';
 
 /** Wraps a Value as a ValueDirective for testing. */
 export class WrapValue extends ValueDirective {

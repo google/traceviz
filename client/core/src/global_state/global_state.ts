@@ -59,7 +59,6 @@ export class GlobalState extends BehaviorSubject<string[]> implements
         .from(SOURCE)
         .at(Severity.FATAL);
     }
-    console.log(`adding value with key '${key}'`);
     this.valuesByKey.set(key, val);
     this.next([...this.valuesByKey.keys()]);
   }

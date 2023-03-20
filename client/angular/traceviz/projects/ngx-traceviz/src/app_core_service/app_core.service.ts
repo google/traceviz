@@ -20,8 +20,11 @@ import { AppCore } from 'traceviz-client-core';
 
 /** An injectable service providing a global AppCore. */
 @Injectable({
-    providedIn: 'root',
+  providedIn: 'root'
 })
 export class AppCoreService {
-    readonly appCore = new AppCore();
+  readonly appCore = new AppCore();
+
+  constructor() {
+  }
 }

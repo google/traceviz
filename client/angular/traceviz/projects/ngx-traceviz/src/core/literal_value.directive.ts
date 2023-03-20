@@ -16,17 +16,15 @@
  * in TraceViz templates.
  */
 
-import { AppCoreService } from '../app_core_service/app_core_service';
 
-import { AfterContentInit, ContentChild, ContentChildren, Directive, ElementRef, forwardRef, Input, QueryList } from '@angular/core';
-import { ConfigurationError, Severity } from 'traceviz-client-core';
+import { AfterContentInit, ContentChildren, Directive, ElementRef, forwardRef, Input, QueryList } from '@angular/core';
+import { ConfigurationError, Duration, DurationValue, Severity } from 'traceviz-client-core';
 import { Timestamp } from 'traceviz-client-core';
 import { DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value } from 'traceviz-client-core';
 import { ValueRef } from 'traceviz-client-core';
 import { ValueMap } from 'traceviz-client-core';
-import { AppCore } from 'traceviz-client-core';
 
-const SOURCE = 'directives/value';
+const SOURCE = 'value.directives';
 
 /** A base class for directives specifying Values. */
 export abstract class ValueDirective implements ValueRef {
@@ -74,7 +72,6 @@ export class StringLiteralDirective extends ValueDirective implements
   }
 
   ngAfterContentInit() {
-    console.log('well');
     if (this.elementRef != null) {
       this.val = this.elementRef.nativeElement.innerText;
       // Clear out the innerText so that it doesn't get rendered.
@@ -273,14 +270,44 @@ export class DblLiteralDirective extends ValueDirective implements
   }
 }
 
+/** A duration, in nanos */
+@Directive({
+  selector: 'dur',
+  providers: [
+    { provide: ValueDirective, useExisting: forwardRef(() => DurationLiteralDirective) }
+  ],
+})
+export class DurationLiteralDirective extends ValueDirective implements AfterContentInit {
+  val = new Duration(0);
+
+  constructor(readonly elementRef?: ElementRef) {
+    super();
+  }
+
+  ngAfterContentInit() {
+    if (this.elementRef != null) {
+      this.val = new Duration(Number(this.elementRef.nativeElement.innerText));
+      this.elementRef.nativeElement.innerText = '';
+    }
+  }
+
+  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+    return new DurationValue(this.val);
+  }
+
+  label(): string {
+    return `literal ${this.val.toString()}`;
+  }
+}
+
 /** A timestamp, initially the zero time. */
 @Directive({
   selector: 'timestamp',
   providers: [
-    { provide: ValueDirective, useExisting: forwardRef(() => TimestampDirective) }
+    { provide: ValueDirective, useExisting: forwardRef(() => TimestampLiteralDirective) }
   ],
 })
-export class TimestampDirective extends ValueDirective {
+export class TimestampLiteralDirective extends ValueDirective {
   val = new Timestamp(0, 0);
 
   get(unusedLocalState: ValueMap | undefined): Value | undefined {
@@ -289,135 +316,5 @@ export class TimestampDirective extends ValueDirective {
 
   label(): string {
     return `literal ${this.val.toString()}`;
-  }
-}
-
-/** A reference to a Value in the calling component. */
-@Directive({
-  selector: 'local-ref',
-  providers: [
-    { provide: ValueDirective, useExisting: forwardRef(() => LocalRefDirective) }
-  ],
-})
-export class LocalRefDirective extends ValueDirective {
-  @Input() key: string = '';
-
-  get(localState: ValueMap | undefined): Value | undefined {
-    if (localState == null) {
-      throw new ConfigurationError(
-        `Can't look up local reference with no local ValueMap`)
-        .at(Severity.FATAL)
-        .from(SOURCE);
-    }
-    if (!localState.has(this.key)) {
-      return undefined;
-    }
-    return localState.get(this.key);
-  }
-
-  label(): string {
-    return `local value '${this.key}'`;
-  }
-}
-
-/** A reference, by key, to a global Value. */
-@Directive({
-  selector: 'global-ref',
-  providers: [
-    { provide: ValueDirective, useExisting: forwardRef(() => GlobalRefDirective) }
-  ],
-})
-export class GlobalRefDirective extends ValueDirective implements AfterContentInit {
-  @Input() key: string = '';
-  private val: Value | undefined;
-
-  constructor(private readonly appCoreService: AppCoreService) {
-    super();
-  }
-
-  ngAfterContentInit() {
-    const key = this.key;
-    this.appCoreService.appCore.onPublish(
-      (appCore: AppCore) => {
-        this.val = appCore.globalState.get(this.key);
-      }
-    );
-  }
-
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
-    if (this.val == null) {
-      throw new ConfigurationError(`No global value has the key '${this.key}'`)
-        .at(Severity.FATAL)
-        .from(SOURCE);
-    }
-    return this.val;
-  }
-
-  label(): string {
-    if (this.val == null) {
-      return `global undefined value '${this.key}'`;
-    }
-    return `global ${this.val.typeName()} '${this.key}'`;
-  }
-}
-
-/**
- * A wrapper for a value specifier -- a literal, LocalRef, or GlobalRef -- that
- * produces a Value representing the wrapped item: a new Value if wrapping a
- * literal, or the referenced Value for local and global refs.
- * It may specify a string key, for example for building a value map.
- */
-@Directive({ selector: 'value' })
-export class ValueWrapperDirective {
-  // If specified, a key to associate with this Value.
-  @Input() key: string | undefined;
-
-  @ContentChild(ValueDirective) val: ValueDirective | undefined;
-
-  get(localState: ValueMap | undefined): Value | undefined {
-    if (!this.val) {
-      throw new ConfigurationError(
-        `<value> does not define a valid ValueDirective for key '${this.key}'`)
-        .at(Severity.FATAL)
-        .from(SOURCE);
-    }
-    return this.val.get(localState);
-  }
-
-  label(): string {
-    if (this.val) {
-      return this.val.label();
-    }
-    return 'unspecified value';
-  }
-}
-
-/** A mapping from string keys to Values. */
-@Directive({ selector: 'value-map' })
-export class ValueMapDirective {
-  @ContentChildren(ValueWrapperDirective)
-  valueWrappers = new QueryList<ValueWrapperDirective>();
-
-  getValueMap(localState?: ValueMap):
-    ValueMap {
-    const ret = new Map<string, Value>();
-    for (const valueWrapper of this.valueWrappers) {
-      if (valueWrapper.key == null) {
-        throw new ConfigurationError(`values within a value-map must have keys`)
-          .at(Severity.FATAL)
-          .from(SOURCE);
-      }
-      if (ret.has(valueWrapper.key)) {
-        throw new ConfigurationError(
-          `values within a value-map must have unique keys`)
-          .at(Severity.FATAL)
-          .from(SOURCE);
-      }
-      const val = valueWrapper.get(localState);
-      if (val != null) {
-        ret.set(valueWrapper.key, val);
-      }
-    }
-    return new ValueMap(ret);
   }
 }

@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-import { AppCoreService } from "./app_core_service";
+import { AppCoreService } from "../app_core/app_core.service";
 
 /**
  * @fileoverview Utilities for tests that require an AppCoreService..
@@ -19,7 +19,7 @@ import { AppCoreService } from "./app_core_service";
 
 /** Returns a pre-published AppCoreService. */
 export function testAppCoreService(): AppCoreService {
-    const ret = new AppCoreService();
-    ret.appCore.publish();
-    return ret;
+        const ret = new AppCoreService();
+        ret.appCore.publish();
+        return ret;
 }

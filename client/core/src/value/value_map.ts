@@ -38,9 +38,9 @@ export class ValueMap {
     props: KV[] | Map<string, Value> = new Map<string, Value>([]),
     stringTable: string[] = []) {
     let map = new Map<string, Value>();
-    if (props instanceof Map<string, Value>) {
+    if (props instanceof Map) {
       map = props;
-    } else if (props instanceof Array<KV>) {
+    } else if (props instanceof Array) {
       for (const kv of props) {
         const key = (typeof kv[0] === 'string') ? kv[0] : stringTable[kv[0]];
         const value = fromV(kv[1], stringTable);
@@ -73,7 +73,6 @@ export class ValueMap {
     for (const [k, v] of this.map) {
       const gotV = v.toV();
       if (gotV !== undefined) {
-        console.log(`writing key ${k} to ${v}`);
         ret.set(stringTableBuilder.index(k), gotV);
       }
     }
