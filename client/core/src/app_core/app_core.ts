@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-import { ConfigurationError, Severity } from '../errors/errors.js';
+import { ConfigurationError } from '../errors/errors.js';
 import { GlobalState } from '../global_state/global_state.js';
 import { ReplaySubject } from 'rxjs';
 

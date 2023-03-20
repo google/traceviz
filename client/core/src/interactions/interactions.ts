@@ -38,12 +38,13 @@
  */
 
 import { Documenter, DocumenterType } from '../documentation/documentation.js';
+import { ConfigurationError, Severity } from '../errors/errors.js';
 import { EmptyValue, Value } from '../value/value.js';
 import { ValueMap } from '../value/value_map.js';
 import { ValueRef } from '../value/value_reference.js';
 import { combineLatest, distinctUntilChanged, EMPTY, merge, Observable, ReplaySubject } from 'rxjs';
 import { delay, map, takeUntil } from 'rxjs/operators';
-import { ConfigurationError, Severity } from '../errors/errors.js';
+
 const SOURCE = 'interactions';
 
 /**
@@ -280,7 +281,7 @@ export class Action extends Update {
  * Returns a Boolean observable that rises to true when a predicate condition
  * holds.
  */
-export type MatchFn = (localState: ValueMap | undefined) => Observable<boolean>;
+export type MatchFn = (localState?: ValueMap | undefined) => Observable<boolean>;
 
 /**
  * A base class for directives serving as reaction predicates.  The 'match'
@@ -559,11 +560,11 @@ export class Watch implements Documenter {
   overrideDocument = '';
   documentChildren = true;
 
-  constructor(readonly type: string, private readonly valueMap: ValueMap) { }
+  constructor(readonly type: string) { }
 
-  watch(cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
+  watch(valueMap: ValueMap, cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
     const ret = new ReplaySubject<unknown>();
-    this.valueMap.watch().pipe(takeUntil(ret)).subscribe((vm: ValueMap) => {
+    valueMap.watch().pipe(takeUntil(ret)).subscribe((vm: ValueMap) => {
       try {
         cb(vm);
       } catch (err: unknown) {
@@ -574,7 +575,7 @@ export class Watch implements Documenter {
   }
 
   get autoDocument(): string {
-    return `Trigger '${this.type}' on changes to [${[...this.valueMap.keys()].join(', ')}]`;
+    return `Trigger '${this.type}' on changes to arguments`;
   }
 
   get children(): Documenter[] {
@@ -628,7 +629,7 @@ export class Interactions implements Documenter {
     return this;
   }
 
-  update(target: string, type: string, localValues: ValueMap | undefined) {
+  update(target: string, type: string, localValues?: ValueMap | undefined) {
     const action = this.actionsByTargetAndType.get(target)?.get(type);
     if (action !== undefined) {
       action.update(localValues);
@@ -643,12 +644,12 @@ export class Interactions implements Documenter {
     return reaction!.match();
   }
 
-  watch(type: string, cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
+  watch(type: string, valueMap: ValueMap, cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
     const watch = this.watchesByType.get(type);
     if (watch === undefined) {
       return new ReplaySubject<unknown>();
     }
-    return watch!.watch(cb);
+    return watch!.watch(valueMap, cb);
   }
 
   get autoDocument(): string {

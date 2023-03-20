@@ -16,7 +16,7 @@
  * converting into them from standard frontend Requests.
  */
 
-import {Request, SeriesRequest} from './request_interface.js';
+import { Request, SeriesRequest } from './request_interface.js';
 
 // These objects are serialized to JSON, so their names must be formatted as
 // expected on the backend.
@@ -48,6 +48,6 @@ export function toObject(req: Request): DataRequest {
   return {
     GlobalFilters: req.filters.toVMap(),
     SeriesRequests:
-        req.seriesRequests.map((seriesReq) => fromSeriesRequest(seriesReq)),
+      req.seriesRequests.map((seriesReq) => fromSeriesRequest(seriesReq)),
   };
 }

@@ -11,19 +11,17 @@
         limitations under the License.
 */
 
-import { Value } from '../value/value.js';
-import { Subject } from 'rxjs';
-
 /**
- * Extended by types that include the portion of the GlobalState API available
- * to all TraceViz components.  Provides lookup by key on global Values, and is
- * an Observable broadcasting changes to its managed set of keys.
+ * @fileoverview A set of interactions directives.
  */
-export interface GlobalStateInterface extends Subject<string[]> {
-        /**
-         * Returns the Value associated with the specified key in the global state
-         * mapping.  It is an error to call get() on a key not present in the global
-         * mapping.
-         */
-        get(key: string): Value;
+
+import { Value } from 'traceviz-client-core';
+import { ValueRef } from 'traceviz-client-core';
+import { ValueMap } from 'traceviz-client-core';
+
+/** A base class for directives specifying Values. */
+export abstract class ValueDirective implements ValueRef {
+    abstract get(
+        localState: ValueMap | undefined): Value | undefined;
+    abstract label(): string;
 }

@@ -13,7 +13,7 @@
 
 import 'jasmine';
 
-import {Duration} from './duration.js';
+import { Duration } from './duration.js';
 
 function dur(nanos: number): Duration {
   return new Duration(nanos);

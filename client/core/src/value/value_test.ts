@@ -13,11 +13,10 @@
 
 import 'jasmine';
 
-import {Duration} from '../duration/duration.js';
-import {Timestamp} from '../timestamp/timestamp.js';
-
-import {strs, str, strSet, dbl, dur, ts, int, ints, intSet} from './test_value.js';
-import {Value, V, ValueType, fromV} from './value.js';
+import { strs, str, strSet, dbl, dur, ts, int, ints, intSet } from './test_value.js';
+import { Value, V, ValueType, fromV } from './value.js';
+import { Duration } from '../duration/duration.js';
+import { Timestamp } from '../timestamp/timestamp.js';
 
 describe('value test', () => {
   it('converts to and from json', () => {
@@ -65,26 +64,26 @@ describe('value test', () => {
     ];
     for (const [idx, test] of tests.entries()) {
       expect(fromV(JSON.parse(test.json) as V, []))
-          .withContext(`testcase ${idx}`)
-          .toEqual(test.value);
+        .withContext(`testcase ${idx}`)
+        .toEqual(test.value);
       expect(test.value.toV()).withContext(`testcase ${idx}`).toEqual(test.v);
       expect(JSON.parse(test.json) as V)
-          .withContext(`testcase ${idx}`)
-          .toEqual(test.v);
+        .withContext(`testcase ${idx}`)
+        .toEqual(test.v);
       expect(fromV(test.v, []))
-          .withContext(`testcase ${idx}`)
-          .toEqual(test.value);
+        .withContext(`testcase ${idx}`)
+        .toEqual(test.value);
     }
     // A handful of types don't do symmetric conversion.  For those, test
     // what we can.
-     expect(fromV(JSON.parse(`[ 2, 0 ]`) as V, ['hello']))
-         .toEqual(str('hello'));
-     expect(fromV(JSON.parse(`[ 4, [ 0, 1, 2] ]`) as V, ['a', 'b', 'c']))
-         .toEqual(strs('a', 'b', 'c'));
-     expect(JSON.stringify(strSet('c', 'a', 'b').toV()))
-         .toEqual(`[ 3, [ "a", "b", "c" ] ]`.replace(/\s/g, ''));
-     expect(JSON.stringify(intSet(3, 1, 2).toV()))
-         .toEqual(`[ 6, [ 1, 2, 3 ] ]`.replace(/\s/g, ''));
+    expect(fromV(JSON.parse(`[ 2, 0 ]`) as V, ['hello']))
+      .toEqual(str('hello'));
+    expect(fromV(JSON.parse(`[ 4, [ 0, 1, 2] ]`) as V, ['a', 'b', 'c']))
+      .toEqual(strs('a', 'b', 'c'));
+    expect(JSON.stringify(strSet('c', 'a', 'b').toV()))
+      .toEqual(`[ 3, [ "a", "b", "c" ] ]`.replace(/\s/g, ''));
+    expect(JSON.stringify(intSet(3, 1, 2).toV()))
+      .toEqual(`[ 6, [ 1, 2, 3 ] ]`.replace(/\s/g, ''));
   });
 
   it('serializes and deserializes', () => {
@@ -138,8 +137,8 @@ describe('value test', () => {
 
     const tsval = ts(new Timestamp(1000, 500));
     expect(tsval.val).toEqual(new Timestamp(1000, 500));
-    expect(tsval.exportTo()).toEqual({seconds: 1000, nanos: 500});
-    expect(tsval.importFrom({seconds: 2000, nanos: 300})).toBeTrue();
+    expect(tsval.exportTo()).toEqual({ seconds: 1000, nanos: 500 });
+    expect(tsval.importFrom({ seconds: 2000, nanos: 300 })).toBeTrue();
     expect(tsval.val).toEqual(new Timestamp(2000, 300));
   });
 
@@ -312,15 +311,15 @@ describe('value test', () => {
       const toggle = (test.toggle !== undefined) ? test.toggle : true;
       const replace = (test.replace !== undefined) ? test.replace : false;
       expect(test.target.fold(test.other, toggle, replace))
-          .withContext(`testcase ${idx}`)
-          .toBeTrue();
+        .withContext(`testcase ${idx}`)
+        .toBeTrue();
       // if target includes final and final includes target, they're equal.
       expect(test.target.includes(test.final))
-          .withContext(`testcase ${idx}`)
-          .toBeTrue();
+        .withContext(`testcase ${idx}`)
+        .toBeTrue();
       expect(test.final.includes(test.target))
-          .withContext(`testcase ${idx}`)
-          .toBeTrue();
+        .withContext(`testcase ${idx}`)
+        .toBeTrue();
     }
   });
 
@@ -426,7 +425,7 @@ describe('value test', () => {
     });
     timestamp.val = new Timestamp(2000, 0);
     timestamp.val = new Timestamp(2000, 0),
-    timestamp.val = new Timestamp(3000, 0);
+      timestamp.val = new Timestamp(3000, 0);
     expect(tsVals).toEqual([
       new Timestamp(1000, 0),
       new Timestamp(2000, 0),
@@ -450,12 +449,12 @@ describe('value test', () => {
   it('compares properly', () => {
     expect(strSet('a', 'b', 'c').compare(str('a'))).toBeGreaterThan(0);
     expect(strSet('c', 'b', 'a').compare(strSet('a', 'd', 'b')))
-        .toBeLessThan(0);
+      .toBeLessThan(0);
     expect(strSet('d', 'b', 'a').compare(strSet('a', 'c', 'b')))
-        .toBeGreaterThan(0);
+      .toBeGreaterThan(0);
     expect(strSet('c', 'b', 'a').compare(strs('a', 'd', 'b'))).toBeLessThan(0);
     expect(strSet('d', 'b', 'a').compare(strs('a', 'c', 'b')))
-        .toBeGreaterThan(0);
+      .toBeGreaterThan(0);
     expect(strs('a', 'b', 'c').compare(str('a'))).toBeGreaterThan(0);
     expect(strs('a', 'b', 'c').compare(strs('c', 'b', 'a'))).toBeLessThan(0);
     expect(strs('a').compare(strs('a', 'c', 'b'))).toBeLessThan(0);
@@ -477,16 +476,16 @@ describe('value test', () => {
     expect(dbl(0.5).compare(dbl(.5))).toBe(0);
     expect(dbl(1.5).compare(dbl(1))).toBeGreaterThan(0);
     expect(dur(new Duration(0)).compare(dur(new Duration(1000))))
-        .toBeLessThan(0);
+      .toBeLessThan(0);
     expect(dur(new Duration(1000)).compare(dur(new Duration(1000)))).toBe(0);
     expect(dur(new Duration(2000)).compare(dur(new Duration(1000))))
-        .toBeGreaterThan(0);
+      .toBeGreaterThan(0);
     expect(ts(new Timestamp(1000, 0)).compare(ts(new Timestamp(2000, 1000))))
-        .toBeLessThan(0);
+      .toBeLessThan(0);
     expect(ts(new Timestamp(1000, 1000)).compare(ts(new Timestamp(1000, 1000))))
-        .toBe(0);
+      .toBe(0);
     expect(ts(new Timestamp(1000, 2000)).compare(ts(new Timestamp(0, 1000))))
-        .toBeGreaterThan(0);
+      .toBeGreaterThan(0);
 
     expect(str('a').compare(strs('a', 'b'))).not.toBe(0);
     expect(str('a').compare(strSet('a', 'b'))).not.toBe(0);
@@ -546,7 +545,7 @@ describe('value test', () => {
     expect(dur(new Duration(1000)).compare(intSet(1, 2))).not.toBe(0);
     expect(dur(new Duration(1000)).compare(dbl(1.5))).not.toBe(0);
     expect(dur(new Duration(1000)).compare(ts(new Timestamp(1000, 1000))))
-        .not.toBe(0);
+      .not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(str('a'))).not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(strs('a', 'b'))).not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(strSet('a', 'b'))).not.toBe(0);
@@ -555,6 +554,6 @@ describe('value test', () => {
     expect(ts(new Timestamp(1000, 1000)).compare(intSet(1, 2))).not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(dbl(1.5))).not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(dur(new Duration(1000))))
-        .not.toBe(0);
+      .not.toBe(0);
   });
 });

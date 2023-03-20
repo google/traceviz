@@ -13,24 +13,24 @@
 
 import 'jasmine';
 
-import {Value} from './value.js';
-import {int, strs, str, ints, dbl, dur, ts, st, valueMap} from './test_value.js';
-import {ValueMap} from './value_map.js';
-import {Duration} from '../duration/duration.js';
-import {Timestamp} from '../timestamp/timestamp.js';
+import { Value } from './value.js';
+import { int, strs, str, ints, dbl, dur, ts, valueMap } from './test_value.js';
+import { ValueMap } from './value_map.js';
+import { Duration } from '../duration/duration.js';
+import { Timestamp } from '../timestamp/timestamp.js';
 
 describe('value map test', () => {
   it('constructs from object with stridx keys', () => {
     const vm = new ValueMap(
-        [
-          [0, [2, 7]], [1, [4, [7, 8]]], [2, [5, 100]],
-          [3, [6, [50, 150, 250]]], [4, [7, 3.14159]], [5, [8, 150000000]],
-          [6, [9, [500, 100]]]
-        ],
-        [
-          'stridx', 'stridxs', 'int', 'ints', 'dbl', 'dur', 'ts', 'hello',
-          'goodbye'
-        ]);
+      [
+        [0, [2, 7]], [1, [4, [7, 8]]], [2, [5, 100]],
+        [3, [6, [50, 150, 250]]], [4, [7, 3.14159]], [5, [8, 150000000]],
+        [6, [9, [500, 100]]]
+      ],
+      [
+        'stridx', 'stridxs', 'int', 'ints', 'dbl', 'dur', 'ts', 'hello',
+        'goodbye'
+      ]);
     expect([...(vm.entries())]).toEqual([
       ['stridx', str('hello')], ['stridxs', strs('hello', 'goodbye')],
       ['int', int(100)], ['ints', ints(50, 150, 250)], ['dbl', dbl(3.14159)],
@@ -62,15 +62,15 @@ describe('value map test', () => {
       ['publication_year', int(1865)]
     ]));
     const fmtStr =
-        `Let's look at '$(title)', a $(type) published by $(author) in $(publication_year).`;
+      `Let's look at '$(title)', a $(type) published by $(author) in $(publication_year).`;
     expect(vm.format(fmtStr))
-        .toEqual(
-            `Let's look at 'Alice's Adventures in Wonderland', a book published by Lewis Carroll in 1865.`);
+      .toEqual(
+        `Let's look at 'Alice's Adventures in Wonderland', a book published by Lewis Carroll in 1865.`);
   });
 
   it('rejects bad formats', () => {
     for (const badFmt
-             of [`a bare $`, `paren $(problems`, `missing $(variable)`]) {
+      of [`a bare $`, `paren $(problems`, `missing $(variable)`]) {
       expect(() => {
         valueMap().format(badFmt);
       }).toThrow();
@@ -107,8 +107,8 @@ describe('value map test', () => {
     ]));
     // Expect the right serialization
     expect(vm.exportKeyValueMap())
-        .toEqual(
-            {'str': 'a', 'int': 1, 'strs': ['x', 'y', 'z'], 'ints': [7, 8, 9]});
+      .toEqual(
+        { 'str': 'a', 'int': 1, 'strs': ['x', 'y', 'z'], 'ints': [7, 8, 9] });
     // Expect working unserialization
     const vm2 = new ValueMap(new Map<string, Value>([
       ['str', str('b')],
@@ -123,33 +123,33 @@ describe('value map test', () => {
     expect(vm2.expectIntegerList('ints')).toEqual([7, 8, 9]);
     // Expect a missing key to fail
     expect(() => {
-      vm.updateFromExportedKeyValueMap({'absent': 100});
+      vm.updateFromExportedKeyValueMap({ 'absent': 100 });
     }).toThrow();
     // Expect a failure to unserialize a value
     expect(() => {
-      vm.updateFromExportedKeyValueMap({'str': [1, 2, 3]});
+      vm.updateFromExportedKeyValueMap({ 'str': [1, 2, 3] });
     }).toThrow();
   });
 
   it('removes properties via without()', () => {
     expect((new ValueMap(new Map<string, Value>([
-             ['str', str('b')],
-             ['int', int(3)],
-             ['strs', strs('l', 'm', 'n', 'o', 'p')],
-             ['ints', ints(1000, 2000, 3000)],
-           ]))).without('str', 'strs', 'foos'))
-        .toEqual(new ValueMap(new Map<string, Value>([
-          ['int', int(3)],
-          ['ints', ints(1000, 2000, 3000)],
-        ])));
+      ['str', str('b')],
+      ['int', int(3)],
+      ['strs', strs('l', 'm', 'n', 'o', 'p')],
+      ['ints', ints(1000, 2000, 3000)],
+    ]))).without('str', 'strs', 'foos'))
+      .toEqual(new ValueMap(new Map<string, Value>([
+        ['int', int(3)],
+        ['ints', ints(1000, 2000, 3000)],
+      ])));
   });
 
   it('watches properly', () => {
     const i = int(1);
     const s = str('hello');
     const vm = valueMap(
-        {key: 'foo', val: i},
-        {key: 'bar', val: s},
+      { key: 'foo', val: i },
+      { key: 'bar', val: s },
     );
     const obs = vm.watch();
     let updates = 0;
@@ -167,34 +167,34 @@ describe('value map test', () => {
 
   it('unions properly', () => {
     expect(ValueMap.union(
-               valueMap(
-                   {key: 'foo', val: int(1)},
-                   {key: 'bar', val: str('hello')},
-                   ),
-               valueMap(
-                   {key: 'foo', val: int(1)},
-                   {key: 'baz', val: ints(1, 2, 3)},
-                   ),
-               valueMap(
-                   {key: 'baz', val: ints(1, 2, 3)},
-                   {key: 'bar', val: str('hello')},
-                   ),
-               ))
-        .toEqual(valueMap(
-            {key: 'foo', val: int(1)},
-            {key: 'bar', val: str('hello')},
-            {key: 'baz', val: ints(1, 2, 3)},
-            ));
+      valueMap(
+        { key: 'foo', val: int(1) },
+        { key: 'bar', val: str('hello') },
+      ),
+      valueMap(
+        { key: 'foo', val: int(1) },
+        { key: 'baz', val: ints(1, 2, 3) },
+      ),
+      valueMap(
+        { key: 'baz', val: ints(1, 2, 3) },
+        { key: 'bar', val: str('hello') },
+      ),
+    ))
+      .toEqual(valueMap(
+        { key: 'foo', val: int(1) },
+        { key: 'bar', val: str('hello') },
+        { key: 'baz', val: ints(1, 2, 3) },
+      ));
     expect(() => {
       ValueMap.union(
-          valueMap(
-              {key: 'foo', val: int(1)},
-              {key: 'bar', val: str('hello')},
-              ),
-          valueMap(
-              {key: 'foo', val: int(2)},
-              {key: 'baz', val: ints(1, 2, 3)},
-              ),
+        valueMap(
+          { key: 'foo', val: int(1) },
+          { key: 'bar', val: str('hello') },
+        ),
+        valueMap(
+          { key: 'foo', val: int(2) },
+          { key: 'baz', val: ints(1, 2, 3) },
+        ),
       );
     }).toThrow();
   });

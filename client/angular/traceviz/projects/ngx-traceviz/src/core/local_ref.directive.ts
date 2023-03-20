@@ -19,7 +19,7 @@ import { Directive, forwardRef, Input } from '@angular/core';
 import { ConfigurationError, Severity } from 'traceviz-client-core';
 import { Value } from 'traceviz-client-core';
 import { ValueMap } from 'traceviz-client-core';
-import { ValueDirective } from './literal_value.directive';
+import { ValueDirective } from './value.directive';
 
 const SOURCE = 'local_ref.directive';
 

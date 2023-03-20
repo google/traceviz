@@ -11,17 +11,17 @@
         limitations under the License.
 */
 
-/**
+/** 
  * @fileoverview A set of tools for working with references to Values.
  */
 
-import {Value} from './value.js';
-import {ValueMap} from './value_map.js';
+import { Value } from './value.js';
+import { ValueMap } from './value_map.js';
 
 /** A reference to a Value. */
 export interface ValueRef {
-    get(localState: ValueMap | undefined): Value | undefined;
-    label(): string;
+  get(localState: ValueMap | undefined): Value | undefined;
+  label(): string;
 }
 
 /**
@@ -39,7 +39,7 @@ export class LocalValue implements ValueRef {
       return undefined;
     }
     return localState.get(this.key);
-  } 
+  }
 
   label(): string {
     return `local value '${this.key}'`;

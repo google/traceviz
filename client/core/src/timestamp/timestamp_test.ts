@@ -13,8 +13,8 @@
 
 import 'jasmine';
 
-import {Timestamp} from './timestamp.js';
-import {Duration} from '../duration/duration.js';
+import { Timestamp } from './timestamp.js';
+import { Duration } from '../duration/duration.js';
 
 describe('timestamp test', () => {
   it('converts to a Date', () => {

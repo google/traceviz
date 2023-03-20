@@ -11,12 +11,12 @@
         limitations under the License.
 */
 
+import { DoubleValue, DurationValue, ExportedValue, fromV, IntegerListValue, IntegerValue, StringListValue, StringTableBuilder, StringValue, TimestampValue, V, Value } from './value.js';
 import { Duration } from '../duration/duration.js';
 import { ConfigurationError, Severity } from '../errors/errors.js';
 import { Timestamp } from '../timestamp/timestamp.js';
-import { DoubleValue, DurationValue, ExportedValue, fromV, IntegerListValue, IntegerValue, StringListValue, StringTableBuilder, StringValue, TimestampValue, V, Value } from './value.js';
 import { merge, Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 const SOURCE = 'value_map';
 

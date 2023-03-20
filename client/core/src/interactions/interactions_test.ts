@@ -13,13 +13,13 @@
 
 import 'jasmine';
 
+import { Action, And, Clear, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Toggle, Update, Watch } from './interactions.js';
 import { prettyPrintDocumenter } from '../documentation/test_documentation.js';
 import { int, intSet, str, strs, strSet, valueMap } from '../value/test_value.js';
 import { IntegerValue } from '../value/value.js';
 import { ValueMap } from '../value/value_map.js';
 import { ValueRef } from '../value/value_reference.js';
 import { LocalValue, FixedValue } from '../value/value_reference.js';
-import { Action, And, Clear, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Toggle, Update, Watch } from './interactions.js';
 
 describe('interactions test', () => {
     it('clears fixed values', () => {
@@ -188,9 +188,9 @@ describe('interactions test', () => {
             { key: 'highlightedStartOffset', val: highlightedStartOffset },
             { key: 'highlightedEndOffset', val: highlightedEndOffset },
         );
-        const w = new Watch('highlight range', vm);
+        const w = new Watch('highlight range');
         const tickerTape: string[][] = [];
-        const sub = w.watch((vm: ValueMap) => {
+        const sub = w.watch(vm, (vm: ValueMap) => {
             tickerTape.push(
                 Array.from(vm.keys()).map((key) =>
                     `${key}: ${vm.get(key).toString()}`));
@@ -260,7 +260,7 @@ describe('interactions test', () => {
             .withAction(bumpWeightOnClick)
             .withReaction(new Reaction('series', 'highlight', new Includes(labelsRef, labelRef)))
             .withReaction(new Reaction('graph', 'show info', boundsChecker))
-            .withWatch(new Watch('highlight timerange', timerangeVM));
+            .withWatch(new Watch('highlight timerange'));
 
         // Confirm self-documentation
         expect(prettyPrintDocumenter(interactions).join('\n')).toEqual(`Interactions (Interactions)
@@ -277,7 +277,7 @@ describe('interactions test', () => {
         NOT (Predicate)
           when local value 'weight' == value 'forbidden' (Predicate)
       when value 'allowed' includes local value 'weight' (Predicate)
-  Trigger 'highlight timerange' on changes to [highlightedStartOffset, highlightedEndOffset] (Watch)`);
+  Trigger 'highlight timerange' on changes to arguments (Watch)`);
 
         // Confirm interactions
         const label = str('thing');

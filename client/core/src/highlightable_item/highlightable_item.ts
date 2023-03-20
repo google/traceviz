@@ -11,11 +11,11 @@
         limitations under the License.
 */
 
-import {ResponseNode} from '../protocol/response_interface.js';
-import {MatchFn} from '../interactions/interactions.js';
-import {ValueMap} from '../value/value_map.js';
-import {Subject} from 'rxjs';
-import {distinctUntilChanged, takeUntil} from 'rxjs/operators';
+import { ResponseNode } from '../protocol/response_interface.js';
+import { MatchFn } from '../interactions/interactions.js';
+import { ValueMap } from '../value/value_map.js';
+import { Subject } from 'rxjs';
+import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 /** A ResponseNode capable of being highlighted or called-out in the UI. */
 export class HighlightableItem implements ResponseNode {
@@ -25,9 +25,9 @@ export class HighlightableItem implements ResponseNode {
   highlighted: boolean = false;
 
   constructor(
-      node: ResponseNode,
-      childFn: (node: ResponseNode) => HighlightableItem |
-          undefined = (node) => new HighlightableItem(node)) {
+    node: ResponseNode,
+    childFn: (node: ResponseNode) => HighlightableItem |
+      undefined = (node) => new HighlightableItem(node)) {
     this.properties = node.properties;
     for (const childNode of node.children) {
       const child = childFn(childNode);
@@ -38,16 +38,16 @@ export class HighlightableItem implements ResponseNode {
   }
 
   highlightOn(
-      getMatch: (item: HighlightableItem) => MatchFn | undefined,
-      onChange: (item: HighlightableItem) => void = () => {}) {
+    getMatch: (item: HighlightableItem) => MatchFn | undefined,
+    onChange: (item: HighlightableItem) => void = () => { }) {
     const match = getMatch(this);
     if (match) {
       match(this.properties)
-          .pipe(takeUntil(this.highlightUnsubscribe), distinctUntilChanged())
-          .subscribe((matched) => {
-            this.highlighted = matched;
-            onChange(this);
-          });
+        .pipe(takeUntil(this.highlightUnsubscribe), distinctUntilChanged())
+        .subscribe((matched) => {
+          this.highlighted = matched;
+          onChange(this);
+        });
     }
     for (const child of this.children) {
       child.highlightOn(getMatch, onChange);

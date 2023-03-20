@@ -16,6 +16,7 @@ export * from './duration/duration.js';
 export * from './errors/errors.js';
 export * from './global_state/global_state.js';
 export * from './global_state/global_state_interface.js';
+export * from './interactions/interactions.js';
 export * from './protocol/json_request.js';
 export * from './protocol/json_response.js';
 export * from './protocol/request_interface.js';

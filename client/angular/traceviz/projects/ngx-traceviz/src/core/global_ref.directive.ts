@@ -18,7 +18,7 @@
 import { AppCoreService } from '../app_core_service/app_core.service';
 import { AppCore } from 'traceviz-client-core';
 import { AfterContentInit, Directive, Input, forwardRef } from '@angular/core';
-import { ValueDirective } from './literal_value.directive';
+import { ValueDirective } from './value.directive';
 import { Value, ValueMap } from 'traceviz-client-core';
 import { ConfigurationError, Severity } from 'traceviz-client-core';
 

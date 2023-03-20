@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-import {ValueMap} from '../value/value_map.js';
+import { ValueMap } from '../value/value_map.js';
 
 /** Represents a single node in a server-side response. */
 export interface ResponseNode {

@@ -17,7 +17,7 @@
  */
 
 import { ContentChild, ContentChildren, Directive, Input, QueryList } from '@angular/core';
-import { ValueDirective } from './literal_value.directive';
+import { ValueDirective } from './value.directive';
 import { ConfigurationError, Severity, Value } from 'traceviz-client-core';
 import { ValueMap } from 'traceviz-client-core';
 

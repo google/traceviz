@@ -11,15 +11,14 @@
         limitations under the License.
 */
 
-/**
+/** 
  * @fileoverview Test helpers for building TraceViz Values.
  */
 
-import {Duration} from '../duration/duration.js';
-import {Timestamp} from '../timestamp/timestamp.js';
-
-import {DoubleValue, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringTableBuilder, StringValue, TimestampValue, Value} from './value.js';
-import {ValueMap} from './value_map.js';
+import { DoubleValue, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringTableBuilder, StringValue, TimestampValue, Value } from './value.js';
+import { ValueMap } from './value_map.js';
+import { Duration } from '../duration/duration.js';
+import { Timestamp } from '../timestamp/timestamp.js';
 
 /** Builds a StringValue. */
 export function str(str: string): StringValue {
@@ -110,7 +109,7 @@ export function st(...strs: string[]): StringTableBuilder {
 }
 
 /** Builds a ValueMap from an array of key/value pairs. */
-export function valueMap(...props: Array<{key: string, val: Value}>): ValueMap {
+export function valueMap(...props: Array<{ key: string, val: Value }>): ValueMap {
   const valMap = new Map<string, Value>();
   for (const prop of props) {
     valMap.set(prop.key, prop.val);

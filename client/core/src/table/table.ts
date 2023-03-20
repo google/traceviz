@@ -13,12 +13,12 @@
 
 /** @fileoverview Tools for working with tabular data. */
 
-import {HighlightableItem} from '../highlightable_item/highlightable_item.js';
-import {ResponseNode} from '../protocol/response_interface.js';
-import {ConfigurationError, Severity} from '../errors/errors.js';
-import {EmptyValue, StringValue, Value} from '../value/value.js';
-import {ValueMap} from '../value/value_map.js';
-import {Category, CategorySet, getDefinedCategory} from '../category/category.js';
+import { Category, CategorySet, getDefinedCategory } from '../category/category.js';
+import { ConfigurationError, Severity } from '../errors/errors.js';
+import { HighlightableItem } from '../highlightable_item/highlightable_item.js';
+import { ResponseNode } from '../protocol/response_interface.js';
+import { EmptyValue, StringValue, Value } from '../value/value.js';
+import { ValueMap } from '../value/value_map.js';
 
 const SOURCE = 'table';
 
@@ -47,7 +47,7 @@ export class Cell extends HighlightableItem {
   get value(): Value {
     if (this.properties.has(Keys.FORMATTED_CELL)) {
       return new StringValue(this.properties.format(
-          this.properties.expectString(Keys.FORMATTED_CELL)));
+        this.properties.expectString(Keys.FORMATTED_CELL)));
     }
     if (this.properties.has(Keys.CELL)) {
       return this.properties.get(Keys.CELL);
@@ -59,7 +59,7 @@ export class Cell extends HighlightableItem {
 /** An empty table cell. */
 export class EmptyCell extends Cell {
   constructor(column: Header) {
-    super({properties: new ValueMap(), children: []}, column);
+    super({ properties: new ValueMap(), children: [] }, column);
   }
 
   override get value(): Value {
@@ -81,7 +81,7 @@ export class Row extends HighlightableItem {
         return undefined;
       } else {
         const categorySet =
-            new CategorySet(...columns.map(col => col.category));
+          new CategorySet(...columns.map(col => col.category));
         const cats = categorySet.getTaggedCategories(child.properties);
         if (cats.length === 0) {
           return;
@@ -126,8 +126,8 @@ export class Header {
     const category = getDefinedCategory(this.properties);
     if (!category) {
       throw new ConfigurationError(`Expected a column definition but got none!`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
     this.category = category;
   }
@@ -187,8 +187,8 @@ export class CanonicalTable {
       const col = this.columnsByID.get(columnID);
       if (!col) {
         throw new ConfigurationError(`unknown column ID ${columnID}`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
       }
       ret.push(col);
     }
@@ -198,11 +198,11 @@ export class CanonicalTable {
   rowSlice(startIdx?: number, endIdx?: number): Row[] {
     if (!!endIdx && !!startIdx && endIdx < startIdx) {
       throw new ConfigurationError(
-          `slice range [${startIdx}, ${endIdx}] is invalid`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+        `slice range [${startIdx}, ${endIdx}] is invalid`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
     return this.rowNodes.slice(startIdx, endIdx)
-        .map((row: ResponseNode) => new Row(row, this.columnsList));
+      .map((row: ResponseNode) => new Row(row, this.columnsList));
   }
 }

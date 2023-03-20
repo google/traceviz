@@ -18,20 +18,13 @@
 
 
 import { AfterContentInit, ContentChildren, Directive, ElementRef, forwardRef, Input, QueryList } from '@angular/core';
-import { ConfigurationError, Duration, DurationValue, Severity } from 'traceviz-client-core';
+import { Duration, DurationValue } from 'traceviz-client-core';
 import { Timestamp } from 'traceviz-client-core';
 import { DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value } from 'traceviz-client-core';
-import { ValueRef } from 'traceviz-client-core';
 import { ValueMap } from 'traceviz-client-core';
+import { ValueDirective } from './value.directive';
 
 const SOURCE = 'value.directives';
-
-/** A base class for directives specifying Values. */
-export abstract class ValueDirective implements ValueRef {
-  abstract get(
-    localState: ValueMap | undefined): Value | undefined;
-  abstract label(): string;
-}
 
 /** An EmptyValue literal in a TraceViz template. */
 @Directive({

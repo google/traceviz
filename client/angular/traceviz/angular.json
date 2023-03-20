@@ -125,6 +125,12 @@
             ],
             "scripts": []
           }
+        },
+        "analyze": {
+          "builder": "@ngx-builders/analyze:analyze",
+          "options": {
+            "outputPath": "dist/traceviz-testing"
+          }
         }
       }
     }

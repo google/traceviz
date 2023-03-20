@@ -15,7 +15,7 @@
  * @fileoverview A type representing a fine-granularity trace timestamp.
  */
 
-import {Duration} from '../duration/duration.js';
+import { Duration } from '../duration/duration.js';
 
 const NANOS_PER_SECOND = 1000000000.0;
 
@@ -41,8 +41,8 @@ export class Timestamp {
 
   sub(other: Timestamp): Duration {
     return new Duration(
-        (this.seconds - other.seconds) * NANOS_PER_SECOND + this.nanos -
-        other.nanos);
+      (this.seconds - other.seconds) * NANOS_PER_SECOND + this.nanos -
+      other.nanos);
   }
 
   /**
