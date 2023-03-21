@@ -1,5 +1,5 @@
 /*
- * Public API Surface of ngx-traceviz
+ * Public API Surface of ngx-traceviz-lib
  */
 
 export * from './app_core_service/app_core.service';

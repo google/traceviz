@@ -1,10 +1,10 @@
 {
-  "name": "ngx-traceviz",
+  "name": "ngx-traceviz-lib",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^15.2.0",
-    "@angular/core": "^15.2.3",
-    "traceviz-client-core": "file:../../../../core"
+    "@angular/core": "^15.2.0",
+    "traceviz-client-core": "file:../../../../../../../traceviz/client/core"
   },
   "dependencies": {
     "tslib": "^2.3.0"
