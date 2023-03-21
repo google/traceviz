@@ -12,6 +12,8 @@
 */
 
 export * from './app_core/app_core.js';
+export * from './data_query/data_query.js';
+export * from './data_series_query/data_series_query.js';
 export * from './duration/duration.js';
 export * from './errors/errors.js';
 export * from './global_state/global_state.js';
