@@ -18,15 +18,17 @@ import { AppCoreService } from '../app_core_service/app_core.service';
 import { InteractionsDirective } from './interactions.directive';
 import { IntegerValue, Interactions } from 'traceviz-client-core';
 import { CoreModule } from './core.module';
+import { TestCoreModule } from './test_core.module';
 
 @Component({
-    template: `
+  template: `
   <app-core>
     <global-state>
       <value-map>
         <value key="counter"><int>0</int></value>
       </value-map>
     </global-state>
+    <test-data-query></test-data-query>
   </app-core>
   <interactions>
     <action target="counter" type="reset">
@@ -60,62 +62,61 @@ import { CoreModule } from './core.module';
 `
 })
 class InteractionsTestComponent {
-    @ViewChild(AppCoreDirective) appCoreDir!: AppCoreDirective;
-    @ViewChild(InteractionsDirective) interactionsDir!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCoreDir!: AppCoreDirective;
+  @ViewChild(InteractionsDirective) interactionsDir!: InteractionsDirective;
 }
 
 describe('interactions directive test', () => {
-    let fixture: ComponentFixture<InteractionsTestComponent>;
-    const appCoreService = new AppCoreService();
+  let fixture: ComponentFixture<InteractionsTestComponent>;
+  const appCoreService = new AppCoreService();
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            declarations: [InteractionsTestComponent],
-            imports: [CoreModule],
-            providers: [{
-                provide: AppCoreService,
-                useValue: appCoreService,
-            }]
-        })
-        fixture = TestBed.createComponent(InteractionsTestComponent);
-    });
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [InteractionsTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    })
+    fixture = TestBed.createComponent(InteractionsTestComponent);
+  });
 
-    it('handles interactions', () => {
-        fixture.detectChanges();
-        const tc = fixture.componentInstance;
-        let interactions: Interactions | undefined;
-        expect(() => {
-            interactions = tc.interactionsDir.get();
-        }).not.toThrow();
-        const counter = tc.appCoreDir.appCoreService.appCore.globalState.get('counter') as IntegerValue;
-        const bolded: string[] = [];
-        interactions!.match('counter', 'bold')().subscribe(
-            (bold: boolean) => {
-                bolded.push(`bold: ${bold} at ${counter.val}`);
-            });
-        const bump = () => {
-            counter.val = counter.val + 1;
-            console.log(`bumped to ${counter.val}`);
-        };
-        // Bump the counter 12 times, to 12.
-        for (let i = 0; i < 12; i++) {
-            bump();
-        }
-        expect(counter.val).toEqual(12);
-        // Perform the 'reset' interaction, resetting counter to 0.
-        interactions!.update('counter', 'reset');
-        expect(counter.val).toEqual(0);
-        // Expect to start unbolded, go bolded at 6, unbold at 7,
-        // bold at 8, unbold at 10 bold at 12, and unbold for 0.
-        expect(bolded).toEqual([
-            "bold: false at 0",
-            "bold: true at 6",
-            "bold: false at 7",
-            "bold: true at 8",
-            "bold: false at 10",
-            "bold: true at 12",
-            "bold: false at 0",
-        ]);
-    });
+  it('handles interactions', () => {
+    fixture.detectChanges();
+    const tc = fixture.componentInstance;
+    let interactions: Interactions | undefined;
+    expect(() => {
+      interactions = tc.interactionsDir.get();
+    }).not.toThrow();
+    const counter = tc.appCoreDir.appCoreService.appCore.globalState.get('counter') as IntegerValue;
+    const bolded: string[] = [];
+    interactions!.match('counter', 'bold')().subscribe(
+      (bold: boolean) => {
+        bolded.push(`bold: ${bold} at ${counter.val}`);
+      });
+    const bump = () => {
+      counter.val = counter.val + 1;
+    };
+    // Bump the counter 12 times, to 12.
+    for (let i = 0; i < 12; i++) {
+      bump();
+    }
+    expect(counter.val).toEqual(12);
+    // Perform the 'reset' interaction, resetting counter to 0.
+    interactions!.update('counter', 'reset');
+    expect(counter.val).toEqual(0);
+    // Expect to start unbolded, go bolded at 6, unbold at 7,
+    // bold at 8, unbold at 10 bold at 12, and unbold for 0.
+    expect(bolded).toEqual([
+      "bold: false at 0",
+      "bold: true at 6",
+      "bold: false at 7",
+      "bold: true at 8",
+      "bold: false at 10",
+      "bold: true at 12",
+      "bold: false at 0",
+    ]);
+  });
 });
 

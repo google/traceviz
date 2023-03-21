@@ -16,8 +16,8 @@
  * functions converting them to standard frontend Responses.
  */
 
-import { KV, ValueMap } from '../value/value_map.js';
 import { Response, ResponseNode } from './response_interface.js';
+import { KV, ValueMap } from '../value/value_map.js';
 
 type Datum = [
   KV[],

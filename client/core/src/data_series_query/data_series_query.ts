@@ -13,7 +13,7 @@
 
 /**
  * @fileoverview Defines a class mediating a single TraceViz data series
- * request.
+ * request. 
  */
 
 import { BehaviorSubject, combineLatest, filter, Observable, Subject, takeUntil } from "rxjs";
@@ -71,8 +71,8 @@ export class DataSeriesQuery {
   readonly uniqueSeriesName: string;
 
   constructor(
-      readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
-      readonly parameters: ValueMap, fetch: Observable<boolean>) {
+    readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
+    readonly parameters: ValueMap, fetch: Observable<boolean>) {
     this.uniqueSeriesName = getUniqueSeriesName();
     const onChange: Value[] = [queryName];
     for (const value of parameters.values()) {
@@ -81,10 +81,10 @@ export class DataSeriesQuery {
     // On a change to the query name or any parameter, and the 'fetch' reaction
     // is true, fetch the series.
     combineLatest([fetch, ...onChange])
-        .pipe(filter(v => (v[0] as boolean)), takeUntil(this.unsubscribe))
-        .subscribe(() => {
-          this.fetch();
-        });
+      .pipe(filter(v => (v[0] as boolean)), takeUntil(this.unsubscribe))
+      .subscribe(() => {
+        this.fetch();
+      });
   }
 
   private fetch() {
@@ -96,16 +96,16 @@ export class DataSeriesQuery {
     // Publish the fact that a query is pending.
     this.loading.next(true);
     this.dataQuery.fetchDataSeries(
-        req,
-        (resp: ResponseNode) => {
-            // Upon receiving the response, broadcast the response and publish
-          // the fact that no query is pending.
-          this.response.next(resp);
-          this.loading.next(false);
-        },
-        () => {
-            this.loading.next(false);
-        });
+      req,
+      (resp: ResponseNode) => {
+        // Upon receiving the response, broadcast the response and publish
+        // the fact that no query is pending.
+        this.response.next(resp);
+        this.loading.next(false);
+      },
+      () => {
+        this.loading.next(false);
+      });
   }
 
   dispose() {

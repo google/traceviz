@@ -12,15 +12,15 @@
 */
 import 'jasmine';
 
-import {Request} from '../protocol/request_interface.js';
-import {Response} from '../protocol/response_interface.js';
-import {Observable, throwError} from 'rxjs';
+import { Request } from '../protocol/request_interface.js';
+import { Response } from '../protocol/response_interface.js';
+import { Observable, throwError } from 'rxjs';
 import { DataFetcherInterface } from './data_fetcher_interface.js';
 
 /** Implements DataFetcher for fake data. */
 export class TestDataFetcher implements DataFetcherInterface {
   // expectReq should equal incoming DataRequests.
-  expectReq: Request|undefined;
+  expectReq: Request | undefined;
   // onFetch should be returned upon a fetch.
   onFetch: Observable<Response> = throwError(() => new Error(`undefined`));
 
@@ -29,7 +29,7 @@ export class TestDataFetcher implements DataFetcherInterface {
       expect(this.expectReq).toBeDefined();
       const sortSeriesRequests = (req: Request) => {
         req.seriesRequests.sort(
-            (a, b) => (a.seriesName < b.seriesName) ? -1 : 1);
+          (a, b) => (a.seriesName < b.seriesName) ? -1 : 1);
       };
       sortSeriesRequests(req);
       sortSeriesRequests(this.expectReq);

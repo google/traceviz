@@ -13,28 +13,28 @@
 
 import 'jasmine';
 import { DataSeriesFetcher } from './data_series_fetcher.js';
-import {SeriesRequest} from '../protocol/request_interface.js';
-import {ResponseNode} from '../protocol/response_interface.js';
+import { SeriesRequest } from '../protocol/request_interface.js';
+import { ResponseNode } from '../protocol/response_interface.js';
 import { int, str, valueMap } from '../value/test_value.js';
-import { BehaviorSubject, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { DataSeriesQuery } from './data_series_query.js';
-import {IntegerValue} from '../value/value.js';
+import { IntegerValue } from '../value/value.js';
 import { node } from '../protocol/test_response.js';
 
 class TestFetcher implements DataSeriesFetcher {
   // If specified, the series request we next want to see fetched.
-  wantReq: SeriesRequest|undefined;
+  wantReq: SeriesRequest | undefined;
   // The onResponse callback provided with the most recent fetchDataSeries
   // call.
-  onResponse: (resp: ResponseNode) => void = () => {};
+  onResponse: (resp: ResponseNode) => void = () => { };
 
   fetchDataSeries(req: SeriesRequest, onResponse: (resp: ResponseNode) => void):
-      void {
+    void {
     if (this.wantReq !== undefined) {
       expect(this.wantReq.queryName).toEqual(req.queryName);
       expect(this.wantReq.seriesName).toEqual(req.seriesName);
       expect(this.wantReq.parameters.entries())
-          .toEqual(req.parameters.entries());
+        .toEqual(req.parameters.entries());
     }
     this.onResponse = onResponse;
   }
@@ -46,7 +46,7 @@ describe('data series query test', () => {
   const param1 = int(1);
   const param2 = str('hello');
   const parameters =
-      valueMap({key: 'count', val: param1}, {key: 'greetings', val: param2});
+    valueMap({ key: 'count', val: param1 }, { key: 'greetings', val: param2 });
   let fetch = new BehaviorSubject<boolean>(true);
   const dsq = new DataSeriesQuery(fdq, queryName, parameters, fetch);
   // An empty ResponseNode to send back.  Its contents are unimportant.
@@ -57,24 +57,24 @@ describe('data series query test', () => {
   // The last value of dsq.response's update.
   let responses: ResponseNode[] = [];
 
-    // Track the ups and downs of dsq.loading.
-    dsq.loading.pipe().subscribe((loading: boolean) => {
-        loadingHistory += loading ? 't' : 'f';
-    });
-    // Also track the number of times response has updated, and its last update
-    // value.
-    dsq.response.subscribe((response: ResponseNode) => {
-      responses.push(response);
-    });
+  // Track the ups and downs of dsq.loading.
+  dsq.loading.pipe().subscribe((loading: boolean) => {
+    loadingHistory += loading ? 't' : 'f';
+  });
+  // Also track the number of times response has updated, and its last update
+  // value.
+  dsq.response.subscribe((response: ResponseNode) => {
+    responses.push(response);
+  });
 
-    beforeEach(() => {
-        fdq.wantReq = {
-            queryName: 'query',
-            seriesName: dsq.uniqueSeriesName,
-            parameters,
-          };
-          queryName.val = 'query';
-        responses = [];
+  beforeEach(() => {
+    fdq.wantReq = {
+      queryName: 'query',
+      seriesName: dsq.uniqueSeriesName,
+      parameters,
+    };
+    queryName.val = 'query';
+    responses = [];
     loadingHistory = '';
     fetch.next(true);
   });
@@ -101,7 +101,7 @@ describe('data series query test', () => {
       queryName: 'query',
       seriesName: dsq.uniqueSeriesName,
       parameters: valueMap(
-          {key: 'count', val: int(2)}, {key: 'greetings', val: str('hello')}),
+        { key: 'count', val: int(2) }, { key: 'greetings', val: str('hello') }),
     };
     (parameters.get('count') as IntegerValue).val++;
     expect(loadingHistory).toEqual('tft');

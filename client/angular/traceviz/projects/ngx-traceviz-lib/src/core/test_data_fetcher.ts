@@ -12,17 +12,19 @@
 */
 
 /**
- * @fileoverview Defines an interface for types providing backend fetch services.
+ * @fileoverview An override of HttpDataFetcher for testing.
  */
 
-import { Request } from '../protocol/request_interface.js';
-import { Response } from '../protocol/response_interface.js';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { Request, Response } from 'traceviz-client-core';
+import { DataFetcherInterface } from 'traceviz-client-core/src/data_query/data_fetcher_interface';
 
-/**
- * Implemented by data fetchers that accept a Request and return a subscribable
- * Response.
- */
-export interface DataFetcherInterface {
-        fetch(req: Request): Observable<Response>;
-}  
+export class TestDataFetcher implements DataFetcherInterface {
+    requestChannel = new Subject<Request>();
+    responseChannel = new Subject<Response>();
+
+    fetch(req: Request): Observable<Response> {
+        this.requestChannel.next(req);
+        return this.responseChannel;
+    }
+}

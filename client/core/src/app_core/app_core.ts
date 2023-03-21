@@ -11,12 +11,14 @@
         limitations under the License.
 */
 
+import { DataQuery } from '../data_query/data_query.js';
 import { ConfigurationError } from '../errors/errors.js';
 import { GlobalState } from '../global_state/global_state.js';
 import { ReplaySubject } from 'rxjs';
 
 export class AppCore {
     readonly configurationErrors = new ReplaySubject<ConfigurationError>(1);
+    readonly dataQuery = new DataQuery();
     readonly globalState = new GlobalState();
 
     private published = false;

@@ -15,24 +15,31 @@
  * @fileoverview A directive defining an app's global state.
  */
 
-import { ContentChild, Directive } from '@angular/core';
+import { AfterContentInit, ContentChild, Directive } from '@angular/core';
 import { ValueMapDirective } from './value_map.directive';
 import { AppCore, ConfigurationError, Severity } from 'traceviz-client-core';
+import { AppCoreService } from '../app_core_service/app_core.service';
 
 const SOURCE = 'global_state.directive';
 
 @Directive({ selector: 'global-state' })
-export class GlobalStateDirective {
+export class GlobalStateDirective implements AfterContentInit {
     @ContentChild(ValueMapDirective) values: ValueMapDirective | undefined;
 
-    populate(appCore: AppCore) {
-        if (this.values === undefined) {
-            throw new ConfigurationError('global-state lacks a value-map')
-                .from(SOURCE)
-                .at(Severity.FATAL);
-        }
-        for (const [key, value] of this.values.getValueMap().entries()) {
-            appCore.globalState.set(key, value);
-        }
+    constructor(
+        private readonly appCoreService: AppCoreService) { }
+
+    ngAfterContentInit(): void {
+        this.appCoreService.appCore.onPublish((appCore: AppCore) => {
+            if (this.values === undefined) {
+                throw new ConfigurationError('global-state lacks a value-map')
+                    .from(SOURCE)
+                    .at(Severity.FATAL);
+            }
+            for (const [key, value] of this.values.getValueMap().entries()) {
+                appCore.globalState.set(key, value);
+            }
+            this.values = undefined;
+        });
     }
 }

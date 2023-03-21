@@ -15,16 +15,16 @@
  * @fileoverview Defines a class mediating all TraceViz data series requests.
  */
 
-import { debounce, sample, Subject, timer} from 'rxjs';
-import {Request, SeriesRequest} from '../protocol/request_interface.js';
-import {ResponseNode} from '../protocol/response_interface.js';
-import {ConfigurationError, Severity} from '../errors/errors.js';
+import { debounce, sample, Subject, timer } from 'rxjs';
+import { Request, SeriesRequest } from '../protocol/request_interface.js';
+import { ResponseNode } from '../protocol/response_interface.js';
+import { ConfigurationError, Severity } from '../errors/errors.js';
 import { ValueMap } from '../value/value_map.js';
 import { DataFetcherInterface } from './data_fetcher_interface.js';
 import { DataSeriesFetcher } from '../data_series_query/data_series_fetcher.js';
 
 const SOURCE = 'data_query';
- 
+
 interface PendingQuery {
   req: SeriesRequest;
   onResponse: (resp: ResponseNode) => void;
@@ -40,7 +40,7 @@ interface PendingQuery {
  * all batched DataSeriesRequests.  Upon the response, DataQuery invokes the
  * provided callbacks for each registered DataSeriesRequest.
  */
-export class DataQuery implements DataSeriesFetcher{
+export class DataQuery implements DataSeriesFetcher {
   // updateRequested is advanced whenever an update has been requested.
   protected updateRequested = new Subject<null>();
   // globalFilters is a key/Value mapping provided with DataRequests.
@@ -50,7 +50,7 @@ export class DataQuery implements DataSeriesFetcher{
   // DataSeriesRequestProto and the response callback is stored.
   private pendingQueriesBySeriesName = new Map<string, PendingQuery>();
 
-  private fetcher: DataFetcherInterface|undefined;
+  private fetcher: DataFetcherInterface | undefined;
 
   connect(fetcher: DataFetcherInterface) {
     this.fetcher = fetcher;
@@ -66,9 +66,9 @@ export class DataQuery implements DataSeriesFetcher{
     // new fetch, as long as at least one series wants an update.  Just before
     // the fetch, the set of ready series names is cleared.
     this.updateRequested.pipe(debounce(() => timer(debounceMs)))
-        .subscribe(() => {
-          this.issueQuery();
-        });
+      .subscribe(() => {
+        this.issueQuery();
+      });
   }
 
   // Issues updates each time the returned callback is invoked.  For testing
@@ -84,15 +84,15 @@ export class DataQuery implements DataSeriesFetcher{
   }
 
   fetchDataSeries(
-      req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
-      cancel: () => void) {
+    req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
+    cancel: () => void) {
     const seriesName = req.seriesName;
     if (seriesName === undefined) {
       throw new Error(`DataSeriesRequest lacks required series name`);
     }
     // Place this requet in the set of pending queries, overwriting any already
     // present for this series.
-    this.pendingQueriesBySeriesName.set(seriesName, {req, onResponse, cancel});
+    this.pendingQueriesBySeriesName.set(seriesName, { req, onResponse, cancel });
     // Bump this.updateRequested for debouncing.
     this.updateRequested.next(null);
   }
@@ -112,26 +112,26 @@ export class DataQuery implements DataSeriesFetcher{
     for (const queryInFlight of queriesInFlightBySeriesName.values()) {
       seriesRequests.push(queryInFlight.req);
     }
-    const req: Request = {filters: this.globalFilters, seriesRequests};
+    const req: Request = { filters: this.globalFilters, seriesRequests };
     // Submit the request via the fetcher.
     this.fetcher.fetch(req).subscribe(
-        (data) => {
-          for (const [seriesName, series] of data.series.entries()) {
-            const queryInFlight = queriesInFlightBySeriesName.get(seriesName);
-            if (queryInFlight === undefined) {
-              throw new ConfigurationError(
-                  `Can't route DataSeries: series '${seriesName} is missing`)
-                  .at(Severity.FATAL)
-                  .from(SOURCE);
-            }
-            // Invoke the registered callback for this dataSeries.
-            queryInFlight.onResponse(series);
+      (data) => {
+        for (const [seriesName, series] of data.series.entries()) {
+          const queryInFlight = queriesInFlightBySeriesName.get(seriesName);
+          if (queryInFlight === undefined) {
+            throw new ConfigurationError(
+              `Can't route DataSeries: series '${seriesName} is missing`)
+              .at(Severity.FATAL)
+              .from(SOURCE);
           }
-        },
-        (err) => {
-          for (const queryInFlight of queriesInFlightBySeriesName.values()) {
-            queryInFlight.cancel();
-          }
-        });
+          // Invoke the registered callback for this dataSeries.
+          queryInFlight.onResponse(series);
+        }
+      },
+      (err) => {
+        for (const queryInFlight of queriesInFlightBySeriesName.values()) {
+          queryInFlight.cancel();
+        }
+      });
   }
 }

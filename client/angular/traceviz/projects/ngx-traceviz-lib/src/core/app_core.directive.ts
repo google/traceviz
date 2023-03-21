@@ -19,23 +19,32 @@ import { ContentChild, Directive, AfterContentInit } from '@angular/core';
 import { ConfigurationError, Severity } from 'traceviz-client-core';
 import { AppCoreService } from '../app_core_service/app_core.service';
 import { GlobalStateDirective } from './global_state.directive';
+import { DataQueryDirectiveBase } from './data_query.directive';
 
 const SOURCE = 'app_core.directive';
 
 @Directive({ selector: 'app-core' })
 export class AppCoreDirective implements AfterContentInit {
     @ContentChild(GlobalStateDirective) globalState: GlobalStateDirective | undefined;
+    @ContentChild(DataQueryDirectiveBase) dataQuery: DataQueryDirectiveBase | undefined;
 
     constructor(readonly appCoreService: AppCoreService) { }
 
     ngAfterContentInit() {
         if (this.globalState === undefined) {
-            this.appCoreService.appCore.err(new ConfigurationError(`app-core is missing required 'global-state' directive`)
+            const err = new ConfigurationError(`app-core is missing required 'global-state' directive`)
                 .from(SOURCE)
-                .at(Severity.ERROR));
-            return;
+                .at(Severity.ERROR);
+            this.appCoreService.appCore.err(err);
+            throw err;
         }
-        this.globalState.populate(this.appCoreService.appCore);
+        if (this.dataQuery === undefined) {
+            const err = new ConfigurationError(`app-core is missing required 'data-query' directive`)
+                .from(SOURCE)
+                .at(Severity.ERROR);
+            this.appCoreService.appCore.err(err);
+            throw err;
+        }
         this.appCoreService.appCore.publish();
     }
-}
+} 

@@ -11,18 +11,18 @@
         limitations under the License.
 */
 
-/**
- * @fileoverview Defines an interface for types providing backend fetch services.
- */
+import { NgModule } from '@angular/core';
 
-import { Request } from '../protocol/request_interface.js';
-import { Response } from '../protocol/response_interface.js';
-import { Observable } from 'rxjs';
+import { TestDataQueryDirective } from './test_data_query.directive';
 
-/**
- * Implemented by data fetchers that accept a Request and return a subscribable
- * Response.
- */
-export interface DataFetcherInterface {
-        fetch(req: Request): Observable<Response>;
-}  
+@NgModule({
+    declarations: [
+        TestDataQueryDirective,
+    ],
+    imports: [],
+    exports: [
+        TestDataQueryDirective,
+    ],
+})
+export class TestCoreModule {
+}

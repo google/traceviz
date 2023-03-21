@@ -12,20 +12,25 @@
 */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, ViewChild } from '@angular/core';
+import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 
 import { AppCoreDirective } from './app_core.directive';
 import { AppCoreService } from '../app_core_service/app_core.service';
 import { ValueMap, str, valueMap } from 'traceviz-client-core';
 import { CoreModule } from './core.module';
 import { ValueMapDirective } from './value_map.directive';
+import { TestCoreModule } from './test_core.module';
 
 @Component({
     template: `
-    <!--
-      -- The value-map goes first so that ViewChild doesn't pick up the one
-      -- in the global-state :\
-      -->
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="name"><string>clyde</string></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
   <value-map>
     <value key="name">
         <global-ref key="name"></global-ref>
@@ -37,17 +42,10 @@ import { ValueMapDirective } from './value_map.directive';
         <local-ref key="species"></local-ref>
     </value>
   </value-map>
-  <app-core>
-    <global-state>
-      <value-map>
-        <value key="name"><string>clyde</string></value>
-      </value-map>
-    </global-state>
-  </app-core>
 `
 })
 class ValueMapTestComponent {
-    @ViewChild(ValueMapDirective) valueMapDir!: ValueMapDirective;
+    @ViewChildren(ValueMapDirective) valueMapDirs = new QueryList<ValueMapDirective>();
     @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
 }
 
@@ -58,7 +56,7 @@ describe('value map directive test', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             declarations: [ValueMapTestComponent],
-            imports: [CoreModule],
+            imports: [CoreModule, TestCoreModule],
             providers: [{
                 provide: AppCoreService,
                 useValue: appCoreService,
@@ -69,14 +67,15 @@ describe('value map directive test', () => {
 
     it('handles value map', () => {
         fixture.detectChanges();
+        fixture.detectChanges();
         const tc = fixture.componentInstance;
         const localVm = valueMap(
             { key: 'species', val: str('cloud') },
         );
-        const vmDir = tc.valueMapDir as ValueMapDirective;
+        const vmDir = tc.valueMapDirs.get(tc.valueMapDirs.length - 1);
         let vm: ValueMap | undefined;
         expect(() => {
-            vm = vmDir.getValueMap(localVm);
+            vm = vmDir!.getValueMap(localVm);
         }).not.toThrow();
         expect(Array.from(vm!.entries()).map(([key, val]) => [key, val.toString()])).toEqual([
             ['name', 'clyde'],

@@ -19,44 +19,46 @@ import { AppCoreService } from '../app_core_service/app_core.service';
 import { GlobalRefDirective } from './global_ref.directive';
 import { StringValue } from 'traceviz-client-core';
 import { CoreModule } from './core.module';
+import { TestCoreModule } from './test_core.module';
 
 @Component({
-    template: `
+  template: `
   <app-core>
     <global-state>
       <value-map>
         <value key="str"><string>yay</string></value>
       </value-map>
     </global-state>
+    <test-data-query></test-data-query>
   </app-core>
   <global-ref key="str"></global-ref>
 `
 })
 class GlobalTestComponent {
-    @ViewChild(GlobalRefDirective) globalRefDir!: GlobalRefDirective;
-    @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+  @ViewChild(GlobalRefDirective) globalRefDir!: GlobalRefDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
 }
 
 describe('global value directive test', () => {
-    let fixture: ComponentFixture<GlobalTestComponent>;
-    const appCoreService = new AppCoreService();
+  let fixture: ComponentFixture<GlobalTestComponent>;
+  const appCoreService = new AppCoreService();
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            declarations: [GlobalTestComponent],
-            imports: [CoreModule],
-            providers: [{
-                provide: AppCoreService,
-                useValue: appCoreService,
-            }]
-        })
-        fixture = TestBed.createComponent(GlobalTestComponent);
-    });
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [GlobalTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    })
+    fixture = TestBed.createComponent(GlobalTestComponent);
+  });
 
-    it('handles global Values', () => {
-        fixture.detectChanges();
-        const tc = fixture.componentInstance;
-        expect((tc.globalRefDir.get(undefined) as StringValue).val).toEqual('yay');
-    });
+  it('handles global Values', () => {
+    fixture.detectChanges();
+    const tc = fixture.componentInstance;
+    expect((tc.globalRefDir.get(undefined) as StringValue).val).toEqual('yay');
+  });
 });
 

@@ -20,6 +20,8 @@ import { GlobalRefDirective } from './global_ref.directive';
 import { AppCoreDirective } from './app_core.directive';
 import { LocalRefDirective } from './local_ref.directive';
 import { ActionDirective, AndDirective, ChangedDirective, ClearDirective, EqualsDirective, ExtendDirective, GreaterThanDirective, IncludesDirective, InteractionsDirective, LessThanDirective, NotDirective, OrDirective, ReactionDirective, SetDirective, SetIfEmptyDirective, ToggleDirective, ToggleOrSetDirective, WatchDirective } from './interactions.directive';
+import { DataQueryDirective } from './data_query.directive';
+import { TestDataFetcher } from './test_data_fetcher';
 
 @NgModule({
     declarations: [
@@ -28,6 +30,7 @@ import { ActionDirective, AndDirective, ChangedDirective, ClearDirective, Equals
         AppCoreDirective,
         ClearDirective,
         ChangedDirective,
+        DataQueryDirective,
         DblLiteralDirective,
         DurationLiteralDirective,
         EmptyLiteralDirective,
@@ -65,6 +68,7 @@ import { ActionDirective, AndDirective, ChangedDirective, ClearDirective, Equals
         AppCoreDirective,
         ClearDirective,
         ChangedDirective,
+        DataQueryDirective,
         DblLiteralDirective,
         DurationLiteralDirective,
         EmptyLiteralDirective,
