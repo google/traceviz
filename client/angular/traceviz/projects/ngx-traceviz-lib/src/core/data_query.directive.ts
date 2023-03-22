@@ -18,13 +18,15 @@
 import { ContentChild, Directive, AfterContentInit, Input, forwardRef } from '@angular/core';
 import { AppCore, ConfigurationError, Severity, ValueMap } from 'traceviz-client-core';
 import { AppCoreService } from '../app_core_service/app_core.service';
-import { GlobalStateDirective } from './global_state.directive';
 import { HttpDataFetcher } from './http_data_fetcher';
 import { DataFetcherInterface } from 'traceviz-client-core/src/data_query/data_fetcher_interface';
-import { TestDataFetcher } from './test_data_fetcher';
+import { ValueMapDirective } from './value_map.directive';
 
 const SOURCE = 'data_query.directive';
 
+/**
+ * A base class of all data query directives.
+ */
 export abstract class DataQueryDirectiveBase {
     constructor(
         protected readonly appCoreService: AppCoreService,
@@ -33,18 +35,16 @@ export abstract class DataQueryDirectiveBase {
     abstract filters(): ValueMap;
     abstract debounceMs: number;
 
-    init() {
-        this.appCoreService.appCore.onPublish((appCore: AppCore) => {
-
-            appCore.dataQuery.connect(this.fetcher);
-            appCore.dataQuery.setGlobalFilters(this.filters());
-            if (this.debounceMs > 0) {
-                appCore.dataQuery.debounceUpdates(this.debounceMs);
-            }
-        });
+    init(appCore: AppCore) {
+        appCore.dataQuery.connect(this.fetcher);
+        appCore.dataQuery.setGlobalFilters(this.filters());
+        appCore.dataQuery.debounceUpdates(this.debounceMs);
     }
 }
 
+/**
+ * Describes how data requests are sent to the backend.
+ */
 @Directive({
     selector: 'data-query',
     providers: [{
@@ -53,8 +53,16 @@ export abstract class DataQueryDirectiveBase {
     }],
 })
 export class DataQueryDirective extends DataQueryDirectiveBase implements AfterContentInit {
+    // The backend query debouncing interval: the DataQuery will wait this long
+    // after an initial series request, then will issue that request and any
+    // others that arrived in that interval.  This allows the TraceViz backend
+    // to handle multiple requests at once, and to reuse intermediate results.
     @Input() debounceMs: number = 50;
-    @ContentChild(GlobalStateDirective) filtersDir: GlobalStateDirective | undefined;
+    // The set of filters sent to the backend with each query.  Carefully
+    // selecting these values allows the backend to precompute expensive
+    // intermediate results once per data query, then reuse those results in
+    // handling multiple series queries.
+    @ContentChild(ValueMapDirective) filtersDir: ValueMapDirective | undefined;
 
     constructor(
         appCoreService: AppCoreService,
@@ -68,7 +76,7 @@ export class DataQueryDirective extends DataQueryDirectiveBase implements AfterC
                 .from(SOURCE)
                 .at(Severity.FATAL);
         }
-        let filters = this.filtersDir.values?.getValueMap();
+        let filters = this.filtersDir.getValueMap();
         if (filters === undefined) {
             filters = new ValueMap();
         }
@@ -76,6 +84,8 @@ export class DataQueryDirective extends DataQueryDirectiveBase implements AfterC
     }
 
     ngAfterContentInit(): void {
-        this.init();
+        this.appCoreService.appCore.onPublish((appCore) => {
+            this.init(appCore);
+        });
     }
 }

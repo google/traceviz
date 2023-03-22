@@ -22,6 +22,6 @@ import { ValueMap } from 'traceviz-client-core';
 /** A base class for directives specifying Values. */
 export abstract class ValueDirective implements ValueRef {
     abstract get(
-        localState: ValueMap | undefined): Value | undefined;
+        localState?: ValueMap | undefined): Value | undefined;
     abstract label(): string;
 }

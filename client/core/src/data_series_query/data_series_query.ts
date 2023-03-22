@@ -16,7 +16,7 @@
  * request. 
  */
 
-import { BehaviorSubject, combineLatest, filter, Observable, Subject, takeUntil } from "rxjs";
+import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, Observable, Subject, takeUntil } from "rxjs";
 import { StringValue, Value } from "../value/value.js";
 import { ResponseNode } from "../protocol/response_interface.js";
 import { DataSeriesFetcher } from "./data_series_fetcher.js";
@@ -81,9 +81,14 @@ export class DataSeriesQuery {
     // On a change to the query name or any parameter, and the 'fetch' reaction
     // is true, fetch the series.
     combineLatest([fetch, ...onChange])
-      .pipe(filter(v => (v[0] as boolean)), takeUntil(this.unsubscribe))
-      .subscribe(() => {
-        this.fetch();
+      .pipe(
+        filter(v => v[0] as boolean),
+        distinctUntilChanged(),
+        takeUntil(this.unsubscribe),
+      ).subscribe((fetch) => {
+        if (fetch) {
+          this.fetch();
+        }
       });
   }
 

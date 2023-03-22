@@ -32,7 +32,7 @@ describe('data query test', () => {
   // to support explicit fetch.  It will use a TestDataFetcher which serves
   // canned data.
   const tdf = new TestDataFetcher();
-  const tdq = new DataQuery();
+  const tdq = new DataQuery((err) => fail(err));
   tdq.connect(tdf);
   const sendRequest = tdq.triggerUpdates();
   // Set up global filters, and provide them to the TestDataQuery
@@ -192,7 +192,7 @@ describe('data query test', () => {
 describe('DataQuery integration with DataSeriesQuery', () => {
   const gf1 = int(1);
   const tdf = new TestDataFetcher();
-  const tdq = new DataQuery();
+  const tdq = new DataQuery((err) => fail(err));
   tdq.connect(tdf);
   const sendRequest = tdq.triggerUpdates();
   const filters = valueMap({ key: 'numThings', val: gf1 });

@@ -28,3 +28,5 @@ export class TestDataFetcher implements DataFetcherInterface {
         return this.responseChannel;
     }
 }
+
+export const GLOBAL_TEST_DATA_FETCHER = new TestDataFetcher();

@@ -11,14 +11,45 @@
         limitations under the License.
 */
 
+/**
+ * @fileoverview The global state of a TraceViz application.
+ */
+
 import { DataQuery } from '../data_query/data_query.js';
-import { ConfigurationError } from '../errors/errors.js';
+import { ConfigurationError, Severity } from '../errors/errors.js';
 import { GlobalState } from '../global_state/global_state.js';
 import { ReplaySubject } from 'rxjs';
 
+const SOURCE = 'app_core';
+
+/**
+ * A collection of global state for a TraceViz application, such as global
+ * Values, the DataQuery responsible for backend communication, and error
+ * handling and reporting.  Each app must have exactly one AppCore.
+ * 
+ * Application code can access the AppCore, but since there may be a span of
+ * time at application startup during which the AppCore exists but is not yet
+ * complete, AppCore users must wait until it is published.  When application
+ * code is ready for full AppCore access (for instance, when a UI component has
+ * fully loaded), it may invoke `onPublish()`, providing a callback which will
+ * be invoked when the AppCore has been published.
+ * 
+ * The AppCore should be published exactly once, when its state is completely
+ * known and ready to serve queries (for instance, when a directive defining
+ * it has been fully loaded).
+ */
 export class AppCore {
+    // An Observable which may be subscribed to receive the most recent
+    // ConfigurationError, for example by error-reporting components.  This
+    // may be subscribed before the AppCore is published.
     readonly configurationErrors = new ReplaySubject<ConfigurationError>(1);
-    readonly dataQuery = new DataQuery();
+    // The shared DataQuery component, responsible for issuing all backend
+    // DataSeries requests and handling their responses.  This should not be
+    // examined until the AppCore is published.
+    readonly dataQuery = new DataQuery((err) => this.err(err));
+    // The shared global state; a key-value mapping of Values available
+    // throughout the application.  This should not be examined until the
+    // AppCore is published.
     readonly globalState = new GlobalState();
 
     private published = false;
@@ -27,7 +58,11 @@ export class AppCore {
     /** To be invoked once, when the AppCore is populated. */
     publish() {
         if (this.published) {
-            throw new Error(`An AppCore may only be published once.`);
+            const err = new ConfigurationError(`Only one AppCore may be defined, and it may only be published once.`)
+                .from(SOURCE)
+                .at(Severity.FATAL);
+            this.err(err);
+            throw err;
         }
         this.published = true;
         this.pendingCallbacks.forEach((cb) => cb(this));
@@ -46,6 +81,13 @@ export class AppCore {
         }
     }
 
+    /**
+     * To be invoked on any errors generated or caught within application code.
+     * Configuration errors are broadcast to anything that subscribed to
+     * `configurationErrors`.
+     * 
+     * `err()` may be invoked before the AppCore is published.
+     */
     err(error: unknown) {
         if (error instanceof ConfigurationError) {
             this.configurationErrors.next(error);

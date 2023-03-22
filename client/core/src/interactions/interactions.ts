@@ -43,7 +43,7 @@ import { EmptyValue, Value } from '../value/value.js';
 import { ValueMap } from '../value/value_map.js';
 import { ValueRef } from '../value/value_reference.js';
 import { combineLatest, distinctUntilChanged, EMPTY, merge, Observable, ReplaySubject } from 'rxjs';
-import { delay, map, takeUntil } from 'rxjs/operators';
+import { delay, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 
 const SOURCE = 'interactions';
 
@@ -310,7 +310,7 @@ export abstract class Predicate implements Documenter {
  */
 export class Changed extends Predicate {
   constructor(private readonly x: ValueRef,
-    private readonly sinceMs: number = 50) {
+    private readonly sinceMs: number = 0) {
     super();
   }
 
@@ -319,6 +319,10 @@ export class Changed extends Predicate {
       const val = this.x.get(localState);
       if (val === undefined) {
         return EMPTY;
+      }
+      if (this.sinceMs === 0) {
+        // If sinceMs is 0, just emit a pulse on the rising edge of the change.
+        return val.pipe(mergeMap(() => [true, false]));
       }
       const valueChanged = val.pipe(map(() => true));
       const changeTimeout = valueChanged.pipe(
@@ -669,5 +673,31 @@ export class Interactions implements Documenter {
     this.overrideDocument = helpText;
     this.documentChildren = documentChildren;
     return this;
+  }
+
+  checkForSupportedActions(supportedTargetsAndTypes: Array<[string, string]>): ConfigurationError | undefined {
+    for (let [target, type] of supportedTargetsAndTypes) {
+      const actionsByType = this.actionsByTargetAndType.get(target);
+      if (actionsByType !== undefined && actionsByType.has(type)) {
+        continue;
+      }
+      return new ConfigurationError(`Action target '${target}' and type '${type}' are not supported`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
+    }
+    return undefined;
+  }
+
+  checkForSupportedReactions(supportedTargetsAndTypes: Array<[string, string]>): ConfigurationError | undefined {
+    for (let [target, type] of supportedTargetsAndTypes) {
+      const reactionsByType = this.reactionsByTargetAndType.get(target);
+      if (reactionsByType !== undefined && reactionsByType.has(type)) {
+        continue;
+      }
+      return new ConfigurationError(`Reaction target '${target}' and type '${type}' are not supported`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
+    }
+    return undefined;
   }
 }

@@ -39,7 +39,7 @@ export class EmptyLiteralDirective extends ValueDirective {
     super();
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new EmptyValue();
   }
 
@@ -72,7 +72,7 @@ export class StringLiteralDirective extends ValueDirective implements
     }
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new StringValue(this.val);
   }
 
@@ -101,7 +101,7 @@ export class StringLiteralListDirective extends ValueDirective implements
     }
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new StringListValue(this.val);
   }
 
@@ -131,7 +131,7 @@ export class StringLiteralSetDirective extends ValueDirective implements
     }
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new StringSetValue(this.val);
   }
 
@@ -163,7 +163,7 @@ export class IntLiteralDirective extends ValueDirective implements
     }
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new IntegerValue(this.val);
   }
 
@@ -192,7 +192,7 @@ export class IntLiteralListDirective extends ValueDirective implements
     }
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new IntegerListValue(this.val);
   }
 
@@ -222,7 +222,7 @@ export class IntLiteralSetDirective extends ValueDirective implements
     }
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new IntegerSetValue(this.val);
   }
 
@@ -254,7 +254,7 @@ export class DblLiteralDirective extends ValueDirective implements
     }
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new DoubleValue(this.val);
   }
 
@@ -284,7 +284,7 @@ export class DurationLiteralDirective extends ValueDirective implements AfterCon
     }
   }
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new DurationValue(this.val);
   }
 
@@ -303,7 +303,7 @@ export class DurationLiteralDirective extends ValueDirective implements AfterCon
 export class TimestampLiteralDirective extends ValueDirective {
   val = new Timestamp(0, 0);
 
-  get(unusedLocalState: ValueMap | undefined): Value | undefined {
+  get(unusedLocalState?: ValueMap | undefined): Value | undefined {
     return new TimestampValue(this.val);
   }
 

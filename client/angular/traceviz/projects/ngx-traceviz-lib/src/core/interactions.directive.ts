@@ -16,7 +16,7 @@
  */
 
 import { AfterContentInit, ContentChild, ContentChildren, Directive, forwardRef, Input, QueryList } from '@angular/core';
-import { Action, And, Changed, ConfigurationError, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Predicate, Reaction, SetIfEmpty, Severity, Toggle, ToggleOrSet, ValueMap, ValueRef, Watch } from 'traceviz-client-core';
+import { Action, And, Changed, ConfigurationError, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Predicate, Reaction, SetIfEmpty, Severity, Toggle, ToggleOrSet, ValueRef, Watch } from 'traceviz-client-core';
 import { Clear, Update, Set as SetU } from 'traceviz-client-core';
 import { ValueDirective } from './value.directive';
 import { ValueMapDirective } from './value_map.directive';
@@ -291,7 +291,7 @@ export abstract class PredicateDirective {
 })
 export class ChangedDirective extends PredicateDirective implements AfterContentInit {
     @ContentChild(ValueDirective) valueDirective: ValueDirective | undefined;
-    @Input() sinceMs = 50;
+    @Input() sinceMs = 0;
     private changed: Changed | undefined;
 
     constructor() {

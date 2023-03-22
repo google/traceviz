@@ -19,13 +19,17 @@ import { ContentChild, Directive, AfterContentInit, Input, forwardRef } from '@a
 import { ValueMap } from 'traceviz-client-core';
 import { AppCoreService } from '../app_core_service/app_core.service';
 import { GlobalStateDirective } from './global_state.directive';
-import { TestDataFetcher } from './test_data_fetcher';
+import { GLOBAL_TEST_DATA_FETCHER } from './test_data_fetcher';
 import { DataQueryDirectiveBase } from './data_query.directive';
 
 const SOURCE = 'test_data_query.directive';
 
-export const GlobalTestDataFetcher = new TestDataFetcher();
-
+/**
+ * A data query for use in tests.  It forces the debounce interval to 0,
+ * making all requests synchronous, and uses the global test data fetcher
+ * instead of an actual HTTP fetcher, making it easy to examine requests and
+ * provide responses.
+ */
 @Directive({
     selector: 'test-data-query',
     providers: [{
@@ -39,7 +43,8 @@ export class TestDataQueryDirective extends DataQueryDirectiveBase implements Af
 
     constructor(
         appCoreService: AppCoreService) {
-        super(appCoreService, GlobalTestDataFetcher);
+        super(appCoreService, GLOBAL_TEST_DATA_FETCHER);
+        this.debounceMs = 0;
     }
 
     override filters(): ValueMap {
@@ -54,6 +59,8 @@ export class TestDataQueryDirective extends DataQueryDirectiveBase implements Af
     }
 
     ngAfterContentInit(): void {
-        this.init();
+        this.appCoreService.appCore.onPublish((appCore) => {
+            this.init(appCore);
+        });
     }
 }

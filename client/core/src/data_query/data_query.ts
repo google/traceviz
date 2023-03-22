@@ -52,6 +52,8 @@ export class DataQuery implements DataSeriesFetcher {
 
   private fetcher: DataFetcherInterface | undefined;
 
+  constructor(private readonly errorReporter: (err: any) => void) { }
+
   connect(fetcher: DataFetcherInterface) {
     this.fetcher = fetcher;
   }
@@ -60,8 +62,15 @@ export class DataQuery implements DataSeriesFetcher {
     this.globalFilters = globalFilters;
   }
 
-  // Issues updates after a specified debounce interval.
+  // Issues queries after a specified debounce interval.  If the interval is 0,
+  // queries are issued synchronously.
   debounceUpdates(debounceMs: number) {
+    if (debounceMs === 0) {
+      this.updateRequested.subscribe(() => {
+        this.issueQuery();
+      });
+      return;
+    }
     // Each event on the debounced 'updateRequested' channel results in a
     // new fetch, as long as at least one series wants an update.  Just before
     // the fetch, the set of ready series names is cleared.
@@ -88,7 +97,12 @@ export class DataQuery implements DataSeriesFetcher {
     cancel: () => void) {
     const seriesName = req.seriesName;
     if (seriesName === undefined) {
-      throw new Error(`DataSeriesRequest lacks required series name`);
+      this.errorReporter(
+        new ConfigurationError(`DataSeriesRequest lacks required series name`)
+          .from(SOURCE)
+          .at(Severity.FATAL)
+      );
+      return;
     }
     // Place this requet in the set of pending queries, overwriting any already
     // present for this series.
@@ -99,7 +113,12 @@ export class DataQuery implements DataSeriesFetcher {
 
   protected issueQuery() {
     if (!this.fetcher) {
-      throw new Error(`issueQuery() called before connect().`);
+      this.errorReporter(
+        new ConfigurationError(`issueQuery() called before connect().`)
+          .from(SOURCE)
+          .at(Severity.FATAL)
+      );
+      return;
     }
     // Save a copy of the pending queries so that we can find and invoke the
     // response callbacks, then clear the pending queries map in preparation for
@@ -119,10 +138,12 @@ export class DataQuery implements DataSeriesFetcher {
         for (const [seriesName, series] of data.series.entries()) {
           const queryInFlight = queriesInFlightBySeriesName.get(seriesName);
           if (queryInFlight === undefined) {
-            throw new ConfigurationError(
+            this.errorReporter(new ConfigurationError(
               `Can't route DataSeries: series '${seriesName} is missing`)
               .at(Severity.FATAL)
-              .from(SOURCE);
+              .from(SOURCE)
+            );
+            return;
           }
           // Invoke the registered callback for this dataSeries.
           queryInFlight.onResponse(series);
