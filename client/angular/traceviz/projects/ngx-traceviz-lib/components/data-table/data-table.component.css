@@ -1,0 +1,22 @@
+.table-cell {
+    overflow: hidden;
+    user-select: none;
+}
+
+.content {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.table {
+    width: 100%;
+}
+
+.header-cell {
+    font-size: 75%;
+    text-align: left;
+}
+
+.paginator-holder {
+    flex-basis: 56px;
+}

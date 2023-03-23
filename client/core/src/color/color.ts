@@ -17,8 +17,7 @@
  * on the format, see the file comment for traceviz/server/data_source/color.go.
  */
 
-const d3 = await import('d3');
-// import * as d3 from 'd3';
+import * as d3 from 'd3';
 import { ConfigurationError, Severity } from '../errors/errors.js';
 import { ValueMap } from '../value/value_map.js';
 

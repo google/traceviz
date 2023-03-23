@@ -12,6 +12,7 @@
 */
 
 export * from './app_core/app_core.js';
+export * from './color/color.js';
 export * from './data_query/data_query.js';
 export * from './data_series_query/data_series_query.js';
 export * from './duration/duration.js';
@@ -19,10 +20,12 @@ export * from './errors/errors.js';
 export * from './global_state/global_state.js';
 export * from './global_state/global_state_interface.js';
 export * from './interactions/interactions.js';
+export * from './label/label.js';
 export * from './protocol/json_request.js';
 export * from './protocol/json_response.js';
 export * from './protocol/request_interface.js';
 export * from './protocol/response_interface.js';
+export * from './table/table.js';
 export * from './timestamp/timestamp.js';
 export * from './value/test_value.js';
 export * from './value/value.js';

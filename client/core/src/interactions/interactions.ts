@@ -681,7 +681,7 @@ export class Interactions implements Documenter {
       if (actionsByType !== undefined && actionsByType.has(type)) {
         continue;
       }
-      return new ConfigurationError(`Action target '${target}' and type '${type}' are not supported`)
+      return new ConfigurationError(`Action target '${target}' and type '${type}' is not supported.`)
         .from(SOURCE)
         .at(Severity.ERROR);
     }
@@ -694,7 +694,19 @@ export class Interactions implements Documenter {
       if (reactionsByType !== undefined && reactionsByType.has(type)) {
         continue;
       }
-      return new ConfigurationError(`Reaction target '${target}' and type '${type}' are not supported`)
+      return new ConfigurationError(`Reaction target '${target}' and type '${type}' is not supported.`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
+    }
+    return undefined;
+  }
+
+  checkForSupportedWatches(supportedTypes: string[]): ConfigurationError | undefined {
+    for (let type of supportedTypes) {
+      if (this.watchesByType.has(type)) {
+        continue;
+      }
+      return new ConfigurationError(`Watch type '${type}' is not supported.`)
         .from(SOURCE)
         .at(Severity.ERROR);
     }

@@ -32,7 +32,7 @@ export class AppCoreDirective implements AfterContentInit {
 
     ngAfterContentInit() {
         if (this.globalState === undefined) {
-            const err = new ConfigurationError(`app-core is missing required 'global-state' directive`)
+            const err = new ConfigurationError(`app-core is missing required 'global-state' child.`)
                 .from(SOURCE)
                 .at(Severity.ERROR);
             this.appCoreService.appCore.err(err);

@@ -12,7 +12,8 @@
 */
 
 /** 
- * @fileoverview A set of tools for working with references to Values.
+ * @fileoverview A set of tools for working with deferred-evaluation references
+ * to Values.
  */
 
 import { Value } from './value.js';
@@ -25,11 +26,10 @@ export interface ValueRef {
 }
 
 /**
- * A reference to a 'local' value: one whose definition varies in
- * different local contexts, represented as distinct ValueMaps.
- * For example, each row in a table could have its own local
- * properties in a ValueMap, and `new LocalValue('ID')` would
- * support access to each row's ID.
+ * A reference to a 'local' value: one whose definition varies in different
+ * local contexts, represented as distinct ValueMaps.  For example, each row in
+ * a table could have its own local properties in a ValueMap, and `new
+ * LocalValue('ID')` would support access to each row's ID.
  */
 export class LocalValue implements ValueRef {
   constructor(private readonly key: string) { }
@@ -46,9 +46,7 @@ export class LocalValue implements ValueRef {
   }
 }
 
-/**
- * A reference to a fixed value: one whose definition never changes.
- */
+/** A reference to a fixed value: one whose definition never changes. */
 export class FixedValue implements ValueRef {
   constructor(private readonly val: Value,
     private readonly name: string = '') { }
@@ -60,5 +58,25 @@ export class FixedValue implements ValueRef {
   label(): string {
     return `value '${this.name}'`;
   }
+}
 
+/** A reference to a value with a key. */
+export interface KeyedValueRef extends ValueRef {
+  key: string;
+}
+
+/** A keyed map of ValueRefs. */
+export class ValueRefMap {
+  constructor(private refMap: KeyedValueRef[]) { };
+
+  get(localState: ValueMap | undefined): ValueMap | undefined {
+    const ret = new Map<string, Value>();
+    for (const keyedValueRef of this.refMap) {
+      const val = keyedValueRef.get(localState);
+      if (val !== undefined) {
+        ret.set(keyedValueRef.key, val);
+      }
+    }
+    return new ValueMap(ret);
+  }
 }

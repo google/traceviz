@@ -42,11 +42,19 @@ const supportedReactions = new Array<[string, string]>(
     [DATASERIES, FETCH],
 );
 
+/**
+ * A data series definition, to be enclosed in a type that consumes that data
+ * series, such as a UI component.   
+ */
 @Directive({ selector: 'data-series' })
 export class DataSeriesQueryDirective implements AfterContentInit {
     @ContentChild(QueryDirective) query: QueryDirective | undefined;
     @ContentChild(ParametersDirective) parameters: ParametersDirective | undefined;
     @ContentChild(InteractionsDirective) interactions: InteractionsDirective | undefined;
+    // Available after ContentInit.  Since ngAfterContentInit is invoked on a
+    // component's children before being invoked on the component itself,
+    // dataSeriesQuery should be available in a parent component's 
+    // ngAfterContentInit.
     dataSeriesQuery: DataSeriesQuery | undefined;
 
     constructor(private readonly appCoreService: AppCoreService) { }

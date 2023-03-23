@@ -17,7 +17,7 @@
  */
 
 
-import { AfterContentInit, ContentChildren, Directive, ElementRef, forwardRef, Input, QueryList } from '@angular/core';
+import { AfterContentInit, ContentChildren, Directive, ElementRef, forwardRef, QueryList } from '@angular/core';
 import { Duration, DurationValue } from 'traceviz-client-core';
 import { Timestamp } from 'traceviz-client-core';
 import { DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value } from 'traceviz-client-core';

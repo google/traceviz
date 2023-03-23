@@ -18,7 +18,7 @@
 
 import { ContentChild, ContentChildren, Directive, Input, QueryList } from '@angular/core';
 import { ValueDirective } from './value.directive';
-import { ConfigurationError, Severity, Value } from 'traceviz-client-core';
+import { ConfigurationError, Severity, Value, KeyedValueRef, ValueRefMap } from 'traceviz-client-core';
 import { ValueMap } from 'traceviz-client-core';
 
 const SOURCE = 'value_map.directives';
@@ -30,20 +30,29 @@ const SOURCE = 'value_map.directives';
  * It may specify a string key, for example for building a value map.
  */
 @Directive({ selector: 'value' })
-export class ValueWrapperDirective {
+export class ValueWrapperDirective implements KeyedValueRef {
     // If specified, a key to associate with this Value.
-    @Input() key: string | undefined;
+    @Input() key: string = '';
 
     @ContentChild(ValueDirective) val: ValueDirective | undefined;
 
-    get(localState: ValueMap | undefined): Value | undefined {
+    private checkVal() {
         if (!this.val) {
             throw new ConfigurationError(
                 `<value> does not define a valid ValueDirective for key '${this.key}'`)
                 .at(Severity.FATAL)
                 .from(SOURCE);
         }
-        return this.val.get(localState);
+    }
+
+    label(): string {
+        this.checkVal();
+        return this.val!.label();
+    }
+
+    get(localState: ValueMap | undefined): Value | undefined {
+        this.checkVal();
+        return this.val!.get(localState);
     }
 }
 
@@ -53,26 +62,15 @@ export class ValueMapDirective {
     @ContentChildren(ValueWrapperDirective)
     valueWrappers = new QueryList<ValueWrapperDirective>();
 
-    getValueMap(localState?: ValueMap):
-        ValueMap {
-        const ret = new Map<string, Value>();
-        for (const valueWrapper of this.valueWrappers) {
-            if (valueWrapper.key == null) {
-                throw new ConfigurationError(`values within a value-map must have keys`)
-                    .at(Severity.FATAL)
-                    .from(SOURCE);
-            }
-            if (ret.has(valueWrapper.key)) {
-                throw new ConfigurationError(
-                    `values within a value-map must have unique keys`)
-                    .at(Severity.FATAL)
-                    .from(SOURCE);
-            }
-            const val = valueWrapper.get(localState);
-            if (val != null) {
-                ret.set(valueWrapper.key, val);
-            }
+    getValueRefMap(): ValueRefMap {
+        return new ValueRefMap(Array.from(this.valueWrappers));
+    }
+
+    getValueMap(localState?: ValueMap | undefined): ValueMap {
+        const vm = this.getValueRefMap().get(localState);
+        if (vm === undefined) {
+            return new ValueMap();
         }
-        return new ValueMap(ret);
+        return vm;
     }
 }

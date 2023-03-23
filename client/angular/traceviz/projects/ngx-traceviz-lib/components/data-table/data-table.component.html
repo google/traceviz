@@ -1,0 +1,27 @@
+<div class="container">
+    <div *ngIf="loading">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+    <div class="content" #componentDiv (window:resize)="redraw()">
+        <table class="table" [ngStyle]="{'font-size': fontSizePx}" matSort [matSortActive]="sort.active"
+            [matSortDirection]="sort.direction" (matSortChange)="doSort($event)">
+            <tr [ngStyle]="{'height': rowHeightPx}">
+                <th class="header-cell" *ngFor="let column of columns" [title]="column.category.description"
+                    [mat-sort-header]="column.category.id">
+                    {{ column.category.displayName }}
+                </th>
+            </tr>
+            <tr *ngFor="let row of rows" [ngStyle]="{'height': rowHeightPx}" (mouseover)="rowMouseover(row)"
+                (mouseout)="rowMouseout(row)" (click)="rowClick(row, $event.shiftKey)" [ngStyle]="itemStyle(row)">
+                <td *ngFor="let cell of rowCells(row)" [title]="cellLabel(cell) || cell.value.toString()">
+                    <div class="table-datum" [ngStyle]="itemStyle(cell, row)">
+                        {{ cell.value.toString() }}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="paginator-holder">
+        <ng-content select="mat-paginator"></ng-content>
+    </div>
+</div>
