@@ -192,7 +192,7 @@ describe('data query test', () => {
 describe('DataQuery integration with DataSeriesQuery', () => {
   const gf1 = int(1);
   const tdf = new TestDataFetcher();
-  const tdq = new DataQuery((err) => fail(err));
+  const tdq = new DataQuery((err: any) => fail(err));
   tdq.connect(tdf);
   const sendRequest = tdq.triggerUpdates();
   const filters = valueMap({ key: 'numThings', val: gf1 });
