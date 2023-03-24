@@ -19,7 +19,7 @@ import { ContentChild, Directive, AfterContentInit, Input, forwardRef } from '@a
 import { ValueMap } from 'traceviz-client-core';
 import { AppCoreService } from '../app_core_service/app_core.service';
 import { GlobalStateDirective } from './global_state.directive';
-import { GLOBAL_TEST_DATA_FETCHER } from './test_data_fetcher';
+import { GLOBAL_TEST_DATA_FETCHER } from 'traceviz-client-core';
 import { DataQueryDirectiveBase } from './data_query.directive';
 
 const SOURCE = 'test_data_query.directive';

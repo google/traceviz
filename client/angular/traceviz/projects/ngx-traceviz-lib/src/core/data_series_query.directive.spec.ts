@@ -18,10 +18,10 @@ import { AppCoreService } from "../app_core_service/app_core.service";
 import { CoreModule } from "./core.module";
 import { TestCoreModule } from "./test_core.module";
 import { IntegerValue, Request, ResponseNode, StringValue, str, valueMap } from "traceviz-client-core";
-import { GLOBAL_TEST_DATA_FETCHER } from "./test_data_fetcher";
+import { GLOBAL_TEST_DATA_FETCHER } from "traceviz-client-core";
 
 @Component({
-    template: `
+  template: `
     <app-core>
       <global-state>
         <value-map>
@@ -59,72 +59,72 @@ import { GLOBAL_TEST_DATA_FETCHER } from "./test_data_fetcher";
 `
 })
 class DataSeriesQueryTestComponent {
-    @ViewChild(DataSeriesQueryDirective) dataSeriesQueryDir!: DataSeriesQueryDirective;
+  @ViewChild(DataSeriesQueryDirective) dataSeriesQueryDir!: DataSeriesQueryDirective;
 }
 
 describe('data series directive test', () => {
-    let fixture: ComponentFixture<DataSeriesQueryTestComponent>;
-    const appCoreService = new AppCoreService();
+  let fixture: ComponentFixture<DataSeriesQueryTestComponent>;
+  const appCoreService = new AppCoreService();
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            declarations: [DataSeriesQueryTestComponent],
-            imports: [CoreModule, TestCoreModule],
-            providers: [{
-                provide: AppCoreService,
-                useValue: appCoreService,
-            }]
-        })
-        fixture = TestBed.createComponent(DataSeriesQueryTestComponent);
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [DataSeriesQueryTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    })
+    fixture = TestBed.createComponent(DataSeriesQueryTestComponent);
+  });
+
+  it('handles data series integration and querying', () => {
+    fixture.detectChanges();
+    const tc = fixture.componentInstance;
+    const appCore = appCoreService.appCore;
+    const dataSeriesQuery = tc.dataSeriesQueryDir.dataSeriesQuery;
+    expect(dataSeriesQuery).toBeDefined();
+    var requests: Request[] = [];
+    GLOBAL_TEST_DATA_FETCHER.requestChannel.subscribe((request) => {
+      requests.push(request);
+    });
+    var series: ResponseNode[] = [];
+    dataSeriesQuery?.response.subscribe((responseNode) => {
+      series.push(responseNode);
+    });
+    let loading = false;
+    dataSeriesQuery?.loading.subscribe((isLoading) => loading = isLoading);
+
+    expect(requests.length).toBe(0);
+    expect(series.length).toBe(0);
+    expect(loading).toBeFalse();
+    appCoreService.appCore.configurationErrors.subscribe((err) => {
+      fail(err);
     });
 
-    it('handles data series integration and querying', () => {
-        fixture.detectChanges();
-        const tc = fixture.componentInstance;
-        const appCore = appCoreService.appCore;
-        const dataSeriesQuery = tc.dataSeriesQueryDir.dataSeriesQuery;
-        expect(dataSeriesQuery).toBeDefined();
-        var requests: Request[] = [];
-        GLOBAL_TEST_DATA_FETCHER.requestChannel.subscribe((request) => {
-            requests.push(request);
-        });
-        var series: ResponseNode[] = [];
-        dataSeriesQuery?.response.subscribe((responseNode) => {
-            series.push(responseNode);
-        });
-        let loading = false;
-        dataSeriesQuery?.loading.subscribe((isLoading) => loading = isLoading);
+    // Change the collection name, forcing an initial fetch.
+    (appCore.globalState.get('collection_name') as StringValue).val = 'coll';
+    expect(requests.length).toBe(1);
+    expect(series.length).toBe(0);
+    expect(loading).toBeTrue();
 
-        expect(requests.length).toBe(0);
-        expect(series.length).toBe(0);
-        expect(loading).toBeFalse();
-        appCoreService.appCore.configurationErrors.subscribe((err) => {
-            fail(err);
-        });
-
-        // Change the collection name, forcing an initial.
-        (appCore.globalState.get('collection_name') as StringValue).val = 'coll';
-        expect(requests.length).toBe(1);
-        expect(series.length).toBe(0);
-        expect(loading).toBeTrue();
-
-        GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
-            series: new Map<string, ResponseNode>([
-                [dataSeriesQuery!.uniqueSeriesName, {
-                    properties: valueMap(
-                        { key: 'greeting', val: str('hello') },
-                    ),
-                    children: [],
-                }]
-            ]),
-        });
-        expect(series.length).toBe(1);
-        expect(loading).toBeFalse();
-
-        // Change `count`, forcing a refetch.
-        (appCore.globalState.get('count') as IntegerValue).val = 10;
-        expect(requests.length).toBe(2);
-        expect(series.length).toBe(1);
-        expect(loading).toBeTrue();
+    GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
+      series: new Map<string, ResponseNode>([
+        [dataSeriesQuery!.uniqueSeriesName, {
+          properties: valueMap(
+            { key: 'greeting', val: str('hello') },
+          ),
+          children: [],
+        }]
+      ]),
     });
+    expect(series.length).toBe(1);
+    expect(loading).toBeFalse();
+
+    // Change `count`, forcing a refetch.
+    (appCore.globalState.get('count') as IntegerValue).val = 10;
+    expect(requests.length).toBe(2);
+    expect(series.length).toBe(2);
+    expect(loading).toBeFalse();
+  });
 });

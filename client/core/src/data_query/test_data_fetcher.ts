@@ -10,31 +10,29 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 */
-import 'jasmine';
 
+/**
+ * @fileoverview An override of HttpDataFetcher for testing.
+ */
+
+import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { Request } from '../protocol/request_interface.js';
 import { Response } from '../protocol/response_interface.js';
-import { Observable, throwError } from 'rxjs';
 import { DataFetcherInterface } from './data_fetcher_interface.js';
 
-/** Implements DataFetcher for fake data. */
 export class TestDataFetcher implements DataFetcherInterface {
-  // expectReq should equal incoming DataRequests.
-  expectReq: Request | undefined;
-  // onFetch should be returned upon a fetch.
-  onFetch: Observable<Response> = throwError(() => new Error(`undefined`));
+  requestChannel = new Subject<Request>();
+  // Enqueue up to one response for broadcasting.
+  responseChannel = new ReplaySubject<Response>(1);
 
   fetch(req: Request): Observable<Response> {
-    if (this.expectReq) {
-      expect(this.expectReq).toBeDefined();
-      const sortSeriesRequests = (req: Request) => {
-        req.seriesRequests.sort(
-          (a, b) => (a.seriesName < b.seriesName) ? -1 : 1);
-      };
-      sortSeriesRequests(req);
-      sortSeriesRequests(this.expectReq);
-      expect(req).toEqual(this.expectReq);
-    }
-    return this.onFetch;
+    this.requestChannel.next(req);
+    return this.responseChannel;
+  }
+
+  reset() {
+    this.responseChannel = new ReplaySubject<Response>(1);
   }
 }
+
+export const GLOBAL_TEST_DATA_FETCHER = new TestDataFetcher();

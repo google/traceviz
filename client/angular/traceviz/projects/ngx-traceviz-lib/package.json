@@ -4,7 +4,7 @@
   "peerDependencies": {
     "@angular/common": "^15.2.0",
     "@angular/core": "^15.2.0",
-    "traceviz-client-core": "file:../../../../../../../traceviz/client/core"
+    "traceviz-client-core": "file:../../../../core"
   },
   "dependencies": {
     "tslib": "^2.3.0"

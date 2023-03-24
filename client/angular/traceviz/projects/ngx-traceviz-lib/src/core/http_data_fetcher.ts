@@ -21,7 +21,7 @@ import { Observable } from "rxjs/internal/Observable";
 import { OperatorFunction } from "rxjs/internal/types";
 import { catchError, map } from "rxjs/operators";
 import { ConfigurationError, Request, Response, ResponseNode, Severity, fromObject, toObject } from "traceviz-client-core";
-import { DataFetcherInterface } from "traceviz-client-core/src/data_query/data_fetcher_interface";
+import { DataFetcherInterface } from "traceviz-client-core";
 import { AppCoreService } from '../app_core_service/app_core.service';
 import { throwError } from 'rxjs/internal/observable/throwError';
 

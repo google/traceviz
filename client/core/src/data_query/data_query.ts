@@ -15,7 +15,7 @@
  * @fileoverview Defines a class mediating all TraceViz data series requests.
  */
 
-import { debounce, sample, Subject, timer } from 'rxjs';
+import { debounce, sample, Subject, take, takeUntil, timer } from 'rxjs';
 import { Request, SeriesRequest } from '../protocol/request_interface.js';
 import { ResponseNode } from '../protocol/response_interface.js';
 import { ConfigurationError, Severity } from '../errors/errors.js';
@@ -51,10 +51,12 @@ export class DataQuery implements DataSeriesFetcher {
   private pendingQueriesBySeriesName = new Map<string, PendingQuery>();
 
   private fetcher: DataFetcherInterface | undefined;
+  // private unsubscribe = new Subject<void>();
 
   constructor(private readonly errorReporter: (err: any) => void) { }
 
   connect(fetcher: DataFetcherInterface) {
+    // this.unsubscribe.next();
     this.fetcher = fetcher;
   }
 
@@ -78,18 +80,6 @@ export class DataQuery implements DataSeriesFetcher {
       .subscribe(() => {
         this.issueQuery();
       });
-  }
-
-  // Issues updates each time the returned callback is invoked.  For testing
-  // only.
-  triggerUpdates(): () => void {
-    const issue = new Subject<null>();
-    this.updateRequested.pipe(sample(issue)).subscribe(() => {
-      this.issueQuery();
-    });
-    return () => {
-      issue.next(null);
-    };
   }
 
   fetchDataSeries(
@@ -133,8 +123,8 @@ export class DataQuery implements DataSeriesFetcher {
     }
     const req: Request = { filters: this.globalFilters, seriesRequests };
     // Submit the request via the fetcher.
-    this.fetcher.fetch(req).subscribe(
-      (data) => {
+    this.fetcher.fetch(req).pipe(take(1)).subscribe({
+      next: (data) => {
         for (const [seriesName, series] of data.series.entries()) {
           const queryInFlight = queriesInFlightBySeriesName.get(seriesName);
           if (queryInFlight === undefined) {
@@ -149,10 +139,11 @@ export class DataQuery implements DataSeriesFetcher {
           queryInFlight.onResponse(series);
         }
       },
-      (err) => {
+      error: (err) => {
         for (const queryInFlight of queriesInFlightBySeriesName.values()) {
           queryInFlight.cancel();
         }
-      });
+      }
+    });
   }
 }

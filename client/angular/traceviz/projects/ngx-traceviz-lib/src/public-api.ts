@@ -12,3 +12,9 @@ export * from './core/literal_value.directive';
 export * from './core/local_ref.directive';
 export * from './core/value_map.directive';
 export * from './core/value.directive';
+
+/**
+ * Test exports.
+ * TODO() Break these out as package.json exports.
+ */
+export * from './core/test_core.module';

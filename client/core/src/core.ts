@@ -14,6 +14,7 @@
 export * from './app_core/app_core.js';
 export * from './color/color.js';
 export * from './data_query/data_query.js';
+export * from './data_query/data_fetcher_interface.js';
 export * from './data_series_query/data_series_query.js';
 export * from './duration/duration.js';
 export * from './errors/errors.js';
@@ -31,3 +32,10 @@ export * from './value/test_value.js';
 export * from './value/value.js';
 export * from './value/value_map.js';
 export * from './value/value_reference.js';
+
+/**
+ * Test exports.
+ * TODO() Break these out as package.json exports, and figure out how to
+ *        import those into the Angular library.
+ */
+export * from './data_query/test_data_fetcher.js';

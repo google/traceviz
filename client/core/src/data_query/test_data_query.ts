@@ -11,22 +11,15 @@
         limitations under the License.
 */
 
+import { DataQuery } from "./data_query.js"
+
 /**
- * @fileoverview An override of HttpDataFetcher for testing.
+ * @fileoverview Defines a DataQuery suitable for testing.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { Request, Response } from 'traceviz-client-core';
-import { DataFetcherInterface } from 'traceviz-client-core/src/data_query/data_fetcher_interface';
-
-export class TestDataFetcher implements DataFetcherInterface {
-    requestChannel = new Subject<Request>();
-    responseChannel = new Subject<Response>();
-
-    fetch(req: Request): Observable<Response> {
-        this.requestChannel.next(req);
-        return this.responseChannel;
+export class TestDataQuery extends DataQuery {
+    triggerUpdates() {
+        this.issueQuery();
     }
 }
 
-export const GLOBAL_TEST_DATA_FETCHER = new TestDataFetcher();
