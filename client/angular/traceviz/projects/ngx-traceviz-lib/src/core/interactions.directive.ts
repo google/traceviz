@@ -87,7 +87,7 @@ export class SetDirective extends UpdateDirective implements AfterContentInit {
         for (const valueDirective of this.valueDirectives) {
             valueRefs.push(valueDirective);
         }
-        if (valueRefs.length !== 2) {
+        if (valueRefs.length === 2) {
             this.set = new SetU(valueRefs[0], valueRefs[1]);
         } else {
             this.errorMessage = `'set' takes exactly two arguments.`;
@@ -606,6 +606,7 @@ export class InteractionsDirective {
         if (this.interactions === undefined) {
             this.interactions = new Interactions();
             for (const actionDirective of this.actionDirectives) {
+                console.log(`id registering action ${this.actionDirectives}`);
                 this.interactions.withAction(actionDirective.get());
             }
             for (const reactionDirective of this.reactionDirectives) {

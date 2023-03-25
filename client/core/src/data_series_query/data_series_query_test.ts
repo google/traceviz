@@ -38,6 +38,9 @@ class TestFetcher implements DataSeriesFetcher {
     }
     this.onResponse = onResponse;
   }
+
+  cancelDataSeries(seriesName: string | undefined): void {
+  }
 }
 
 describe('data series query test', () => {

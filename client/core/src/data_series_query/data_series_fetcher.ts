@@ -29,4 +29,5 @@ export interface DataSeriesFetcher {
         fetchDataSeries(
                 req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
                 cancel: () => void): void;
+        cancelDataSeries(seriesName: string | undefined): void;
 }

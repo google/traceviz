@@ -15,7 +15,7 @@
  * @fileoverview Directives used to define a data series.
  */
 
-import { AfterContentInit, ContentChild, Directive } from "@angular/core";
+import { AfterContentInit, ContentChild, Directive, Input, OnDestroy } from "@angular/core";
 import { ValueDirective } from "./value.directive";
 import { ValueMapDirective } from "./value_map.directive";
 import { InteractionsDirective } from "./interactions.directive";
@@ -47,7 +47,7 @@ const supportedReactions = new Array<[string, string]>(
  * series, such as a UI component.   
  */
 @Directive({ selector: 'data-series' })
-export class DataSeriesQueryDirective implements AfterContentInit {
+export class DataSeriesQueryDirective implements AfterContentInit, OnDestroy {
     @ContentChild(QueryDirective) query: QueryDirective | undefined;
     @ContentChild(ParametersDirective) parameters: ParametersDirective | undefined;
     @ContentChild(InteractionsDirective) interactions: InteractionsDirective | undefined;
@@ -57,7 +57,8 @@ export class DataSeriesQueryDirective implements AfterContentInit {
     // ngAfterContentInit.
     dataSeriesQuery: DataSeriesQuery | undefined;
 
-    constructor(private readonly appCoreService: AppCoreService) { }
+    constructor(private readonly appCoreService: AppCoreService) {
+    }
 
     ngAfterContentInit(): void {
         this.appCoreService.appCore.onPublish((appCore) => {
@@ -103,5 +104,9 @@ export class DataSeriesQueryDirective implements AfterContentInit {
                 parameters,
                 interactions.match(DATASERIES, FETCH)());
         });
+    }
+
+    ngOnDestroy(): void {
+        this.dataSeriesQuery?.dispose();
     }
 }

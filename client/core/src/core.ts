@@ -39,3 +39,4 @@ export * from './value/value_reference.js';
  *        import those into the Angular library.
  */
 export * from './data_query/test_data_fetcher.js';
+export * from './protocol/test_response.js';

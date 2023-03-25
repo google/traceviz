@@ -36,7 +36,7 @@ import { GLOBAL_TEST_DATA_FETCHER } from "traceviz-client-core";
       </test-data-query>
     </app-core>
     <data-series>
-    <query><string>my_query</string></query>
+      <query><string>my_query</string></query>
       <parameters>
         <value-map>
         </value-map>
@@ -56,8 +56,7 @@ import { GLOBAL_TEST_DATA_FETCHER } from "traceviz-client-core";
         </reaction>
       </interactions>
     </data-series>
-`
-})
+`})
 class DataSeriesQueryTestComponent {
   @ViewChild(DataSeriesQueryDirective) dataSeriesQueryDir!: DataSeriesQueryDirective;
 }
@@ -65,6 +64,9 @@ class DataSeriesQueryTestComponent {
 describe('data series directive test', () => {
   let fixture: ComponentFixture<DataSeriesQueryTestComponent>;
   const appCoreService = new AppCoreService();
+  appCoreService.appCore.configurationErrors.subscribe((err) => {
+    fail(err);
+  });
 
   beforeEach(() => {
     TestBed.configureTestingModule({

@@ -40,7 +40,7 @@ const MOUSEOUT = 'mouseout';
 const HIGHLIGHT = 'highlight';
 
 // Valid watch types
-const SORT = 'sort';
+const SORT_ROWS = 'sortRows';
 
 // Sort watch keys
 const SORT_DIRECTION = 'direction';
@@ -62,7 +62,7 @@ const supportedReactions = new Array<[string, string]>(
   [ROWS, HIGHLIGHT],
 );
 
-const supportedWatches = [SORT];
+const supportedWatches = [SORT_ROWS];
 
 @Component({
   selector: 'data-table',
@@ -92,14 +92,19 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
   // Fields available after ngAfterContentInit.
   private interactions: Interactions | undefined;
-  private dataSeriesQuery: DataSeriesQuery | undefined;
+  dataSeriesQuery: DataSeriesQuery | undefined;
   sort: Sort = { active: '', direction: '' };
 
   constructor(private readonly appCoreService: AppCoreService,
-    private readonly ref: ChangeDetectorRef) { }
+    private readonly ref: ChangeDetectorRef) {
+
+    console.log('constructing a table');
+  }
 
   ngAfterContentInit(): void {
+    console.log('table content init');
     this.appCoreService.appCore.onPublish((appCore) => {
+      console.log('table on publish');
       if (this.dataSeriesQueryDir === undefined) {
         appCore.err(new ConfigurationError(`data-table is missing required 'data-series' child.`)
           .from(SOURCE)
@@ -121,13 +126,16 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
       // Ensure the user-specified interactions are supported.
       this.interactions = this.interactionsDir?.get();
-      this.interactions?.checkForSupportedActions(supportedActions);
-      this.interactions?.checkForSupportedReactions(supportedReactions);
-      this.interactions?.checkForSupportedWatches(supportedWatches);
-
+      try {
+        this.interactions?.checkForSupportedActions(supportedActions);
+        this.interactions?.checkForSupportedReactions(supportedReactions);
+        this.interactions?.checkForSupportedWatches(supportedWatches);
+      } catch (err) {
+        appCore.err(err);
+      }
       // Set up watches
-      this.interactions?.watch(SORT, new ValueMap(), (vm) => {
-        this.sortWatch(vm);
+      this.interactions?.watch(SORT_ROWS, new ValueMap(), (vm) => {
+        this.sortRowsWatch(vm);
       })
 
       // Publish loading status.
@@ -142,6 +150,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
       this.dataSeriesQuery?.response
         .pipe(takeUntil(this.unsubscribe))
         .subscribe((response) => {
+          console.log('Got a table response');
           this.newSeries.next();
           try {
             this.table = new CanonicalTable(response);
@@ -169,7 +178,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
     this.unsubscribe.complete();
   }
 
-  sortWatch(values: ValueMap) {
+  sortRowsWatch(values: ValueMap) {
     try {
       const sortDirection = values.expectString(SORT_DIRECTION);
       if (![SORT_ASC, SORT_DESC, SORT_NONE].includes(sortDirection)) {
@@ -221,6 +230,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
   rowClick(row: TableRow, shiftDepressed: boolean) {
     if (!shiftDepressed) {
+      console.log(`clicked row ${row}`);
       this.interactions?.update(ROWS, CLICK, row.properties);
     }
   }

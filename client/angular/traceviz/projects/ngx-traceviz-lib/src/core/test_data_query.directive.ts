@@ -45,6 +45,8 @@ export class TestDataQueryDirective extends DataQueryDirectiveBase implements Af
         appCoreService: AppCoreService) {
         super(appCoreService, GLOBAL_TEST_DATA_FETCHER);
         this.debounceMs = 0;
+        // Clear out any previous test data fetcher state.
+        GLOBAL_TEST_DATA_FETCHER.reset();
     }
 
     override filters(): ValueMap {

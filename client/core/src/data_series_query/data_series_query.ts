@@ -114,6 +114,7 @@ export class DataSeriesQuery {
   }
 
   dispose() {
+    this.dataQuery.cancelDataSeries(this.uniqueSeriesName);
     this.unsubscribe.next();
     this.unsubscribe.complete();
   }

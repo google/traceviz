@@ -6,7 +6,7 @@
     "ngx-traceviz-lib": {
       "projectType": "library",
       "root": "projects/ngx-traceviz-lib",
-      "sourceRoot": "projects/ngx-traceviz-lib/src",
+      "sourceRoot": "projects/ngx-traceviz-lib",
       "prefix": "lib",
       "architect": {
         "build": {

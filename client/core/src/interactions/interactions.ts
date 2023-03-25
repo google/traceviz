@@ -675,41 +675,59 @@ export class Interactions implements Documenter {
     return this;
   }
 
-  checkForSupportedActions(supportedTargetsAndTypes: Array<[string, string]>): ConfigurationError | undefined {
-    for (let [target, type] of supportedTargetsAndTypes) {
-      const actionsByType = this.actionsByTargetAndType.get(target);
-      if (actionsByType !== undefined && actionsByType.has(type)) {
-        continue;
+  checkForSupportedActions(supportedTargetsAndTypes: Array<[string, string]>): void {
+    const supportedLookup = new Map<string, string[]>([]);
+    for (const [target, type] of supportedTargetsAndTypes) {
+      if (supportedLookup.has(target)) {
+        supportedLookup.get(target)?.push(type);
+      } else {
+        supportedLookup.set(target, [type]);
       }
-      return new ConfigurationError(`Action target '${target}' and type '${type}' is not supported.`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
     }
-    return undefined;
+    for (let [target, actionsByType] of this.actionsByTargetAndType) {
+      if (!supportedLookup.has(target)) {
+        throw new ConfigurationError(`Action target '${target}' is not supported`);
+      }
+      for (let type of actionsByType.keys()) {
+        if (!supportedLookup.get(target)?.includes(type)) {
+          throw new ConfigurationError(`Action type '${type}' on target '${target}' is not supported.`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
+        }
+      }
+    }
   }
 
-  checkForSupportedReactions(supportedTargetsAndTypes: Array<[string, string]>): ConfigurationError | undefined {
-    for (let [target, type] of supportedTargetsAndTypes) {
-      const reactionsByType = this.reactionsByTargetAndType.get(target);
-      if (reactionsByType !== undefined && reactionsByType.has(type)) {
-        continue;
+  checkForSupportedReactions(supportedTargetsAndTypes: Array<[string, string]>): void {
+    const supportedLookup = new Map<string, string[]>([]);
+    for (const [target, type] of supportedTargetsAndTypes) {
+      if (supportedLookup.has(target)) {
+        supportedLookup.get(target)?.push(type);
+      } else {
+        supportedLookup.set(target, [type]);
       }
-      return new ConfigurationError(`Reaction target '${target}' and type '${type}' is not supported.`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
     }
-    return undefined;
+    for (let [target, reactionsByType] of this.reactionsByTargetAndType) {
+      if (!supportedLookup.has(target)) {
+        throw new ConfigurationError(`Reaction target '${target}' is not supported`);
+      }
+      for (let type of reactionsByType.keys()) {
+        if (!supportedLookup.get(target)?.includes(type)) {
+          throw new ConfigurationError(`Reaction type '${type}' on target '${target}' is not supported.`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
+        }
+      }
+    }
   }
 
-  checkForSupportedWatches(supportedTypes: string[]): ConfigurationError | undefined {
-    for (let type of supportedTypes) {
-      if (this.watchesByType.has(type)) {
-        continue;
+  checkForSupportedWatches(supportedTypes: string[]): void {
+    for (let type of this.watchesByType.keys()) {
+      if (!supportedTypes.includes(type)) {
+        throw new ConfigurationError(`Watch type '${type}' is not supported.`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
       }
-      return new ConfigurationError(`Watch type '${type}' is not supported.`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
     }
-    return undefined;
   }
 }

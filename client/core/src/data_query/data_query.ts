@@ -101,6 +101,12 @@ export class DataQuery implements DataSeriesFetcher {
     this.updateRequested.next(null);
   }
 
+  cancelDataSeries(seriesName: string | undefined) {
+    if (seriesName !== undefined) {
+      this.pendingQueriesBySeriesName.delete(seriesName);
+    }
+  }
+
   protected issueQuery() {
     if (!this.fetcher) {
       this.errorReporter(
@@ -128,12 +134,7 @@ export class DataQuery implements DataSeriesFetcher {
         for (const [seriesName, series] of data.series.entries()) {
           const queryInFlight = queriesInFlightBySeriesName.get(seriesName);
           if (queryInFlight === undefined) {
-            this.errorReporter(new ConfigurationError(
-              `Can't route DataSeries: series '${seriesName} is missing`)
-              .at(Severity.FATAL)
-              .from(SOURCE)
-            );
-            return;
+            continue;
           }
           // Invoke the registered callback for this dataSeries.
           queryInFlight.onResponse(series);
