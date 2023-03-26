@@ -65,35 +65,30 @@ var entrySets = map[string][]*Entry{
 			At(testTime(0)).
 			From(ac.SourceLocation("a.cc", 10)).
 			WithLevel(ac.Level(3, "Info")).
-			WithProcess(ac.Process(100)).
 			WithMessage("hello"),
 		NewEntry().
 			In(ac.Log("mylog")).
 			At(testTime(10)).
 			From(ac.SourceLocation("b.cc", 10)).
 			WithLevel(ac.Level(1, "Error")).
-			WithProcess(ac.Process(100)).
 			WithMessage("UH OH"),
 		NewEntry().
 			In(ac.Log("mylog")).
 			At(testTime(20)).
 			From(ac.SourceLocation("a.cc", 20)).
 			WithLevel(ac.Level(2, "Warning")).
-			WithProcess(ac.Process(100)).
 			WithMessage("Careful"),
 		NewEntry().
 			In(ac.Log("mylog")).
 			At(testTime(30)).
 			From(ac.SourceLocation("a.cc", 30)).
 			WithLevel(ac.Level(3, "Info")).
-			WithProcess(ac.Process(200)).
 			WithMessage("Hi again :3"),
 		NewEntry().
 			In(ac.Log("mylog")).
 			At(testTime(40)).
 			From(ac.SourceLocation("a.cc", 40)).
 			WithLevel(ac.Level(0, "Fatal")).
-			WithProcess(ac.Process(200)).
 			WithMessage("Crashing..."),
 	},
 }
@@ -151,19 +146,6 @@ func TestForEachEntryAndFiltering(t *testing.T) {
 			entrySets["mylog"][2],
 			entrySets["mylog"][3],
 			entrySets["mylog"][4],
-		},
-	}, {
-		description: "filter to process 100 and after 5 sec",
-		logTrace: lt(t,
-			newTestLogReader("log", entrySets["mylog"]...),
-		),
-		filters: []Filter{
-			WithProcesses(ac.Process(100)),
-			WithStartTime(testTime(5)),
-		},
-		wantEntries: []*Entry{
-			entrySets["mylog"][1],
-			entrySets["mylog"][2],
 		},
 	}, {
 		description: "filter to log level 'Info'",

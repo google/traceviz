@@ -111,35 +111,14 @@ func (sl *SourceLocation) String() string {
 	return sl.Identifier()
 }
 
-// Process describes the process that produced an Entry.
-type Process struct {
-	// The process' PID.  Must be unique among Processes.
-	PID int
-}
-
-// Identifier returns a unique name of the receiving Process.
-func (p *Process) Identifier() string {
-	return strconv.Itoa(p.PID)
-}
-
-// DisplayName returns a display name for the receiving Process.
-func (p *Process) DisplayName() string {
-	return fmt.Sprintf("PID %d", p.PID)
-}
-
-func (p *Process) String() string {
-	return p.Identifier()
-}
-
 // Entry represents a single log entry.
 type Entry struct {
 	Time time.Time
-	// log, Level, Process, and SourceLocation pointers are compared to determine
+	// log, Level, and SourceLocation pointers are compared to determine
 	// field equality.  A given LogReader should only use one instance of each of
 	// these types for each distinct instance of that type.
-	Log     *Log
-	Level   *Level
-	Process *Process
+	Log   *Log
+	Level *Level
 	// an Entry's SourceFile is referenced in its SourceLocation.
 	SourceLocation *SourceLocation
 	Message        []string
@@ -168,12 +147,6 @@ func (e *Entry) WithLevel(l *Level) *Entry {
 	return e
 }
 
-// WithProcess amends the receiver's Process field with the specified Process.
-func (e *Entry) WithProcess(p *Process) *Entry {
-	e.Process = p
-	return e
-}
-
 // From amends the receiver's SourceLocation field with the specified content.
 func (e *Entry) From(sourceLoc *SourceLocation) *Entry {
 	e.SourceLocation = sourceLoc
@@ -193,7 +166,6 @@ type AssetCache struct {
 	logs        map[string]*Log
 	sourceFiles map[string]*SourceFile
 	sourceLocs  map[*SourceFile]map[int]*SourceLocation
-	processes   map[int]*Process
 	levels      map[int]*Level
 }
 
@@ -203,7 +175,6 @@ func NewAssetCache() *AssetCache {
 		logs:        map[string]*Log{},
 		sourceFiles: map[string]*SourceFile{},
 		sourceLocs:  map[*SourceFile]map[int]*SourceLocation{},
-		processes:   map[int]*Process{},
 		levels:      map[int]*Level{},
 	}
 }
@@ -253,19 +224,6 @@ func (ac *AssetCache) SourceFile(filename string) *SourceFile {
 		ac.sourceFiles[filename] = sourceFile
 	}
 	return sourceFile
-}
-
-// Process fetches the Process with the specified PID from the receiving
-// AssetCache, creating it if necessary.
-func (ac *AssetCache) Process(pid int) *Process {
-	process, ok := ac.processes[pid]
-	if !ok {
-		process = &Process{
-			PID: pid,
-		}
-		ac.processes[pid] = process
-	}
-	return process
 }
 
 // Level fetches the Level with the specified weight and label from the

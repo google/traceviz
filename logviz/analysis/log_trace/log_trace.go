@@ -1,6 +1,8 @@
 package logtrace
 
 import (
+	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -9,9 +11,9 @@ import (
 
 // LogTrace provides a programmatic interface for trace analysis of Logs data.
 // Each log entry has a set of 'granularities' that can be used for filtering:
-// source log, log level (severity), logging process, source file, and source
-// location.  Each unique granularity has a unique identifier string.
-// Each distinct Log, Level, Process, and SourceLocation pointer should have
+// source log, log level (severity), source file, and source location.  Each
+// unique granularity has a unique identifier string.
+// Each distinct Log, Level, and SourceLocation pointer should have
 // exactly one instance, so a set of such pointers should contain all
 // distinct items, with no duplicates.
 //
@@ -21,14 +23,12 @@ type LogTrace struct {
 	// identifier string.
 	Logs        map[*Log]string
 	Levels      map[*Level]string
-	Processes   map[*Process]string
 	SourceLocs  map[*SourceLocation]string
 	SourceFiles map[*SourceFile]string
 
 	// We also maintain maps to look up granularity by identifier string.
 	LogsByID        map[string]*Log
 	LevelsByID      map[string]*Level
-	ProcessesByID   map[string]*Process
 	SourceLocsByID  map[string]*SourceLocation
 	SourceFilesByID map[string]*SourceFile
 
@@ -40,13 +40,11 @@ func NewLogTrace(lrs ...LogReader) (*LogTrace, error) {
 	lt := &LogTrace{
 		Logs:        map[*Log]string{},
 		Levels:      map[*Level]string{},
-		Processes:   map[*Process]string{},
 		SourceLocs:  map[*SourceLocation]string{},
 		SourceFiles: map[*SourceFile]string{},
 
 		LogsByID:        map[string]*Log{},
 		LevelsByID:      map[string]*Level{},
-		ProcessesByID:   map[string]*Process{},
 		SourceLocsByID:  map[string]*SourceLocation{},
 		SourceFilesByID: map[string]*SourceFile{},
 	}
@@ -54,18 +52,18 @@ func NewLogTrace(lrs ...LogReader) (*LogTrace, error) {
 	for _, lr := range lrs {
 		entryCh, err := lr.Entries(ac)
 		if err != nil {
-			return nil, logger.Errorf( "failed to create logtracer data source: %s", err)
+			log.Print(logger.Error("failed to create logtracer data source: %s", err))
+			return nil, fmt.Errorf("failed to create logtracer data source: %s", err)
 		}
 		for item := range entryCh {
 			if item.Err != nil {
-				return nil, logger.Errorf( "failure fetching log Entries: %s", item.Err)
+				log.Printf(logger.Error("failure fetching log Entries: %s", item.Err))
+				return nil, fmt.Errorf("failure fetching log Entries: %s", item.Err)
 			}
 			lt.Logs[item.Entry.Log] = item.Entry.Log.Identifier()
 			lt.LogsByID[item.Entry.Log.Identifier()] = item.Entry.Log
 			lt.Levels[item.Entry.Level] = item.Entry.Level.Identifier()
 			lt.LevelsByID[item.Entry.Level.Identifier()] = item.Entry.Level
-			lt.Processes[item.Entry.Process] = item.Entry.Process.Identifier()
-			lt.ProcessesByID[item.Entry.Process.Identifier()] = item.Entry.Process
 			lt.SourceLocs[item.Entry.SourceLocation] = item.Entry.SourceLocation.Identifier()
 			lt.SourceLocsByID[item.Entry.SourceLocation.Identifier()] = item.Entry.SourceLocation
 			lt.SourceFiles[item.Entry.SourceLocation.SourceFile] = item.Entry.SourceLocation.SourceFile.Identifier()
@@ -74,7 +72,8 @@ func NewLogTrace(lrs ...LogReader) (*LogTrace, error) {
 		}
 	}
 	if len(lt.Entries) == 0 {
-		return nil, logger.Errorf("log trace has no Entries")
+		log.Print(logger.Error("log trace has no Entries"))
+		return nil, fmt.Errorf("log trace has no Entries")
 	}
 	// Order Entries by timestamp ascending.
 	sort.Slice(lt.Entries, func(x, y int) bool {

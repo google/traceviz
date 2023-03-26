@@ -13,13 +13,19 @@
 
 // Package loggerreader provides a logtrace.LogReader implementation for logger
 // output.
+//
+// Logging in this package is goofy and over-the-top to generate interesting
+// logs for the package itself to consume.
 package loggerreader
 
 import (
+	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"time"
 
+	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
 	"github.com/google/traceviz/logviz/logger"
 )
 
@@ -32,7 +38,7 @@ type LineParser interface {
 	// ParseLine returns `(nil, nil)`, the entire line's contents will be
 	// appended, with an initial `\n`, to the previous log entry, if there is
 	// one.  In this way, multiline log entries can be supported.
-	ParseLine(ac *logtracer.AssetCache, line string) (*logtracer.Entry, error)
+	ParseLine(ac *logtrace.AssetCache, line string) (*logtrace.Entry, error)
 }
 
 var defaultLevels = map[string]struct {
@@ -46,91 +52,102 @@ var defaultLevels = map[string]struct {
 }
 
 type defaultLineParser struct {
-	re   *regexp.Regexp
-	tz   *time.Location
-	now  time.Time
-	year int
+	re *regexp.Regexp
+	tz *time.Location
 }
 
-func (dlp *defaultLineParser) ParseLine(ac *logtracer.AssetCache, line string) (*logtracer.Entry, error) {
+func (dlp *defaultLineParser) ParseLine(ac *logtrace.AssetCache, line string) (*logtrace.Entry, error) {
 	matches := dlp.re.FindStringSubmatch(line)
+	log.Printf("got %d matches", len(matches))
 	if len(matches) == 0 {
 		return nil, nil
 	}
 	if len(matches) != 12 {
-		return nil, logger.Errorf( "can't parse log line '%s'", line)
+		log.Print(logger.Error("can't parse log line '%s'", line))
+		return nil, fmt.Errorf("can't parse log line '%s'", line)
 	}
-	lev, ok := defaultLevels[matches[1]]
-	if !ok {
-		return nil, logger.Errorf( "unrecognized level '%s'", matches[1])
-	}
-	e := logtracer.NewEntry().
-		WithLevel(ac.Level(lev.weight, lev.label)).
+	e := logtrace.NewEntry().
 		WithMessage(matches[11])
-	pid, err := strconv.Atoi(matches[8])
+	year, err := strconv.Atoi(matches[1])
 	if err != nil {
-		return nil, logger.Errorf( "failed to parse PID `%s` as int", matches[8])
+		log.Printf(logger.Error("failed to parse year `%s` as int", matches[1]))
+		return nil, fmt.Errorf("failed to parse year `%s` as int", matches[1])
 	}
-
-	e.WithProcess(ac.Process(pid))
 	month, err := strconv.Atoi(matches[2])
 	if err != nil {
-		return nil, logger.Errorf( "failed to parse month `%s` as int", matches[2])
+		log.Printf(logger.Error("failed to parse month `%s` as int", matches[2]))
+		return nil, fmt.Errorf("failed to parse month `%s` as int", matches[2])
 	}
 	day, err := strconv.Atoi(matches[3])
 	if err != nil {
-		return nil, logger.Errorf( "failed to parse day `%s` as int", matches[3])
+		log.Print(logger.Error("failed to parse day `%s` as int", matches[3]))
+		return nil, fmt.Errorf("failed to parse day `%s` as int", matches[3])
 	}
 	hour, err := strconv.Atoi(matches[4])
 	if err != nil {
-		return nil, logger.Errorf( "failed to parse hour `%s` as int", matches[4])
+		log.Print(logger.Error("failed to parse hour `%s` as int", matches[4]))
+		return nil, fmt.Errorf("failed to parse hour `%s` as int", matches[4])
 	}
 	minute, err := strconv.Atoi(matches[5])
 	if err != nil {
-		return nil, logger.Errorf( "failed to parse minute `%s` as int", matches[5])
+		log.Print(logger.Error("failed to parse minute `%s` as int", matches[5]))
+		return nil, fmt.Errorf("failed to parse minute `%s` as int", matches[5])
 	}
 	second, err := strconv.Atoi(matches[6])
 	if err != nil {
-		return nil, logger.Errorf( "failed to parse seconds `%s` as int", matches[6])
+		log.Print(logger.Error("failed to parse seconds `%s` as int", matches[6]))
+		return nil, fmt.Errorf("failed to parse seconds `%s` as int", matches[6])
 	}
 	usec, err := strconv.Atoi(matches[7])
 	if err != nil {
-		return nil, logger.Errorf( "failed to parse usec `%s` as int", matches[7])
+		log.Print(logger.Error("failed to parse usec `%s` as int", matches[7]))
+		return nil, fmt.Errorf("failed to parse usec `%s` as int", matches[7])
 	}
 	// Assume the log's from the current year.  If that puts it in the future,
 	// assume it's from last year.
-	t := time.Date(dlp.year, time.Month(month), day, hour, minute, second, usec*1000, dlp.tz)
-	if dlp.now.Before(t) {
-		t = time.Date(dlp.year-1, time.Month(month), day, hour, minute, second, usec*1000, dlp.tz)
-	}
+	t := time.Date(year, time.Month(month), day, hour, minute, second, usec*1000, dlp.tz)
 	e.At(t)
-	lineNumber, err := strconv.Atoi(matches[10])
+	lineNumber, err := strconv.Atoi(matches[9])
 	if err != nil {
-		return nil, logger.Errorf( "failed to parse usec `%s` as int", matches[10])
+		log.Print(logger.Error("failed to parse line number `%s` as int", matches[9]))
+		return nil, fmt.Errorf("failed to parse line number `%s` as int", matches[9])
 	}
-	return e.From(ac.SourceLocation(matches[9], lineNumber)), nil
+	e.From(ac.SourceLocation(matches[8], lineNumber))
+	lev, ok := defaultLevels[matches[10]]
+	if !ok {
+		log.Printf(logger.Error("unrecognized level '%s'", matches[1]))
+		return nil, fmt.Errorf("unrecognized level '%s'", matches[1])
+	}
+	e.WithLevel(ac.Level(lev.weight, lev.label))
+	return e, nil
 }
 
 // DefaultLineParser is a LineParser implementation that expects log line
 // formats like `Lmmdd hh:mm:ss.uuuuuu PID file:line] msg`, with times in
 // America/Los_Angeles and dates within the twelve months prior to the
 // provided 'now' timestamp.
-func DefaultLineParser(now time.Time) LineParser {
-	tz, err := time.LoadLocation("America/Los_Angeles")
-	if err != nil {
-		panic("Failed to load time zone America/Los_Angeles")
-	}
+func DefaultLineParser() LineParser {
+	// Groups:
+	//   1: Year
+	//   2: Month
+	//   3: Day
+	//   4: Hour
+	//   5: Minute
+	//   6: Second
+	//   7: Microsecond
+	//   8: Filename
+	//   9: Source line
+	//  10: Severity
+	//  11: Message
 	// Lmmdd hh:mm:ss.uuuuuu PID file:line] msg
 	return &defaultLineParser{
-		re:   regexp.MustCompile(`^([IWEF])(\d{2})(\d{2}) (\d{2}):(\d{2}):(\d{2})\.(\d{6})\s+(\d+) ([^:]+):(\d+)\] (.*)$`),
-		tz:   tz,
-		now:  now,
-		year: now.Year(),
+		re: regexp.MustCompile(`^(\d{4})/(\d{2})/(\d{2}) (\d{2}):(\d{2}):(\d{2})\.(\d{6}) ([^:]*):(\d+): \[([IWEFP])\] (.*)$`),
+		tz: time.UTC,
 	}
 }
 
 // TextLogReader converts a textual log (expressed as a channel of strings)
-// into a stream of logtracer.Entrys.
+// into a stream of logtrace.Entrys.
 type TextLogReader struct {
 	logFilename string
 	lp          LineParser
@@ -147,26 +164,27 @@ func New(filename string, lp LineParser, lines <-chan string) *TextLogReader {
 	}
 }
 
-// Entries returns a readable channel producing logtracer.Items.  This channel
+// Entries returns a readable channel producing logtrace.Items.  This channel
 // is closed only after the receiver's `lines` channel is closed, or when a
 // parsing error is encountered -- in the latter case, the last Item sent on
 // the channel will contain that error.  Entries may only be called once on a
 // given TextLogReader.
-func (tlr *TextLogReader) Entries(ac *logtracer.AssetCache) (<-chan *logtracer.Item, error) {
+func (tlr *TextLogReader) Entries(ac *logtrace.AssetCache) (<-chan *logtrace.Item, error) {
 	if tlr.lines == nil {
-		return nil, logger.Errorf( "a LogReader's Entries() method may only be called once")
+		log.Print(logger.Error("a LogReader's Entries() method may only be called once"))
+		return nil, fmt.Errorf("a LogReader's Entries() method may only be called once")
 	}
 	lines := tlr.lines
 	tlr.lines = nil
-	entries := make(chan *logtracer.Item)
+	entries := make(chan *logtrace.Item)
 	// This goroutine will leak if a caller to Entries() fails to read the
 	// entries channel until it closes.
-	go func(lines <-chan string, entries chan<- *logtracer.Item) {
-		var lastEntry *logtracer.Entry
+	go func(lines <-chan string, entries chan<- *logtrace.Item) {
+		var lastEntry *logtrace.Entry
 		for line := range lines {
 			thisEntry, err := tlr.lp.ParseLine(ac, line)
 			if err != nil {
-				entries <- &logtracer.Item{
+				entries <- &logtrace.Item{
 					Err: err,
 				}
 				close(entries)
@@ -176,7 +194,7 @@ func (tlr *TextLogReader) Entries(ac *logtracer.AssetCache) (<-chan *logtracer.I
 			if thisEntry != nil {
 				thisEntry.In(ac.Log(tlr.logFilename))
 				if lastEntry != nil {
-					entries <- &logtracer.Item{
+					entries <- &logtrace.Item{
 						Entry: lastEntry,
 					}
 				}
@@ -186,8 +204,9 @@ func (tlr *TextLogReader) Entries(ac *logtracer.AssetCache) (<-chan *logtracer.I
 			// line to its message.
 			if thisEntry == nil {
 				if lastEntry == nil {
-					entries <- &logtracer.Item{
-						Err: logger.Errorf( "failed to parse log line '%s'", line),
+					log.Print(logger.Error("failed to parse log line '%s'", line))
+					entries <- &logtrace.Item{
+						Err: fmt.Errorf("failed to parse log line '%s'", line),
 					}
 					close(entries)
 					return
@@ -197,7 +216,7 @@ func (tlr *TextLogReader) Entries(ac *logtracer.AssetCache) (<-chan *logtracer.I
 		}
 		// Send any last entry along the pipe, then close it.
 		if lastEntry != nil {
-			entries <- &logtracer.Item{
+			entries <- &logtrace.Item{
 				Entry: lastEntry,
 			}
 		}

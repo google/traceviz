@@ -17,71 +17,60 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/traceviz/logviz/analysis/logtrace"
+	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
 
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestLogReader(t *testing.T) {
-	loc, err := time.LoadLocation("America/Los_Angeles")
-	if err != nil {
-		t.Fatalf("failed to load default time zone: %s", err)
-	}
-	now := time.Date(2000, 12, 31, 23, 59, 59, 999999999, loc)
 	for _, test := range []struct {
 		description string
 		log         []string
-		wantEntries []*logtracer.Entry
+		wantEntries []*logtrace.Entry
 	}{{
 		description: "reads simple log",
 		log: []string{
-			"I0102 03:04:05.000006 7 hello.cc:8] Hello there",
+			"2023/01/02 03:04:05.000006 hello.cc:7: [I] Hello there",
 		},
-		wantEntries: []*logtracer.Entry{
-			logtracer.NewEntry().
-				In(&logtracer.Log{
+		wantEntries: []*logtrace.Entry{
+			logtrace.NewEntry().
+				In(&logtrace.Log{
 					Filename: "test",
 				}).
-				At(time.Date(2000, 01, 02, 03, 04, 05, 6000, loc)).
-				WithLevel(&logtracer.Level{
+				At(time.Date(2023, 01, 02, 03, 04, 05, 6000, time.UTC)).
+				WithLevel(&logtrace.Level{
 					Label:  "Info",
 					Weight: 3,
 				}).
-				WithProcess(&logtracer.Process{
-					PID: 7,
-				}).
-				From(&logtracer.SourceLocation{
-					SourceFile: &logtracer.SourceFile{
+				From(&logtrace.SourceLocation{
+					SourceFile: &logtrace.SourceFile{
 						Filename: "hello.cc",
 					},
-					Line: 8,
+					Line: 7,
 				}).
 				WithMessage("Hello there"),
 		},
 	}, {
 		description: "multiline log",
 		log: []string{
-			"I0102 03:04:05.000006 7 hello.cc:8] Hello there",
+			"2023/01/02 03:04:05.000006 /foo/bar/hello.cc:7: [I] Hello there",
 			"I'm glad you're here!",
 		},
-		wantEntries: []*logtracer.Entry{
-			logtracer.NewEntry().
-				In(&logtracer.Log{
+		wantEntries: []*logtrace.Entry{
+			logtrace.NewEntry().
+				In(&logtrace.Log{
 					Filename: "test",
 				}).
-				At(time.Date(2000, 01, 02, 03, 04, 05, 6000, loc)).
-				WithLevel(&logtracer.Level{
+				At(time.Date(2023, 01, 02, 03, 04, 05, 6000, time.UTC)).
+				WithLevel(&logtrace.Level{
 					Label:  "Info",
 					Weight: 3,
 				}).
-				WithProcess(&logtracer.Process{
-					PID: 7,
-				}).
-				From(&logtracer.SourceLocation{
-					SourceFile: &logtracer.SourceFile{
-						Filename: "hello.cc",
+				From(&logtrace.SourceLocation{
+					SourceFile: &logtrace.SourceFile{
+						Filename: "/foo/bar/hello.cc",
 					},
-					Line: 8,
+					Line: 7,
 				}).
 				WithMessage("Hello there", "I'm glad you're here!"),
 		},
@@ -94,12 +83,12 @@ func TestLogReader(t *testing.T) {
 				}
 				close(logCh)
 			}()
-			reader := New("test", DefaultLineParser(now), logCh)
-			entryCh, err := reader.Entries(logtracer.NewAssetCache())
+			reader := New("test", DefaultLineParser(), logCh)
+			entryCh, err := reader.Entries(logtrace.NewAssetCache())
 			if err != nil {
 				t.Fatalf("Failed to fetch entries: %s", err)
 			}
-			gotEntries := []*logtracer.Entry{}
+			gotEntries := []*logtrace.Entry{}
 			for item := range entryCh {
 				if item.Err != nil {
 					t.Errorf("Unexpected parsing error %s", item.Err)

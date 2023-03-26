@@ -11,7 +11,7 @@
 	limitations under the License.
 */
 
-package logtracer
+package logtrace
 
 import (
 	"sort"
@@ -24,7 +24,6 @@ type Filter func(f *filter) error
 type filter struct {
 	logs        map[*Log]struct{}
 	levels      map[*Level]struct{}
-	processes   map[*Process]struct{}
 	sourceLocs  map[*SourceLocation]struct{}
 	sourceFiles map[*SourceFile]struct{}
 	startTime   time.Time
@@ -46,16 +45,6 @@ func WithLevels(levels ...*Level) Filter {
 	return func(f *filter) error {
 		for _, level := range levels {
 			f.levels[level] = struct{}{}
-		}
-		return nil
-	}
-}
-
-// WithProcesses returns a Filter filtering in the specified Processes.
-func WithProcesses(processes ...*Process) Filter {
-	return func(f *filter) error {
-		for _, process := range processes {
-			f.processes[process] = struct{}{}
 		}
 		return nil
 	}
@@ -116,7 +105,6 @@ func (lt *LogTrace) filter(filters ...Filter) (*filter, error) {
 	ret := &filter{
 		logs:        map[*Log]struct{}{},
 		levels:      map[*Level]struct{}{},
-		processes:   map[*Process]struct{}{},
 		sourceLocs:  map[*SourceLocation]struct{}{},
 		sourceFiles: map[*SourceFile]struct{}{},
 		startTime:   start,
@@ -175,11 +163,6 @@ func (f *filter) entryFilteredIn(e *Entry) bool {
 	}
 	if len(f.levels) > 0 {
 		if _, ok := f.levels[e.Level]; !ok {
-			return false
-		}
-	}
-	if len(f.processes) > 0 {
-		if _, ok := f.processes[e.Process]; !ok {
 			return false
 		}
 	}
