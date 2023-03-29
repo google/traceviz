@@ -14,8 +14,9 @@
 // Package loggerreader provides a logtrace.LogReader implementation for logger
 // output.
 //
-// Logging in this package is goofy and over-the-top to generate interesting
-// logs for the package itself to consume.
+// This is not a serious log parsing package.  Its own internal logging is
+// goofy and over-the-top to generate interesting logs for logviz to visualize.
+// Consider
 package loggerreader
 
 import (
