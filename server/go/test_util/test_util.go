@@ -132,11 +132,45 @@ func (tdb *testDataBuilder) Parent() TestDataBuilder {
 	return tdb.parent
 }
 
+func dataOf(d any) (*util.Data, error) {
+	switch v := d.(type) {
+	case *util.DataResponseBuilder:
+		return v.Data()
+	case *util.Data:
+		return v, nil
+	default:
+		return nil, fmt.Errorf("argument must be a *util.DataResponseBuilder or a *tracevizpb.Data")
+	}
+}
+
+// CompareDataResponses compares the provided got and want values, which must
+// be either *util.DataResponseBuilder or *util.Data.  If the two compare
+// equal, returns nil.  If they do not compare equal, raises an error on the
+// provided testing.T object.  If another problem is encountered, returns it as
+// an error.
+func CompareDataResponses(t *testing.T, got any, want any) error {
+	t.Helper()
+	gotData, err := dataOf(got)
+	if err != nil {
+		return err
+	}
+	wantData, err := dataOf(want)
+	if err != nil {
+		return err
+	}
+	gotPP := gotData.PrettyPrint()
+	wantPP := wantData.PrettyPrint()
+	if diff := cmp.Diff(wantPP, gotPP); diff != "" {
+		t.Errorf("Got data %s, diff (-want, +got) %s", gotData.PrettyPrint(), diff)
+	}
+	return nil
+}
+
 // CompareResponses is a test helper for TraceViz data sources and data
 // helpers.  It compares test output from the system under test with desired
 // output.  Both outputs are produced by callbacks accepting either a
 // util.DataBuilder or a TestDataBuilder.
-func CompareResponses(t *testing.T, buildGotIf, buildWantIf any) error {
+func CompareResponses(t *testing.T, buildGotIf any, buildWantIf any) error {
 	t.Helper()
 	gotDrb := util.NewDataResponseBuilder()
 	switch buildGot := buildGotIf.(type) {
@@ -149,11 +183,6 @@ func CompareResponses(t *testing.T, buildGotIf, buildWantIf any) error {
 	default:
 		t.Fatalf("expected buildGot to be func(util.DataBuilder) or func(testutil.TestDataBuilder)")
 	}
-	// ToJSON forces gotDrb.D's string table to update.
-	gotData, err := gotDrb.Data()
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
 	wantDrb := util.NewDataResponseBuilder()
 	switch buildWant := buildWantIf.(type) {
 	case func(util.DataBuilder):
@@ -165,12 +194,5 @@ func CompareResponses(t *testing.T, buildGotIf, buildWantIf any) error {
 	default:
 		t.Fatalf("expected buildWant to be func(util.DataBuilder) or func(testutil.TestDataBuilder)")
 	}
-	wantData, err := wantDrb.Data()
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-	if diff := cmp.Diff(wantData.PrettyPrint(), gotData.PrettyPrint()); diff != "" {
-		t.Errorf("Got data %v, diff (-want, +got) %s", gotData, diff)
-	}
-	return nil
+	return CompareDataResponses(t, gotDrb, wantDrb)
 }
