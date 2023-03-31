@@ -18,11 +18,13 @@ import (
 	"context"
 	"fmt"
 	"hash/fnv"
+	"log"
 	"sort"
 	"strings"
 	"time"
 
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
+	"github.com/google/traceviz/logviz/logger"
 	"github.com/google/traceviz/server/go/category"
 	"github.com/google/traceviz/server/go/color"
 	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
@@ -215,8 +217,10 @@ func (ds *DataSource) HandleDataSeriesRequests(ctx context.Context, globalFilter
 	// Fetch the collection, from the cache if it's there.
 	coll, err := ds.fetchCollection(ctx, collectionName)
 	if err != nil {
+		log.Printf(logger.Error("Failed to fetch collection: %s", err))
 		return err
 	}
+	log.Printf(logger.Info("Loaded collection %s", collectionName))
 	// Build the queryFilters, just once, for all DataSeriesRequests.
 	qf, err := filterFromGlobalFilters(coll.lt, globalFilters)
 	if err != nil {

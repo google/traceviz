@@ -124,7 +124,7 @@ export class ToggleDirective extends UpdateDirective implements AfterContentInit
         for (const valueDirective of this.valueDirectives) {
             valueRefs.push(valueDirective);
         }
-        if (valueRefs.length !== 2) {
+        if (valueRefs.length === 2) {
             this.toggle = new Toggle(valueRefs[0], valueRefs[1]);
         } else {
             this.errorMessage = `'toggle' takes exactly two arguments.`;
@@ -161,7 +161,7 @@ export class ToggleOrSetDirective extends UpdateDirective implements AfterConten
         for (const valueDirective of this.valueDirectives) {
             valueRefs.push(valueDirective);
         }
-        if (valueRefs.length !== 2) {
+        if (valueRefs.length === 2) {
             this.tos = new ToggleOrSet(valueRefs[0], valueRefs[1]);
         } else {
             this.errorMessage = `'toggle-or-set' takes exactly two arguments.`;
@@ -198,7 +198,7 @@ export class ExtendDirective extends UpdateDirective implements AfterContentInit
         for (const valueDirective of this.valueDirectives) {
             valueRefs.push(valueDirective);
         }
-        if (valueRefs.length !== 2) {
+        if (valueRefs.length === 2) {
             this.extend = new Extend(valueRefs[0], valueRefs[1]);
         } else {
             this.errorMessage = `'extend' takes exactly two arguments.`;
@@ -235,7 +235,7 @@ export class SetIfEmptyDirective extends UpdateDirective implements AfterContent
         for (const valueDirective of this.valueDirectives) {
             valueRefs.push(valueDirective);
         }
-        if (valueRefs.length !== 2) {
+        if (valueRefs.length === 2) {
             this.sie = new SetIfEmpty(valueRefs[0], valueRefs[1]);
         } else {
             this.errorMessage = `'set-if-empty' takes exactly two arguments.`;

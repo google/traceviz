@@ -226,6 +226,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
           });
       }
     }
+    this.ref.detectChanges();
   }
 
   rowClick(row: TableRow, shiftDepressed: boolean) {

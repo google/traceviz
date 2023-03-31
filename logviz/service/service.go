@@ -17,6 +17,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -24,6 +25,7 @@ import (
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
 	loggerreader "github.com/google/traceviz/logviz/analysis/logger_reader"
 	datasource "github.com/google/traceviz/logviz/data_source"
+	"github.com/google/traceviz/logviz/logger"
 	"github.com/google/traceviz/server/go/handlers"
 	querydispatcher "github.com/google/traceviz/server/go/query_dispatcher"
 	"github.com/hashicorp/golang-lru/simplelru"
@@ -99,6 +101,9 @@ func New(assetRoot, collectionRoot string, cap int) (*Service, error) {
 	}
 	assetHandler := handlers.NewHandler()
 	addFileAsset := func(resourceName, resourceType, filename string) {
+		log.Printf(logger.Info("Serving asset '%s' at '%s'",
+			path.Join(assetRoot, filename),
+			resourceName))
 		assetHandler.With(
 			resourceName,
 			handlers.NewFileAsset(
@@ -108,9 +113,10 @@ func New(assetRoot, collectionRoot string, cap int) (*Service, error) {
 		)
 	}
 	addFileAsset("/logviz-theme.css", "text/css", "logviz-theme.css")
-	addFileAsset("/", "text/html", "index.html")
 	addFileAsset("/index.html", "text/html", "index.html")
-	addFileAsset("/app.js", "application/javascript", "bundle.js")
+	addFileAsset("main.js", "application/javascript", "main.js")
+	addFileAsset("polyfills.js", "application/javascript", "polyfills.js")
+	addFileAsset("runtime.js", "application/javascript", "runtime.js")
 	return &Service{
 		queryHandler: handlers.NewQueryHandler(qd),
 		assetHandler: assetHandler,
@@ -121,7 +127,7 @@ func (s *Service) RegisterHandlers(mux *http.ServeMux) {
 	for path, handler := range s.queryHandler.HandlersByPath() {
 		mux.HandleFunc(path, handler)
 	}
-	for path, handler := range s.assetHandler.HandlersByPath() {
-		mux.HandleFunc(path, handler)
-	}
+	// for path, handler := range s.assetHandler.HandlersByPath() {
+	// 	mux.HandleFunc(path, handler)
+	// }
 }

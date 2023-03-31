@@ -8,7 +8,9 @@
       <value-map>
         <!-- The collection loader finds collections at this name under
              google3/third_party/traceviz/codelab/logviz/server/logs/. -->
-        <value key="collection_name"><string>log3</string></value>
+        <value key="collection_name">
+          <string>logs/log1</string>
+        </value>
         <!-- Filtered-in granularities.  Empty means 'unfiltered' -->
         <value key="filtered_source_files"><string-set></string-set></value>
         <!-- called-out source-file granularities.  Empty means 'none'. -->
@@ -21,7 +23,7 @@
       Multiple components may use this to subscribe to DataSeries streams;
       these will be automatically updated as new data becomes available.
     -->
-    <data-query debounceMs="50">
+    <data-query [debounceMs]="50">
       <!--
         The set of filters to attach to DataRequests.  Each specified global
         value is provided with each DataRequest under the provided query key.
@@ -86,7 +88,9 @@
         <!-- The data series that should populate this table -->
         <data-series>
           <!-- The name of the dataseries query -->
-          <query><string>logs.aggregate_source_files_table</string></query>
+          <query>
+            <string>logs.aggregate_source_files_table</string>
+          </query>
           <!--
             The circumstances under which this query should re-fetch: if
             collection_name has just changed, and it is nonempty.
@@ -94,11 +98,13 @@
           <interactions>
             <reaction target="data-series" type="fetch">
               <and>
-                <not><equals>
-                  <global-ref key="collection_name"></global-ref>
-                  <string></string>
-                </equals></not>
-                <changed><global-ref key="collection_name"></global-ref></changed>
+                <not>
+                  <equals>
+                    <global-ref key="collection_name"></global-ref>
+                    <string></string>
+                  </equals>
+                </not>
+                <changed [sinceMs]=50><global-ref key="collection_name"></global-ref></changed>
               </and>
             </reaction>
           </interactions>
@@ -129,14 +135,18 @@
         </interactions>
 
         <data-series>
-          <query><string>logs.raw_entries</string></query>
+          <query>
+            <string>logs.raw_entries</string>
+          </query>
           <interactions>
             <reaction target="data-series" type="fetch">
               <and>
-                <not><equals>
-                  <global-ref key="collection_name"></global-ref>
-                  <string></string>
-                </equals></not>
+                <not>
+                  <equals>
+                    <global-ref key="collection_name"></global-ref>
+                    <string></string>
+                  </equals>
+                </not>
                 <or>
                   <changed><global-ref key="collection_name"></global-ref></changed>
                   <changed><global-ref key="filtered_source_files"></global-ref></changed>
@@ -158,7 +168,7 @@
     Add an overtime chart here!
   </mat-card>
 
-<!--   <mat-card class="band">
+  <!--   <mat-card class="band">
     <mat-card-title>Global State Monitor</mat-card-title>
     <global-state-monitor></global-state-monitor>
   </mat-card> -->
