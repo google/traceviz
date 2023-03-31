@@ -1,10 +1,14 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 
+import {AppCoreService} from 'traceviz-angular-core';
+
+/** The application component of the LogViz client. */
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  selector: 'logviz',
+  templateUrl: './logviz.component.html',
+  styleUrls: ['logviz.component.css'],
 })
-export class AppComponent {
-  title = 'client';
+export class LogvizComponent {
+  constructor(public appCoreService: AppCoreService) {
+  }
 }
