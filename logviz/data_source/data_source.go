@@ -1,3 +1,16 @@
+/*
+	Copyright 2023 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+		https://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/
+
 // Package datasource provides a TraceViz data source for logs traces.
 package datasource
 
@@ -9,7 +22,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/golang-lru/simplelru"
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
 	"github.com/google/traceviz/server/go/category"
 	"github.com/google/traceviz/server/go/color"
@@ -127,33 +139,32 @@ func filterFromGlobalFilters(lt *logtrace.LogTrace, options map[string]*util.V) 
 type LogTraceFetcher interface {
 	// FetchLog fetches the log specified by collectionName, returning a
 	// LogTrace or an error if a failure is encountered.
-	Fetch(ctx context.Context, collectionName string) (*logtrace.LogTrace, error)
+	Fetch(ctx context.Context, collectionName string) (*Collection, error)
 }
 
 // collection represents a single fetched log trace, along with any metadata it
 // requires.
-type collection struct {
+type Collection struct {
 	lt *logtrace.LogTrace
+}
+
+func NewCollection(lt *logtrace.LogTrace) *Collection {
+	return &Collection{
+		lt: lt,
+	}
 }
 
 // DataSource implements querydispatcher.dataSource for logs data.  It caches
 // the most recently used logs.
 type DataSource struct {
-	// An LRU cache holding the most recently-accessed logs.
-	lru *simplelru.LRU
 	// A log fetcher used to fetch uncached logs.
 	fetcher LogTraceFetcher
 }
 
 // New returns a new DataSource with the specified cache capacity, and using
 // the provided log fetcher.
-func New(cap int, fetcher LogTraceFetcher) (*DataSource, error) {
-	lru, err := simplelru.NewLRU(cap /*no onEvict policy*/, nil)
-	if err != nil {
-		return nil, err
-	}
+func New(fetcher LogTraceFetcher) (*DataSource, error) {
 	return &DataSource{
-		lru:     lru,
 		fetcher: fetcher,
 	}, nil
 }
@@ -171,23 +182,11 @@ func (ds *DataSource) SupportedDataSeriesQueries() []string {
 // fetchCollection returns the specified collection from the LRU if it's
 // present there.  If it isn't already in the LRU, it is fetched and added to
 // the LRU before being returned.
-func (ds *DataSource) fetchCollection(ctx context.Context, collectionName string) (*collection, error) {
-	collIf, ok := ds.lru.Get(collectionName)
-	if ok {
-		coll, ok := collIf.(*collection)
-		if !ok {
-			return nil, fmt.Errorf("fetched collection didn't contain a LogTrace")
-		}
-		return coll, nil
-	}
-	lt, err := ds.fetcher.Fetch(ctx, collectionName)
+func (ds *DataSource) fetchCollection(ctx context.Context, collectionName string) (*Collection, error) {
+	coll, err := ds.fetcher.Fetch(ctx, collectionName)
 	if err != nil {
 		return nil, err
 	}
-	coll := &collection{
-		lt: lt,
-	}
-	ds.lru.Add(collectionName, coll)
 	return coll, nil
 }
 
@@ -297,7 +296,7 @@ func (sfd *sourceFileData) row(levels []*levelInfo) []table.CellUpdate {
 
 var highlightColor = "rgb(127, 127, 127)"
 
-func handleSourceFileTableQuery(coll *collection, qf *queryFilters, tableDb util.DataBuilder, reqOpts map[string]*util.V) error {
+func handleSourceFileTableQuery(coll *Collection, qf *queryFilters, tableDb util.DataBuilder, reqOpts map[string]*util.V) error {
 	for key := range reqOpts {
 		switch key {
 		default:
@@ -400,7 +399,7 @@ var colorSpacesByLevelWeight = map[int]*color.Space{
 	3: color.NewSpace(infoColorSpace, "rgba(153, 153, 153, .5)"),
 }
 
-func handleRawEntriesQuery(coll *collection, qf *queryFilters, tableDb util.DataBuilder, reqOpts map[string]*util.V) error {
+func handleRawEntriesQuery(coll *Collection, qf *queryFilters, tableDb util.DataBuilder, reqOpts map[string]*util.V) error {
 	for key := range reqOpts {
 		switch key {
 		default:
@@ -458,7 +457,7 @@ var (
 	}
 )
 
-func handleTimeseriesQuery(coll *collection, qf *queryFilters, series util.DataBuilder, reqOpts map[string]*util.V) error {
+func handleTimeseriesQuery(coll *Collection, qf *queryFilters, series util.DataBuilder, reqOpts map[string]*util.V) error {
 	// Handle query parameters.
 	var binCount int64
 	var aggregateBy string

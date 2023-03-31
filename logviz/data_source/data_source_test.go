@@ -1,3 +1,16 @@
+/*
+	Copyright 2023 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+		https://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/
+
 package datasource
 
 import (
@@ -19,29 +32,22 @@ import (
 	xychart "github.com/google/traceviz/server/go/xy_chart"
 )
 
-const (
-	log1 = `I0101 00:00:00.000000 100 a.cc:10] Hello
-W0101 00:10:00.000000 100 a.cc:20] We have a problem...
-I0101 00:20:00.000000 100 a.cc:30] Still here
-E0101 00:30:00.000000 100 b.cc:10] Trouble!`
-	log2 = `E0101 00:05:00.000000 100 c.cc:10] Alert!
-E0101 00:15:00.000000 100 c.cc:20] Alert!
-E0101 00:25:00.000000 100 a.cc:40] ALERT!
-F0101 00:35:00.000000 100 c.cc:30] Failure`
-)
+var startTime = time.Date(2023, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-const timeLayout = "Jan 2, 2006 at 3:04pm (MST)"
-
-func getRefTime() (func(offset time.Duration) time.Time, error) {
-	loc, err := time.LoadLocation("America/Los_Angeles")
-	if err != nil {
-		return nil, err
-	}
-	refTime := time.Date(2000, time.January, 1, 0, 0, 0, 0, loc)
-	return func(offset time.Duration) time.Time {
-		return refTime.Add(offset)
-	}, nil
+func ts(dur time.Duration) time.Time {
+	return startTime.Add(dur)
 }
+
+const (
+	log1 = `2023/01/01 00:00:00.000000 a.cc:10: [I] Hello
+2023/01/01 00:10:00.000000 a.cc:20: [W] We have a problem...
+2023/01/01 00:20:00.000000 a.cc:30: [I] Still here
+2023/01/01 00:30:00.000000 b.cc:10: [E] Trouble!`
+	log2 = `2023/01/01 00:05:00.000000 c.cc:10: [E] Alert!
+2023/01/01 00:15:00.000000 c.cc:20: [E] Alert!
+2023/01/01 00:25:00.000000 a.cc:40: [E] ALERT!
+2023/01/01 00:35:00.000000 c.cc:30: [F] Failure`
+)
 
 func testLogReader(collectionName, log string) *loggerreader.TextLogReader {
 	logCh := make(chan string)
@@ -56,7 +62,7 @@ func testLogReader(collectionName, log string) *loggerreader.TextLogReader {
 
 type testLogTraceFetcher struct{}
 
-func (tlf *testLogTraceFetcher) Fetch(ctx context.Context, collectionName string) (*logtrace.LogTrace, error) {
+func (tlf *testLogTraceFetcher) Fetch(ctx context.Context, collectionName string) (*Collection, error) {
 	var logReaders []logtrace.LogReader
 	switch collectionName {
 	case "log1":
@@ -68,15 +74,16 @@ func (tlf *testLogTraceFetcher) Fetch(ctx context.Context, collectionName string
 	default:
 		return nil, fmt.Errorf("can't find collection '%s'", collectionName)
 	}
-	return logtrace.NewLogTrace(logReaders...)
+	lt, err := logtrace.NewLogTrace(logReaders...)
+	if err != nil {
+		return nil, err
+	}
+	return &Collection{
+		lt: lt,
+	}, nil
 }
 
 func TestQueries(t *testing.T) {
-	ts, err := getRefTime()
-	if err != nil {
-		t.Fatalf("failed to parse reference time: %s", err)
-	}
-
 	fatalCol := table.Column(category.New("level_0", "Fatal", "The number of distinct log entries associated with this source file at log level `Fatal`"))
 	errorCol := table.Column(category.New("level_1", "Error", "The number of distinct log entries associated with this source file at log level `Error`"))
 	warningCol := table.Column(category.New("level_2", "Warning", "The number of distinct log entries associated with this source file at log level `Warning`"))
@@ -403,7 +410,7 @@ func TestQueries(t *testing.T) {
 		},
 	}} {
 		t.Run(test.description, func(t *testing.T) {
-			ds, err := New(10, &testLogTraceFetcher{})
+			ds, err := New(&testLogTraceFetcher{})
 			if err != nil {
 				t.Fatalf("Unexpected failure creating data source: %s", err)
 			}
