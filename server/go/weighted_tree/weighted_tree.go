@@ -75,10 +75,10 @@ import (
 )
 
 const (
-	datumTypeKey   = "tree_datum_type"
-	payloadTypeKey = "tree_payload_type"
+	datumTypeKey   = "weighted_tree_datum_type"
+	payloadTypeKey = "weighted_tree_payload_type"
 
-	frameHeightPxKey = "tree_frame_height_px"
+	frameHeightPxKey = "weighted_tree_frame_height_px"
 )
 
 // RenderSettings is a collection of rendering settings for trees.

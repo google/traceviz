@@ -183,13 +183,13 @@ const (
 	payloadTypeKey = "trace_payload_type"
 
 	// Rendering property keys
-	spanWidthCatPx          = "span_width_cat_px"
-	spanPaddingCatPx        = "span_padding_cat_px"
-	categoryHeaderCatPx     = "category_header_cat_px"
-	categoryPaddingCatPx    = "category_padding_cat_px"
-	categoryMarginTempPx    = "category_margin_temp_px"
-	categoryMinWidthCatPx   = "category_min_width_cat_px"
-	categoryBaseWidthTempPx = "category_base_width_temp_px"
+	spanWidthCatPxKey          = "trace_span_width_cat_px"
+	spanPaddingCatPxKey        = "trace_span_padding_cat_px"
+	categoryHeaderCatPxKey     = "trace_category_header_cat_px"
+	categoryPaddingCatPxKey    = "trace_category_padding_cat_px"
+	categoryMarginTempPxKey    = "trace_category_margin_temp_px"
+	categoryMinWidthCatPxKey   = "trace_category_min_width_cat_px"
+	categoryBaseWidthTempPxKey = "trace_category_base_width_temp_px"
 )
 
 // RenderSettings is a collection of rendering settings for traces.  A trace is
@@ -232,13 +232,13 @@ type RenderSettings struct {
 // Define applies the receiver as a set of properties.
 func (rs *RenderSettings) Define() util.PropertyUpdate {
 	return util.Chain(
-		util.IntegerProperty(spanWidthCatPx, rs.SpanWidthCatPx),
-		util.IntegerProperty(spanPaddingCatPx, rs.SpanPaddingCatPx),
-		util.IntegerProperty(categoryHeaderCatPx, rs.CategoryHeaderCatPx),
-		util.IntegerProperty(categoryPaddingCatPx, rs.CategoryPaddingCatPx),
-		util.IntegerProperty(categoryMarginTempPx, rs.CategoryMarginTempPx),
-		util.IntegerProperty(categoryMinWidthCatPx, rs.CategoryMinWidthCatPx),
-		util.IntegerProperty(categoryBaseWidthTempPx, rs.CategoryBaseWidthTempPx),
+		util.IntegerProperty(spanWidthCatPxKey, rs.SpanWidthCatPx),
+		util.IntegerProperty(spanPaddingCatPxKey, rs.SpanPaddingCatPx),
+		util.IntegerProperty(categoryHeaderCatPxKey, rs.CategoryHeaderCatPx),
+		util.IntegerProperty(categoryPaddingCatPxKey, rs.CategoryPaddingCatPx),
+		util.IntegerProperty(categoryMarginTempPxKey, rs.CategoryMarginTempPx),
+		util.IntegerProperty(categoryMinWidthCatPxKey, rs.CategoryMinWidthCatPx),
+		util.IntegerProperty(categoryBaseWidthTempPxKey, rs.CategoryBaseWidthTempPx),
 	)
 }
 

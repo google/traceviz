@@ -94,13 +94,13 @@ func TestTraceData(t *testing.T) {
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			db.With(
 				continuousaxis.NewDurationAxis(cat, 300*time.Nanosecond).Define(),
-				util.IntegerProperty(spanWidthCatPx, 0),
-				util.IntegerProperty(spanPaddingCatPx, 0),
-				util.IntegerProperty(categoryHeaderCatPx, 0),
-				util.IntegerProperty(categoryPaddingCatPx, 0),
-				util.IntegerProperty(categoryMarginTempPx, 0),
-				util.IntegerProperty(categoryMinWidthCatPx, 0),
-				util.IntegerProperty(categoryBaseWidthTempPx, 0),
+				util.IntegerProperty(spanWidthCatPxKey, 0),
+				util.IntegerProperty(spanPaddingCatPxKey, 0),
+				util.IntegerProperty(categoryHeaderCatPxKey, 0),
+				util.IntegerProperty(categoryPaddingCatPxKey, 0),
+				util.IntegerProperty(categoryMarginTempPxKey, 0),
+				util.IntegerProperty(categoryMinWidthCatPxKey, 0),
+				util.IntegerProperty(categoryBaseWidthTempPxKey, 0),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(categoryNodeType)),
 				cpu0Category.Define(),
