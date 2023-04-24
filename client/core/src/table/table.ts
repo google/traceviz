@@ -15,7 +15,6 @@
 
 import { Category, CategorySet, getDefinedCategory } from '../category/category.js';
 import { ConfigurationError, Severity } from '../errors/errors.js';
-// import { HighlightableItem } from '../highlightable_item/highlightable_item.js';
 import { ResponseNode } from '../protocol/response_interface.js';
 import { EmptyValue, StringValue, Value } from '../value/value.js';
 import { ValueMap } from '../value/value_map.js';
@@ -45,8 +44,6 @@ export class TableRenderProperties {
     }
   }
 }
-
-
 
 /** A table cell. */
 export class TableCell {

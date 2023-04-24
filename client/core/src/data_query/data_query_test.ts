@@ -14,10 +14,8 @@
 import { Request, SeriesRequest } from "../protocol/request_interface.js";
 import { Response, ResponseNode } from "../protocol/response_interface.js";
 import { node, response } from "../protocol/test_response.js";
-import { DataSeriesQuery } from "../data_series_query/data_series_query.js";
 import { GLOBAL_TEST_DATA_FETCHER } from "./test_data_fetcher.js";
 import { int, str, valueMap } from '../value/test_value.js';
-import { BehaviorSubject, of, throwError } from "rxjs";
 import { TestDataQuery } from "./test_data_query.js";
 
 function buildEmptyResponse(...seriesRequests: SeriesRequest[]): Response {
