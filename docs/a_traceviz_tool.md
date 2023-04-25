@@ -132,8 +132,8 @@ data queries:
 ```
 
 With that, data requests from the frontend will automatically be batched
-together, debounced, and routed to the proper data source: TraceViz handles all
-client-server communication for you.
+together, debounced, and routed to the proper data source:
+[TraceViz handles](./data_model.md) all client-server communication for you.  
 
 LogViz operates on individual log files found in the filesystem.  Rather than
 reloading the same file for each new data query, LogViz stores loaded and
@@ -150,6 +150,6 @@ Whether the requested file was already present in the cache, or needed to be
 loaded, user data requests are then satisfied by the
 [LogViz data source](../logviz/data_source/data_source.go).  For each group of
 data series queries, this data source fetches the requested `LogTrace`
-instance, queries it, and marshals low-semantic visualization data in response.
-This response data is then sent back to the client and routed to the right
-UI components, which then render it.
+instance, queries it, and marshals low-semantic [visualization data](./data_model.md)
+in response.  This response data is then sent back to the client and routed to 
+the right UI components, which then render it.

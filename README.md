@@ -14,7 +14,7 @@ user interactions in a highly reusable, low-semantic way.
 
 TraceViz is suitable for a wide variety of performance tooling applications,
 but is especially suitable when building visualizations for rich data, which
-may support many different *analysis workflows*.
+may support many different [*analysis workflows*](./docs/why_traceviz.md#analysis-workflows).
 
 ## Learn more
 
