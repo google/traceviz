@@ -22,3 +22,7 @@ may support many different [*analysis workflows*](./docs/why_traceviz.md#analysi
    and can help you decide if it's right for you.
 *  [A TraceViz tool](docs/a_traceviz_tool.md) describes the architecture of a
    typical TraceViz tool.
+*  [The TraceViz data model](docs/data_model.md) describes the data model at the
+   heart of TraceViz's frontend and backend communication and user interaction support.
+*  [Interactions](docs/interactions.md) describes TraceViz's novel user
+   interaction system.
