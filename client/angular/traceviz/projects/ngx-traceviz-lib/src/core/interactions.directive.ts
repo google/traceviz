@@ -16,7 +16,7 @@
  */
 
 import { AfterContentInit, ContentChild, ContentChildren, Directive, forwardRef, Input, QueryList } from '@angular/core';
-import { Action, And, Changed, ConfigurationError, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Predicate, Reaction, SetIfEmpty, Severity, Toggle, ToggleOrSet, ValueRef, Watch } from 'traceviz-client-core';
+import { Action, And, Changed, ConfigurationError, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Predicate, Reaction, SetIfEmpty, Severity, Toggle, SetOrClear, ValueRef, Watch } from 'traceviz-client-core';
 import { Clear, Update, Set as SetU } from 'traceviz-client-core';
 import { ValueDirective } from './value.directive';
 import { ValueMapDirective } from './value_map.directive';
@@ -145,12 +145,12 @@ export class ToggleDirective extends UpdateDirective implements AfterContentInit
     selector: 'toggle-or-set',
     providers: [{
         provide: UpdateDirective,
-        useExisting: forwardRef(() => ToggleOrSetDirective)
+        useExisting: forwardRef(() => SetOrClearDirective)
     }],
 })
-export class ToggleOrSetDirective extends UpdateDirective implements AfterContentInit {
+export class SetOrClearDirective extends UpdateDirective implements AfterContentInit {
     @ContentChildren(ValueDirective) valueDirectives = new QueryList<ValueDirective>();
-    private tos: ToggleOrSet | undefined;
+    private tos: SetOrClear | undefined;
 
     constructor() {
         super('toggle-or-set');
@@ -162,7 +162,7 @@ export class ToggleOrSetDirective extends UpdateDirective implements AfterConten
             valueRefs.push(valueDirective);
         }
         if (valueRefs.length === 2) {
-            this.tos = new ToggleOrSet(valueRefs[0], valueRefs[1]);
+            this.tos = new SetOrClear(valueRefs[0], valueRefs[1]);
         } else {
             this.errorMessage = `'toggle-or-set' takes exactly two arguments.`;
         }

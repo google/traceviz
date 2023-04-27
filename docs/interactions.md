@@ -35,6 +35,8 @@ in the tool or the component source, or may be specified in the tool template;
 we'll use the [Angular interactions directive](../client/angular/traceviz/projects/ngx-traceviz-lib/src/core/interactions.directive.ts) as an example in
 this document.
 
+## 'Half-interactions': actions, reactions, and watches
+
 `Interactions` understands three kinds of half-interaction:
 
 *  [`Action`](../client/core/src/interactions/interactions.ts), which associates
@@ -76,4 +78,142 @@ values.  For example,
     `first_fetched_page` if a new chunk is needed, and a `Reaction` on
     `first_fetched_page` which would actually issue the backend fetch.)
 *   'When the global `default_filter_text` Value has changed, *populate a text
-    box* with `default_filter_text`'s contents.  
+    box* with `default_filter_text`'s contents.
+
+## Examples
+
+These examples use the
+[Angular interactions directives](../client/angular/traceviz/projects/ngx-traceviz-lib/src/core/interactions.directive.ts),
+but could also be implemented
+[programmatically](../client/core/src/interactions/interactions.ts).
+
+### Responding to a click
+
+Suppose we have a tool, 'WidgetView', which shows a list of widgets, each of
+which has a unique `string` identifier, along with an overtime line chart
+showing how selected widgets' changed over time.  To support our desired
+analysis workflows, we'd like to:
+
+*   click on a widget in the list to 'select' that widget, replacing any
+    previous selection (if the clicked widget was already selected, the click
+    should clear the selection).
+*   shift-click on a widget in the list to 'select' that widget, adding it to
+    the current set of selected widgets (if the shift-clicked widget was already
+    selected, the shift-click should deselect it).
+*   keep the line chart up to date: whenever a new widget is selected, its
+    series should be drawn in the chart.
+*   highlight selected widgets in the list so that the user knows they're
+    selected.
+
+Looking over these requirements, it's clear that the tool must maintain an idea
+of which widgets are currently selected.  This becomes part of the application's
+[global state](./data_model.md):
+
+```html
+<widget-view-app>
+    <app-core>
+        <data-query>
+            <!-- Not shown -->
+        </data-query>
+
+        <global-state>
+            <value-map>
+                <value key="selected-widget-ids"><string-set></string-set></value>
+                <!-- Which data set to display. -->
+                <value key="collection-name"><string></string></value>
+                <!-- Other global values not shown -->
+            </value-map>
+        </global-state>
+    </app-core>
+    ...
+```
+
+Suppose we've written a [data source](./a_traceviz_tool.md) that supports a
+`wv.widget_list` query whose response is compatible with a `<widget-list>`
+component.  In that response, we attach a `widget-id` `string` property to
+every widget.  We can use that to update the global `selected-widget-ids`
+property, using actions.  Additionally, we can highlight widgets that are
+currently selected with a reaction.
+
+```html
+    ...
+    <widget-list>
+        <data-series>
+            <!-- Populate with the backend 'wv.widget_list' query. -->
+            <query><string>wv.widget_list</string></query>
+            <!-- Not shown -->
+        </data-series>
+        <interactions>
+            <!-- When a widget is clicked, it should replace any other selected
+                 widgets.  If it was already the selected widget, it should be
+                 unselected.
+             -->
+            <action target="widget" type="click">
+                <set-or-clear>
+                    <global-ref key="selected-widget-ids"></global-ref>
+                    <local-ref key="widget-id"></local-ref>
+                </set-or-clear>
+            </action>
+            <!-- When a widget is shift-clicked, it should be added to the set
+                 of selected widgets.  If it was already selected, it should
+                 be unselected.
+             -->
+            <action target="widget" type="shift-click">
+                <toggle>
+                    <global-ref key="selected-widget-ids"></global-ref>
+                    <local-ref key="widget-id"></local-ref>
+                </toggle>
+            </action>
+            <!-- When a widget's ID is included in the set of selected widgets,
+                 it should be highlighted.
+             -->
+            <reaction target="widget" type="highlight">
+                <includes>
+                    <global-ref key="selected-widget-ids">
+                    <local-ref key="widget-id">
+                </includes>
+            </reaction>
+        </interactions>
+    </widget-list>
+    ...
+```
+
+Note that the `<widget-list>` UI component needs to support the `click` and
+`shift-click` actions, and the `highlight` reaction, on the `widget` target.
+Different UI components support different sets of actions and reactions -- but,
+as you can see, what *happens* on those supported actions is fully configurable.
+
+Then, we want the line chart to stay in sync: it should refetch and rerender its
+data, via backend query `wv.overtime_widgets`, whenever the set of selected widget IDs changes (actually, whenever the collection name is nonempty and
+either the collection name or the selected widget ID set has recently changed.)
+
+```html
+    ...
+    <line-chart>
+        <data-series>
+            <query><string>wv.overtime_widgets</string></query>
+            <interactions>
+                <reaction target="data-series" type="fetch">
+                    <and>
+                        <not><equal>
+                            <global-ref key="collection-name"></global-ref>
+                            <string></string>
+                        </equal></not>
+                        <or>
+                            <changed><global-ref key="selected-widget-ids"></changed>
+                            <changed><global-ref key="collection-name"></changed>
+                        </or>
+                    </and>
+                </reaction>
+            </interactions>
+        </data-series>
+        <interactions>
+            <!-- Not shown -->
+        </interactions>
+    </line-chart>
+<widget-view-app>
+```
+
+Note that here, the `<interactions>` containing the `data-series` `fetch`
+reaction belongs to the `<line-chart>`'s `<data-series>`, because it's the
+data series that is reacting to the changes.

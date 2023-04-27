@@ -155,7 +155,7 @@ export class Toggle extends Update {
  * On update, clears its destination child if it is equal to its source child,
  * or sets the destination from the source if they are not equal.
  */
-export class ToggleOrSet extends Update {
+export class SetOrClear extends Update {
   constructor(private readonly destinationVR: ValueRef,
     private readonly sourceVR: ValueRef) {
     super();

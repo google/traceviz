@@ -19,7 +19,7 @@ import { GlobalStateDirective } from './global_state.directive';
 import { GlobalRefDirective } from './global_ref.directive';
 import { AppCoreDirective } from './app_core.directive';
 import { LocalRefDirective } from './local_ref.directive';
-import { ActionDirective, AndDirective, ChangedDirective, ClearDirective, EqualsDirective, ExtendDirective, GreaterThanDirective, IncludesDirective, InteractionsDirective, LessThanDirective, NotDirective, OrDirective, ReactionDirective, SetDirective, SetIfEmptyDirective, ToggleDirective, ToggleOrSetDirective, WatchDirective } from './interactions.directive';
+import { ActionDirective, AndDirective, ChangedDirective, ClearDirective, EqualsDirective, ExtendDirective, GreaterThanDirective, IncludesDirective, InteractionsDirective, LessThanDirective, NotDirective, OrDirective, ReactionDirective, SetDirective, SetIfEmptyDirective, ToggleDirective, SetOrClearDirective, WatchDirective } from './interactions.directive';
 import { DataQueryDirective } from './data_query.directive';
 import { DataSeriesQueryDirective, ParametersDirective, QueryDirective } from './data_series_query.directive';
 
@@ -58,7 +58,7 @@ import { DataSeriesQueryDirective, ParametersDirective, QueryDirective } from '.
         StringLiteralSetDirective,
         TimestampLiteralDirective,
         ToggleDirective,
-        ToggleOrSetDirective,
+        SetOrClearDirective,
         ReactionDirective,
         ValueMapDirective,
         ValueWrapperDirective,
@@ -99,7 +99,7 @@ import { DataSeriesQueryDirective, ParametersDirective, QueryDirective } from '.
         StringLiteralSetDirective,
         TimestampLiteralDirective,
         ToggleDirective,
-        ToggleOrSetDirective,
+        SetOrClearDirective,
         ReactionDirective,
         ValueMapDirective,
         ValueWrapperDirective,
