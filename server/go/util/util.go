@@ -672,7 +672,7 @@ func ExpectTimestampValue(val *V) (time.Time, error) {
 	return time.Unix(ts.UnixSeconds, ts.UnixNanos), nil
 }
 
-// PropertyUpdate is a function that updates a provided valueMapBuilder.  A nil
+// PropertyUpdate is a function that updates a provided datumBuilder.  A nil
 // PropertyUpdate does nothing.
 type PropertyUpdate func(db *datumBuilder) error
 
