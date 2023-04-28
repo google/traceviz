@@ -11,8 +11,8 @@
     limitations under the License.
 */
 
-/** @fileoverview Tools for working with two-dimensional series data.  See
- *  ../../../../server/go/xy_chart/xy_chart.go for more detail.
+/** @fileoverview Tools for working with weighted tree data.  See
+ *  ../../../../server/go/weighted_tree/weighted_tree.go for more detail.
  */
 
 import { ConfigurationError, Severity } from '../errors/errors.js';
@@ -34,7 +34,7 @@ enum Keys {
 /**
  * A collection of settings for rendering trees.
  */
-export interface RenderSettings {
+export interface WeightedTreeRenderSettings {
     // The height of a frame in pixels.
     frameHeightPx: number;
 }
@@ -97,13 +97,13 @@ export class TreeNode {
 /** A weighted tree. */
 export class Tree {
     readonly properties: ValueMap;
-    readonly renderSettings: RenderSettings;
+    readonly WeightedTreeRenderSettings: WeightedTreeRenderSettings;
     readonly coloring: Coloring;
     readonly roots: TreeNode[] = [];
     readonly totalWeight: number = 0;
 
     constructor(node: ResponseNode) {
-        this.renderSettings = {
+        this.WeightedTreeRenderSettings = {
             frameHeightPx: node.properties.expectNumber(Keys.FRAME_HEIGHT_PX),
         };
         this.properties = node.properties.without(Keys.FRAME_HEIGHT_PX);

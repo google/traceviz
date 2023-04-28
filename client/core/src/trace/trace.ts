@@ -62,7 +62,7 @@ enum Keys {
  * these two axes, so are suffixed 'TempPx' for a pixel extent along the
  * temporal axis, or 'CatPx' for a pixel extent along the category axis.
  */
-export interface RenderSettings {
+export interface TraceRenderSettings {
     // The padding between adjacent spans along the category axis.  If x is the
     // temporal axis, this is the vertical spacing between spans.
     spanWidthCatPx: number;
@@ -192,7 +192,7 @@ export class Trace {
         return new Trace(ValueMap.union(...props), categories, axis);
     }
 
-    renderSettings(): RenderSettings {
+    renderSettings(): TraceRenderSettings {
         return {
             spanWidthCatPx: this.properties.expectNumber(Keys.SPAN_WIDTH_CAT_PX),
             categoryHeaderCatPx:

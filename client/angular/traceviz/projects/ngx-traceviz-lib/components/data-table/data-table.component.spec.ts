@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DataTableComponent } from './data-table.component';
 import { Component, ViewChild } from '@angular/core';

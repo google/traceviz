@@ -12,7 +12,8 @@
 */
 
 /**
- * @fileoverview A basic TraceViz table view.
+ * @fileoverview A basic TraceViz table view, consuming tabular data as defined
+ * at ../../../../server/go/table/table.go
  */
 
 import { AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, OnDestroy, ViewChild } from '@angular/core';
