@@ -91,4 +91,25 @@ describe('tree test', () => {
             ],
         }));
     });
+
+    it('renders a top-down tree', () => {
+        const tree = new Tree(weightedTreeNode);
+        const renderedNodes = tree.renderTopDownTree();
+        renderedNodes.forEach((renderedNode) => {
+            renderedNode.resize(100);
+        });
+        expect(renderedNodes.map(
+            (renderedNode) =>
+                [renderedNode.label, renderedNode.x0Px, renderedNode.y0Px,
+                renderedNode.widthPx, renderedNode.heightPx]))
+            .toEqual([
+                ['root 1', 0, 0, 50, 20],
+                ['a', 0, 20, 45, 20],
+                ['c', 0, 40, 20, 20],
+                ['b', 20, 40, 15, 20],
+                ['root 2', 50, 0, 50, 20],
+                ['x', 50, 20, 20, 20],
+                ['z', 50, 40, 5, 20],
+            ]);
+    });
 });
