@@ -1,0 +1,16 @@
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
+    max-height: 100%;
+    display: block;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.svg {
+    display: block;
+}

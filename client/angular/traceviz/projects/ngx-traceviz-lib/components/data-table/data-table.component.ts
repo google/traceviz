@@ -21,7 +21,7 @@ import { Sort, SortDirection } from '@angular/material/sort';
 import { DataSeriesQueryDirective } from '../../src/core/data_series_query.directive';
 import { InteractionsDirective } from '../../src/core/interactions.directive';
 import { MatPaginator } from '@angular/material/paginator';
-import { CanonicalTable, Coloring, ConfigurationError, DataSeriesQuery, Interactions, Severity, TableCell, TableHeader, TableRow, ValueMap, Watch, getLabel } from 'traceviz-client-core';
+import { CanonicalTable, Coloring, ConfigurationError, DataSeriesQuery, Interactions, Severity, TableCell, TableHeader, TableRow, ValueMap, getLabel } from 'traceviz-client-core';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { AppCoreService } from '../../src/app_core_service/app_core.service';
@@ -29,8 +29,8 @@ import { AppCoreService } from '../../src/app_core_service/app_core.service';
 const SOURCE = 'data-table';
 
 // Valid interactions targets
-const ROWS = 'rows';
-const COLUMNS = 'columns';
+const ROW = 'row';
+const COLUMN = 'column';
 
 // Valid action types
 const CLICK = 'click';
@@ -41,7 +41,7 @@ const MOUSEOUT = 'mouseout';
 const HIGHLIGHT = 'highlight';
 
 // Valid watch types
-const SORT_ROWS = 'sortRows';
+const SORT_ROWS = 'sort_rows';
 
 // Sort watch keys
 const SORT_DIRECTION = 'direction';
@@ -53,14 +53,14 @@ const SORT_DESC = 'desc';
 const SORT_NONE = '';
 
 const supportedActions = new Array<[string, string]>(
-  [ROWS, CLICK],
-  [ROWS, MOUSEOVER],
-  [ROWS, MOUSEOUT],
-  [COLUMNS, CLICK],
+  [ROW, CLICK],
+  [ROW, MOUSEOVER],
+  [ROW, MOUSEOUT],
+  [COLUMN, CLICK],
 );
 
 const supportedReactions = new Array<[string, string]>(
-  [ROWS, HIGHLIGHT],
+  [ROW, HIGHLIGHT],
 );
 
 const supportedWatches = [SORT_ROWS];
@@ -98,14 +98,10 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
   constructor(private readonly appCoreService: AppCoreService,
     private readonly ref: ChangeDetectorRef) {
-
-    console.log('constructing a table');
   }
 
   ngAfterContentInit(): void {
-    console.log('table content init');
     this.appCoreService.appCore.onPublish((appCore) => {
-      console.log('table on publish');
       if (this.dataSeriesQueryDir === undefined) {
         appCore.err(new ConfigurationError(`data-table is missing required 'data-series' child.`)
           .from(SOURCE)
@@ -151,7 +147,6 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
       this.dataSeriesQuery?.response
         .pipe(takeUntil(this.unsubscribe))
         .subscribe((response) => {
-          console.log('Got a table response');
           this.newSeries.next();
           try {
             this.table = new CanonicalTable(response);
@@ -198,7 +193,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
   doSort(sort: Sort) {
     const column = this.columns.find((col => col.category.id === sort.active));
     if (column !== undefined) {
-      this.interactions?.update(COLUMNS, CLICK, column.properties);
+      this.interactions?.update(COLUMN, CLICK, column.properties);
       this.sort = sort;
     }
   }
@@ -214,7 +209,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
       end = start + this.paginator.pageSize;
     }
     this.rows = this.table.rowSlice(start, end);
-    const matchFn = this.interactions?.match(ROWS, HIGHLIGHT);
+    const matchFn = this.interactions?.match(ROW, HIGHLIGHT);
     if (matchFn !== undefined) {
       for (const row of this.rows) {
         matchFn(row.properties).pipe(
@@ -232,17 +227,16 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
   rowClick(row: TableRow, shiftDepressed: boolean) {
     if (!shiftDepressed) {
-      console.log(`clicked row ${row}`);
-      this.interactions?.update(ROWS, CLICK, row.properties);
+      this.interactions?.update(ROW, CLICK, row.properties);
     }
   }
 
   rowMouseover(row: TableRow) {
-    this.interactions?.update(ROWS, MOUSEOVER, row.properties);
+    this.interactions?.update(ROW, MOUSEOVER, row.properties);
   }
 
   rowMouseout(row: TableRow) {
-    this.interactions?.update(ROWS, MOUSEOUT, row.properties);
+    this.interactions?.update(ROW, MOUSEOUT, row.properties);
   }
 
   rowCells(row: TableRow): TableCell[] {

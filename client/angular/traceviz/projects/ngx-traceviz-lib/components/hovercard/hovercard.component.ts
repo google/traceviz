@@ -11,8 +11,8 @@
         limitations under the License.
 */
 
-import {DOCUMENT} from '@angular/common';
-import {Component, ElementRef, HostListener, Inject, Input} from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, ElementRef, HostListener, Inject, Input } from '@angular/core';
 
 /** Provides a box that appears on top near the mouse cursor */
 @Component({
@@ -36,12 +36,12 @@ import {Component, ElementRef, HostListener, Inject, Input} from '@angular/core'
     }
   `],
 })
-export class Hovercard {
+export class HovercardComponent {
   @Input() visible = false;
 
   constructor(
-      readonly element: ElementRef,
-      @Inject(DOCUMENT) readonly document: Document) {}
+    readonly element: ElementRef,
+    @Inject(DOCUMENT) readonly document: Document) { }
 
   @HostListener('window:mousemove', ['$event'])
   updatePosition(event: MouseEvent) {
@@ -61,7 +61,7 @@ export class Hovercard {
     // If the tooltip can be placed below the cursor, place it there
     const topPosWhenBelow = cursorY + offsetY;
     const fitsBelow =
-        (topPosWhenBelow + tooltipBounds.height <= windowBounds.height);
+      (topPosWhenBelow + tooltipBounds.height <= windowBounds.height);
     if (fitsBelow) {
       return topPosWhenBelow;
     }
@@ -94,7 +94,7 @@ export class Hovercard {
     const leftPosWhenOnLeft = cursorX - offsetX - tooltipBounds.width;
 
     const fitsRight =
-        leftPosWhenOnRight + tooltipBounds.width <= windowBounds.width;
+      leftPosWhenOnRight + tooltipBounds.width <= windowBounds.width;
 
     if (!fitsRight) {
       return leftPosWhenOnLeft;

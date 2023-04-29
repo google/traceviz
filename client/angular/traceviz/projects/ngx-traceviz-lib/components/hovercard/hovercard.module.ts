@@ -11,20 +11,20 @@
         limitations under the License.
 */
 
-import {NgModule} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 
-import {Hovercard} from './hovercard';
+import { HovercardComponent } from './hovercard.component';
 
 @NgModule({
   declarations: [
-    Hovercard,
+    HovercardComponent,
   ],
   imports: [
     BrowserModule,
   ],
   exports: [
-    Hovercard,
+    HovercardComponent,
   ],
 })
 export class HovercardModule {

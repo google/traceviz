@@ -114,7 +114,7 @@ const tableData = node(
     </app-core>
     <data-table>
       <interactions>
-        <watch type="sortRows">
+        <watch type="sort_rows">
           <value-map>
             <value key="table_sort_direction">
               <global-ref key="table_sort_direction"></global-ref>
@@ -124,7 +124,7 @@ const tableData = node(
             </value>
           </value-map>
         </watch>
-        <action type="click" target="rows">
+        <action type="click" target="row">
           <set>
             <global-ref key="selected_flavor"></global-ref>
             <local-ref key="flavor"></local-ref>

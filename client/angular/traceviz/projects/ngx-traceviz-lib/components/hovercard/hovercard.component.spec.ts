@@ -11,5 +11,5 @@
         limitations under the License.
 */
 
-import {Hovercard} from './hovercard.component';
-import {HovercardModule} from './hovercard.module';
+import { HovercardComponent } from './hovercard.component';
+import { HovercardModule } from './hovercard.module';
