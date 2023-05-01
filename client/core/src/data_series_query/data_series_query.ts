@@ -74,22 +74,12 @@ export class DataSeriesQuery {
     readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
     readonly parameters: ValueMap, fetch: Observable<boolean>) {
     this.uniqueSeriesName = getUniqueSeriesName();
-    const onChange: Value[] = [queryName];
-    for (const value of parameters.values()) {
-      onChange.push(value);
-    }
-    // On a change to the query name or any parameter, and the 'fetch' reaction
-    // is true, fetch the series.
-    combineLatest([fetch, ...onChange])
-      .pipe(
-        filter(v => v[0] as boolean),
-        distinctUntilChanged(),
-        takeUntil(this.unsubscribe),
-      ).subscribe((fetch) => {
-        if (fetch) {
-          this.fetch();
-        }
-      });
+    fetch.pipe(
+      distinctUntilChanged(),
+      takeUntil(this.unsubscribe),
+    ).subscribe((fetch) => {
+      fetch && this.fetch();
+    });
   }
 
   private fetch() {

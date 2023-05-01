@@ -16,9 +16,8 @@ import { DataSeriesFetcher } from './data_series_fetcher.js';
 import { SeriesRequest } from '../protocol/request_interface.js';
 import { ResponseNode } from '../protocol/response_interface.js';
 import { int, str, valueMap } from '../value/test_value.js';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject, distinctUntilChanged, takeUntil } from 'rxjs';
 import { DataSeriesQuery } from './data_series_query.js';
-import { IntegerValue } from '../value/value.js';
 import { node } from '../protocol/test_response.js';
 
 class TestFetcher implements DataSeriesFetcher {
@@ -50,7 +49,7 @@ describe('data series query test', () => {
   const param2 = str('hello');
   const parameters =
     valueMap({ key: 'count', val: param1 }, { key: 'greetings', val: param2 });
-  let fetch = new BehaviorSubject<boolean>(true);
+  const fetch = new BehaviorSubject<boolean>(false);
   const dsq = new DataSeriesQuery(fdq, queryName, parameters, fetch);
   // An empty ResponseNode to send back.  Its contents are unimportant.
   const cannedResponse = node();
@@ -59,66 +58,57 @@ describe('data series query test', () => {
   let loadingHistory = '';
   // The last value of dsq.response's update.
   let responses: ResponseNode[] = [];
-
-  // Track the ups and downs of dsq.loading.
-  dsq.loading.pipe().subscribe((loading: boolean) => {
-    loadingHistory += loading ? 't' : 'f';
-  });
-  // Also track the number of times response has updated, and its last update
-  // value.
-  dsq.response.subscribe((response: ResponseNode) => {
-    responses.push(response);
-  });
+  let unsubscribe = new Subject<void>();
 
   beforeEach(() => {
+    // An empty ResponseNode to send back.  Its contents are unimportant.
+    // Track the ups and downs of dsq.loading.
+    dsq.loading.pipe(
+      takeUntil(unsubscribe),
+      distinctUntilChanged())
+      .subscribe((loading: boolean) => {
+        loadingHistory += loading ? 't' : 'f';
+      });
+    // Also track the number of times response has updated, and its last update
+    // value.
+    dsq.response.pipe(takeUntil(unsubscribe)).subscribe((response: ResponseNode) => {
+      responses.push(response);
+    });
     fdq.wantReq = {
       queryName: 'query',
       seriesName: dsq.uniqueSeriesName,
       parameters,
     };
     queryName.val = 'query';
+  });
+
+  afterEach(() => {
+    unsubscribe.next();
+    unsubscribe.complete();
+    unsubscribe = new Subject<void>();
     responses = [];
     loadingHistory = '';
-    fetch.next(true);
   });
 
   it('tests initial fetch', () => {
+    fetch.next(true);
     // Expect the initial fetch to be loading.
     expect(responses).toEqual([]);
-    expect(loadingHistory).toEqual('t');
+    expect(loadingHistory).toEqual('ft');
 
     // Finish the fetch by explicitly invoking fdq.onResponse.
     fdq.onResponse(cannedResponse);
     expect(responses.length).toBe(1);
-    expect(loadingHistory).toEqual('tf');
+    expect(loadingHistory).toEqual('ftf');
     expect(responses.at(-1)).toEqual(cannedResponse);
-  });
-
-  it('tests fetch-on-param-change', () => {
-    // Complete the initial fetch.
-    fdq.onResponse(cannedResponse);
-    expect(loadingHistory).toEqual('tf');
-
-    // Increment the 'count' param, expect a refetch.
-    fdq.wantReq = {
-      queryName: 'query',
-      seriesName: dsq.uniqueSeriesName,
-      parameters: valueMap(
-        { key: 'count', val: int(2) }, { key: 'greetings', val: str('hello') }),
-    };
-    (parameters.get('count') as IntegerValue).val++;
-    expect(loadingHistory).toEqual('tft');
-
-    fdq.onResponse(cannedResponse);
-    expect(responses.at(-1)).toEqual(cannedResponse);
-    expect(loadingHistory).toEqual('tftf');
-  });
-
-  it('tests fetch-on-watch-change', () => {
+    // Reset fetch's state to false.
     fetch.next(false);
+  });
+
+  it('tests fetch when signalled', () => {
     // Complete the initial fetch.
     fdq.onResponse(cannedResponse);
-    expect(loadingHistory).toEqual('tf');
+    expect(loadingHistory).toEqual('f');
 
     // Tickle fetch, expect a refetch.  Note that the request we issue does
     // not change.
@@ -129,29 +119,10 @@ describe('data series query test', () => {
     };
     fetch.next(true);
     fetch.next(false);
-    expect(loadingHistory).toEqual('tft');
+    expect(loadingHistory).toEqual('ft');
 
     fdq.onResponse(cannedResponse);
     expect(responses.at(-1)).toEqual(cannedResponse);
-    expect(loadingHistory).toEqual('tftf');
-  });
-
-  it('tests fetch-on-query-name-change', () => {
-    // Complete the initial fetch.
-    fdq.onResponse(cannedResponse);
-    expect(loadingHistory).toEqual('tf');
-
-    // Change the query name, expect a refetch.
-    fdq.wantReq = {
-      queryName: 'newquery',
-      seriesName: dsq.uniqueSeriesName,
-      parameters,
-    };
-    queryName.val = 'newquery';
-    expect(loadingHistory).toEqual('tft');
-
-    fdq.onResponse(cannedResponse);
-    expect(responses.at(-1)).toEqual(cannedResponse);
-    expect(loadingHistory).toEqual('tftf');
+    expect(loadingHistory).toEqual('ftf');
   });
 });
