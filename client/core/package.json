@@ -7,7 +7,6 @@
     "jasmine-spec-reporter": "^7.0.0",
     "jasmine-ts-console-reporter": "^3.1.1",
     "rimraf": "^4.1.2",
-    "rxjs": "^7.8.0",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
@@ -25,6 +24,7 @@
     "brace-expansion": "^1.1.11",
     "concat-map": "^0.0.1",
     "d3": "^7.8.2",
+    "rxjs": "7.8.0",
     "fs.realpath": "^1.0.0",
     "glob": "^7.2.3",
     "inflight": "^1.0.6",
@@ -39,7 +39,8 @@
     "clean": "rimraf lib",
     "build": "npm i && tsc --declaration",
     "test": "jasmine",
-    "bt": "npm run build && npm run test"
+    "bt": "npm run build && npm run test",
+    "cbt": "npm run clean && npm run bt"
   },
   "type": "module",
   "author": "Lee Baugh",
