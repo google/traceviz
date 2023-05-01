@@ -32,6 +32,11 @@ var (
 		util.StringProperty("sort_by", "name"),
 		util.StringProperty("sort_direction", "descending"),
 	)
+
+	renderSettings = &RenderSettings{
+		RowHeightPx: 20,
+		FontSizePx:  14,
+	}
 )
 
 func TestColumns(t *testing.T) {
@@ -42,14 +47,17 @@ func TestColumns(t *testing.T) {
 	}{{
 		description: "simple columns",
 		buildTabular: func(db util.DataBuilder) {
-			New(db, puzzleCol, answerCol, hintCol).Row(
+			New(db, renderSettings, puzzleCol, answerCol, hintCol).Row(
 				Cell(puzzleCol, util.String("I in a F")),
 				Cell(answerCol, util.Integer(12)),
 				Cell(hintCol, util.String("length")),
 			)
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.Child(). // column definitions
+			db.With(
+				util.IntegerProperty(rowHeightPxKey, 20),
+				util.IntegerProperty(fontSizePxKey, 14),
+			).Child(). // column definitions
 					Child().With(puzzleCol.cat.Define()).
 					AndChild().With(answerCol.cat.Define()).
 					AndChild().With(hintCol.cat.Define()).
@@ -69,7 +77,7 @@ func TestColumns(t *testing.T) {
 	}, {
 		description: "format cell, decorate table, column, row, and cell",
 		buildTabular: func(db util.DataBuilder) {
-			New(db, sortableNameCol).With(
+			New(db, renderSettings, sortableNameCol).With(
 				util.StringProperty("table_title", "People"),
 			).Row(
 				FormattedCell(sortableNameCol,
@@ -84,6 +92,8 @@ func TestColumns(t *testing.T) {
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			db.With(
 				util.StringProperty("table_title", "People"),
+				util.IntegerProperty(rowHeightPxKey, 20),
+				util.IntegerProperty(fontSizePxKey, 14),
 			).Child(). // column definitions
 					Child().With(
 				nameCol.cat.Define(),
@@ -104,13 +114,13 @@ func TestColumns(t *testing.T) {
 	}, {
 		description: "payloads",
 		buildTabular: func(db util.DataBuilder) {
-			table := New(db, nameCol)
+			table := New(db, nil, nameCol)
 			row := table.Row()
 			row.AddCellWithPayloads(FormattedCell(nameCol, "thumbnail"), "overtime_bins")["overtime_bins"].With(
 				util.IntegersProperty("bins", 1, 2, 3, 4),
 			)
 			subtableDb := row.AddPayload("subtable")
-			subtable := New(subtableDb, nameCol)
+			subtable := New(subtableDb, nil, nameCol)
 			subtable.Row(FormattedCell(nameCol, "thing"))
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {

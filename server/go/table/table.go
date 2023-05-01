@@ -90,7 +90,28 @@ const (
 	cellKey          = "table_cell"
 	formattedCellKey = "table_formatted_cell"
 	payloadKey       = "table_payload"
+
+	rowHeightPxKey = "table_row_height_px"
+	fontSizePxKey  = "table_font_size_px"
 )
+
+// RenderSettings is a collection of rendering settings for trees.
+type RenderSettings struct {
+	// The height of a row in pixels.
+	RowHeightPx int64
+	// The table text font size in pixels.
+	FontSizePx int64
+}
+
+func (rs *RenderSettings) define() util.PropertyUpdate {
+	if rs == nil {
+		return util.EmptyUpdate
+	}
+	return util.Chain(
+		util.IntegerProperty(rowHeightPxKey, rs.RowHeightPx),
+		util.IntegerProperty(fontSizePxKey, rs.FontSizePx),
+	)
+}
 
 // ColumnUpdate represents a table column.  It couples a category (specifying
 // the column's unique ID, display name, and description) with arbitrary column
@@ -159,11 +180,12 @@ func (n *Node) With(properties ...util.PropertyUpdate) *Node {
 
 // New defines a new table in the provided DataBiulder, with the specified
 // columns.
-func New(db util.DataBuilder, columns ...*ColumnUpdate) *Node {
+func New(db util.DataBuilder, renderSettings *RenderSettings, columns ...*ColumnUpdate) *Node {
 	colGroup := db.Child()
 	for _, column := range columns {
 		colGroup.Child().With(column.define())
 	}
+	db.With(renderSettings.define())
 	return &Node{
 		db: db,
 	}
