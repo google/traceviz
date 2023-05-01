@@ -17,13 +17,11 @@
 
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/internal/Observable";
-import { OperatorFunction } from "rxjs/internal/types";
+import { Observable, OperatorFunction, throwError } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { ConfigurationError, Request, Response, ResponseNode, Severity, fromObject, toObject } from "traceviz-client-core";
 import { DataFetcherInterface } from "traceviz-client-core";
 import { AppCoreService } from '../app_core_service/app_core.service';
-import { throwError } from 'rxjs/internal/observable/throwError';
 
 const SOURCE = 'http_data_fetcher';
 
