@@ -13,7 +13,7 @@
 
 import 'jasmine';
 
-import { Action, And, Clear, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Toggle, Update, Watch } from './interactions.js';
+import { Action, And, Clear, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Toggle, Update, Watch, Changed } from './interactions.js';
 import { prettyPrintDocumenter } from '../documentation/test_documentation.js';
 import { int, intSet, str, strs, strSet, valueMap } from '../value/test_value.js';
 import { IntegerValue } from '../value/value.js';
@@ -177,9 +177,17 @@ describe('interactions test', () => {
             '0: false', '6: true', '7: false',
             '8: true', '10: false', '12: true',
         ]);
-
     });
 
+    it('detects changes', () => {
+        const ref = str('a');
+        const changed = new Changed(new FixedValue(ref), 0);
+        const out: boolean[] = [];
+        changed.match()().subscribe((v) => out.push(v));
+        expect(out).toEqual([true, false]);
+        ref.val = 'b';
+        expect(out).toEqual([true, false, true, false]);
+    });
 
     it('watches', () => {
         const highlightedStartOffset = int(100);
