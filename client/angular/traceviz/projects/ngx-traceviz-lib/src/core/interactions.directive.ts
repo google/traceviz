@@ -606,7 +606,6 @@ export class InteractionsDirective {
         if (this.interactions === undefined) {
             this.interactions = new Interactions();
             for (const actionDirective of this.actionDirectives) {
-                console.log(`id registering action ${this.actionDirectives}`);
                 this.interactions.withAction(actionDirective.get());
             }
             for (const reactionDirective of this.reactionDirectives) {
