@@ -127,7 +127,4 @@ func (s *Service) RegisterHandlers(mux *http.ServeMux) {
 	for path, handler := range s.queryHandler.HandlersByPath() {
 		mux.HandleFunc(path, handler)
 	}
-	// for path, handler := range s.assetHandler.HandlersByPath() {
-	// 	mux.HandleFunc(path, handler)
-	// }
 }
