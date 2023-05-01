@@ -15,7 +15,7 @@
  * @fileoverview Directives used to define a data series.
  */
 
-import { AfterContentInit, ContentChild, Directive, Input, OnDestroy } from "@angular/core";
+import { AfterContentInit, ContentChild, Directive, OnDestroy } from "@angular/core";
 import { ValueDirective } from "./value.directive";
 import { ValueMapDirective } from "./value_map.directive";
 import { InteractionsDirective } from "./interactions.directive";
