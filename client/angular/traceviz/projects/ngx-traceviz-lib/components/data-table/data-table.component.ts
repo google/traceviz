@@ -34,6 +34,7 @@ const COLUMN = 'column';
 
 // Valid action types
 const CLICK = 'click';
+const SHIFTCLICK = 'shift-click';
 const MOUSEOVER = 'mouseover';
 const MOUSEOUT = 'mouseout';
 
@@ -54,6 +55,7 @@ const SORT_NONE = '';
 
 const supportedActions = new Array<[string, string]>(
   [ROW, CLICK],
+  [ROW, SHIFTCLICK],
   [ROW, MOUSEOVER],
   [ROW, MOUSEOUT],
   [COLUMN, CLICK],
@@ -78,8 +80,6 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
   @ViewChild('componentDiv') componentDiv!: ElementRef;
   @ViewChild('loadingDiv') loadingDiv!: ElementRef;
-
-  coloring = new Coloring(new ValueMap());
 
   loading = false;
 
@@ -198,6 +198,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
     }
   }
 
+
   updateRows() {
     if (this.table === undefined) {
       return;
@@ -228,6 +229,8 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
   rowClick(row: TableRow, shiftDepressed: boolean) {
     if (!shiftDepressed) {
       this.interactions?.update(ROW, CLICK, row.properties);
+    } else {
+      this.interactions?.update(ROW, SHIFTCLICK, row.properties);
     }
   }
 
@@ -245,33 +248,40 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
   itemStyle(...items: (TableRow | TableCell)[]): { [klass: string]: string } {
     const style: { [klass: string]: string; } = {};
-    const colorings = items.map((item) => this.coloring.colors(item.properties));
-    let bgColor: string | undefined;
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      if (item instanceof TableRow &&
-        item.highlighted &&
-        colorings[i].secondary !== undefined) {
-        bgColor = colorings[i].secondary;
-        break;
-      }
+    if (this.table === undefined) {
+      return style;
     }
-    if (bgColor === undefined) {
+    try {
+      const colorings = items.map((item) => this.table!.coloring.colors(item.properties));
+      let bgColor: string | undefined;
       for (let i = 0; i < items.length; i++) {
-        if (colorings[i].primary !== undefined) {
-          bgColor = colorings[i].primary;
+        const item = items[i];
+        if (item instanceof TableRow &&
+          item.highlighted &&
+          colorings[i].secondary !== undefined) {
+          bgColor = colorings[i].secondary;
           break;
         }
       }
-    }
-    if (bgColor !== undefined) {
-      style['background-color'] = bgColor;
-    }
-    for (let i = 0; i < items.length; i++) {
-      if (colorings[i].stroke !== undefined) {
-        style['color'] = colorings[i].stroke!;
-        break;
+      if (bgColor === undefined) {
+        for (let i = 0; i < items.length; i++) {
+          if (colorings[i].primary !== undefined) {
+            bgColor = colorings[i].primary;
+            break;
+          }
+        }
       }
+      if (bgColor !== undefined) {
+        style['background-color'] = bgColor;
+      }
+      for (let i = 0; i < items.length; i++) {
+        if (colorings[i].stroke !== undefined) {
+          style['color'] = colorings[i].stroke!;
+          break;
+        }
+      }
+    } catch (err: unknown) {
+      this.appCoreService.appCore.err(err);
     }
     return style;
   }
