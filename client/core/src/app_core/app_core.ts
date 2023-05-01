@@ -90,6 +90,7 @@ export class AppCore {
      */
     err(error: unknown) {
         if (error instanceof ConfigurationError) {
+            console.log(error);
             this.configurationErrors.next(error);
         } else {
             throw error;
