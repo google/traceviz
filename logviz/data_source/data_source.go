@@ -298,7 +298,13 @@ func (sfd *sourceFileData) row(levels []*levelInfo) []table.CellUpdate {
 	return cells
 }
 
-var highlightColor = "rgb(127, 127, 127)"
+var (
+	highlightColor = "rgb(127, 127, 127)"
+	renderSettings = &table.RenderSettings{
+		RowHeightPx: 20,
+		FontSizePx:  14,
+	}
+)
 
 func handleSourceFileTableQuery(coll *Collection, qf *queryFilters, tableDb util.DataBuilder, reqOpts map[string]*util.V) error {
 	for key := range reqOpts {
@@ -368,7 +374,7 @@ func handleSourceFileTableQuery(coll *Collection, qf *queryFilters, tableDb util
 		return sourceFileDatas[a].sourceFile.Filename < sourceFileDatas[b].sourceFile.Filename
 	})
 	// Emit the data series as a table.
-	table := table.New(tableDb, cols...)
+	table := table.New(tableDb, renderSettings, cols...)
 	for _, sfd := range sourceFileDatas {
 		table.Row(sfd.row(levels)...).With(
 			util.StringProperty(sourceFileKey, sfd.sourceFile.Filename),
@@ -390,10 +396,10 @@ var eventFormatStr = fmt.Sprintf("[$(%s)] $(%s) ($(%s)): $(%s)",
 )
 
 var (
-	fatalColorSpace   = "fatal_color"
-	errorColorSpace   = "error_color"
-	warningColorSpace = "warning_color"
-	infoColorSpace    = "info_color"
+	fatalColorSpace   = "fatal"
+	errorColorSpace   = "error"
+	warningColorSpace = "warning"
+	infoColorSpace    = "info"
 )
 
 var colorSpacesByLevelWeight = map[int]*color.Space{
@@ -410,7 +416,7 @@ func handleRawEntriesQuery(coll *Collection, qf *queryFilters, tableDb util.Data
 			return fmt.Errorf("unsupported option '%s'", key)
 		}
 	}
-	t := table.New(tableDb, eventCol)
+	t := table.New(tableDb, renderSettings, eventCol)
 	for _, colorSpace := range colorSpacesByLevelWeight {
 		t.With(colorSpace.Define())
 	}
