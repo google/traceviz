@@ -10,8 +10,5 @@ import { AppCoreService } from 'traceviz/dist/ngx-traceviz-lib';
 })
 export class AppComponent {
   constructor(public appCoreService: AppCoreService) {
-    appCoreService.appCore.onPublish((appCore) => {
-      console.log('published!');
-    });
   }
 }

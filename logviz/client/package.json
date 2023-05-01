@@ -2,9 +2,12 @@
   "name": "client",
   "version": "0.0.0",
   "scripts": {
+    "clean": "ng cache clean",
+    "reset": "npm install rimraf && rimraf dist && rimraf package-lock.json && rimraf node_modules",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "cb": "npm run clean && npm install && ng b",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -19,6 +22,7 @@
     "@angular/platform-browser": "^15.2.0",
     "@angular/platform-browser-dynamic": "^15.2.0",
     "@angular/router": "^15.2.0",
+    "rimraf": "^5.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"
@@ -35,7 +39,6 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
     "traceviz": "file:../../client/angular/traceviz",
-    "traceviz-client-core": "file:../../client/core",
     "typescript": "~4.9.4"
   }
 }

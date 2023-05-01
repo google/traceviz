@@ -46,7 +46,7 @@
       <data-table class="vertical-fill">
         <interactions>
           <!-- Mousing into a row calls out that row's source file. -->
-          <action target="rows" type="mouseover">
+          <action target="row" type="mouseover">
             <set>
               <global-ref key="called_out_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
@@ -54,14 +54,14 @@
           </action>
 
           <!-- Mousing out of a row clears the called out source files. -->
-          <action target="rows" type="mouseout">
+          <action target="row" type="mouseout">
             <clear>
               <global-ref key="called_out_source_files"></global-ref>
             </clear>
           </action>
 
           <!-- Clicking a row sets the filtered-in source file set to that row's source file. -->
-          <action target="rows" type="click">
+          <action target="row" type="click">
             <toggle-or-set>
               <global-ref key="filtered_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
@@ -69,7 +69,7 @@
           </action>
 
           <!-- Shift-clicking a row adds that row's source file to the filtered-in set -->
-          <action target="rows" type="shift-click">
+          <action target="row" type="shift-click">
             <toggle>
               <global-ref key="filtered_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
@@ -77,7 +77,7 @@
           </action>
 
           <!-- Rows for filtered-in source files should be highlighted.  -->
-          <reaction target="rows" type="highlight">
+          <reaction target="row" type="highlight">
             <includes>
               <global-ref key="filtered_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
@@ -104,7 +104,7 @@
                     <string></string>
                   </equals>
                 </not>
-                <changed [sinceMs]=50><global-ref key="collection_name"></global-ref></changed>
+                <changed><global-ref key="collection_name"></global-ref></changed>
               </and>
             </reaction>
           </interactions>
@@ -126,7 +126,7 @@
       <data-table class="vertical-fill">
         <interactions>
           <!-- A log entry should be highlighted if its source file is called out. -->
-          <reaction target="rows" type="highlight">
+          <reaction target="row" type="highlight">
             <includes>
               <global-ref key="called_out_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
