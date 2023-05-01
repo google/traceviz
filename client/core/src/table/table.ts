@@ -16,6 +16,7 @@
 import { Category, CategorySet, getDefinedCategory } from '../category/category.js';
 import { ConfigurationError, Severity } from '../errors/errors.js';
 import { ResponseNode } from '../protocol/response_interface.js';
+import { Coloring } from '../core.js';
 import { EmptyValue, StringValue, Value } from '../value/value.js';
 import { ValueMap } from '../value/value_map.js';
 
@@ -171,6 +172,7 @@ export class TableHeader {
 export class CanonicalTable {
   readonly properties: ValueMap;
   readonly renderProperties: TableRenderProperties;
+  readonly coloring: Coloring;
   private readonly initialColumnOrder = new Array<string>();
   private readonly columnsByID: ReadonlyMap<string, TableHeader>;
   private readonly rowNodes: ResponseNode[];
@@ -178,6 +180,7 @@ export class CanonicalTable {
 
   constructor(private readonly node: ResponseNode) {
     this.properties = node.properties;
+    this.coloring = new Coloring(this.properties);
     this.renderProperties = new TableRenderProperties(this.properties);
     const columnsByID = new Map<string, TableHeader>();
     if (this.node.children.length > 0) {
