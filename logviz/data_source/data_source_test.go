@@ -107,7 +107,7 @@ func TestQueries(t *testing.T) {
 			},
 		},
 		wantSeries: func(db util.DataBuilder) {
-			t := table.New(db,
+			t := table.New(db, renderSettings,
 				sourceFileCol, sourceLocCountCol, entriesCol, errorCol, warningCol, infoCol,
 			)
 			t.Row(
@@ -143,7 +143,7 @@ func TestQueries(t *testing.T) {
 			},
 		},
 		wantSeries: func(db util.DataBuilder) {
-			t := table.New(db,
+			t := table.New(db, renderSettings,
 				sourceFileCol, sourceLocCountCol, entriesCol, fatalCol, errorCol, warningCol, infoCol,
 			)
 			t.Row(
@@ -193,7 +193,7 @@ func TestQueries(t *testing.T) {
 			},
 		},
 		wantSeries: func(db util.DataBuilder) {
-			t := table.New(db,
+			t := table.New(db, renderSettings,
 				sourceFileCol, sourceLocCountCol, entriesCol, fatalCol, errorCol, warningCol, infoCol,
 			)
 			t.Row(
@@ -240,7 +240,7 @@ func TestQueries(t *testing.T) {
 			},
 		},
 		wantSeries: func(db util.DataBuilder) {
-			t := table.New(db, eventCol).With(
+			t := table.New(db, renderSettings, eventCol).With(
 				colorSpacesByLevelWeight[0].Define(),
 				colorSpacesByLevelWeight[1].Define(),
 				colorSpacesByLevelWeight[2].Define(),
