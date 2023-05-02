@@ -17,6 +17,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -47,6 +48,11 @@ func newCollectionFetcher(collectionRoot string, cap int) (*collectionFetcher, e
 	}, nil
 }
 
+type readerCloser struct {
+	io.Reader
+	io.Closer
+}
+
 func (cf *collectionFetcher) Fetch(ctx context.Context, collectionName string) (*datasource.Collection, error) {
 	collIf, ok := cf.lru.Get(collectionName)
 	if ok {
@@ -60,18 +66,14 @@ func (cf *collectionFetcher) Fetch(ctx context.Context, collectionName string) (
 	if err != nil {
 		return nil, err
 	}
-	logCh := make(chan string)
-	scanner := bufio.NewScanner(file)
-	go func() {
-		for scanner.Scan() {
-			logCh <- scanner.Text()
-		}
-		close(logCh)
-	}()
-	lr := loggerreader.New(collectionName, loggerreader.DefaultLineParser(), logCh)
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
+	// The TextLogReader takes ownership of the file.
+	lr := loggerreader.New(
+		collectionName,
+		loggerreader.DefaultLineParser(),
+		readerCloser{
+			Reader: bufio.NewReader(file),
+			Closer: file,
+		})
 	lt, err := logtrace.NewLogTrace(lr)
 	if err != nil {
 		return nil, err

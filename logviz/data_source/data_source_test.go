@@ -16,6 +16,7 @@ package datasource
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 	"time"
@@ -50,14 +51,7 @@ const (
 )
 
 func testLogReader(collectionName, log string) *loggerreader.TextLogReader {
-	logCh := make(chan string)
-	go func() {
-		for _, line := range strings.Split(log, "\n") {
-			logCh <- line
-		}
-		close(logCh)
-	}()
-	return loggerreader.New(collectionName, loggerreader.DefaultLineParser(), logCh)
+	return loggerreader.New(collectionName, loggerreader.DefaultLineParser(), io.NopCloser(strings.NewReader(log)))
 }
 
 type testLogTraceFetcher struct{}

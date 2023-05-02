@@ -20,7 +20,9 @@
 package loggerreader
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"regexp"
 	"strconv"
@@ -152,16 +154,16 @@ func DefaultLineParser() LineParser {
 type TextLogReader struct {
 	logFilename string
 	lp          LineParser
-	lines       <-chan string
+	reader      io.ReadCloser
 }
 
 // New returns a new TextLogReader drawing from the provided string channel
 // and using the provided LineParser to parse text logs.
-func New(filename string, lp LineParser, lines <-chan string) *TextLogReader {
+func New(filename string, lp LineParser, reader io.ReadCloser) *TextLogReader {
 	return &TextLogReader{
 		logFilename: filename,
 		lp:          lp,
-		lines:       lines,
+		reader:      reader,
 	}
 }
 
@@ -171,18 +173,21 @@ func New(filename string, lp LineParser, lines <-chan string) *TextLogReader {
 // the channel will contain that error.  Entries may only be called once on a
 // given TextLogReader.
 func (tlr *TextLogReader) Entries(ac *logtrace.AssetCache) (<-chan *logtrace.Item, error) {
-	if tlr.lines == nil {
+	if tlr.reader == nil {
 		log.Print(logger.Error("a LogReader's Entries() method may only be called once"))
 		return nil, fmt.Errorf("a LogReader's Entries() method may only be called once")
 	}
-	lines := tlr.lines
-	tlr.lines = nil
+	reader := tlr.reader
+	tlr.reader = nil
 	entries := make(chan *logtrace.Item)
 	// This goroutine will leak if a caller to Entries() fails to read the
 	// entries channel until it closes.
-	go func(lines <-chan string, entries chan<- *logtrace.Item) {
+	go func(reader io.ReadCloser, entries chan<- *logtrace.Item) {
+		defer reader.Close()
 		var lastEntry *logtrace.Entry
-		for line := range lines {
+		scanner := bufio.NewScanner(reader)
+		for scanner.Scan() {
+			line := scanner.Text()
 			thisEntry, err := tlr.lp.ParseLine(ac, line)
 			if err != nil {
 				entries <- &logtrace.Item{
@@ -222,6 +227,6 @@ func (tlr *TextLogReader) Entries(ac *logtrace.AssetCache) (<-chan *logtrace.Ite
 			}
 		}
 		close(entries)
-	}(lines, entries)
+	}(reader, entries)
 	return entries, nil
 }
