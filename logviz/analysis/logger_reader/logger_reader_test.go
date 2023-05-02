@@ -14,7 +14,7 @@
 package loggerreader
 
 import (
-	"io"
+	"bufio"
 	"strings"
 	"testing"
 	"time"
@@ -78,7 +78,7 @@ I'm glad you're here!`,
 			// Ignore empty lines; they're useful for writing the test cases
 			// comfortably.
 			log := strings.TrimSpace(test.log)
-			reader := New("test", DefaultLineParser(), io.NopCloser(strings.NewReader(log)))
+			reader := New("test", ReaderCloser{Reader: bufio.NewReader(strings.NewReader(log))}, NewSimpleLogParser())
 			entryCh, err := reader.Entries(logtrace.NewAssetCache())
 			if err != nil {
 				t.Fatalf("Failed to fetch entries: %s", err)
