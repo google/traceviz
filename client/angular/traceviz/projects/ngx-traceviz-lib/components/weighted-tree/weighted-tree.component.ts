@@ -163,8 +163,12 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
 
     handleMouseover(treeNode: RenderedTreeNode) {
         try {
-            this.tooltip = treeNode.properties.format(
+            if (treeNode.properties.has(Keys.DETAIL_FORMAT)) {
+              this.tooltip = treeNode.properties.format(
                 treeNode.properties.expectString(Keys.DETAIL_FORMAT));
+            } else {
+              this.tooltip = '';
+            }
         } catch (err: unknown) {
             this.appCoreService.appCore.err(err);
         }
