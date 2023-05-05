@@ -137,6 +137,7 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
                     try {
                         const tree = new Tree(response);
                         this.treeNodes = tree.renderTopDownTree();
+                        this.redraw();
                     } catch (err: unknown) {
                         appCore.err(err);
                     }
