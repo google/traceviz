@@ -207,16 +207,17 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
         const enteredNodes: any = nodes.enter()
             .append('svg')
             .on('mouseover',
-                (d: RenderedTreeNode) => {
+                (event: any, d: RenderedTreeNode) => {
                     this.interactions?.update(NODE, MOUSEOVER, d.properties);
                     wt.handleMouseover(d);
                 })
             .on('mouseout',
-                (d: RenderedTreeNode) => {
+                (event: any, d: RenderedTreeNode) => {
                     this.interactions?.update(NODE, MOUSEOUT, d.properties);
                     wt.handleMouseout();
                 })
-            .on('click', (d: RenderedTreeNode) => {
+            .on('click',
+              (event: any, d: RenderedTreeNode) => {
                 this.interactions?.update(NODE, CLICK, d.properties);
             });
         enteredNodes.append('rect');
