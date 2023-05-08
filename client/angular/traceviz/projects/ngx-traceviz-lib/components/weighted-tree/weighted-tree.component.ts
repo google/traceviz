@@ -59,7 +59,7 @@ const supportedWatches: string[] = [];
     selector: 'weighted-tree',
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-    <div #loadingDiv>
+    <div *ngIf="loading">
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>>
     </div>
     <div class="content">
@@ -77,7 +77,6 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
     @ContentChild(InteractionsDirective) interactionsDir: InteractionsDirective | undefined;
 
     @ViewChild('svg', { static: true }) svg!: ElementRef;
-    @ViewChild('loadingDiv', { static: true }) loadingDiv: ElementRef | undefined;
     @ViewChild('scopeNameDiv', { static: true }) scopeNameDiv!: ElementRef;
     @ViewChild('componentDiv') componentDiv!: ElementRef;
 
