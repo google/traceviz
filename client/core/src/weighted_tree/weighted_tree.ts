@@ -29,7 +29,9 @@ enum Keys {
     DATUM_TYPE = 'weighted_tree_datum_type',
     PAYLOAD_TYPE = 'weighted_tree_payload_type',
 
-    FRAME_HEIGHT_PX = 'weighted_tree_frame_height_px'
+    FRAME_HEIGHT_PX = 'weighted_tree_frame_height_px',
+
+    PATH = 'path',
 }
 
 /**
@@ -52,10 +54,12 @@ const DEFAULT_STROKE_COLOR = 'chartreuse';
 export class RenderedTreeNode {
     // id uniquely identifies this RenderedTreeNode within a tree of
     // RenderedTreeNodes.  Note that the ID for what logically constitutes the
-    // same tree node can change when a new tree is constructed.
+    // same tree node can change when a new tree is constructed. For a more
+    // stable ID, use path when available.
     readonly id: number = 0;
     readonly label: string;
     private readonly colors: Colors;
+    readonly path: string = "";
     readonly properties: ValueMap;
 
     readonly heightPx: number = 0;
@@ -85,6 +89,9 @@ export class RenderedTreeNode {
         this.id = id;
         this.label = getLabel(properties);
         this.colors = coloring.colors(properties);
+        if (properties.has(Keys.PATH)) {
+            this.path = properties.expectStringList(Keys.PATH).join('/')
+        }
         this.properties = properties;
         this.xOffsetPct = xOffsetPct;
         this.widthPct = widthPct;

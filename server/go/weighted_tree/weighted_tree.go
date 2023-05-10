@@ -79,6 +79,9 @@ const (
 	payloadTypeKey = "weighted_tree_payload_type"
 
 	frameHeightPxKey = "weighted_tree_frame_height_px"
+
+	// pathKey specifies the key used for the path property.
+	pathKey = "path"
 )
 
 // RenderSettings is a collection of rendering settings for trees.
@@ -107,8 +110,23 @@ func New(db util.DataBuilder, renderSettings *RenderSettings, properties ...util
 	}
 }
 
+// Path returns a PropertyUpdate that annotates with n.Path() (i.e. the path to
+// n from the root of n's tree). The path is used by the weighted tree component
+// to uniquely identify tree nodes.
+func Path(n TreeNode) util.PropertyUpdate {
+	// We encode the n.Path() as strings, for greater generality.
+	path := make([]int64, len(n.Path()))
+	for i, scope := range n.Path() {
+		path[i] = int64(scope)
+	}
+	return util.IntegersProperty(pathKey, path...)
+}
+
 // Node creates and returns a new root node with the specified magnitude in the
 // tree.
+//
+// NOTE: use path.Path(<path>) to annotate the node with a path from the root
+// that is useful for the weighted tree component.
 func (t *Tree) Node(selfMagnitude float64, properties ...util.PropertyUpdate) *Node {
 	return &Node{
 		db: newChild(t.db, treeNodeDatumType).With(

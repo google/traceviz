@@ -200,7 +200,14 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
         const nodes = d3.select(this.svg.nativeElement)
             .select('.chart-area')
             .selectAll('svg')
-            .data(this.treeNodes);
+            .data(this.treeNodes, (datum) : string => {
+              // If a path property is configured, use that as the node's key.
+              // Otherwise, use the same key for each node; this will cause all
+              // old nodes to be removed and all new nodes to be added on every
+              // update (i.e. old nodes will not be matched to new nodes).
+              const d = datum as RenderedTreeNode;
+              return d.path ? d.path : "";
+            });
         // Remove any extra nodes.
         nodes.exit().remove();
         // Add any new nodes.
