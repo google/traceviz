@@ -50,8 +50,14 @@ const DEFAULT_PRIMARY_COLOR = 'magenta';
 const DEFAULT_STROKE_COLOR = 'chartreuse';
 
 export class RenderedTreeNode {
+    // id uniquely identifies this RenderedTreeNode within a tree of
+    // RenderedTreeNodes.  Note that the ID for what logically constitutes the
+    // same tree node can change when a new tree is constructed.
+    readonly id: number = 0;
     readonly label: string;
     private readonly colors: Colors;
+    readonly properties: ValueMap;
+
     readonly heightPx: number = 0;
     readonly fillColor: string;
     readonly highlightedFillColor: string;
@@ -59,16 +65,29 @@ export class RenderedTreeNode {
     readonly highlightedBorderColor: string;
     readonly textColor: string;
     readonly highlightedTextColor: string;
-    readonly textSizePx: number = 14;
-    id = 0;
+    readonly y0Px: number;
+    readonly y1Px: number;
+
+    private readonly xOffsetPct: number;
+    private readonly widthPct: number;
+
     x0Px = 0;
     widthPx = 0;
 
-    constructor(coloring: Coloring, readonly properties: ValueMap,
-        private readonly xOffsetPct: number, private readonly widthPct: number,
-        readonly y0Px: number, readonly y1Px: number) {
+    constructor(
+        id: number,
+        coloring: Coloring,
+        properties: ValueMap,
+        xOffsetPct: number,
+        widthPct: number,
+        y0Px: number, y1Px: number,
+    ) {
+        this.id = id;
         this.label = getLabel(properties);
         this.colors = coloring.colors(properties);
+        this.properties = properties;
+        this.xOffsetPct = xOffsetPct;
+        this.widthPct = widthPct;
         this.heightPx = y1Px - y0Px;
         this.fillColor = (this.colors.primary) ? this.colors.primary : DEFAULT_PRIMARY_COLOR;
         const d3FillColor = d3.color(this.fillColor);
@@ -78,6 +97,8 @@ export class RenderedTreeNode {
         this.textColor = (this.colors.stroke) ? this.colors.stroke : DEFAULT_STROKE_COLOR;
         const d3TextColor = d3.color(this.textColor);
         this.highlightedTextColor = (d3TextColor !== null) ? d3TextColor.darker(2).toString() : DEFAULT_STROKE_COLOR;
+        this.y0Px = y0Px
+        this.y1Px = y1Px
     }
 
     resize(treeWidthPx: number): RenderedTreeNode {
@@ -164,13 +185,30 @@ export class Tree {
         }
     }
 
+
     // Renders a weighted tree with the root nodes at y=0, and children
     // placed below their parents.
     renderTopDownTree(): RenderedTreeNode[] {
-        return this.renderTopDownTreeNodes(this.roots, 0, 0);
+        const idAllocator = {
+            nextID: 1,
+        }
+
+        const idGenerator: Generator<number> = function* ():Generator<number> {
+            let index = 1;
+            while (true) {
+                yield index++;
+            }
+        }()
+
+        return this.renderTopDownTreeNodes(this.roots, 0, 0, idGenerator);
     }
 
-    private renderTopDownTreeNodes(treeNodes: TreeNode[], horizontalOffsetPct: number, verticalOffsetPx: number): RenderedTreeNode[] {
+    private renderTopDownTreeNodes(
+        treeNodes: TreeNode[],
+        horizontalOffsetPct: number,
+        verticalOffsetPx: number,
+        idGenerator: Generator<number>,
+    ): RenderedTreeNode[] {
         if (treeNodes.length === 0) {
             return [];
         }
@@ -178,16 +216,18 @@ export class Tree {
         for (const treeNode of treeNodes) {
             const widthPct = treeNode.totalWeight / this.totalWeight;
             renderedNodes.push(
-                new RenderedTreeNode(this.coloring, treeNode.properties,
+                new RenderedTreeNode(
+                    idGenerator.next().value,
+                    this.coloring, treeNode.properties,
                     horizontalOffsetPct, widthPct, verticalOffsetPx,
                     verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx),
                 ...this.renderTopDownTreeNodes(
-                    treeNode.children, horizontalOffsetPct, verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx),
+                    treeNode.children,
+                    horizontalOffsetPct,
+                    verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx,
+                    idGenerator),
             );
             horizontalOffsetPct += widthPct;
-        }
-        for (let i = 0; i < renderedNodes.length; i++) {
-            renderedNodes[i].id = i;
         }
         return renderedNodes;
     }
