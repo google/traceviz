@@ -15,7 +15,7 @@
  * @fileoverview Directives used to define the TraceViz data query.
  */
 
-import { ContentChild, Directive, AfterContentInit, Input, forwardRef } from '@angular/core';
+import { AfterContentInit, ContentChild, Directive, forwardRef, Input } from '@angular/core';
 import { AppCore, ConfigurationError, Severity, ValueMap } from 'traceviz-client-core';
 import { AppCoreService } from '../app_core_service/app_core.service';
 import { HttpDataFetcher } from './http_data_fetcher';
@@ -28,64 +28,66 @@ const SOURCE = 'data_query.directive';
  * A base class of all data query directives.
  */
 export abstract class DataQueryDirectiveBase {
-    constructor(
-        protected readonly appCoreService: AppCoreService,
-        protected readonly fetcher: DataFetcherInterface) { }
+  constructor(
+    protected readonly appCoreService: AppCoreService,
+    protected readonly fetcher: DataFetcherInterface) {
+  }
 
-    abstract filters(): ValueMap;
-    abstract debounceMs: number;
+  abstract filters(): ValueMap;
 
-    init(appCore: AppCore) {
-        appCore.dataQuery.connect(this.fetcher);
-        appCore.dataQuery.setGlobalFilters(this.filters());
-        appCore.dataQuery.debounceUpdates(this.debounceMs);
-    }
+  abstract debounceMs: number;
+
+  init(appCore: AppCore) {
+    appCore.dataQuery.connect(this.fetcher);
+    appCore.dataQuery.setGlobalFilters(this.filters());
+    appCore.dataQuery.debounceUpdates(this.debounceMs);
+  }
 }
 
 /**
  * Describes how data requests are sent to the backend.
  */
 @Directive({
-    selector: 'data-query',
-    providers: [{
-        provide: DataQueryDirectiveBase,
-        useExisting: forwardRef(() => DataQueryDirective)
-    }],
+  selector: 'data-query',
+  providers: [{
+    provide: DataQueryDirectiveBase,
+    useExisting: forwardRef(() => DataQueryDirective)
+  }],
 })
 export class DataQueryDirective extends DataQueryDirectiveBase implements AfterContentInit {
-    // The backend query debouncing interval: the DataQuery will wait this long
-    // after an initial series request, then will issue that request and any
-    // others that arrived in that interval.  This allows the TraceViz backend
-    // to handle multiple requests at once, and to reuse intermediate results.
-    @Input() debounceMs: number = 50;
-    // The set of filters sent to the backend with each query.  Carefully
-    // selecting these values allows the backend to precompute expensive
-    // intermediate results once per data query, then reuse those results in
-    // handling multiple series queries.
-    @ContentChild(ValueMapDirective) filtersDir: ValueMapDirective | undefined;
+  // The backend query debouncing interval: the DataQuery will wait this long
+  // after an initial series request, then will issue that request and any
+  // others that arrived in that interval.  This allows the TraceViz backend
+  // to handle multiple requests at once, and to reuse intermediate results.
+  @Input() debounceMs: number = 50;
+  // The set of filters sent to the backend with each query.  Carefully
+  // selecting these values allows the backend to precompute expensive
+  // intermediate results once per data query, then reuse those results in
+  // handling multiple series queries.
+  @ContentChild(ValueMapDirective) filtersDir: ValueMapDirective | undefined;
 
-    constructor(
-        appCoreService: AppCoreService,
-        httpDataFetcher: HttpDataFetcher) {
-        super(appCoreService, httpDataFetcher);
-    }
+  constructor(
+    appCoreService: AppCoreService,
+    httpDataFetcher: HttpDataFetcher) {
+    super(appCoreService, httpDataFetcher);
+  }
 
-    override filters(): ValueMap {
-        if (this.filtersDir === undefined) {
-            throw new ConfigurationError('global-state lacks a value-map')
-                .from(SOURCE)
-                .at(Severity.FATAL);
-        }
-        let filters = this.filtersDir.getValueMap();
-        if (filters === undefined) {
-            filters = new ValueMap();
-        }
-        return filters;
+  override filters(): ValueMap {
+    if (this.filtersDir === undefined) {
+      throw new ConfigurationError('global-state lacks a value-map')
+        .from(SOURCE)
+        .at(Severity.FATAL);
     }
+    let filters = this.filtersDir.getValueMap();
+    if (filters === undefined) {
+      filters = new ValueMap();
+    }
+    return filters;
+  }
 
-    ngAfterContentInit(): void {
-        this.appCoreService.appCore.onPublish((appCore) => {
-            this.init(appCore);
-        });
-    }
+  ngAfterContentInit(): void {
+    this.appCoreService.appCore.onPublish((appCore) => {
+      this.init(appCore);
+    });
+  }
 }

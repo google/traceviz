@@ -15,13 +15,12 @@
  * @fileoverview A set of interactions directives.
  */
 
-import { Value } from 'traceviz-client-core';
-import { ValueRef } from 'traceviz-client-core';
-import { ValueMap } from 'traceviz-client-core';
+import { Value, ValueMap, ValueRef } from 'traceviz-client-core';
 
 /** A base class for directives specifying Values. */
 export abstract class ValueDirective implements ValueRef {
-    abstract get(
-        localState?: ValueMap | undefined): Value | undefined;
-    abstract label(): string;
+  abstract get(
+    localState?: ValueMap | undefined): Value | undefined;
+
+  abstract label(): string;
 }

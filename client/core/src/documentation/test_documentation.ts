@@ -18,14 +18,14 @@
 import { Documenter, DocumenterType } from './documentation.js';
 
 const typeToString = new Map<DocumenterType, string>([
-    [DocumenterType.Update, "Update"],
-    [DocumenterType.Predicate, "Predicate"],
-    [DocumenterType.Watch, "Watch"],
-    [DocumenterType.Action, "Action"],
-    [DocumenterType.Reaction, "Reaction"],
-    [DocumenterType.Interactions, "Interactions"],
-    [DocumenterType.Component, "Component"],
-    [DocumenterType.Tool, "Tool"],
+  [DocumenterType.Update, "Update"],
+  [DocumenterType.Predicate, "Predicate"],
+  [DocumenterType.Watch, "Watch"],
+  [DocumenterType.Action, "Action"],
+  [DocumenterType.Reaction, "Reaction"],
+  [DocumenterType.Interactions, "Interactions"],
+  [DocumenterType.Component, "Component"],
+  [DocumenterType.Tool, "Tool"],
 ]);
 
 /**
@@ -33,12 +33,12 @@ const typeToString = new Map<DocumenterType, string>([
  * Documenter, indented by the supplied indentation.
  */
 export function prettyPrintDocumenter(doc: Documenter, indent = ''): string[] {
-    const msg = (doc.overrideDocument === '') ? doc.autoDocument : doc.overrideDocument;
-    const ret = [`${indent}${msg} (${typeToString.get(doc.documenterType)})`];
-    if (doc.documentChildren) {
-        for (const child of doc.children) {
-            ret.push(...prettyPrintDocumenter(child, indent + '  '));
-        }
+  const msg = (doc.overrideDocument === '') ? doc.autoDocument : doc.overrideDocument;
+  const ret = [`${indent}${msg} (${typeToString.get(doc.documenterType)})`];
+  if (doc.documentChildren) {
+    for (const child of doc.children) {
+      ret.push(...prettyPrintDocumenter(child, indent + '  '));
     }
-    return ret;
+  }
+  return ret;
 }

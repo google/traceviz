@@ -15,7 +15,7 @@
  * @fileoverview Directives used to define the app core.
  */
 
-import { ContentChild, Directive, AfterContentInit } from '@angular/core';
+import { AfterContentInit, ContentChild, Directive } from '@angular/core';
 import { ConfigurationError, Severity } from 'traceviz-client-core';
 import { AppCoreService } from '../app_core_service/app_core.service';
 import { GlobalStateDirective } from './global_state.directive';
@@ -23,28 +23,29 @@ import { DataQueryDirectiveBase } from './data_query.directive';
 
 const SOURCE = 'app_core.directive';
 
-@Directive({ selector: 'app-core' })
+@Directive({selector: 'app-core'})
 export class AppCoreDirective implements AfterContentInit {
-    @ContentChild(GlobalStateDirective) globalState: GlobalStateDirective | undefined;
-    @ContentChild(DataQueryDirectiveBase) dataQuery: DataQueryDirectiveBase | undefined;
+  @ContentChild(GlobalStateDirective) globalState: GlobalStateDirective | undefined;
+  @ContentChild(DataQueryDirectiveBase) dataQuery: DataQueryDirectiveBase | undefined;
 
-    constructor(readonly appCoreService: AppCoreService) { }
+  constructor(readonly appCoreService: AppCoreService) {
+  }
 
-    ngAfterContentInit() {
-        if (this.globalState === undefined) {
-            const err = new ConfigurationError(`app-core is missing required 'global-state' child.`)
-                .from(SOURCE)
-                .at(Severity.ERROR);
-            this.appCoreService.appCore.err(err);
-            throw err;
-        }
-        if (this.dataQuery === undefined) {
-            const err = new ConfigurationError(`app-core is missing required 'data-query' directive`)
-                .from(SOURCE)
-                .at(Severity.ERROR);
-            this.appCoreService.appCore.err(err);
-            throw err;
-        }
-        this.appCoreService.appCore.publish();
+  ngAfterContentInit() {
+    if (this.globalState === undefined) {
+      const err = new ConfigurationError(`app-core is missing required 'global-state' child.`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
+      this.appCoreService.appCore.err(err);
+      throw err;
     }
-} 
+    if (this.dataQuery === undefined) {
+      const err = new ConfigurationError(`app-core is missing required 'data-query' directive`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
+      this.appCoreService.appCore.err(err);
+      throw err;
+    }
+    this.appCoreService.appCore.publish();
+  }
+}
