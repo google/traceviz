@@ -301,8 +301,8 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
                         distinctUntilChanged(),
                     )
                     .subscribe((matches) => {
-                        const rect = nodes.select(`#rect${treeNode.id}`);
-                        const text = nodes.select(`#text${treeNode.id}`);
+                        const rect = mergedNodes.select(`#rect${treeNode.id}`);
+                        const text = mergedNodes.select(`#text${treeNode.id}`);
                         if (matches) {
                             rect.transition()
                                 .duration(this.transitionDurationMs)
