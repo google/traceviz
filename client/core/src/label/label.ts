@@ -18,15 +18,15 @@ import { ValueMap } from "../value/value_map.js";
  */
 
 enum Keys {
-    LABEL_FORMAT = 'label_format',
+  LABEL_FORMAT = 'label_format',
 }
 
 /**
  * Returns the label for the provided ValueMap, or an empty string otherwise.
  */
 export function getLabel(vm: ValueMap): string {
-    if (!vm.has(Keys.LABEL_FORMAT)) {
-        return '';
-    }
-    return vm.format(vm.expectString(Keys.LABEL_FORMAT));
+  if (!vm.has(Keys.LABEL_FORMAT)) {
+    return '';
+  }
+  return vm.format(vm.expectString(Keys.LABEL_FORMAT));
 }

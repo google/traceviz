@@ -23,11 +23,12 @@ import { ResponseNode } from '../protocol/response_interface.js';
  * Types capable of fetching data series should implement DataSeriesFetcher.
  */
 export interface DataSeriesFetcher {
-        // fetchDataSeries requests that a new data series be fetched.  It specifies
-        // the series request, with populated and unique seriesName, and a callback
-        // to invoke with the response.
-        fetchDataSeries(
-                req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
-                cancel: () => void): void;
-        cancelDataSeries(seriesName: string | undefined): void;
+  // fetchDataSeries requests that a new data series be fetched.  It specifies
+  // the series request, with populated and unique seriesName, and a callback
+  // to invoke with the response.
+  fetchDataSeries(
+    req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
+    cancel: () => void): void;
+
+  cancelDataSeries(seriesName: string | undefined): void;
 }

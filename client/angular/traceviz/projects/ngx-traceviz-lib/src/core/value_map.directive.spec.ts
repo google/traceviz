@@ -16,13 +16,13 @@ import { Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 
 import { AppCoreDirective } from './app_core.directive';
 import { AppCoreService } from '../app_core_service/app_core.service';
-import { ValueMap, str, valueMap } from 'traceviz-client-core';
+import { str, ValueMap, valueMap } from 'traceviz-client-core';
 import { CoreModule } from './core.module';
 import { ValueMapDirective } from './value_map.directive';
 import { TestCoreModule } from './test_core.module';
 
 @Component({
-    template: `
+  template: `
   <app-core>
     <global-state>
       <value-map>
@@ -45,43 +45,43 @@ import { TestCoreModule } from './test_core.module';
 `
 })
 class ValueMapTestComponent {
-    @ViewChildren(ValueMapDirective) valueMapDirs = new QueryList<ValueMapDirective>();
-    @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+  @ViewChildren(ValueMapDirective) valueMapDirs = new QueryList<ValueMapDirective>();
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
 }
 
 describe('value map directive test', () => {
-    let fixture: ComponentFixture<ValueMapTestComponent>;
-    const appCoreService = new AppCoreService();
+  let fixture: ComponentFixture<ValueMapTestComponent>;
+  const appCoreService = new AppCoreService();
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            declarations: [ValueMapTestComponent],
-            imports: [CoreModule, TestCoreModule],
-            providers: [{
-                provide: AppCoreService,
-                useValue: appCoreService,
-            }]
-        })
-        fixture = TestBed.createComponent(ValueMapTestComponent);
-    });
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [ValueMapTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    })
+    fixture = TestBed.createComponent(ValueMapTestComponent);
+  });
 
-    it('handles value map', () => {
-        fixture.detectChanges();
-        fixture.detectChanges();
-        const tc = fixture.componentInstance;
-        const localVm = valueMap(
-            { key: 'species', val: str('cloud') },
-        );
-        const vmDir = tc.valueMapDirs.get(tc.valueMapDirs.length - 1);
-        let vm: ValueMap | undefined;
-        expect(() => {
-            vm = vmDir!.getValueMap(localVm);
-        }).not.toThrow();
-        expect(Array.from(vm!.entries()).map(([key, val]) => [key, val.toString()])).toEqual([
-            ['name', 'clyde'],
-            ['age', '56'],
-            ['species', 'cloud']
-        ]);
-    });
+  it('handles value map', () => {
+    fixture.detectChanges();
+    fixture.detectChanges();
+    const tc = fixture.componentInstance;
+    const localVm = valueMap(
+      {key: 'species', val: str('cloud')},
+    );
+    const vmDir = tc.valueMapDirs.get(tc.valueMapDirs.length - 1);
+    let vm: ValueMap | undefined;
+    expect(() => {
+      vm = vmDir!.getValueMap(localVm);
+    }).not.toThrow();
+    expect(Array.from(vm!.entries()).map(([key, val]) => [key, val.toString()])).toEqual([
+      ['name', 'clyde'],
+      ['age', '56'],
+      ['species', 'cloud']
+    ]);
+  });
 });
 

@@ -15,38 +15,38 @@ import { CoreModule } from './core.module';
 import { LocalRefDirective } from './local_ref.directive';
 import { AppCoreDirective } from './app_core.directive';
 import { AppCoreService } from '../app_core_service/app_core.service';
-import { StringValue, valueMap, str } from 'traceviz-client-core';
+import { str, StringValue, valueMap } from 'traceviz-client-core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, ViewChild } from '@angular/core';
 
 @Component({
-    template: `
+  template: `
   <local-ref key="str"></local-ref>
 `
 })
 class LocalTestComponent {
-    @ViewChild(LocalRefDirective) globalRefDir!: LocalRefDirective;
-    @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+  @ViewChild(LocalRefDirective) globalRefDir!: LocalRefDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
 }
 
 describe('local value directives test', () => {
-    let fixture: ComponentFixture<LocalTestComponent>;
-    const appCoreService = new AppCoreService();
+  let fixture: ComponentFixture<LocalTestComponent>;
+  const appCoreService = new AppCoreService();
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            declarations: [LocalTestComponent],
-            imports: [CoreModule],
-        })
-        fixture = TestBed.createComponent(LocalTestComponent);
-    });
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [LocalTestComponent],
+      imports: [CoreModule],
+    })
+    fixture = TestBed.createComponent(LocalTestComponent);
+  });
 
-    it('handles global Values', () => {
-        fixture.detectChanges();
-        const tc = fixture.componentInstance;
-        const vm = valueMap(
-            { key: 'str', val: str('howdy') },
-        );
-        expect((tc.globalRefDir.get(vm) as StringValue).val).toEqual('howdy');
-    });
+  it('handles global Values', () => {
+    fixture.detectChanges();
+    const tc = fixture.componentInstance;
+    const vm = valueMap(
+      {key: 'str', val: str('howdy')},
+    );
+    expect((tc.globalRefDir.get(vm) as StringValue).val).toEqual('howdy');
+  });
 });

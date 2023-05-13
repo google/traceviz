@@ -18,8 +18,8 @@ import { DataQuery } from "./data_query.js"
  */
 
 export class TestDataQuery extends DataQuery {
-    triggerUpdates() {
-        this.issueQuery();
-    }
+  triggerUpdates() {
+    this.issueQuery();
+  }
 }
 

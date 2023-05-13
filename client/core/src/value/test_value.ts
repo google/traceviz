@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-/** 
+/**
  * @fileoverview Test helpers for building TraceViz Values.
  */
 

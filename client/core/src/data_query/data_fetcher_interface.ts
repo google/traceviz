@@ -24,5 +24,5 @@ import { Observable } from 'rxjs';
  * Response.
  */
 export interface DataFetcherInterface {
-        fetch(req: Request): Observable<Response>;
-}  
+  fetch(req: Request): Observable<Response>;
+}

@@ -5,17 +5,17 @@ import { CommonModule } from "@angular/common";
 import { HovercardModule } from "../hovercard/hovercard.module";
 
 @NgModule({
-    declarations: [
-        WeightedTreeComponent,
-    ],
-    imports: [
-        CommonModule,
-        HovercardModule,
-        MatProgressBarModule,
-    ],
-    exports: [
-        WeightedTreeComponent,
-    ],
+  declarations: [
+    WeightedTreeComponent,
+  ],
+  imports: [
+    CommonModule,
+    HovercardModule,
+    MatProgressBarModule,
+  ],
+  exports: [
+    WeightedTreeComponent,
+  ],
 })
 export class WeightedTreeModule {
 }

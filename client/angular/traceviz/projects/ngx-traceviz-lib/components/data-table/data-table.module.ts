@@ -5,17 +5,17 @@ import { MatSortModule } from "@angular/material/sort";
 import { CommonModule } from "@angular/common";
 
 @NgModule({
-    declarations: [
-        DataTableComponent,
-    ],
-    imports: [
-        CommonModule,
-        MatProgressBarModule,
-        MatSortModule,
-    ],
-    exports: [
-        DataTableComponent,
-    ],
+  declarations: [
+    DataTableComponent,
+  ],
+  imports: [
+    CommonModule,
+    MatProgressBarModule,
+    MatSortModule,
+  ],
+  exports: [
+    DataTableComponent,
+  ],
 })
 export class DataTableModule {
 }
