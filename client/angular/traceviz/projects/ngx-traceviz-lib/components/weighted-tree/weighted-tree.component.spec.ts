@@ -141,7 +141,6 @@ describe('weighted tree test', () => {
         fixture.detectChanges();
         const tc = fixture.componentInstance;
         const collectionName = appCoreService.appCore.globalState.get('collection_name') as StringValue;
-        console.log(`got a ${tc.weightedTreeComp}`);
         GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
             series: new Map<string, ResponseNode>([
                 [tc.weightedTreeComp.dataSeriesQuery!.uniqueSeriesName,

@@ -96,11 +96,9 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
     private treeNodes: RenderedTreeNode[] = [];
 
     constructor(private readonly appCoreService: AppCoreService, private readonly ref: ChangeDetectorRef) {
-        console.log('uh');
     }
 
     ngAfterContentInit(): void {
-        console.log('welp');
         this.appCoreService.appCore.onPublish((appCore) => {
             if (this.dataSeriesQueryDir === undefined) {
                 appCore.err(new ConfigurationError(`weighted-tree is missing required 'data-series' child.`)
@@ -108,7 +106,6 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
                     .at(Severity.ERROR));
                 return;
             }
-            console.log('here');
             this.dataSeriesQuery = this.dataSeriesQueryDir.dataSeriesQuery;
 
             // Ensure the user-specified interactions are supported.
