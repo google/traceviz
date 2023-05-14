@@ -110,7 +110,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
       }
       this.dataSeriesQuery = this.dataSeriesQueryDir.dataSeriesQuery;
       if (this.paginator !== undefined) {
-        // Per https://github.com/angular/components/inssues/15781, the
+        // Per https://github.com/angular/components/issues/15781, the
         // paginator's tooltips stick past hover.  Hide them.
         this.paginator._intl.nextPageLabel = '';
         this.paginator._intl.previousPageLabel = '';
