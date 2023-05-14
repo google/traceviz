@@ -22,7 +22,7 @@
               "tsConfig": "projects/ngx-traceviz-lib/tsconfig.lib.json"
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "development"
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
