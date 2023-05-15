@@ -16,12 +16,36 @@
  * at ../../../../server/go/table/table.go
  */
 
-import { AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import {
+    AfterContentInit,
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    ContentChild,
+    ElementRef,
+    Input,
+    OnDestroy,
+    ViewChild
+} from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { DataSeriesQueryDirective } from '../../src/core/data_series_query.directive';
 import { InteractionsDirective } from '../../src/core/interactions.directive';
 import { MatPaginator } from '@angular/material/paginator';
-import { CanonicalTable, Coloring, ConfigurationError, DataSeriesQuery, Interactions, Severity, TableCell, TableHeader, TableRow, ValueMap, getLabel } from 'traceviz-client-core';
+import {
+    CanonicalTable,
+    ConfigurationError,
+    DataSeriesQuery,
+    Interactions,
+    Severity,
+    TableCell,
+    TableHeader,
+    TableRow,
+    ValueMap,
+    getLabel,
+    ResponseNode,
+    AppCore
+} from 'traceviz-client-core';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { AppCoreService } from '../../src/app_core_service/app_core.service';
@@ -81,6 +105,11 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
   @ViewChild('componentDiv') componentDiv!: ElementRef;
   @ViewChild('loadingDiv') loadingDiv!: ElementRef;
 
+  // dataInput can be set if a <data-series> child is not provided, representing
+  // the table's static data. The ResponseNode's data needs to have the same
+  // tabular format as the one expected from a <data-series>.
+  @Input('data') dataInput?: ResponseNode;
+
   loading = false;
 
   // Ends all subscriptions in the component.
@@ -102,13 +131,15 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
   ngAfterContentInit(): void {
     this.appCoreService.appCore.onPublish((appCore) => {
-      if (this.dataSeriesQueryDir === undefined) {
-        appCore.err(new ConfigurationError(`data-table is missing required 'data-series' child.`)
-          .from(SOURCE)
-          .at(Severity.ERROR));
-        return;
-      }
-      this.dataSeriesQuery = this.dataSeriesQueryDir.dataSeriesQuery;
+     if (this.dataSeriesQueryDir !== undefined && this.dataInput !== undefined) {
+         appCore.err(
+             new ConfigurationError(
+                 'data-table cannot specify both a <data-series> child and the "data" property')
+                 .from(SOURCE)
+                 .at(Severity.ERROR));
+         return;
+     }
+
       if (this.paginator !== undefined) {
         // Per https://github.com/angular/components/issues/15781, the
         // paginator's tooltips stick past hover.  Hide them.
@@ -135,31 +166,26 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
         this.sortRowsWatch(vm);
       })
 
-      // Publish loading status.
-      this.dataSeriesQuery?.loading
-        .pipe(takeUntil(this.unsubscribe))
-        .subscribe((loading) => {
-          this.loading = loading;
-          this.ref.detectChanges();
-        });
+    this.dataSeriesQuery = this.dataSeriesQueryDir?.dataSeriesQuery;
+      if (this.dataSeriesQuery) {
+        // Publish loading status.
+        this.dataSeriesQuery.loading
+          .pipe(takeUntil(this.unsubscribe))
+          .subscribe((loading) => {
+              this.loading = loading;
+              this.ref.detectChanges();
+          });
 
-      // Handle new data series.
-      this.dataSeriesQuery?.response
-        .pipe(takeUntil(this.unsubscribe))
-        .subscribe((response) => {
-          this.newSeries.next();
-          try {
-            this.table = new CanonicalTable(response);
-            this.columns = this.table?.columns();
-            if (this.paginator !== undefined) {
-              this.paginator.pageIndex = 0;
-              this.paginator.length = this.table ? this.table.rowCount : 0;
-            }
-            this.updateRows();
-          } catch (err: unknown) {
-            appCore.err(err);
-          }
-        });
+        // Handle new data series.
+        this.dataSeriesQuery.response
+          .pipe(takeUntil(this.unsubscribe))
+          .subscribe((response) => {
+              this.updateData(response, appCore);
+          });
+      } else if (this.dataInput) {
+        // If static data was passed in, render it.
+        this.updateData(this.dataInput, appCore)
+      }
     })
   }
 
@@ -198,6 +224,22 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
     }
   }
 
+
+  // updateData renders data.
+  private updateData(data:ResponseNode, appCore: AppCore): void {
+    this.newSeries.next();
+    try {
+      this.table = new CanonicalTable(data);
+      this.columns = this.table?.columns();
+      if (this.paginator !== undefined) {
+          this.paginator.pageIndex = 0;
+          this.paginator.length = this.table ? this.table.rowCount : 0;
+      }
+      this.updateRows();
+    } catch (err: unknown) {
+        appCore.err(err);
+    }
+  }
 
   updateRows() {
     if (this.table === undefined) {
