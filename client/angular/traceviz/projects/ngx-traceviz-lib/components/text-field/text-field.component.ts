@@ -16,6 +16,7 @@ import { AppCoreService, InteractionsDirective } from "projects/ngx-traceviz-lib
 import { Subject, pipe } from "rxjs";
 import { debounceTime, distinctUntilChanged, takeUntil } from "rxjs/operators";
 import { ConfigurationError, Severity, StringValue, Value, ValueMap } from "traceviz-client-core";
+import { coerceBooleanProperty, BooleanInput } from '@angular/cdk/coercion';
 
 /**
  * @fileoverview A text entry box supporting TraceViz interactions.
@@ -72,7 +73,15 @@ export class TextFieldComponent implements AfterContentInit, OnDestroy {
     @Input() debounceMs = 250;
     @Input() label = '';
     @Input() placeholder = '';
-    @Input() updateOnEnter = false;
+
+    @Input()
+    get updateOnEnter() { return this._updateOnEnter; }
+    set updateOnEnter(value: BooleanInput) {
+      this._updateOnEnter = coerceBooleanProperty(value);
+    }
+    private _updateOnEnter = false;
+
+
     @ContentChild(InteractionsDirective) interactionsDirective?: InteractionsDirective;
 
     contents = new StringValue('');
