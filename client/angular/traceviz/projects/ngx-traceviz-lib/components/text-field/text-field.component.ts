@@ -12,7 +12,8 @@
 */
 
 import { AfterContentInit, Component, ContentChild, Input, OnDestroy } from "@angular/core";
-import { AppCoreService, InteractionsDirective } from "projects/ngx-traceviz-lib/public-api";
+import { AppCoreService } from '../../src/app_core_service/app_core.service';
+import { InteractionsDirective } from '../../src/core/interactions.directive';
 import { Subject, pipe } from "rxjs";
 import { debounceTime, distinctUntilChanged, takeUntil } from "rxjs/operators";
 import { ConfigurationError, Severity, StringValue, Value, ValueMap } from "traceviz-client-core";
