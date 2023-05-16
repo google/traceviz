@@ -1,0 +1,7 @@
+{
+  "/GetData": {
+    "target": "http://localhost:7410",
+    "secure": false,
+    "logLevel": "debug"
+  }
+}
