@@ -160,8 +160,12 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
 
     handleMouseover(treeNode: RenderedTreeNode) {
         try {
-            this.tooltip = treeNode.properties.format(
+            if (treeNode.properties.has(Keys.DETAIL_FORMAT)) {
+              this.tooltip = treeNode.properties.format(
                 treeNode.properties.expectString(Keys.DETAIL_FORMAT));
+            } else {
+              this.tooltip = '';
+            }
         } catch (err: unknown) {
             this.appCoreService.appCore.err(err);
         }
@@ -204,16 +208,17 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
         const enteredNodes: any = nodes.enter()
             .append('svg')
             .on('mouseover',
-                (d: RenderedTreeNode) => {
+                (event: any, d: RenderedTreeNode) => {
                     this.interactions?.update(NODE, MOUSEOVER, d.properties);
                     wt.handleMouseover(d);
                 })
             .on('mouseout',
-                (d: RenderedTreeNode) => {
+                (event: any, d: RenderedTreeNode) => {
                     this.interactions?.update(NODE, MOUSEOUT, d.properties);
                     wt.handleMouseout();
                 })
-            .on('click', (d: RenderedTreeNode) => {
+            .on('click',
+              (event: any, d: RenderedTreeNode) => {
                 this.interactions?.update(NODE, CLICK, d.properties);
             });
         enteredNodes.append('rect');
