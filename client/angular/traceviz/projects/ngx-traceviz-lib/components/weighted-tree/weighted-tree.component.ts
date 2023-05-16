@@ -73,8 +73,8 @@ const supportedWatches: string[] = [];
     styleUrls: ['weighted-tree.component.css'],
 })
 export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, OnDestroy {
-    @ContentChild(DataSeriesQueryDirective) dataSeriesQueryDir: DataSeriesQueryDirective | undefined;
-    @ContentChild(InteractionsDirective) interactionsDir: InteractionsDirective | undefined;
+    @ContentChild(DataSeriesQueryDirective, { descendants: false }) dataSeriesQueryDir: DataSeriesQueryDirective | undefined;
+    @ContentChild(InteractionsDirective,{ descendants: false }) interactionsDir: InteractionsDirective | undefined;
 
     @ViewChild('svg', { static: true }) svg!: ElementRef;
     @ViewChild('scopeNameDiv', { static: true }) scopeNameDiv!: ElementRef;

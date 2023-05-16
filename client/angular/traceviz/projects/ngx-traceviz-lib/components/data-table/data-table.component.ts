@@ -74,8 +74,8 @@ const supportedWatches = [SORT_ROWS];
   styleUrls: ['./data-table.component.css']
 })
 export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDestroy {
-  @ContentChild(DataSeriesQueryDirective) dataSeriesQueryDir: DataSeriesQueryDirective | undefined;
-  @ContentChild(InteractionsDirective) interactionsDir: InteractionsDirective | undefined;
+  @ContentChild(DataSeriesQueryDirective, { descendants: false }) dataSeriesQueryDir: DataSeriesQueryDirective | undefined;
+  @ContentChild(InteractionsDirective, { descendants: false }) interactionsDir: InteractionsDirective | undefined;
   @ContentChild(MatPaginator) paginator: MatPaginator | undefined;
 
   @ViewChild('componentDiv') componentDiv!: ElementRef;
