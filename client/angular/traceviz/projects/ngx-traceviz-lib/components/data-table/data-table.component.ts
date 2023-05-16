@@ -26,7 +26,8 @@ import {
     ElementRef,
     Input,
     OnDestroy,
-    ViewChild
+    ViewChild,
+    ViewEncapsulation
 } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { DataSeriesQueryDirective } from '../../src/core/data_series_query.directive';
@@ -95,7 +96,10 @@ const supportedWatches = [SORT_ROWS];
   selector: 'data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './data-table.component.html',
-  styleUrls: ['./data-table.component.css']
+  styleUrls: ['./data-table.component.css'],
+  // We need to use ShadowDom for the `part="table"` attribute in the template
+  // to work and allow users to inject styling.
+  encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDestroy {
   @ContentChild(DataSeriesQueryDirective, { descendants: false }) dataSeriesQueryDir: DataSeriesQueryDirective | undefined;

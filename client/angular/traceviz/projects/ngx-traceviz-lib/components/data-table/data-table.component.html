@@ -3,7 +3,7 @@
         <mat-progress-bar mode="indeterminate"></mat-progress-bar>
     </div>
     <div class="content" #componentDiv (window:resize)="redraw()">
-        <table class="table" [ngStyle]="{'font-size': fontSizePx}" matSort [matSortActive]="sort.active"
+        <table part="table" class="table" [ngStyle]="{'font-size': fontSizePx}" matSort [matSortActive]="sort.active"
             [matSortDirection]="sort.direction" (matSortChange)="doSort($event)">
             <tr [ngStyle]="{'height': rowHeightPx}">
                 <th class="header-cell" *ngFor="let column of columns" [title]="column.category.description"
