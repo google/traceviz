@@ -250,11 +250,18 @@ export class SetIfEmpty extends Update {
  * all provided updates are applied.
  */
 export class Action extends Update {
+  readonly updates: Update[];
+
   constructor(
     readonly target: string,
     readonly type: string,
-    readonly updates: Update[]) {
+    updates: Update | Update[]) {
     super(DocumenterType.Action);
+    if (updates instanceof Update) {
+        this.updates = [updates];
+    } else {
+        this.updates = updates;
+    }
   }
 
   override update(localState?: ValueMap | undefined) {
