@@ -32,31 +32,6 @@ enum Keys {
     DETAIL_FORMAT = 'detail_format',
 }
 
-// Valid interactions targets
-const NODE = 'node';
-
-// Valid action types
-const CLICK = 'click';
-const CTRL_CLICK = 'ctrl-click';
-const MOUSEOVER = 'mouseover';
-const MOUSEOUT = 'mouseout';
-
-// Valid reaction types
-const HIGHLIGHT = 'highlight';
-
-const supportedActions = new Array<[string, string]>(
-    [NODE, CLICK],
-    [NODE, CTRL_CLICK],
-    [NODE, MOUSEOVER],
-    [NODE, MOUSEOUT],
-);
-
-const supportedReactions = new Array<[string, string]>(
-    [NODE, HIGHLIGHT],
-);
-
-const supportedWatches: string[] = [];
-
 @Component({
     selector: 'weighted-tree',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,6 +50,26 @@ const supportedWatches: string[] = [];
     styleUrls: ['weighted-tree.component.css'],
 })
 export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, OnDestroy {
+    // Valid interactions targets
+    static readonly NODE = 'node';
+    // Valid action types
+    static readonly CLICK = 'click';
+    static readonly CTRL_CLICK = 'ctrl-click';
+    static readonly MOUSEOVER = 'mouseover';
+    static readonly MOUSEOUT = 'mouseout';
+    // Valid reaction types
+    static readonly HIGHLIGHT = 'highlight';
+    private static readonly supportedActions = new Array<[string, string]>(
+        [WeightedTreeComponent.NODE, WeightedTreeComponent.CLICK],
+        [WeightedTreeComponent.NODE, WeightedTreeComponent.CTRL_CLICK],
+        [WeightedTreeComponent.NODE, WeightedTreeComponent.MOUSEOVER],
+        [WeightedTreeComponent.NODE, WeightedTreeComponent.MOUSEOUT],
+    );
+    private static readonly supportedReactions = new Array<[string, string]>(
+        [WeightedTreeComponent.NODE, WeightedTreeComponent.HIGHLIGHT],
+    );
+    private static readonly supportedWatches: string[] = [];
+
     @ContentChild(DataSeriesQueryDirective, { descendants: false }) dataSeriesQueryDir: DataSeriesQueryDirective | undefined;
     @ContentChild(InteractionsDirective,{ descendants: false }) interactionsDir: InteractionsDirective | undefined;
 
@@ -113,9 +108,9 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
             // Ensure the user-specified interactions are supported.
             this.interactions = this.interactionsDir?.get();
             try {
-                this.interactions?.checkForSupportedActions(supportedActions);
-                this.interactions?.checkForSupportedReactions(supportedReactions);
-                this.interactions?.checkForSupportedWatches(supportedWatches);
+                this.interactions?.checkForSupportedActions(WeightedTreeComponent.supportedActions);
+                this.interactions?.checkForSupportedReactions(WeightedTreeComponent.supportedReactions);
+                this.interactions?.checkForSupportedWatches(WeightedTreeComponent.supportedWatches);
             } catch (err) {
                 appCore.err(err);
             }
@@ -211,20 +206,20 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
             .append('svg')
             .on('mouseover',
                 (event: any, d: RenderedTreeNode) => {
-                    this.interactions?.update(NODE, MOUSEOVER, d.properties);
+                    this.interactions?.update(WeightedTreeComponent.NODE, WeightedTreeComponent.MOUSEOVER, d.properties);
                     wt.handleMouseover(d);
                 })
             .on('mouseout',
                 (event: any, d: RenderedTreeNode) => {
-                    this.interactions?.update(NODE, MOUSEOUT, d.properties);
+                    this.interactions?.update(WeightedTreeComponent.NODE, WeightedTreeComponent.MOUSEOUT, d.properties);
                     wt.handleMouseout();
                 })
             .on('click',
               (event: PointerEvent, d: RenderedTreeNode) => {
-                if (event.ctrlKey && this.interactions?.hasAction(NODE, CTRL_CLICK)) {
-                    this.interactions?.update(NODE, CTRL_CLICK, d.properties);
+                if (event.ctrlKey && this.interactions?.hasAction(WeightedTreeComponent.NODE, WeightedTreeComponent.CTRL_CLICK)) {
+                    this.interactions?.update(WeightedTreeComponent.NODE, WeightedTreeComponent.CTRL_CLICK, d.properties);
                 } else {
-                    this.interactions?.update(NODE, CLICK, d.properties);
+                    this.interactions?.update(WeightedTreeComponent.NODE, WeightedTreeComponent.CLICK, d.properties);
                 }
             });
         enteredNodes.append('rect');
@@ -299,7 +294,7 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
                     return '14px';
                 }));
 
-        const matchFn = this.interactions?.match(NODE, HIGHLIGHT);
+        const matchFn = this.interactions?.match(WeightedTreeComponent.NODE, WeightedTreeComponent.HIGHLIGHT);
         if (matchFn !== undefined) {
             for (const treeNode of this.treeNodes) {
                 matchFn(treeNode.properties)
