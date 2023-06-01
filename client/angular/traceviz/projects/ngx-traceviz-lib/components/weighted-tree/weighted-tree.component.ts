@@ -37,6 +37,7 @@ const NODE = 'node';
 
 // Valid action types
 const CLICK = 'click';
+const CTRL_CLICK = 'ctrl-click';
 const MOUSEOVER = 'mouseover';
 const MOUSEOUT = 'mouseout';
 
@@ -45,6 +46,7 @@ const HIGHLIGHT = 'highlight';
 
 const supportedActions = new Array<[string, string]>(
     [NODE, CLICK],
+    [NODE, CTRL_CLICK],
     [NODE, MOUSEOVER],
     [NODE, MOUSEOUT],
 );
@@ -218,8 +220,12 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit, O
                     wt.handleMouseout();
                 })
             .on('click',
-              (event: any, d: RenderedTreeNode) => {
-                this.interactions?.update(NODE, CLICK, d.properties);
+              (event: PointerEvent, d: RenderedTreeNode) => {
+                if (event.ctrlKey && this.interactions?.hasAction(NODE, CTRL_CLICK)) {
+                    this.interactions?.update(NODE, CTRL_CLICK, d.properties);
+                } else {
+                    this.interactions?.update(NODE, CLICK, d.properties);
+                }
             });
         enteredNodes.append('rect');
         enteredNodes.append('text');

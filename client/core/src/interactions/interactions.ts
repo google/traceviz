@@ -640,6 +640,13 @@ export class Interactions implements Documenter {
     }
   }
 
+  // hasAction returns true if an action for the given target and type is
+  // defined.
+  hasAction(target: string, type: string): boolean {
+      const action = this.actionsByTargetAndType.get(target)?.get(type);
+      return (action !== undefined);
+  }
+
   match(target: string, type: string): MatchFn {
     const reaction = this.reactionsByTargetAndType.get(target)?.get(type);
     if (reaction === undefined) {
