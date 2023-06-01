@@ -265,11 +265,8 @@ export class ActionDirective {
         if (this.action !== undefined) {
             return this.action;
         }
-        const updates: Update[] = [];
-        for (const updateDirective of this.updateDirectives) {
-            updates.push(updateDirective.get());
-        }
-        this.action = new Action(this.target, this.type, updates);
+        const updates = this.updateDirectives.map(item => item.get())
+        this.action = new Action(this.target, this.type, this.updateDirectives.map(item => item.get()));
         return this.action;
     }
 }

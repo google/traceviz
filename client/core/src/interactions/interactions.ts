@@ -250,11 +250,18 @@ export class SetIfEmpty extends Update {
  * all provided updates are applied.
  */
 export class Action extends Update {
+  readonly updates: Update[];
+
   constructor(
     readonly target: string,
     readonly type: string,
-    readonly updates: Update[]) {
+    updates: Update | Update[]) {
     super(DocumenterType.Action);
+    if (updates instanceof Update) {
+        this.updates = [updates];
+    } else {
+        this.updates = updates;
+    }
   }
 
   override update(localState?: ValueMap | undefined) {
@@ -638,6 +645,13 @@ export class Interactions implements Documenter {
     if (action !== undefined) {
       action.update(localValues);
     }
+  }
+
+  // hasAction returns true if an action for the given target and type is
+  // defined.
+  hasAction(target: string, type: string): boolean {
+      const action = this.actionsByTargetAndType.get(target)?.get(type);
+      return (action !== undefined);
   }
 
   match(target: string, type: string): MatchFn {
