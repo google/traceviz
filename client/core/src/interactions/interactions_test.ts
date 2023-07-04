@@ -20,6 +20,7 @@ import { IntegerValue } from '../value/value.js';
 import { ValueMap } from '../value/value_map.js';
 import { ValueRef } from '../value/value_reference.js';
 import { LocalValue, FixedValue } from '../value/value_reference.js';
+import { ReplaySubject, Subject } from 'rxjs';
 
 describe('interactions test', () => {
     it('clears fixed values', () => {
@@ -198,11 +199,12 @@ describe('interactions test', () => {
         );
         const w = new Watch('highlight range', vm);
         const tickerTape: string[][] = [];
+        const unsub = new Subject<void>();
         const sub = w.watch((vm: ValueMap) => {
             tickerTape.push(
                 Array.from(vm.keys()).map((key) =>
                     `${key}: ${vm.get(key).toString()}`));
-        });
+        }, unsub);
         highlightedStartOffset.val = 50;
         expect(tickerTape).toEqual([
             ['highlightedStartOffset: 100', 'highlightedEndOffset: 200'],
@@ -210,8 +212,8 @@ describe('interactions test', () => {
             ['highlightedStartOffset: 50', 'highlightedEndOffset: 200'],
         ]);
         // Close out the error channel, ending the watch.  🫡
-        sub.next(null);
-        sub.complete();
+        unsub.next();
+        unsub.complete();
         highlightedEndOffset.val = 150;
         expect(tickerTape).toEqual([
             ['highlightedStartOffset: 100', 'highlightedEndOffset: 200'],
@@ -263,12 +265,60 @@ describe('interactions test', () => {
         // Provide an action with a 
         const bumpWeightOnClick = new Action('weight', 'click', [new Bump(weightRef)]).withHelpText("Upon 'click' on a 'weight', bumps that 'weight'.", /* documentChildren= */ false);
 
+        const start = int(3);
+        const end = int(10);
         const interactions = new Interactions()
             .withAction(new Action('series', 'clear', [new Clear([labelRef])]))
             .withAction(bumpWeightOnClick)
             .withReaction(new Reaction('series', 'highlight', new Includes(labelsRef, labelRef)))
             .withReaction(new Reaction('graph', 'show info', boundsChecker))
-            .withWatch(new Watch('highlight timerange', valueMap()));
+            .withWatch(new Watch('highlight range', valueMap(
+                { key: 'start', val: start },
+                { key: 'end', val: end },
+            )));
+
+        // Confirm watchAll fails when specifying an unsupported watch type.
+        {
+            let errCount = 0;
+            const unsub = new Subject<void>();
+            interactions.watchAll(new Map([
+                ['adjust bounds', () => { }],
+            ]), unsub).subscribe((err) => {
+                errCount++;
+            });
+            expect(errCount).toBe(1);
+            unsub.next();
+            unsub.complete();
+        }
+
+        // Confirm watchAll invokes callbacks and relays thrown errors.
+        {
+            let errCount = 0;
+            let invocationCount = 0;
+            const unsub = new Subject<void>();
+            interactions.watchAll(new Map([
+                ['highlight range', (vm) => {
+                    invocationCount++;
+                    if (vm.expectNumber('start') > vm.expectNumber('end')) {
+                        throw new Error('oops');
+                    }
+                }],
+            ]), unsub).subscribe((err) => {
+                errCount++;
+            });
+            expect(errCount).toBe(0);
+            expect(invocationCount).toBe(2);
+            start.val = 5;
+            expect(errCount).toBe(0);
+            expect(invocationCount).toBe(3);
+            end.val = 1;
+            expect(errCount).toBe(1);
+            expect(invocationCount).toBe(4);
+            unsub.next();
+            unsub.complete();
+            end.val = 10;
+            expect(invocationCount).toBe(4);
+        }
 
         // Confirm self-documentation
         expect(prettyPrintDocumenter(interactions).join('\n')).toEqual(`Interactions (Interactions)
@@ -285,7 +335,7 @@ describe('interactions test', () => {
         NOT (Predicate)
           when local value 'weight' == value 'forbidden' (Predicate)
       when value 'allowed' includes local value 'weight' (Predicate)
-  Trigger 'highlight timerange' on changes to arguments (Watch)`);
+  Trigger 'highlight range' on changes to arguments (Watch)`);
 
         // Confirm interactions
         const label = str('thing');

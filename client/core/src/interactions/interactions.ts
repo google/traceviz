@@ -42,8 +42,8 @@ import { ConfigurationError, Severity } from '../errors/errors.js';
 import { EmptyValue, Value } from '../value/value.js';
 import { ValueMap } from '../value/value_map.js';
 import { ValueRef } from '../value/value_reference.js';
-import { combineLatest, distinctUntilChanged, EMPTY, merge, Observable, ReplaySubject } from 'rxjs';
-import { delay, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { combineLatest, distinctUntilChanged, EMPTY, merge, Observable, ReplaySubject, Subject } from 'rxjs';
+import { delay, map, mergeMap, takeUntil } from 'rxjs/operators';
 
 const SOURCE = 'interactions';
 
@@ -566,15 +566,22 @@ export class Watch implements Documenter {
 
   constructor(readonly type: string, readonly valueMap: ValueMap) { }
 
-  watch(cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
+  /**
+   * Invokes the provided callback if the receiver's value map changes, until
+   * the provided unsubscribe observable emits.  Returns an observable emitting
+   * any errors thrown during callback invocation.
+   */
+  watch(cb: (vm: ValueMap) => void, unsubscribe: Subject<void>): ReplaySubject<unknown> {
     const ret = new ReplaySubject<unknown>();
-    this.valueMap.watch().pipe(takeUntil(ret)).subscribe((vm: ValueMap) => {
-      try {
-        cb(vm);
-      } catch (err: unknown) {
-        ret.next(err);
-      }
-    });
+    this.valueMap.watch()
+      .pipe(takeUntil(unsubscribe))
+      .subscribe((vm: ValueMap) => {
+        try {
+          cb(vm);
+        } catch (err: unknown) {
+          ret.next(err);
+        }
+      });
     return ret;
   }
 
@@ -648,12 +655,44 @@ export class Interactions implements Documenter {
     return reaction!.match();
   }
 
-  watch(type: string, cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
+  /**
+   * Sets up a single watch on the specified type with the specified callback.
+   * Returns an observable that emits any error thrown by the callback.  The
+   * returned observable also emits an error if the specified watch type does
+   * not exist on the receiver.  Emitting anything on the returned observable
+   * 
+   */
+  watch(type: string, cb: (vm: ValueMap) => void, unsubscribe: Subject<void>): ReplaySubject<unknown> {
     const watch = this.watchesByType.get(type);
     if (watch === undefined) {
-      return new ReplaySubject<unknown>();
+      const ret = new ReplaySubject<unknown>();
+      ret.next(new ConfigurationError(
+        `Watch type '${type}' is not supported`).from(SOURCE).at(Severity.ERROR));
+      return ret;
     }
-    return watch!.watch(cb);
+    return watch!.watch(cb, unsubscribe);
+  }
+
+  /**
+   * Sets up multiple watches at the same time.  The provided watchActions map
+   * specifies which watches to set up, and what callback to apply when they
+   * trigger.  Returns an observable that emits any error thrown by an invoked
+   * callback.  The returned observable also emits an error if a watch type
+   * specified in the provided actions map does not exist on the receiver.
+   */
+  watchAll(watchActions: ReadonlyMap<string, (vm: ValueMap) => void>, unsubscribe: Subject<void>): Observable<unknown> {
+    const chans: ReplaySubject<unknown>[] = [];
+    for (const [type, cb] of watchActions) {
+      const w = this.watchesByType.get(type);
+      if (w === undefined) {
+        const ret = new ReplaySubject<unknown>();
+        ret.next(new ConfigurationError(
+          `Watch type '${type}' is not supported`).from(SOURCE).at(Severity.ERROR));
+        return ret;
+      }
+      chans.push(w.watch(cb, unsubscribe));
+    }
+    return merge(...chans).pipe(takeUntil(unsubscribe));
   }
 
   get autoDocument(): string {
