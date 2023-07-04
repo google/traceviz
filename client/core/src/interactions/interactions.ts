@@ -657,10 +657,10 @@ export class Interactions implements Documenter {
 
   /**
    * Sets up a single watch on the specified type with the specified callback.
-   * Returns an observable that emits any error thrown by the callback.  The
-   * returned observable also emits an error if the specified watch type does
-   * not exist on the receiver.  Emitting anything on the returned observable
-   * 
+   * The callback will be invoked on watch changes until the provided 
+   * unsubscribe observable emits.  Returns an observable that emits any error 
+   * thrown by the callback.  The returned observable also emits an error if
+   * the specified watch type does not exist on the receiver.
    */
   watch(type: string, cb: (vm: ValueMap) => void, unsubscribe: Subject<void>): ReplaySubject<unknown> {
     const watch = this.watchesByType.get(type);
