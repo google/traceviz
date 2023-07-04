@@ -116,10 +116,10 @@ const tableData = node(
       <interactions>
         <watch type="sort_rows">
           <value-map>
-            <value key="table_sort_direction">
+            <value key="direction">
               <global-ref key="table_sort_direction"></global-ref>
             </value>
-            <value key="table_sort_column">
+            <value key="column">
               <global-ref key="table_sort_column"></global-ref>
             </value>
           </value-map>

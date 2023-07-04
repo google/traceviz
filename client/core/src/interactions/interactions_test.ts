@@ -196,9 +196,9 @@ describe('interactions test', () => {
             { key: 'highlightedStartOffset', val: highlightedStartOffset },
             { key: 'highlightedEndOffset', val: highlightedEndOffset },
         );
-        const w = new Watch('highlight range');
+        const w = new Watch('highlight range', vm);
         const tickerTape: string[][] = [];
-        const sub = w.watch(vm, (vm: ValueMap) => {
+        const sub = w.watch((vm: ValueMap) => {
             tickerTape.push(
                 Array.from(vm.keys()).map((key) =>
                     `${key}: ${vm.get(key).toString()}`));
@@ -268,7 +268,7 @@ describe('interactions test', () => {
             .withAction(bumpWeightOnClick)
             .withReaction(new Reaction('series', 'highlight', new Includes(labelsRef, labelRef)))
             .withReaction(new Reaction('graph', 'show info', boundsChecker))
-            .withWatch(new Watch('highlight timerange'));
+            .withWatch(new Watch('highlight timerange', valueMap()));
 
         // Confirm self-documentation
         expect(prettyPrintDocumenter(interactions).join('\n')).toEqual(`Interactions (Interactions)

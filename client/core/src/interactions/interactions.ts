@@ -564,11 +564,11 @@ export class Watch implements Documenter {
   overrideDocument = '';
   documentChildren = true;
 
-  constructor(readonly type: string) { }
+  constructor(readonly type: string, readonly valueMap: ValueMap) { }
 
-  watch(valueMap: ValueMap, cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
+  watch(cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
     const ret = new ReplaySubject<unknown>();
-    valueMap.watch().pipe(takeUntil(ret)).subscribe((vm: ValueMap) => {
+    this.valueMap.watch().pipe(takeUntil(ret)).subscribe((vm: ValueMap) => {
       try {
         cb(vm);
       } catch (err: unknown) {
@@ -648,12 +648,12 @@ export class Interactions implements Documenter {
     return reaction!.match();
   }
 
-  watch(type: string, valueMap: ValueMap, cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
+  watch(type: string, cb: (vm: ValueMap) => void): ReplaySubject<unknown> {
     const watch = this.watchesByType.get(type);
     if (watch === undefined) {
       return new ReplaySubject<unknown>();
     }
-    return watch!.watch(valueMap, cb);
+    return watch!.watch(cb);
   }
 
   get autoDocument(): string {

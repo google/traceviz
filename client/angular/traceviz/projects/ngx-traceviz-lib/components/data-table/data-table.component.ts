@@ -131,7 +131,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
         appCore.err(err);
       }
       // Set up watches
-      this.interactions?.watch(SORT_ROWS, new ValueMap(), (vm) => {
+      this.interactions?.watch(SORT_ROWS, (vm) => {
         this.sortRowsWatch(vm);
       })
 

@@ -587,7 +587,8 @@ export class WatchDirective {
                     .from(SOURCE)
                     .at(Severity.ERROR);
             }
-            this.watch = new Watch(this.type);
+            this.watch =
+                new Watch(this.type, this.valueMapDirective.getValueMap());
         }
         return this.watch
     }

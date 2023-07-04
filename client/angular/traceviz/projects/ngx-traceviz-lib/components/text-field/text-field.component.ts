@@ -104,7 +104,6 @@ export class TextFieldComponent implements AfterContentInit, OnDestroy {
 
         this.appCoreService.appCore.onPublish((appCore) => {
             interactions?.watch(WatchType.UPDATE_CONTENTS,
-                new ValueMap(new Map([[Key.CONTENTS, this.contents]])),
                 (vm: ValueMap) => {
                     const contentsVal = vm.get(Key.CONTENTS);
                     if (contentsVal instanceof StringValue) {
