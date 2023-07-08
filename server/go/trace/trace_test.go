@@ -20,6 +20,7 @@ import (
 
 	"github.com/google/traceviz/server/go/category"
 	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
+	"github.com/google/traceviz/server/go/payload"
 	testutil "github.com/google/traceviz/server/go/test_util"
 	"github.com/google/traceviz/server/go/util"
 )
@@ -360,7 +361,7 @@ func TestTraceData(t *testing.T) {
 		buildTrace: func(db util.DataBuilder) {
 			task100 := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(500)), &RenderSettings{}).
 				Category(pidCat(100))
-			task100.Span(0, 500).Payload("thumbnail").With(
+			payload.New(task100.Span(0, 500), "thumbnail").With(
 				util.IntegersProperty("normalized_cpu_time", 1, 1, 2, 1, 1),
 			)
 			tid110 := task100.Category(pidCat(110))
@@ -386,8 +387,7 @@ func TestTraceData(t *testing.T) {
 				util.DurationProperty(offsetKey, 0),
 				util.DurationProperty(durationKey, 500),
 			).Child().With( // Binned payload data
-				util.IntegerProperty(nodeTypeKey, int64(payloadNodeType)),
-				util.StringProperty(payloadTypeKey, "thumbnail"),
+				util.StringProperty(payload.TypeKey, "thumbnail"),
 				util.IntegersProperty("normalized_cpu_time", 1, 1, 2, 1, 1),
 			)
 			task100.Child().With( // TID 110 category

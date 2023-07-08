@@ -277,20 +277,6 @@ describe('interactions test', () => {
                 { key: 'end', val: end },
             )));
 
-        // Confirm watchAll fails when specifying an unsupported watch type.
-        {
-            let errCount = 0;
-            const unsub = new Subject<void>();
-            interactions.watchAll(new Map([
-                ['adjust bounds', () => { }],
-            ]), unsub).subscribe((err) => {
-                errCount++;
-            });
-            expect(errCount).toBe(1);
-            unsub.next();
-            unsub.complete();
-        }
-
         // Confirm watchAll invokes callbacks and relays thrown errors.
         {
             let errCount = 0;

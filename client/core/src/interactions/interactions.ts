@@ -662,13 +662,10 @@ export class Interactions implements Documenter {
    * thrown by the callback.  The returned observable also emits an error if
    * the specified watch type does not exist on the receiver.
    */
-  watch(type: string, cb: (vm: ValueMap) => void, unsubscribe: Subject<void>): ReplaySubject<unknown> {
+  watch(type: string, cb: (vm: ValueMap) => void, unsubscribe: Subject<void>): Observable<unknown> {
     const watch = this.watchesByType.get(type);
     if (watch === undefined) {
-      const ret = new ReplaySubject<unknown>();
-      ret.next(new ConfigurationError(
-        `Watch type '${type}' is not supported`).from(SOURCE).at(Severity.ERROR));
-      return ret;
+      return EMPTY;
     }
     return watch!.watch(cb, unsubscribe);
   }
@@ -684,13 +681,9 @@ export class Interactions implements Documenter {
     const chans: ReplaySubject<unknown>[] = [];
     for (const [type, cb] of watchActions) {
       const w = this.watchesByType.get(type);
-      if (w === undefined) {
-        const ret = new ReplaySubject<unknown>();
-        ret.next(new ConfigurationError(
-          `Watch type '${type}' is not supported`).from(SOURCE).at(Severity.ERROR));
-        return ret;
+      if (w !== undefined) {
+        chans.push(w.watch(cb, unsubscribe));
       }
-      chans.push(w.watch(cb, unsubscribe));
     }
     return merge(...chans).pipe(takeUntil(unsubscribe));
   }

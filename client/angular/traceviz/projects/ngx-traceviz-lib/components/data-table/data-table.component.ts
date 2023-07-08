@@ -17,34 +17,34 @@
  */
 
 import {
-    AfterContentInit,
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    Component,
-    ContentChild,
-    ElementRef,
-    Input,
-    OnDestroy,
-    ViewChild
+  AfterContentInit,
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild,
+  ElementRef,
+  Input,
+  OnDestroy,
+  ViewChild
 } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { DataSeriesQueryDirective } from '../../src/core/data_series_query.directive';
 import { InteractionsDirective } from '../../src/core/interactions.directive';
 import { MatPaginator } from '@angular/material/paginator';
 import {
-    CanonicalTable,
-    ConfigurationError,
-    DataSeriesQuery,
-    Interactions,
-    Severity,
-    TableCell,
-    TableHeader,
-    TableRow,
-    ValueMap,
-    getLabel,
-    ResponseNode,
-    AppCore
+  CanonicalTable,
+  ConfigurationError,
+  DataSeriesQuery,
+  Interactions,
+  Severity,
+  Cell,
+  Header,
+  Row,
+  ValueMap,
+  getLabel,
+  ResponseNode,
+  AppCore
 } from 'traceviz-client-core';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -117,8 +117,8 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
   // Ends subscriptions from the last data series.
   private newSeries = new Subject<void>();
   private table: CanonicalTable | undefined;
-  columns: TableHeader[] = [];
-  rows: TableRow[] = [];
+  columns: Header[] = [];
+  rows: Row[] = [];
 
   // Fields available after ngAfterContentInit.
   private interactions: Interactions | undefined;
@@ -131,14 +131,14 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
   ngAfterContentInit(): void {
     this.appCoreService.appCore.onPublish((appCore) => {
-     if (this.dataSeriesQueryDir !== undefined && this.dataInput !== undefined) {
-         appCore.err(
-             new ConfigurationError(
-                 'data-table cannot specify both a <data-series> child and the "data" property')
-                 .from(SOURCE)
-                 .at(Severity.ERROR));
-         return;
-     }
+      if (this.dataSeriesQueryDir !== undefined && this.dataInput !== undefined) {
+        appCore.err(
+          new ConfigurationError(
+            'data-table cannot specify both a <data-series> child and the "data" property')
+            .from(SOURCE)
+            .at(Severity.ERROR));
+        return;
+      }
 
       if (this.paginator !== undefined) {
         // Per https://github.com/angular/components/issues/15781, the
@@ -164,23 +164,23 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
       // Set up watches
       this.interactions?.watch(SORT_ROWS, (vm) => {
         this.sortRowsWatch(vm);
-      })
+      }, this.unsubscribe)
 
-    this.dataSeriesQuery = this.dataSeriesQueryDir?.dataSeriesQuery;
+      this.dataSeriesQuery = this.dataSeriesQueryDir?.dataSeriesQuery;
       if (this.dataSeriesQuery) {
         // Publish loading status.
         this.dataSeriesQuery.loading
           .pipe(takeUntil(this.unsubscribe))
           .subscribe((loading) => {
-              this.loading = loading;
-              this.ref.detectChanges();
+            this.loading = loading;
+            this.ref.detectChanges();
           });
 
         // Handle new data series.
         this.dataSeriesQuery.response
           .pipe(takeUntil(this.unsubscribe))
           .subscribe((response) => {
-              this.updateData(response, appCore);
+            this.updateData(response, appCore);
           });
       } else if (this.dataInput) {
         // If static data was passed in, render it.
@@ -226,18 +226,21 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
 
 
   // updateData renders data.
-  private updateData(data:ResponseNode, appCore: AppCore): void {
+  private updateData(data: ResponseNode, appCore: AppCore): void {
     this.newSeries.next();
     try {
-      this.table = new CanonicalTable(data);
+      this.table = new CanonicalTable(data,
+        this.interactions?.match(ROW, HIGHLIGHT), undefined, () => {
+          this.ref.detectChanges();
+        });
       this.columns = this.table?.columns();
       if (this.paginator !== undefined) {
-          this.paginator.pageIndex = 0;
-          this.paginator.length = this.table ? this.table.rowCount : 0;
+        this.paginator.pageIndex = 0;
+        this.paginator.length = this.table ? this.table.rowCount : 0;
       }
       this.updateRows();
     } catch (err: unknown) {
-        appCore.err(err);
+      appCore.err(err);
     }
   }
 
@@ -252,23 +255,10 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
       end = start + this.paginator.pageSize;
     }
     this.rows = this.table.rowSlice(start, end);
-    const matchFn = this.interactions?.match(ROW, HIGHLIGHT);
-    if (matchFn !== undefined) {
-      for (const row of this.rows) {
-        matchFn(row.properties).pipe(
-          takeUntil(this.newSeries),
-          distinctUntilChanged(),
-        )
-          .subscribe((highlighted) => {
-            row.highlighted = highlighted;
-            this.ref.detectChanges();
-          });
-      }
-    }
     this.ref.detectChanges();
   }
 
-  rowClick(row: TableRow, shiftDepressed: boolean) {
+  rowClick(row: Row, shiftDepressed: boolean) {
     if (!shiftDepressed) {
       this.interactions?.update(ROW, CLICK, row.properties);
     } else {
@@ -276,19 +266,19 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
     }
   }
 
-  rowMouseover(row: TableRow) {
+  rowMouseover(row: Row) {
     this.interactions?.update(ROW, MOUSEOVER, row.properties);
   }
 
-  rowMouseout(row: TableRow) {
+  rowMouseout(row: Row) {
     this.interactions?.update(ROW, MOUSEOUT, row.properties);
   }
 
-  rowCells(row: TableRow): TableCell[] {
+  rowCells(row: Row): Cell[] {
     return row.cells(this.columns);
   }
 
-  itemStyle(...items: (TableRow | TableCell)[]): { [klass: string]: string } {
+  itemStyle(...items: (Row | Cell)[]): { [klass: string]: string } {
     const style: { [klass: string]: string; } = {};
     if (this.table === undefined) {
       return style;
@@ -298,7 +288,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
       let bgColor: string | undefined;
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        if (item instanceof TableRow &&
+        if (item instanceof Row &&
           item.highlighted &&
           colorings[i].secondary !== undefined) {
           bgColor = colorings[i].secondary;
@@ -328,7 +318,7 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit, OnDe
     return style;
   }
 
-  cellLabel(cell: TableCell): string {
+  cellLabel(cell: Cell): string {
     return getLabel(cell.properties);
   }
 

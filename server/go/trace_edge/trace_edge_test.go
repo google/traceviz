@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/traceviz/server/go/payload"
 	testutil "github.com/google/traceviz/server/go/test_util"
 	"github.com/google/traceviz/server/go/util"
 )
@@ -31,10 +32,8 @@ func newTestPayloader(db util.DataBuilder) *testPayloader {
 	}
 }
 
-func (tp *testPayloader) Payload(payloadType string) util.DataBuilder {
-	return tp.db.Child().With(
-		util.StringProperty("payload_type", payloadType),
-	)
+func (tp *testPayloader) Payload() util.DataBuilder {
+	return tp.db.Child()
 }
 
 func TestTraceEdges(t *testing.T) {
@@ -43,34 +42,19 @@ func TestTraceEdges(t *testing.T) {
 		buildTraceEdge func(db util.DataBuilder)
 		buildExplicit  func(db testutil.TestDataBuilder)
 	}{{
-		description: "A->B via New",
-		buildTraceEdge: func(db util.DataBuilder) {
-			New(db, 50*time.Second, "A", "B").With(
-				util.StringProperty("label", "Howdy partner I'm A"),
-			)
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.StringProperty(nodeIDKey, "A"),
-				util.DurationProperty(offsetKey, 50*time.Second),
-				util.StringsProperty(endpointNodeIDsKey, "B"),
-				util.StringProperty("label", "Howdy partner I'm A"),
-			)
-		},
-	}, {
-		description: "A->B, A->C via AttachNew",
+		description: "A->B",
 		buildTraceEdge: func(db util.DataBuilder) {
 			tp := newTestPayloader(db)
-			AttachNew(tp, 50*time.Second, "A", "B", "C").With(
+			New(tp, 50*time.Second, "A", "B").With(
 				util.StringProperty("label", "Howdy partner I'm A"),
 			)
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			db.Child().With(
-				util.StringProperty("payload_type", PayloadType),
+				util.StringProperty(payload.TypeKey, PayloadType),
 				util.StringProperty(nodeIDKey, "A"),
 				util.DurationProperty(offsetKey, 50*time.Second),
-				util.StringsProperty(endpointNodeIDsKey, "B", "C"),
+				util.StringsProperty(endpointNodeIDsKey, "B"),
 				util.StringProperty("label", "Howdy partner I'm A"),
 			)
 		},

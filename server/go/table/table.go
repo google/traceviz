@@ -16,23 +16,20 @@
 // the table, and which must not be used for any other purpose, a new Table
 // instance may be created via
 //
-//	table := New(tableRoot, ...columns)
+//	payloadsByType := row.AddCellWithPayloadtable := New(tableRoot, ...columns)
 //
 // Then, a new row may be added via
 //
 //	row := table.Row(...<Cell() or FormattedCell()>)
 //
-// defining a row with the provided columns.  Columns with payloads may also
-// be added, via
+// defining a row with the provided columns.  Within a row, cells may be added
+// via:
 //
-//	payloadsByType := row.AddCellWithPayload(<Cell() or FormattedCell()>,
-//	                                         ...<payload names>)
+//	cn := row.AddCell(Cell(column, value, updates...)
 //
-// which returns a map from specified payload name to that payload's
-// *util.DataBuilder.
-// Rows may also have payloads, via
+// Rows and cells may have payloads, via
 //
-//	payloadDb := row.Payload(payloadName)
+//	payloadDb := row.Payload(payloadName) // or cell.Payload(payloadName)
 //
 // The structure of a table in a TraceViz response, with each level
 // representing a DataSeries or nested Datum is:
@@ -89,7 +86,6 @@ import (
 const (
 	cellKey          = "table_cell"
 	formattedCellKey = "table_formatted_cell"
-	payloadKey       = "table_payload"
 
 	rowHeightPxKey = "table_row_height_px"
 	fontSizePxKey  = "table_font_size_px"
@@ -218,22 +214,31 @@ func (rn *RowNode) With(properties ...util.PropertyUpdate) *RowNode {
 	return rn
 }
 
-// AddCellWithPayloads adds the specified cell to the receiving row, and
-// allocates payload nodes for each specified payload type, returning a mapping
-// from type name to payload node DataBuilder.
-func (rn *RowNode) AddCellWithPayloads(cell CellUpdate, payloadTypes ...string) map[string]util.DataBuilder {
-	cellDb := rn.db.Child().With(util.PropertyUpdate(cell))
-	ret := map[string]util.DataBuilder{}
-	for _, payloadType := range payloadTypes {
-		ret[payloadType] = cellDb.Child().With(
-			util.StringProperty(payloadKey, payloadType),
-		)
-	}
-	return ret
+// CellNode is a table cell to which payloads and properties may be attached.
+type CellNode struct {
+	db util.DataBuilder
 }
 
-// AddPayload adds a payload of the specified type to the receiving row,
-// returning a DataBuilder for that payload.
-func (rn *RowNode) AddPayload(payloadType string) util.DataBuilder {
-	return rn.db.Child().With(util.StringProperty(payloadKey, payloadType))
+// Payload allows CellNode to implement payload.Payloader.
+func (cn *CellNode) Payload() util.DataBuilder {
+	return cn.db.Child()
+}
+
+// With annotates the receiver with the provided properties.
+func (cn *CellNode) With(properties ...util.PropertyUpdate) *CellNode {
+	cn.db.With(properties...)
+	return cn
+}
+
+// AddCell adds the specified cell to the receiving row, returning that cell
+// as a Payloader.
+func (rn *RowNode) AddCell(cellUpdate CellUpdate) *CellNode {
+	return &CellNode{
+		db: rn.db.Child().With(util.PropertyUpdate(cellUpdate)),
+	}
+}
+
+// Payload allows RowNode to implement payload.Payloader.
+func (rn *RowNode) Payload() util.DataBuilder {
+	return rn.db.Child()
 }

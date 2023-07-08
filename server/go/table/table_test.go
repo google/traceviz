@@ -17,6 +17,7 @@ import (
 	"testing"
 
 	"github.com/google/traceviz/server/go/category"
+	"github.com/google/traceviz/server/go/payload"
 	testutil "github.com/google/traceviz/server/go/test_util"
 	"github.com/google/traceviz/server/go/util"
 )
@@ -116,10 +117,10 @@ func TestColumns(t *testing.T) {
 		buildTabular: func(db util.DataBuilder) {
 			table := New(db, nil, nameCol)
 			row := table.Row()
-			row.AddCellWithPayloads(FormattedCell(nameCol, "thumbnail"), "overtime_bins")["overtime_bins"].With(
+			payload.New(row.AddCell(FormattedCell(nameCol, "thumbnail")), "overtime_bins").With(
 				util.IntegersProperty("bins", 1, 2, 3, 4),
 			)
-			subtableDb := row.AddPayload("subtable")
+			subtableDb := payload.New(row, "subtable")
 			subtable := New(subtableDb, nil, nameCol)
 			subtable.Row(FormattedCell(nameCol, "thing"))
 		},
@@ -131,11 +132,11 @@ func TestColumns(t *testing.T) {
 				nameCol.cat.Tag(),
 				util.StringProperty(formattedCellKey, "thumbnail"),
 			).Child().With( // row 0 cell 0 payload
-				util.StringProperty(payloadKey, "overtime_bins"),
+				util.StringProperty(payload.TypeKey, "overtime_bins"),
 				util.IntegersProperty("bins", 1, 2, 3, 4),
 			)
 			subtableDb := row.Child().With( // row 0 payload
-				util.StringProperty(payloadKey, "subtable"),
+				util.StringProperty(payload.TypeKey, "subtable"),
 			)
 			subtableDb.Child(). // subtable column definitions
 						Child().With(nameCol.cat.Define())

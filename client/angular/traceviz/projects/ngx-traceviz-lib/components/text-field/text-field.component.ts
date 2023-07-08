@@ -78,7 +78,7 @@ export class TextFieldComponent implements AfterContentInit, OnDestroy {
     @Input()
     get updateOnEnter() { return this._updateOnEnter; }
     set updateOnEnter(value: BooleanInput) {
-      this._updateOnEnter = coerceBooleanProperty(value);
+        this._updateOnEnter = coerceBooleanProperty(value);
     }
     private _updateOnEnter = false;
 
@@ -124,9 +124,7 @@ export class TextFieldComponent implements AfterContentInit, OnDestroy {
                                 .from(SOURCE)
                                 .at(Severity.ERROR));
                     }
-                }).pipe(
-                    takeUntil(this.unsubscribe),
-                ).subscribe((err) => {
+                }, this.unsubscribe).subscribe((err) => {
                     appCore.err(err);
                 });
         });

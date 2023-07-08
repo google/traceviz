@@ -14,10 +14,13 @@
 /** @fileoverview Tools for working with tabular data. */
 
 import { Category, CategorySet, getDefinedCategory } from '../category/category.js';
+import { children } from '../payload/payload.js';
 import { ConfigurationError, Severity } from '../errors/errors.js';
 import { ResponseNode } from '../protocol/response_interface.js';
-import { Coloring } from '../core.js';
+import { Coloring } from '../color/color.js';
+import { MatchFn } from '../interactions/interactions.js';
 import { EmptyValue, StringValue, Value } from '../value/value.js';
+import { Subject, EMPTY, distinctUntilChanged, takeUntil } from 'rxjs';
 import { ValueMap } from '../value/value_map.js';
 
 const SOURCE = 'table';
@@ -25,7 +28,6 @@ const SOURCE = 'table';
 enum Keys {
   CELL = 'table_cell',
   FORMATTED_CELL = 'table_formatted_cell',
-  PAYLOAD = 'table_payload',
 
   ROW_HEIGHT_PX = 'table_row_height_px',
   FONT_SIZE_PX = 'table_font_size_px',
@@ -46,21 +48,28 @@ export class TableRenderProperties {
   }
 }
 
+export interface Highlightable {
+  properties: ValueMap;
+  highlighted: boolean;
+}
+
 /** A table cell. */
-export class TableCell {
+export class Cell implements Highlightable {
   readonly properties: ValueMap;
-  readonly payloadsByType: ReadonlyMap<string, ResponseNode>;
-  constructor(node: ResponseNode, readonly column: TableHeader) {
+  readonly payloadsByType: ReadonlyMap<string, ResponseNode[]>;
+  private readonly unsubscribe = new Subject<void>();
+
+  highlighted = false;
+
+  constructor(node: ResponseNode, readonly column: Header, matchFn: MatchFn | undefined, onChange: () => void) {
     this.properties = node.properties;
-    const payloadsByType = new Map<string, ResponseNode>();
-    for (const child of node.children) {
-      if (child.properties.has(Keys.PAYLOAD)) {
-        payloadsByType.set(child.properties.expectString(Keys.PAYLOAD), child);
-      } else {
-        throw new ConfigurationError(`cell node children may only be payloads`).from(SOURCE).at(Severity.ERROR);
-      }
+    const c = children(node);
+    if (c.structural.length > 0) {
+      throw new ConfigurationError(`cell node chidlren may only be payloads`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
-    this.payloadsByType = payloadsByType;
+    this.payloadsByType = c.payload;
   }
 
   get value(): Value {
@@ -73,12 +82,17 @@ export class TableCell {
     }
     return new EmptyValue();
   }
+
+  dispose() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
+  }
 }
 
 /** An empty table cell. */
-export class EmptyTableCell extends TableCell {
-  constructor(column: TableHeader) {
-    super({ properties: new ValueMap(), children: [] }, column);
+export class EmptyCell extends Cell {
+  constructor(column: Header) {
+    super({ properties: new ValueMap(), children: [] }, column, () => EMPTY, () => { });
   }
 
   override get value(): Value {
@@ -87,36 +101,45 @@ export class EmptyTableCell extends TableCell {
 }
 
 /** A table row. */
-export class TableRow {
-  private readonly cellsByColumnID: ReadonlyMap<string, TableCell>;
+export class Row implements Highlightable {
   readonly properties: ValueMap;
-  readonly payloadsByType: ReadonlyMap<string, ResponseNode>;
+  private readonly cellsByColumnID: ReadonlyMap<string, Cell>;
+  readonly payloadsByType: ReadonlyMap<string, ResponseNode[]>;
+  private readonly unsubscribe = new Subject<void>();
+
   highlighted = false;
 
-  constructor(node: ResponseNode, columns: TableHeader[]) {
+  constructor(node: ResponseNode, columns: Header[], rowMatchFn: MatchFn | undefined, cellMatchFn: MatchFn | undefined, onChange: () => void) {
     this.properties = node.properties;
-    const cellsByColumnID = new Map<string, TableCell>();
-    const payloadsByType = new Map<string, ResponseNode>();
-    for (const childNode of node.children) {
-      if (childNode.properties.has(Keys.PAYLOAD)) {
-        payloadsByType.set(childNode.properties.expectString(Keys.PAYLOAD), childNode);
-      } else {
-        const categorySet =
-          new CategorySet(...columns.map(col => col.category));
-        const cats = categorySet.getTaggedCategories(childNode.properties);
-        if (cats.length === 0) {
-          continue;
-        }
-        if (cats.length > 1) {
-          throw new ConfigurationError(`Cells may only belong to one column`).from(SOURCE).at(Severity.ERROR);
-        }
-        const column = columns.find(col => col.category === cats[0])!;
-        const cell = new TableCell(childNode, column);
-        cellsByColumnID.set(column.category.id, cell);
+    const c = children(node);
+    this.payloadsByType = c.payload;
+    const cellsByColumnID = new Map<string, Cell>();
+    c.structural.forEach((child: ResponseNode) => {
+      const categorySet =
+        new CategorySet(...columns.map(col => col.category));
+      const cats = categorySet.getTaggedCategories(child.properties);
+      if (cats.length === 0) {
+        return;
       }
-    };
+      if (cats.length > 1) {
+        throw new ConfigurationError(`Cells may only belong to one column`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+      }
+      const column = columns.find(col => col.category === cats[0])!;
+      const cell = new Cell(child, column, cellMatchFn, onChange);
+      cellsByColumnID.set(column.category.id, cell);
+      return cell;
+    })
     this.cellsByColumnID = cellsByColumnID;
-    this.payloadsByType = payloadsByType;
+    if (rowMatchFn !== undefined) {
+      rowMatchFn(this.properties)
+        .pipe(takeUntil(this.unsubscribe), distinctUntilChanged())
+        .subscribe((highlighted) => {
+          this.highlighted = highlighted;
+          onChange();
+        });
+    }
   }
 
   /**
@@ -125,19 +148,24 @@ export class TableRow {
    * cells associated with the provided columns are returned; the row may define
    * cells associated with other columns, but these will not be returned.
    */
-  cells(columns: readonly TableHeader[]): TableCell[] {
-    return columns.map((column: TableHeader): TableCell => {
+  cells(columns: readonly Header[]): Cell[] {
+    return columns.map((column: Header): Cell => {
       const cell = this.cellsByColumnID.get(column.category.id);
       if (cell) {
         return cell;
       }
-      return new EmptyTableCell(column);
+      return new EmptyCell(column);
     });
+  }
+
+  dispose() {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 }
 
 /** A Table ColumnHeader */
-export class TableHeader {
+export class Header {
   readonly properties: ValueMap;
   readonly category: Category;
 
@@ -170,22 +198,24 @@ export class TableHeader {
  * in that row.
  */
 export class CanonicalTable {
-  readonly properties: ValueMap;
   readonly renderProperties: TableRenderProperties;
   readonly coloring: Coloring;
   private readonly initialColumnOrder = new Array<string>();
-  private readonly columnsByID: ReadonlyMap<string, TableHeader>;
+  private readonly columnsByID: ReadonlyMap<string, Header>;
   private readonly rowNodes: ResponseNode[];
-  private readonly columnsList = new Array<TableHeader>();
+  private readonly columnsList = new Array<Header>();
 
-  constructor(private readonly node: ResponseNode) {
-    this.properties = node.properties;
-    this.coloring = new Coloring(this.properties);
-    this.renderProperties = new TableRenderProperties(this.properties);
-    const columnsByID = new Map<string, TableHeader>();
+  constructor(
+    private readonly node: ResponseNode,
+    private readonly rowMatchFn: MatchFn | undefined,
+    private readonly cellMatchFn: MatchFn | undefined,
+    private readonly onChange: () => void) {
+    this.renderProperties = new TableRenderProperties(node.properties);
+    this.coloring = new Coloring(node.properties);
+    const columnsByID = new Map<string, Header>();
     if (this.node.children.length > 0) {
       for (const columnNode of this.node.children[0].children) {
-        const col = new TableHeader(columnNode);
+        const col = new Header(columnNode);
         columnsByID.set(col.category.id, col);
         this.initialColumnOrder.push(col.category.id);
         this.columnsList.push(col);
@@ -204,11 +234,11 @@ export class CanonicalTable {
    * no column IDs are provided, all defined columns, in their definition order,
    * are returned.
    */
-  columns(...columnIDs: string[]): TableHeader[] {
+  columns(...columnIDs: string[]): Header[] {
     if (columnIDs.length === 0) {
       columnIDs = this.initialColumnOrder;
     }
-    const ret = new Array<TableHeader>();
+    const ret = new Array<Header>();
     for (const columnID of columnIDs) {
       const col = this.columnsByID.get(columnID);
       if (!col) {
@@ -221,7 +251,7 @@ export class CanonicalTable {
     return ret;
   }
 
-  rowSlice(startIdx?: number, endIdx?: number): TableRow[] {
+  rowSlice(startIdx?: number, endIdx?: number): Row[] {
     if (!!endIdx && !!startIdx && endIdx < startIdx) {
       throw new ConfigurationError(
         `slice range [${startIdx}, ${endIdx}] is invalid`)
@@ -229,6 +259,7 @@ export class CanonicalTable {
         .at(Severity.ERROR);
     }
     return this.rowNodes.slice(startIdx, endIdx)
-      .map((row: ResponseNode) => new TableRow(row, this.columnsList));
+      .map((row: ResponseNode) => new Row(
+        row, this.columnsList, this.rowMatchFn, this.cellMatchFn, this.onChange));
   }
 }

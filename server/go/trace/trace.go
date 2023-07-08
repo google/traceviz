@@ -83,11 +83,11 @@
 //
 // Arbitrary payloads may be composed into traces under Spans and Subspans, via
 //
-//	span.Payload(payloadType)
-//	subspan.Payload(payloadType)
+//	payload.New(span, payloadType)
+//	payload.New(subspan, payloadType)
 //
-// which allocate the payload, tag it with the specified type string, and
-// return its *util.DataBuilder.
+// which allocate the payload and return its *util.DataBuilder.  See payload.go
+// for more detail.
 //
 // This format supports composition, or 'unioning', on the frontend, which
 // allows multiple distinct data sources to contribute to a single trace view
@@ -157,15 +157,6 @@
 //	  * <decorators>
 //	children
 //	  * repeated payloads
-//
-// payload
-//
-//	properties
-//	  * nodeTypeKey: payloadNodeType
-//	  * payloadTypeKey: StringValue
-//	  * <anything else>
-//	children
-//	  * <anything>
 package trace
 
 import (
@@ -177,10 +168,9 @@ import (
 )
 
 const (
-	offsetKey      = "trace_offset"
-	durationKey    = "trace_duration"
-	nodeTypeKey    = "trace_node_type"
-	payloadTypeKey = "trace_payload_type"
+	offsetKey   = "trace_offset"
+	durationKey = "trace_duration"
+	nodeTypeKey = "trace_node_type"
 
 	// Rendering property keys
 	spanWidthCatPxKey          = "trace_span_width_cat_px"
@@ -248,7 +238,6 @@ const (
 	categoryNodeType traceNodeType = iota
 	spanNodeType
 	subspanNodeType
-	payloadNodeType
 )
 
 func traceNode(parentDb util.DataBuilder, nodeType traceNodeType) util.DataBuilder {
@@ -381,10 +370,8 @@ func (s *Span) With(properties ...util.PropertyUpdate) *Span {
 
 // Payload creates and returns a DataBuilder that can be used to attach
 // arbitrary structured information to the receiving Span.
-func (s *Span) Payload(payloadType string) util.DataBuilder {
-	return traceNode(s.db, payloadNodeType).With(
-		util.StringProperty(payloadTypeKey, payloadType),
-	)
+func (s *Span) Payload() util.DataBuilder {
+	return s.db.Child()
 }
 
 // Subspan creates a new Subspan with the specified offset (from the axis
@@ -408,10 +395,8 @@ type Subspan struct {
 
 // Payload creates and returns a DataBuilder that can be used to attach
 // arbitrary structured information to the receiving SubSpan.
-func (ss *Subspan) Payload(payloadType string) util.DataBuilder {
-	return traceNode(ss.db, payloadNodeType).With(
-		util.StringProperty(payloadTypeKey, payloadType),
-	)
+func (ss *Subspan) Payload() util.DataBuilder {
+	return ss.db.Child()
 }
 
 // With applies a set of properties to the receiving Subspan, returning that

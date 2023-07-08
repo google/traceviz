@@ -18,7 +18,7 @@
 // offset, a unique string identifier, and zero or more endpoint identifiers
 // which are  connected with edges to this endpoint.  For example,
 //
-//	edgeNode := AttachNew(traceSpan, 100 * time.Millisecond, "1", "2", "3")
+//	edgeNode := New(traceSpan, 100 * time.Millisecond, "1", "2", "3")
 //
 // attaches an edge endpoint named '1' under traceSpan at a trace offset of
 // 100ms, and adds two edges, one from '1' to '2' and one from '1' to '3'.
@@ -33,6 +33,7 @@ package traceedge
 import (
 	"time"
 
+	"github.com/google/traceviz/server/go/payload"
 	"github.com/google/traceviz/server/go/util"
 )
 
@@ -52,24 +53,14 @@ type Node struct {
 
 // New produces a new Node in the provided DataBuilder, with the provided
 // offset, ID, and endpoint node IDs.
-func New(db util.DataBuilder, offset time.Duration, id string, edgeEndpointNodeIDs ...string) *Node {
+func New(parent payload.Payloader, offset time.Duration, id string, edgeEndpointNodeIDs ...string) *Node {
 	return &Node{
-		db: db.With(
+		db: payload.New(parent, PayloadType).With(
 			util.StringProperty(nodeIDKey, id),
 			util.DurationProperty(offsetKey, offset),
 			util.StringsProperty(endpointNodeIDsKey, edgeEndpointNodeIDs...),
 		),
 	}
-}
-
-type payloader interface {
-	Payload(payloadType string) util.DataBuilder
-}
-
-// AttachNew produces a new Node under the provided trace.Span or Subspan, with
-// the provided offset, ID, and endpoint node IDs.
-func AttachNew(parent payloader, offset time.Duration, id string, edgeEndpointNodeIDs ...string) *Node {
-	return New(parent.Payload(PayloadType), offset, id, edgeEndpointNodeIDs...)
 }
 
 // With annotates the receiver with the provided updates.
