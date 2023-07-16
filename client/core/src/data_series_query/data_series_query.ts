@@ -13,7 +13,7 @@
 
 /**
  * @fileoverview Defines a class mediating a single TraceViz data series
- * request. 
+ * request.
  */
 
 import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, Observable, Subject, takeUntil } from "rxjs";

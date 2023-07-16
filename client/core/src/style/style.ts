@@ -16,7 +16,7 @@
  *  @fileoverview Tools for working with styling payloads.  See
  *  ../../../../server/go/style/style.go for more detail.
  */
- 
+
 import { ValueMap } from '../value/value_map.js';
 
 const STYLE_KEY_PREFIX = "style_";

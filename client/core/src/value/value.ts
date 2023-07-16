@@ -860,8 +860,8 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
 
   override toString(): string {
     return `{${Array.from(this.wrappedInts)
-        .map(wrappedInt => wrappedInt.toString())
-        .join(', ')}}`;
+      .map(wrappedInt => wrappedInt.toString())
+      .join(', ')}}`;
   }
 
   toV(): V | undefined {

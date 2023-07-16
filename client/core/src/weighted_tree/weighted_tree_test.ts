@@ -20,97 +20,97 @@ import { ValueMap } from '../value/value_map.js';
 import { Tree } from './weighted_tree.js';
 
 function name(name: string): ValueMap {
-    return valueMap(
-        { key: 'label_format', val: str('$(name)') },
-        { key: 'name', val: str(name) },
-    );
+  return valueMap(
+    { key: 'label_format', val: str('$(name)') },
+    { key: 'name', val: str(name) },
+  );
 }
 
 describe('tree test', () => {
-    it('gets tree', () => {
-        const tree = new Tree(weightedTreeNode);
-        expect(tree).toEqual(jasmine.objectContaining({
-            roots: [
+  it('gets tree', () => {
+    const tree = new Tree(weightedTreeNode);
+    expect(tree).toEqual(jasmine.objectContaining({
+      roots: [
+        jasmine.objectContaining({
+          properties: name('root 1'),
+          totalWeight: 10,
+          children: [
+            jasmine.objectContaining({
+              properties: name('a'),
+              totalWeight: 9,
+              children: [
                 jasmine.objectContaining({
-                    properties: name('root 1'),
-                    totalWeight: 10,
-                    children: [
-                        jasmine.objectContaining({
-                            properties: name('a'),
-                            totalWeight: 9,
-                            children: [
-                                jasmine.objectContaining({
-                                    properties: name('c'),
-                                    totalWeight: 4,
-                                }),
-                                jasmine.objectContaining({
-                                    properties: name('b'),
-                                    totalWeight: 3,
-                                }),
-                            ],
-                        }),
-                    ],
+                  properties: name('c'),
+                  totalWeight: 4,
                 }),
                 jasmine.objectContaining({
-                    properties: name('root 2'),
-                    totalWeight: 10,
-                    children: [
-                        jasmine.objectContaining({
-                            properties: name('x'),
-                            totalWeight: 4,
-                            children: [
-                                jasmine.objectContaining({
-                                    properties: name('z'),
-                                    totalWeight: 1,
-                                    payloads: new Map([
-                                        [
-                                            'stuffing',
-                                            [
-                                                node(
-                                                    valueMap(
-                                                        { key: 'weighted_tree_datum_type', val: int(1) },
-                                                        {
-                                                            key: 'weighted_tree_payload_type',
-                                                            val: str('stuffing')
-                                                        },
-                                                        { key: 'count', val: int(3) },
-                                                    ),
-                                                ),
-                                            ],
-                                        ],
-                                    ]),
-                                }),
-                            ],
-                        }),
-                        jasmine.objectContaining({
-                            properties: name('y'),
-                            totalWeight: 2,
-                        }),
-                    ],
+                  properties: name('b'),
+                  totalWeight: 3,
                 }),
-            ],
-        }));
-    });
+              ],
+            }),
+          ],
+        }),
+        jasmine.objectContaining({
+          properties: name('root 2'),
+          totalWeight: 10,
+          children: [
+            jasmine.objectContaining({
+              properties: name('x'),
+              totalWeight: 4,
+              children: [
+                jasmine.objectContaining({
+                  properties: name('z'),
+                  totalWeight: 1,
+                  payloads: new Map([
+                    [
+                      'stuffing',
+                      [
+                        node(
+                          valueMap(
+                            { key: 'weighted_tree_datum_type', val: int(1) },
+                            {
+                              key: 'weighted_tree_payload_type',
+                              val: str('stuffing')
+                            },
+                            { key: 'count', val: int(3) },
+                          ),
+                        ),
+                      ],
+                    ],
+                  ]),
+                }),
+              ],
+            }),
+            jasmine.objectContaining({
+              properties: name('y'),
+              totalWeight: 2,
+            }),
+          ],
+        }),
+      ],
+    }));
+  });
 
-    it('renders a top-down tree', () => {
-        const tree = new Tree(weightedTreeNode);
-        const renderedNodes = tree.renderTopDownTree();
-        renderedNodes.forEach((renderedNode) => {
-            renderedNode.resize(100);
-        });
-        expect(renderedNodes.map(
-            (renderedNode) =>
-                [renderedNode.label, renderedNode.x0Px, renderedNode.y0Px,
-                renderedNode.widthPx, renderedNode.heightPx]))
-            .toEqual([
-                ['root 1', 0, 0, 50, 20],
-                ['a', 0, 20, 45, 20],
-                ['c', 0, 40, 20, 20],
-                ['b', 20, 40, 15, 20],
-                ['root 2', 50, 0, 50, 20],
-                ['x', 50, 20, 20, 20],
-                ['z', 50, 40, 5, 20],
-                ['y', 70, 20, 10, 20]
-            ]);
+  it('renders a top-down tree', () => {
+    const tree = new Tree(weightedTreeNode);
+    const renderedNodes = tree.renderTopDownTree();
+    renderedNodes.forEach((renderedNode) => {
+      renderedNode.resize(100);
     });
+    expect(renderedNodes.map(
+      (renderedNode) =>
+        [renderedNode.label, renderedNode.x0Px, renderedNode.y0Px,
+        renderedNode.widthPx, renderedNode.heightPx]))
+      .toEqual([
+        ['root 1', 0, 0, 50, 20],
+        ['a', 0, 20, 45, 20],
+        ['c', 0, 40, 20, 20],
+        ['b', 20, 40, 15, 20],
+        ['root 2', 50, 0, 50, 20],
+        ['x', 50, 20, 20, 20],
+        ['z', 50, 40, 5, 20],
+        ['y', 70, 20, 10, 20]
+      ]);
+  });
 });

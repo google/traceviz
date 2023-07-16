@@ -61,7 +61,7 @@ export class ValueMap {
   // toJSON is used by JSON.stringify. Without it, ValueMap.map is not
   // stringified (maps are not "enumberable" properties).
   toJSON(): ExportedKeyValueMap {
-      return this.exportKeyValueMap();
+    return this.exportKeyValueMap();
   }
 
   toVMap(stringTableBuilder?: StringTableBuilder): object {

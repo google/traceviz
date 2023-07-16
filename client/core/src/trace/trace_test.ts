@@ -7,109 +7,109 @@ import { Trace } from './trace.js';
 import { sec, d, schedvizRunningNode, schedvizWaitingNode, userInstrumentationNode, embeddedNode, rpcNode } from '../test_responses/traces.js';
 
 describe('trace test', () => {
-    it('merges fixed time-base traces properly', () => {
-        expect(
-            prettyPrintTrace(Trace.union(
-                Trace.fromNode(
-                    node(
-                        valueMap(
-                            { key: 'category_defined_id', val: str('x_axis') },
-                            {
-                                key: 'category_display_name',
-                                val: str('time from start')
-                            },
-                            {
-                                key: 'category_description',
-                                val: str('Time from start')
-                            },
-                            { key: 'axis_type', val: str('timestamp') },
-                            { key: 'axis_min', val: ts(sec(100)) },
-                            { key: 'axis_max', val: ts(sec(300)) },
-                        ),
-                        node(
-                            valueMap(
-                                { key: 'trace_node_type', val: int(0) },
-                                { key: 'category_defined_id', val: str('stuff') },
-                                { key: 'category_display_name', val: str('Stuff') },
-                                { key: 'category_description', val: str('Stuff') },
-                            ),
-                            node(
-                                valueMap(
-                                    { key: 'trace_node_type', val: int(1) },
-                                    { key: 'trace_offset', val: dur(d(0)) },
-                                    { key: 'trace_duration', val: dur(d(100)) },
-                                ),
-                            ),
-                        ),
-                        node(
-                            valueMap(
-                                { key: 'trace_node_type', val: int(0) },
-                                { key: 'category_defined_id', val: str('things') },
-                                { key: 'category_display_name', val: str('Things') },
-                                { key: 'category_description', val: str('Things') },
-                            ),
-                            node(
-                                valueMap(
-                                    { key: 'trace_node_type', val: int(1) },
-                                    { key: 'trace_offset', val: dur(d(50)) },
-                                    { key: 'trace_duration', val: dur(d(150)) },
-                                ),
-                            ),
-                        ),
-                    ),
+  it('merges fixed time-base traces properly', () => {
+    expect(
+      prettyPrintTrace(Trace.union(
+        Trace.fromNode(
+          node(
+            valueMap(
+              { key: 'category_defined_id', val: str('x_axis') },
+              {
+                key: 'category_display_name',
+                val: str('time from start')
+              },
+              {
+                key: 'category_description',
+                val: str('Time from start')
+              },
+              { key: 'axis_type', val: str('timestamp') },
+              { key: 'axis_min', val: ts(sec(100)) },
+              { key: 'axis_max', val: ts(sec(300)) },
+            ),
+            node(
+              valueMap(
+                { key: 'trace_node_type', val: int(0) },
+                { key: 'category_defined_id', val: str('stuff') },
+                { key: 'category_display_name', val: str('Stuff') },
+                { key: 'category_description', val: str('Stuff') },
+              ),
+              node(
+                valueMap(
+                  { key: 'trace_node_type', val: int(1) },
+                  { key: 'trace_offset', val: dur(d(0)) },
+                  { key: 'trace_duration', val: dur(d(100)) },
                 ),
-                Trace.fromNode(
-                    node(
-                        valueMap(
-                            { key: 'category_defined_id', val: str('x_axis') },
-                            {
-                                key: 'category_display_name',
-                                val: str('time from start')
-                            },
-                            {
-                                key: 'category_description',
-                                val: str('Time from start')
-                            },
-                            { key: 'axis_type', val: str('timestamp') },
-                            { key: 'axis_min', val: ts(sec(0)) },
-                            { key: 'axis_max', val: ts(sec(220)) },
-                            { key: 'trace_time_basis', val: ts(sec(0)) },
-                            { key: 'trace_duration', val: dur(d(220)) },
-                        ),
-                        node(
-                            valueMap(
-                                { key: 'trace_node_type', val: int(0) },
-                                { key: 'category_defined_id', val: str('stuff') },
-                                { key: 'category_display_name', val: str('Stuff') },
-                                { key: 'category_description', val: str('Stuff') },
-                            ),
-                            node(
-                                valueMap(
-                                    { key: 'trace_node_type', val: int(1) },
-                                    { key: 'trace_offset', val: dur(d(0)) },
-                                    { key: 'trace_duration', val: dur(d(100)) },
-                                ),
-                            ),
-                        ),
-                        node(
-                            valueMap(
-                                { key: 'trace_node_type', val: int(0) },
-                                { key: 'category_defined_id', val: str('things') },
-                                { key: 'category_display_name', val: str('Things') },
-                                { key: 'category_description', val: str('Things') },
-                            ),
-                            node(
-                                valueMap(
-                                    { key: 'trace_node_type', val: int(1) },
-                                    { key: 'trace_offset', val: dur(d(50)) },
-                                    { key: 'trace_duration', val: dur(d(70)) },
-                                ),
-                            ),
-                        ),
-                    ),
+              ),
+            ),
+            node(
+              valueMap(
+                { key: 'trace_node_type', val: int(0) },
+                { key: 'category_defined_id', val: str('things') },
+                { key: 'category_display_name', val: str('Things') },
+                { key: 'category_description', val: str('Things') },
+              ),
+              node(
+                valueMap(
+                  { key: 'trace_node_type', val: int(1) },
+                  { key: 'trace_offset', val: dur(d(50)) },
+                  { key: 'trace_duration', val: dur(d(150)) },
                 ),
-            )))
-            .toEqual(`Trace:
+              ),
+            ),
+          ),
+        ),
+        Trace.fromNode(
+          node(
+            valueMap(
+              { key: 'category_defined_id', val: str('x_axis') },
+              {
+                key: 'category_display_name',
+                val: str('time from start')
+              },
+              {
+                key: 'category_description',
+                val: str('Time from start')
+              },
+              { key: 'axis_type', val: str('timestamp') },
+              { key: 'axis_min', val: ts(sec(0)) },
+              { key: 'axis_max', val: ts(sec(220)) },
+              { key: 'trace_time_basis', val: ts(sec(0)) },
+              { key: 'trace_duration', val: dur(d(220)) },
+            ),
+            node(
+              valueMap(
+                { key: 'trace_node_type', val: int(0) },
+                { key: 'category_defined_id', val: str('stuff') },
+                { key: 'category_display_name', val: str('Stuff') },
+                { key: 'category_description', val: str('Stuff') },
+              ),
+              node(
+                valueMap(
+                  { key: 'trace_node_type', val: int(1) },
+                  { key: 'trace_offset', val: dur(d(0)) },
+                  { key: 'trace_duration', val: dur(d(100)) },
+                ),
+              ),
+            ),
+            node(
+              valueMap(
+                { key: 'trace_node_type', val: int(0) },
+                { key: 'category_defined_id', val: str('things') },
+                { key: 'category_display_name', val: str('Things') },
+                { key: 'category_description', val: str('Things') },
+              ),
+              node(
+                valueMap(
+                  { key: 'trace_node_type', val: int(1) },
+                  { key: 'trace_offset', val: dur(d(50)) },
+                  { key: 'trace_duration', val: dur(d(70)) },
+                ),
+              ),
+            ),
+          ),
+        ),
+      )))
+      .toEqual(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain ${sec(0).toDate().toString()}, ${sec(300).toDate().toString()})
   Category stuff 'Stuff' (Stuff):
     span-height self:1 total:1
@@ -126,162 +126,162 @@ describe('trace test', () => {
     Span (height 1):
       at 50.000s for 1.167m
 `);
-    });
+  });
 
-    it('refuses to merge traces with incompatible time bases', () => {
-        expect(() => {
-            Trace.union(
-                Trace.fromNode(
-                    node(
-                        valueMap(
-                            { key: 'category_defined_id', val: str('x_axis') },
-                            {
-                                key: 'category_display_name',
-                                val: str('time from start')
-                            },
-                            {
-                                key: 'category_description',
-                                val: str('Time from start')
-                            },
-                            { key: 'axis_type', val: str('duration') },
-                            { key: 'axis_min', val: dur(d(100)) },
-                            { key: 'axis_max', val: dur(d(300)) },
-                        ),
-                    ),
-                ),
-                Trace.fromNode(
-                    node(
-                        valueMap(
-                            { key: 'trace_time_basis', val: ts(sec(0)) },
-                            { key: 'trace_duration', val: dur(d(300)) },
-                            { key: 'category_defined_id', val: str('x_axis') },
-                            {
-                                key: 'category_display_name',
-                                val: str('time from start')
-                            },
-                            {
-                                key: 'category_description',
-                                val: str('Time from start')
-                            },
-                            { key: 'axis_type', val: str('timestamp') },
-                            { key: 'axis_min', val: ts(sec(100)) },
-                            { key: 'axis_max', val: ts(sec(300)) },
-                        ),
-                    ),
-                ),
-            );
-        }).toThrow();
-    });
+  it('refuses to merge traces with incompatible time bases', () => {
+    expect(() => {
+      Trace.union(
+        Trace.fromNode(
+          node(
+            valueMap(
+              { key: 'category_defined_id', val: str('x_axis') },
+              {
+                key: 'category_display_name',
+                val: str('time from start')
+              },
+              {
+                key: 'category_description',
+                val: str('Time from start')
+              },
+              { key: 'axis_type', val: str('duration') },
+              { key: 'axis_min', val: dur(d(100)) },
+              { key: 'axis_max', val: dur(d(300)) },
+            ),
+          ),
+        ),
+        Trace.fromNode(
+          node(
+            valueMap(
+              { key: 'trace_time_basis', val: ts(sec(0)) },
+              { key: 'trace_duration', val: dur(d(300)) },
+              { key: 'category_defined_id', val: str('x_axis') },
+              {
+                key: 'category_display_name',
+                val: str('time from start')
+              },
+              {
+                key: 'category_description',
+                val: str('Time from start')
+              },
+              { key: 'axis_type', val: str('timestamp') },
+              { key: 'axis_min', val: ts(sec(100)) },
+              { key: 'axis_max', val: ts(sec(300)) },
+            ),
+          ),
+        ),
+      );
+    }).toThrow();
+  });
 
-    it('refuses to merge traces with incompatible categories', () => {
-        expect(() => {
-            Trace.union(
-                Trace.fromNode(
-                    node(
-                        valueMap(
-                            { key: 'trace_duration', val: dur(d(300)) },
-                            { key: 'category_defined_id', val: str('x_axis') },
-                            {
-                                key: 'category_display_name',
-                                val: str('time from start')
-                            },
-                            {
-                                key: 'category_description',
-                                val: str('Time from start')
-                            },
-                            { key: 'axis_type', val: str('timestamp') },
-                            { key: 'axis_min', val: ts(sec(100)) },
-                            { key: 'axis_max', val: ts(sec(300)) },
-                        ),
-                        node(
-                            valueMap(
-                                { key: 'trace_node_type', val: int(0) },
-                                { key: 'category_defined_id', val: str('cat 1') },
-                                {
-                                    key: 'category_display_name',
-                                    val: str('Category 1')
-                                },
-                                { key: 'category_description', val: str('Category 1') },
-                            ),
-                        ),
-                    ),
-                ),
-                Trace.fromNode(
-                    node(
-                        valueMap(
-                            { key: 'trace_duration', val: dur(d(300)) },
-                            { key: 'category_defined_id', val: str('x_axis') },
-                            {
-                                key: 'category_display_name',
-                                val: str('time from start')
-                            },
-                            {
-                                key: 'category_description',
-                                val: str('Time from start')
-                            },
-                            { key: 'axis_type', val: str('timestamp') },
-                            { key: 'axis_min', val: ts(sec(100)) },
-                            { key: 'axis_max', val: ts(sec(300)) },
-                        ),
-                        node(
-                            valueMap(
-                                { key: 'trace_node_type', val: int(0) },
-                                { key: 'category_defined_id', val: str('cat 1') },
-                                { key: 'category_display_name', val: str('Cat. 1') },
-                                { key: 'category_description', val: str('Category 1') },
-                            ),
-                        ),
-                    ),
-                ),
-            );
-        }).toThrow();
-    });
+  it('refuses to merge traces with incompatible categories', () => {
+    expect(() => {
+      Trace.union(
+        Trace.fromNode(
+          node(
+            valueMap(
+              { key: 'trace_duration', val: dur(d(300)) },
+              { key: 'category_defined_id', val: str('x_axis') },
+              {
+                key: 'category_display_name',
+                val: str('time from start')
+              },
+              {
+                key: 'category_description',
+                val: str('Time from start')
+              },
+              { key: 'axis_type', val: str('timestamp') },
+              { key: 'axis_min', val: ts(sec(100)) },
+              { key: 'axis_max', val: ts(sec(300)) },
+            ),
+            node(
+              valueMap(
+                { key: 'trace_node_type', val: int(0) },
+                { key: 'category_defined_id', val: str('cat 1') },
+                {
+                  key: 'category_display_name',
+                  val: str('Category 1')
+                },
+                { key: 'category_description', val: str('Category 1') },
+              ),
+            ),
+          ),
+        ),
+        Trace.fromNode(
+          node(
+            valueMap(
+              { key: 'trace_duration', val: dur(d(300)) },
+              { key: 'category_defined_id', val: str('x_axis') },
+              {
+                key: 'category_display_name',
+                val: str('time from start')
+              },
+              {
+                key: 'category_description',
+                val: str('Time from start')
+              },
+              { key: 'axis_type', val: str('timestamp') },
+              { key: 'axis_min', val: ts(sec(100)) },
+              { key: 'axis_max', val: ts(sec(300)) },
+            ),
+            node(
+              valueMap(
+                { key: 'trace_node_type', val: int(0) },
+                { key: 'category_defined_id', val: str('cat 1') },
+                { key: 'category_display_name', val: str('Cat. 1') },
+                { key: 'category_description', val: str('Category 1') },
+              ),
+            ),
+          ),
+        ),
+      );
+    }).toThrow();
+  });
 
-    it('gets render settings properly', () => {
-        expect(Trace
-            .fromNode(
-                node(
-                    valueMap(
-                        { key: 'category_defined_id', val: str('x_axis') },
-                        {
-                            key: 'category_display_name',
-                            val: str('time from start')
-                        },
-                        {
-                            key: 'category_description',
-                            val: str('Time from start')
-                        },
-                        { key: 'axis_type', val: str('timestamp') },
-                        { key: 'axis_min', val: ts(sec(100)) },
-                        { key: 'axis_max', val: ts(sec(300)) },
+  it('gets render settings properly', () => {
+    expect(Trace
+      .fromNode(
+        node(
+          valueMap(
+            { key: 'category_defined_id', val: str('x_axis') },
+            {
+              key: 'category_display_name',
+              val: str('time from start')
+            },
+            {
+              key: 'category_description',
+              val: str('Time from start')
+            },
+            { key: 'axis_type', val: str('timestamp') },
+            { key: 'axis_min', val: ts(sec(100)) },
+            { key: 'axis_max', val: ts(sec(300)) },
 
-                        { key: 'trace_span_width_cat_px', val: int(15) },
-                        { key: 'trace_span_padding_cat_px', val: int(1) },
-                        { key: 'trace_category_header_cat_px', val: int(15) },
-                        { key: 'trace_category_padding_cat_px', val: int(1) },
-                        { key: 'trace_category_margin_temp_px', val: int(10) },
-                        { key: 'trace_category_min_width_cat_px', val: int(16) },
-                        { key: 'trace_category_base_width_temp_px', val: int(400) },
-                    ),
-                ),
-            )
-            .renderSettings())
-            .toEqual({
-                spanWidthCatPx: 15,
-                spanPaddingCatPx: 1,
-                categoryHeaderCatPx: 15,
-                categoryPaddingCatPx: 1,
-                categoryMarginTempPx: 10,
-                categoryMinWidthCatPx: 16,
-                categoryBaseWidthTempPx: 400,
-            });
-    });
+            { key: 'trace_span_width_cat_px', val: int(15) },
+            { key: 'trace_span_padding_cat_px', val: int(1) },
+            { key: 'trace_category_header_cat_px', val: int(15) },
+            { key: 'trace_category_padding_cat_px', val: int(1) },
+            { key: 'trace_category_margin_temp_px', val: int(10) },
+            { key: 'trace_category_min_width_cat_px', val: int(16) },
+            { key: 'trace_category_base_width_temp_px', val: int(400) },
+          ),
+        ),
+      )
+      .renderSettings())
+      .toEqual({
+        spanWidthCatPx: 15,
+        spanPaddingCatPx: 1,
+        categoryHeaderCatPx: 15,
+        categoryPaddingCatPx: 1,
+        categoryMarginTempPx: 10,
+        categoryMinWidthCatPx: 16,
+        categoryBaseWidthTempPx: 400,
+      });
+  });
 
-    it('gets schedviz-like trace by merging two traces.', () => {
-        const trace = Trace.union(
-            Trace.fromNode(schedvizRunningNode),
-            Trace.fromNode(schedvizWaitingNode));
-        expect(prettyPrintTrace(trace)).toBe(`Trace:
+  it('gets schedviz-like trace by merging two traces.', () => {
+    const trace = Trace.union(
+      Trace.fromNode(schedvizRunningNode),
+      Trace.fromNode(schedvizWaitingNode));
+    expect(prettyPrintTrace(trace)).toBe(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain 0ns, 5.000m)
   Category cpu0 'CPU 0' (CPU 0):
     span-height self:0 total:2
@@ -313,11 +313,11 @@ describe('trace test', () => {
         at 3.333m for 1.667m
         with [pids: [100, 300]]
 `);
-    });
+  });
 
-    it('gets RPC trace', () => {
-        expect(prettyPrintTrace(Trace.fromNode(rpcNode)))
-            .toBe(`Trace:
+  it('gets RPC trace', () => {
+    expect(prettyPrintTrace(Trace.fromNode(rpcNode)))
+      .toBe(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain ${sec(0).toDate().toString()}, ${sec(300).toDate().toString()})
   Category rpc a 'RPC a' (RPC a):
     span-height self:1 total:6
@@ -385,11 +385,11 @@ describe('trace test', () => {
             at 4.000m for 10.000s
             with [state: local]
 `);
-    });
+  });
 
-    it('gets user-code instrumentation trace', () => {
-        expect(prettyPrintTrace(Trace.fromNode(userInstrumentationNode)))
-            .toBe(`Trace:
+  it('gets user-code instrumentation trace', () => {
+    expect(prettyPrintTrace(Trace.fromNode(userInstrumentationNode)))
+      .toBe(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain ${sec(0).toDate().toString()}, ${sec(300).toDate().toString()})
   Category pid 100 'PID 100' (PID 100):
     span-height self:3 total:3
@@ -425,11 +425,11 @@ describe('trace test', () => {
           at 2.583m for 10.000s
           with [function: baz]
 `);
-    });
+  });
 
-    it('gets trace with embedded data', () => {
-        expect(prettyPrintTrace(Trace.fromNode(embeddedNode)))
-            .toBe(`Trace:
+  it('gets trace with embedded data', () => {
+    expect(prettyPrintTrace(Trace.fromNode(embeddedNode)))
+      .toBe(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain ${sec(0).toDate().toString()}, ${sec(500).toDate().toString()})
   Category pid 100 'PID 100' (PID 100):
     span-height self:1 total:4
@@ -460,5 +460,5 @@ describe('trace test', () => {
       Span (height 1):
         at 3.333m for 1.667m
 `);
-    });
+  });
 });

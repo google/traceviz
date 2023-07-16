@@ -11,7 +11,6 @@
         limitations under the License.
 */
 
-
 import { valueMap } from '../value/test_value.js';
 import { ValueMap } from '../value/value_map.js';
 import { Response, ResponseNode } from '../protocol/response_interface.js';

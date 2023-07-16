@@ -16,20 +16,20 @@
  * Interactions are the default mode of interactivity in TraceViz tools.
  * Examples include brushing on a timeline to zoom in, or clicking an item to
  * force a data refresh from the backend.
- * 
+ *
  * An interaction comprises two halves: an action, in which a user action like
  * a click results in an update to one or more values; and a reaction, in which
  * a change to one or more values results in an effect such as a tooltip or a
  * backend data fetch.
- * 
+ *
  * TraceViz provides three types for these half-interactions:
- * 
+ *
  *   * `Update`, which TraceViz components can trigger to update values;
  *   * `Predicate`, which yields matches that TraceViz components can monitor to
  *     perform reactions;
  *   * `Watch`, which TraceViz components can use to invoke an arbitrary callback
  *     whenever any value in a map changes.
- * 
+ *
  * The `Interactions` type groups zero or more Updates, Predicates, and Watches,
  * keying Updates and Predicates by target (e.g., 'row', 'node') and type (e.g.,
  * 'click', 'highlight'), and Watches by type.  A TraceViz component may
@@ -557,7 +557,7 @@ export class Reaction extends Predicate {
  * changes.  The 'watch' method accepts a callback which is invoked, and
  * provided with the changed ValueMap, upon every Value change.  The 'watch'
  * method also returns an observable upon which any errors raised in the
- * callback are propagated; 
+ * callback are propagated;
  */
 export class Watch implements Documenter {
   readonly documenterType = DocumenterType.Watch;
@@ -657,8 +657,8 @@ export class Interactions implements Documenter {
 
   /**
    * Sets up a single watch on the specified type with the specified callback.
-   * The callback will be invoked on watch changes until the provided 
-   * unsubscribe observable emits.  Returns an observable that emits any error 
+   * The callback will be invoked on watch changes until the provided
+   * unsubscribe observable emits.  Returns an observable that emits any error
    * thrown by the callback.  The returned observable also emits an error if
    * the specified watch type does not exist on the receiver.
    */
