@@ -17,16 +17,13 @@ import (
 	"testing"
 
 	"github.com/google/traceviz/server/go/magnitude"
+	"github.com/google/traceviz/server/go/payload"
 	"github.com/google/traceviz/server/go/test_util"
 	"github.com/google/traceviz/server/go/util"
 )
 
 func name(name string) util.PropertyUpdate {
 	return util.StringProperty("name", name)
-}
-
-func datumType(datumType treeDatumType) util.PropertyUpdate {
-	return util.IntegerProperty(datumTypeKey, int64(datumType))
 }
 
 var defaultRenderSettings = &RenderSettings{
@@ -49,9 +46,8 @@ func TestTreeConstruction(t *testing.T) {
 			root2 := tree.Node(4, name("root 2"))
 			x := root2.Node(3, name("x"))
 			root2.Node(2, name("y"))
-			x.Node(1, name("z")).
-				Payload("stuffing").
-				With(util.IntegerProperty("count", 3))
+			z := x.Node(1, name("z"))
+			payload.New(z, "stuffing").With(util.IntegerProperty("count", 3))
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			db.With(
@@ -59,40 +55,33 @@ func TestTreeConstruction(t *testing.T) {
 			).Child().With(
 				magnitude.SelfMagnitude(1),
 				name("root 1"),
-				datumType(treeNodeDatumType),
 			).Child().With(
 				magnitude.SelfMagnitude(2),
 				name("a"),
-				datumType(treeNodeDatumType),
 			).Child().With(
 				magnitude.SelfMagnitude(3),
 				name("b"),
-				datumType(treeNodeDatumType),
 			).AndChild().With(
 				magnitude.SelfMagnitude(4),
 				name("c"),
-				datumType(treeNodeDatumType),
 			)
-			db.Child().With(
+			root2 := db.Child().With(
 				magnitude.SelfMagnitude(4),
 				name("root 2"),
-				datumType(treeNodeDatumType),
-			).Child().With(
+			)
+			root2.Child().With(
 				magnitude.SelfMagnitude(3),
 				name("x"),
-				datumType(treeNodeDatumType),
 			).Child().With(
 				magnitude.SelfMagnitude(1),
 				name("z"),
-				datumType(treeNodeDatumType),
 			).Child().With(
-				datumType(payloadDatumType),
-				util.StringProperty(payloadTypeKey, "stuffing"),
+				util.StringProperty(payload.TypeKey, "stuffing"),
 				util.IntegerProperty("count", 3),
-			).Parent().Parent().AndChild().With( // Back up to root2
+			)
+			root2.Child().With(
 				magnitude.SelfMagnitude(2),
 				name("y"),
-				datumType(treeNodeDatumType),
 			)
 		},
 	}} {

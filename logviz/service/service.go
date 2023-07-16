@@ -99,7 +99,7 @@ func New(assetRoot, collectionRoot string, cap int) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	assetHandler := handlers.NewHandler()
+	assetHandler := handlers.NewAssetHandler()
 	addFileAsset := func(resourceName, resourceType, filename string) {
 		log.Printf(logger.Info("Serving asset '%s' at '%s'",
 			path.Join(assetRoot, filename),

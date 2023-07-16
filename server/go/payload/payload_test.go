@@ -28,7 +28,7 @@ func (tp *testPayloader) Payload() util.DataBuilder {
 	return tp.db.Child()
 }
 
-func TetPayload(t *testing.T) {
+func TestPayload(t *testing.T) {
 	if err := testutil.CompareResponses(t,
 		func(db util.DataBuilder) {
 			tp := &testPayloader{
@@ -49,6 +49,6 @@ func TetPayload(t *testing.T) {
 			)
 		},
 	); err != nil {
-		t.Fatalf("encounterd unexpectd error building the payload: %s", err)
+		t.Fatalf("encountered unexpected error building the payload: %s", err)
 	}
 }

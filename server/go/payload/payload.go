@@ -25,7 +25,7 @@
 // *   A tree node divided into differently-colored regions.
 //
 // This package facilitates embedding structured data within other structured
-// data in this way.  Any type into wich other structured data may be embedded
+// data in this way.  Any type into which other structured data may be embedded
 // should implement the Payloader interface.
 package payload
 

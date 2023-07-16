@@ -173,13 +173,14 @@ const (
 	nodeTypeKey = "trace_node_type"
 
 	// Rendering property keys
-	spanWidthCatPxKey          = "trace_span_width_cat_px"
-	spanPaddingCatPxKey        = "trace_span_padding_cat_px"
-	categoryHeaderCatPxKey     = "trace_category_header_cat_px"
-	categoryPaddingCatPxKey    = "trace_category_padding_cat_px"
-	categoryMarginTempPxKey    = "trace_category_margin_temp_px"
-	categoryMinWidthCatPxKey   = "trace_category_min_width_cat_px"
-	categoryBaseWidthTempPxKey = "trace_category_base_width_temp_px"
+	spanWidthCatPxKey          = "span_width_cat_px"
+	spanPaddingCatPxKey        = "span_padding_cat_px"
+	categoryHeaderCatPxKey     = "category_header_cat_px"
+	categoryHandleTempPxKey    = "category_handle_temp_px"
+	categoryPaddingCatPxKey    = "category_padding_cat_px"
+	categoryMarginTempPxKey    = "category_margin_temp_px"
+	categoryMinWidthCatPxKey   = "category_min_width_cat_px"
+	categoryBaseWidthTempPxKey = "category_base_width_temp_px"
 )
 
 // RenderSettings is a collection of rendering settings for traces.  A trace is
@@ -189,8 +190,8 @@ const (
 // hierarchy of trace categories ('cat').
 //
 // These settings are generally defined as extents, in units of pixels, along
-// these two axes, so are suffixed 'TempPx' for a pixel extent along the
-// temporal axis, or 'CatPx' for a pixel extent along the category axis.
+// these two axes, so are suffixed 'TempPxKey' for a pixel extent along the
+// temporal axis, or 'CatPxKey' for a pixel extent along the category axis.
 type RenderSettings struct {
 	// The width of a span along the category axis.  If x is the temporal axis,
 	// this is the default height of a span.
@@ -202,6 +203,9 @@ type RenderSettings struct {
 	// temporal axis, this is the vertical space at the top of a category header
 	// where a category label may be shown.
 	CategoryHeaderCatPx int64
+	// The width, in pixels along the temporal axis, of a 'handle' rendered at
+	// the distal end of a category header; its height is categoryHeaderCatPxKey.
+	CategoryHandleTempPx int64
 	// The padding between adjacent categories along the category axis.  If x is
 	// the temporal axis, this is the vertical spacing between categories.
 	CategoryPaddingCatPx int64
@@ -225,6 +229,7 @@ func (rs *RenderSettings) Define() util.PropertyUpdate {
 		util.IntegerProperty(spanWidthCatPxKey, rs.SpanWidthCatPx),
 		util.IntegerProperty(spanPaddingCatPxKey, rs.SpanPaddingCatPx),
 		util.IntegerProperty(categoryHeaderCatPxKey, rs.CategoryHeaderCatPx),
+		util.IntegerProperty(categoryHandleTempPxKey, rs.CategoryHandleTempPx),
 		util.IntegerProperty(categoryPaddingCatPxKey, rs.CategoryPaddingCatPx),
 		util.IntegerProperty(categoryMarginTempPxKey, rs.CategoryMarginTempPx),
 		util.IntegerProperty(categoryMinWidthCatPxKey, rs.CategoryMinWidthCatPx),
@@ -368,8 +373,7 @@ func (s *Span) With(properties ...util.PropertyUpdate) *Span {
 	return s
 }
 
-// Payload creates and returns a DataBuilder that can be used to attach
-// arbitrary structured information to the receiving Span.
+// Payload supports attaching arbitrary payloads to spans.  See payload.go
 func (s *Span) Payload() util.DataBuilder {
 	return s.db.Child()
 }
@@ -393,8 +397,7 @@ type Subspan struct {
 	db util.DataBuilder
 }
 
-// Payload creates and returns a DataBuilder that can be used to attach
-// arbitrary structured information to the receiving SubSpan.
+// Payload supports attaching arbitrary payloads to spans.  See payload.go
 func (ss *Subspan) Payload() util.DataBuilder {
 	return ss.db.Child()
 }

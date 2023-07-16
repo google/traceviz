@@ -71,7 +71,7 @@ func (y YAxisRenderSettings) Apply() util.PropertyUpdate {
 // Axis is implemented by types that can act as axes.
 type Axis interface {
 	Define() util.PropertyUpdate
-	Value(v interface{}) util.PropertyUpdate
+	Value(v any) util.PropertyUpdate
 }
 
 // TimestampAxis describes a temporal domain with a known starting point.
@@ -110,7 +110,7 @@ func (ta *TimestampAxis) Define() util.PropertyUpdate {
 
 // Value returns a TraceViz Value for the provided value along the axis.
 // The provided value must be a time.Time.
-func (ta *TimestampAxis) Value(v interface{}) util.PropertyUpdate {
+func (ta *TimestampAxis) Value(v any) util.PropertyUpdate {
 	switch val := v.(type) {
 	case time.Time:
 		return util.TimestampProperty(ta.cat.ID(), val)
@@ -157,7 +157,7 @@ func (da *DurationAxis) Define() util.PropertyUpdate {
 
 // Value returns a TraceViz Value for the provided value along the axis.
 // The provided value must be a time.Time.
-func (da *DurationAxis) Value(v interface{}) util.PropertyUpdate {
+func (da *DurationAxis) Value(v any) util.PropertyUpdate {
 	switch val := v.(type) {
 	case time.Duration:
 		return util.DurationProperty(da.cat.ID(), val)
@@ -204,7 +204,7 @@ func (da *DoubleAxis) Define() util.PropertyUpdate {
 
 // Value returns a TraceViz Value for the provided value along the axis.
 // The provided value must be a float64 or an int.
-func (da *DoubleAxis) Value(v interface{}) util.PropertyUpdate {
+func (da *DoubleAxis) Value(v any) util.PropertyUpdate {
 	switch val := v.(type) {
 	case float64:
 		return util.DoubleProperty(da.cat.ID(), val)

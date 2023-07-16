@@ -35,10 +35,10 @@
 //
 // Arbitrary payloads may be composed into trees under Nodes, via
 //
-//	node.Payload(payloadType)
+//	payload.New(node)
 //
-// which allocate the payload, tag it with the specified type string, and
-// return its *util.DataBuilder.
+// which allocate the payload and return its *util.DataBuilder.  See payload.go
+// for more detail.
 //
 // Encoded into the TraceViz data model, a tree is:
 //
@@ -52,21 +52,11 @@
 //
 // node
 //
-//		properties
-//		  * datumTypeKey: nodeDatumType
-//	   * selfMagnitudeKEy: self magnitude
-//		  * <decorators>
-//		children
-//		  * repeated nodes and payloads
-//
-// payload
-//
 //	properties
-//	  * datumTypeKey: payloadDatumType
-//	  * payloadTypeKey: StringValue
-//	  * <anything else>
+//	   * selfMagnitudeKEy: self magnitude
+//		 * <decorators>
 //	children
-//	  * <anything>
+//		 * repeated nodes and payloads
 package weightedtree
 
 import (
@@ -75,9 +65,6 @@ import (
 )
 
 const (
-	datumTypeKey   = "weighted_tree_datum_type"
-	payloadTypeKey = "weighted_tree_payload_type"
-
 	frameHeightPxKey = "weighted_tree_frame_height_px"
 )
 
@@ -111,7 +98,7 @@ func New(db util.DataBuilder, renderSettings *RenderSettings, properties ...util
 // tree.
 func (t *Tree) Node(selfMagnitude float64, properties ...util.PropertyUpdate) *Node {
 	return &Node{
-		db: newChild(t.db, treeNodeDatumType).With(
+		db: t.db.Child().With(
 			magnitude.SelfMagnitude(selfMagnitude),
 		).With(properties...),
 	}
@@ -129,24 +116,11 @@ type Node struct {
 	db util.DataBuilder
 }
 
-type treeDatumType int64
-
-const (
-	treeNodeDatumType treeDatumType = iota
-	payloadDatumType
-)
-
-func newChild(parentDb util.DataBuilder, datumType treeDatumType) util.DataBuilder {
-	return parentDb.
-		Child().
-		With(util.IntegerProperty(datumTypeKey, int64(datumType)))
-}
-
 // Node creates and returns a new child node with the specified magnitude
 // beneath the receiver.
 func (n *Node) Node(selfMagnitude float64, properties ...util.PropertyUpdate) *Node {
 	return &Node{
-		db: newChild(n.db, treeNodeDatumType).With(
+		db: n.db.Child().With(
 			magnitude.SelfMagnitude(selfMagnitude),
 		).With(properties...),
 	}
@@ -161,8 +135,6 @@ func (n *Node) With(properties ...util.PropertyUpdate) *Node {
 
 // Payload creates and returns a DataBuilder that can be used to attach
 // arbitrary structured information to the receiving Node.
-func (n *Node) Payload(payloadType string) util.DataBuilder {
-	return newChild(n.db, payloadDatumType).With(
-		util.StringProperty(payloadTypeKey, payloadType),
-	)
+func (n *Node) Payload() util.DataBuilder {
+	return n.db.Child()
 }

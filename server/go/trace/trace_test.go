@@ -98,6 +98,7 @@ func TestTraceData(t *testing.T) {
 				util.IntegerProperty(spanWidthCatPxKey, 0),
 				util.IntegerProperty(spanPaddingCatPxKey, 0),
 				util.IntegerProperty(categoryHeaderCatPxKey, 0),
+				util.IntegerProperty(categoryHandleTempPxKey, 0),
 				util.IntegerProperty(categoryPaddingCatPxKey, 0),
 				util.IntegerProperty(categoryMarginTempPxKey, 0),
 				util.IntegerProperty(categoryMinWidthCatPxKey, 0),

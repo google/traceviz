@@ -65,14 +65,14 @@ func (fa *FileAsset) HTTPHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// Handler implements http.Handler, and serves static assets (HTML, JS,
+// AssetHandler implements http.Handler, and serves static assets (HTML, JS,
 // CSS, etc.)
 type AssetHandler struct {
 	handlersByPath map[string]func(http.ResponseWriter, *http.Request)
 }
 
 // NewAssetHandler returns a new, empty Handler.
-func NewHandler() *AssetHandler {
+func NewAssetHandler() *AssetHandler {
 	return &AssetHandler{
 		handlersByPath: map[string]func(http.ResponseWriter, *http.Request){},
 	}
