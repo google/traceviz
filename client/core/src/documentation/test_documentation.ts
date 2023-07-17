@@ -18,14 +18,14 @@
 import { Documenter, DocumenterType } from './documentation.js';
 
 const typeToString = new Map<DocumenterType, string>([
-  [DocumenterType.Update, "Update"],
-  [DocumenterType.Predicate, "Predicate"],
-  [DocumenterType.Watch, "Watch"],
-  [DocumenterType.Action, "Action"],
-  [DocumenterType.Reaction, "Reaction"],
-  [DocumenterType.Interactions, "Interactions"],
-  [DocumenterType.Component, "Component"],
-  [DocumenterType.Tool, "Tool"],
+  [DocumenterType.UPDATE, "Update"],
+  [DocumenterType.PREDICATE, "Predicate"],
+  [DocumenterType.WATCH, "Watch"],
+  [DocumenterType.ACTION, "Action"],
+  [DocumenterType.REACTION, "Reaction"],
+  [DocumenterType.INTERACTIONS, "Interactions"],
+  [DocumenterType.COMPONENT, "Component"],
+  [DocumenterType.TOOL, "Tool"],
 ]);
 
 /**

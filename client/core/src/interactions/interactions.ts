@@ -54,7 +54,7 @@ const SOURCE = 'interactions';
 export abstract class Update implements Documenter {
   overrideDocument = '';
   documentChildren = true;
-  constructor(readonly documenterType = DocumenterType.Update) { }
+  constructor(readonly documenterType = DocumenterType.UPDATE) { }
   abstract update(localState?: ValueMap | undefined): void;
   abstract get autoDocument(): string;
   get children(): Documenter[] {
@@ -254,7 +254,7 @@ export class Action extends Update {
     readonly target: string,
     readonly type: string,
     readonly updates: Update[]) {
-    super(DocumenterType.Action);
+    super(DocumenterType.ACTION);
   }
 
   override update(localState?: ValueMap | undefined) {
@@ -291,7 +291,7 @@ export type MatchFn = (localState?: ValueMap | undefined) => Observable<boolean>
 export abstract class Predicate implements Documenter {
   overrideDocument = '';
   documentChildren = true;
-  constructor(readonly documenterType = DocumenterType.Predicate) { }
+  constructor(readonly documenterType = DocumenterType.PREDICATE) { }
   abstract match(): MatchFn;
   abstract get autoDocument(): string;
   get children(): Documenter[] {
@@ -531,7 +531,7 @@ export class Reaction extends Predicate {
     readonly target: string,
     readonly type: string,
     readonly predicate: Predicate) {
-    super(DocumenterType.Reaction);
+    super(DocumenterType.REACTION);
   }
 
   override match(): MatchFn {
@@ -560,7 +560,7 @@ export class Reaction extends Predicate {
  * callback are propagated;
  */
 export class Watch implements Documenter {
-  readonly documenterType = DocumenterType.Watch;
+  readonly documenterType = DocumenterType.WATCH;
   overrideDocument = '';
   documentChildren = true;
 
@@ -606,7 +606,7 @@ export class Watch implements Documenter {
  * 'timeCallout'), supporting convenience accessors for each of them.
  */
 export class Interactions implements Documenter {
-  readonly documenterType = DocumenterType.Interactions;
+  readonly documenterType = DocumenterType.INTERACTIONS;
   overrideDocument = '';
   documentChildren = true;
   private actionsByTargetAndType = new Map<string, Map<string, Action>>([]);

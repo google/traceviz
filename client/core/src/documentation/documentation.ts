@@ -19,21 +19,21 @@
 /** Supported types of documenters. */
 export enum DocumenterType {
   /** Documents an update in response to some user action. */
-  Update = 0,
+  UPDATE = 0,
   /** Documents a predicate controlling some reaction. */
-  Predicate,
+  PREDICATE,
   /** Documents a watch on a set of Values. */
-  Watch,
+  WATCH,
   /** Documents some user action and its resulting updates. */
-  Action,
+  ACTION,
   /** Documents some reaction and the predicates that control it. */
-  Reaction,
+  REACTION,
   /** Documents a set of interactions: Watches, Actions, and Reactions. */
-  Interactions,
+  INTERACTIONS,
   /** Documents a tool component. */
-  Component,
+  COMPONENT,
   /** Documents a tool. */
-  Tool,
+  TOOL,
 }
 
 /** Implemented by self-documenting types. */
