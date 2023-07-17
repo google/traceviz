@@ -12,7 +12,8 @@
 */
 
 /**
- * @fileoverview Defines an interface for types providing backend fetch services.
+ * @fileoverview Defines an interface for types providing backend fetch
+ * services.
  */
 
 import { Request } from '../protocol/request_interface.js';

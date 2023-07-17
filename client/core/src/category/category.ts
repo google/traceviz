@@ -16,17 +16,14 @@ import { ValueMap } from '../value/value_map.js';
 
 const SOURCE = 'categories';
 
-enum Key {
-  CATEGORY_DEFINED_ID = 'category_defined_id',
-  CATEGORY_DESCRIPTION = 'category_description',
-  CATEGORY_DISPLAY_NAME = 'category_display_name',
-  CATEGORY_IDS = 'category_ids',
-}
+const CATEGORY_DEFINED_ID = 'category_defined_id';
+const CATEGORY_DESCRIPTION = 'category_description';
+const CATEGORY_DISPLAY_NAME = 'category_display_name';
+const CATEGORY_IDS = 'category_ids';
 
 /** The set of properties used to define a category. */
-export const categoryProperties: ReadonlyArray<string> = [
-  Key.CATEGORY_DEFINED_ID, Key.CATEGORY_DISPLAY_NAME, Key.CATEGORY_DESCRIPTION,
-  Key.CATEGORY_IDS
+export const categoryProperties: readonly string[] = [
+  CATEGORY_DEFINED_ID, CATEGORY_DISPLAY_NAME, CATEGORY_DESCRIPTION, CATEGORY_IDS
 ];
 
 
@@ -41,12 +38,12 @@ export interface Category {
  * Returns the Category defined in the provided properties, or undefined if no
  * Category is defined there.
  */
-export function getDefinedCategory(properties: ValueMap): Category | undefined {
-  if (properties.has(Key.CATEGORY_DEFINED_ID)) {
+export function getDefinedCategory(properties: ValueMap): Category|undefined {
+  if (properties.has(CATEGORY_DEFINED_ID)) {
     return {
-      id: properties.expectString(Key.CATEGORY_DEFINED_ID),
-      displayName: properties.expectString(Key.CATEGORY_DISPLAY_NAME),
-      description: properties.expectString(Key.CATEGORY_DESCRIPTION),
+      id: properties.expectString(CATEGORY_DEFINED_ID),
+      displayName: properties.expectString(CATEGORY_DISPLAY_NAME),
+      description: properties.expectString(CATEGORY_DESCRIPTION),
     };
   }
   return undefined;
@@ -66,16 +63,17 @@ export class CategorySet {
 
   getTaggedCategories(properties: ValueMap): Category[] {
     const ret = new Array<Category>();
-    if (!properties.has(Key.CATEGORY_IDS)) {
+    if (!properties.has(CATEGORY_IDS)) {
       return [];
     }
-    for (const categoryID of properties.expectStringList(Key.CATEGORY_IDS)) {
+    for (const categoryID of properties.expectStringList(CATEGORY_IDS)) {
       const category = this.categoriesByID.get(categoryID);
       if (!category) {
         throw new ConfigurationError(
-          `tagged category '${categoryID}' is not defined in this CategorySet`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+            `tagged category '${
+                categoryID}' is not defined in this CategorySet`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
       }
       ret.push(category);
     }
@@ -86,5 +84,5 @@ export class CategorySet {
 /** Returns true iff categories a and b are equal in all fields. */
 export function categoryEquals(a: Category, b: Category): boolean {
   return a.id === b.id && a.displayName === b.displayName &&
-    a.description === b.description;
+      a.description === b.description;
 }

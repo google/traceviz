@@ -27,7 +27,7 @@ export interface DataSeriesFetcher {
   // the series request, with populated and unique seriesName, and a callback
   // to invoke with the response.
   fetchDataSeries(
-    req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
-    cancel: () => void): void;
-  cancelDataSeries(seriesName: string | undefined): void;
+      req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
+      cancel: () => void): void;
+  cancelDataSeries(seriesName: string|undefined): void;
 }

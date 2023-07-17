@@ -19,37 +19,37 @@ import { dbl, strs, str, valueMap } from '../value/test_value.js';
 describe('color test', () => {
   it('colors', () => {
     const definitions = valueMap(
-      { key: 'color_space_winners', val: strs('goldenrod', 'silver', 'gold') },
-      { key: 'color_space_bandw', val: strs('#ffffff', '#000000') },
-      { key: 'ratatouille', val: strs('darkmagenta', 'crimson') },
+        {key: 'color_space_winners', val: strs('goldenrod', 'silver', 'gold')},
+        {key: 'color_space_bandw', val: strs('#ffffff', '#000000')},
+        {key: 'ratatouille', val: strs('darkmagenta', 'crimson')},
     );
     const coloring = new Coloring(definitions);
     expect(coloring.colors(valueMap(
-      { key: 'primary_color', val: str('black') },
-      { key: 'secondary_color_space', val: str('color_space_winners') },
-      { key: 'secondary_color_space_value', val: dbl(0.5) },
-      { key: 'stroke_color', val: str('white') },
-    )))
-      .toEqual({
-        primary: 'black',
-        secondary: 'rgb(192, 192, 192)',
-        stroke: 'white',
-      });
+               {key: 'primary_color', val: str('black')},
+               {key: 'secondary_color_space', val: str('color_space_winners')},
+               {key: 'secondary_color_space_value', val: dbl(0.5)},
+               {key: 'stroke_color', val: str('white')},
+               )))
+        .toEqual({
+          primary: 'black',
+          secondary: 'rgb(192, 192, 192)',
+          stroke: 'white',
+        });
     expect(coloring.colors(valueMap(
-      { key: 'primary_color_space', val: str('color_space_bandw') },
-      { key: 'primary_color_space_value', val: dbl(0.5) },
-      { key: 'secondary_color', val: str('green') },
-    )))
-      .toEqual({
-        primary: 'rgb(128, 128, 128)',
-        secondary: 'green',
-        stroke: undefined,
-      });
+               {key: 'primary_color_space', val: str('color_space_bandw')},
+               {key: 'primary_color_space_value', val: dbl(0.5)},
+               {key: 'secondary_color', val: str('green')},
+               )))
+        .toEqual({
+          primary: 'rgb(128, 128, 128)',
+          secondary: 'green',
+          stroke: undefined,
+        });
     // 'ratatouille' is not a valid color space.
     expect(() => {
       coloring.colors(valueMap(
-        { key: 'primary_color_space', val: str('rataouille') },
-        { key: 'primary_color_value', val: dbl(0.5) }));
+          {key: 'primary_color_space', val: str('rataouille')},
+          {key: 'primary_color_value', val: dbl(0.5)}));
     }).toThrow();
     // If we don't say, we don't say.
     expect(coloring.colors(valueMap())).toEqual({

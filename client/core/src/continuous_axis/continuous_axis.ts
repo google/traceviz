@@ -33,11 +33,11 @@ enum AxisType {
 
 /** The set of properties used to define an axis. */
 export const axisProperties =
-  [Key.AXIS_TYPE, Key.AXIS_MIN, Key.AXIS_MAX, ...categoryProperties];
+    [Key.AXIS_TYPE, Key.AXIS_MIN, Key.AXIS_MAX, ...categoryProperties];
 
 /** Represents an axis with a domain of type T. */
 export abstract class Axis<T> {
-  constructor(readonly category: Category, readonly min: T, readonly max: T) { }
+  constructor(readonly category: Category, readonly min: T, readonly max: T) {}
 
   // Given a point's properties, return the value of that point.
   abstract pointValue(properties: ValueMap): T;
@@ -124,32 +124,32 @@ export class NumberAxis extends Axis<number> {
 }
 
 /** Returns the axis defined within the provided properties. */
-export function getAxis(properties: ValueMap): NumberAxis | DurationAxis |
-  TimestampAxis {
+export function getAxis(properties: ValueMap): NumberAxis|DurationAxis|
+    TimestampAxis {
   const axisType = properties.expectString(Key.AXIS_TYPE);
   const cat = getDefinedCategory(properties);
   if (!cat) {
     throw new ConfigurationError(`an axis must define a category`)
-      .from(SOURCE)
-      .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
   }
   switch (axisType) {
     case AxisType.TIMESTAMP_AXIS_TYPE:
       return new TimestampAxis(
-        cat, properties.expectTimestamp(Key.AXIS_MIN),
-        properties.expectTimestamp(Key.AXIS_MAX));
+          cat, properties.expectTimestamp(Key.AXIS_MIN),
+          properties.expectTimestamp(Key.AXIS_MAX));
     case AxisType.DURATION_AXIS_TYPE:
       return new DurationAxis(
-        cat, properties.expectDuration(Key.AXIS_MIN),
-        properties.expectDuration(Key.AXIS_MAX));
+          cat, properties.expectDuration(Key.AXIS_MIN),
+          properties.expectDuration(Key.AXIS_MAX));
     case AxisType.DOUBLE_AXIS_TYPE:
       return new NumberAxis(
-        cat, properties.expectNumber(Key.AXIS_MIN),
-        properties.expectNumber(Key.AXIS_MAX));
+          cat, properties.expectNumber(Key.AXIS_MIN),
+          properties.expectNumber(Key.AXIS_MAX));
     default:
       throw new ConfigurationError(`unsupported axis type ${axisType}`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
   }
 }
 
@@ -164,8 +164,8 @@ function cmp(a: unknown, b: unknown): number {
     return b - a;
   }
   throw new ConfigurationError(`can't compare incomparable types`)
-    .from(SOURCE)
-    .at(Severity.ERROR);
+      .from(SOURCE)
+      .at(Severity.ERROR);
 }
 
 /**
@@ -173,12 +173,12 @@ function cmp(a: unknown, b: unknown): number {
  * and with the same category, covering all of the arguments' domains.
  */
 export function unionAxes(
-  ...axes: Array<DurationAxis | TimestampAxis | NumberAxis>): DurationAxis |
-  TimestampAxis | NumberAxis {
+    ...axes: Array<DurationAxis|TimestampAxis|NumberAxis>): DurationAxis|
+    TimestampAxis|NumberAxis {
   if (axes.length < 2) {
     throw new ConfigurationError(`unionAxes() requires at least two axes`)
-      .from(SOURCE)
-      .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
   }
   const cat = axes[0].category;
   let min = axes[0].min;
@@ -186,7 +186,7 @@ export function unionAxes(
   for (let idx = 1; idx < axes.length; idx++) {
     if (!categoryEquals(cat, axes[idx].category)) {
       throw new ConfigurationError(
-        `can't merge axes with different categories`);
+          `can't merge axes with different categories`);
     }
     if (cmp(min, axes[idx].min) > 0) {
       min = axes[idx].min;

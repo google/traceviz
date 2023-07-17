@@ -16,8 +16,8 @@
  * request.
  */
 
-import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, Observable, Subject, takeUntil } from "rxjs";
-import { StringValue, Value } from "../value/value.js";
+import { BehaviorSubject, distinctUntilChanged, Observable, Subject, takeUntil } from "rxjs";
+import { StringValue } from "../value/value.js";
 import { ResponseNode } from "../protocol/response_interface.js";
 import { DataSeriesFetcher } from "./data_series_fetcher.js";
 import { ValueMap } from "../value/value_map.js";
@@ -71,15 +71,17 @@ export class DataSeriesQuery {
   readonly uniqueSeriesName: string;
 
   constructor(
-    readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
-    readonly parameters: ValueMap, fetch: Observable<boolean>) {
+      readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
+      readonly parameters: ValueMap, fetch: Observable<boolean>) {
     this.uniqueSeriesName = getUniqueSeriesName();
-    fetch.pipe(
-      distinctUntilChanged(),
-      takeUntil(this.unsubscribe),
-    ).subscribe((fetch) => {
-      fetch && this.fetch();
-    });
+    fetch
+        .pipe(
+            distinctUntilChanged(),
+            takeUntil(this.unsubscribe),
+            )
+        .subscribe((fetch) => {
+          fetch && this.fetch();
+        });
   }
 
   private fetch() {
@@ -91,16 +93,16 @@ export class DataSeriesQuery {
     // Publish the fact that a query is pending.
     this.loading.next(true);
     this.dataQuery.fetchDataSeries(
-      req,
-      (resp: ResponseNode) => {
-        // Upon receiving the response, broadcast the response and publish
-        // the fact that no query is pending.
-        this.response.next(resp);
-        this.loading.next(false);
-      },
-      () => {
-        this.loading.next(false);
-      });
+        req,
+        (resp: ResponseNode) => {
+          // Upon receiving the response, broadcast the response and publish
+          // the fact that no query is pending.
+          this.response.next(resp);
+          this.loading.next(false);
+        },
+        () => {
+          this.loading.next(false);
+        });
   }
 
   dispose() {

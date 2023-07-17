@@ -42,8 +42,8 @@ const COLOR_SPACE_NAME_PREFIX = 'color_space_';
 function linearColorSpace(...colors: string[]): (colorValue: number) => string {
   if (colors.length === 0) {
     throw new ConfigurationError(`Color spaces must define at least one color`)
-      .at(Severity.ERROR)
-      .from(SOURCE);
+        .at(Severity.ERROR)
+        .from(SOURCE);
   }
   if (colors.length === 1) {
     // The input domain must vary between 0 and 1, so we need at least two
@@ -53,10 +53,7 @@ function linearColorSpace(...colors: string[]): (colorValue: number) => string {
   const domains: number[] = [];
   for (let i = 0; i < colors.length; i++) {
     domains.push(i / (colors.length - 1));
-    const d3color = d3.color(colors[i]);
-    if (d3color) {
-      colors[i] = d3color.toString();
-    }
+    colors[i] = d3.color(colors[i])?.toString() || '';
   }
   return d3.scaleLinear<string>().domain(domains).range(colors);
 }
@@ -64,15 +61,15 @@ function linearColorSpace(...colors: string[]): (colorValue: number) => string {
 /**
  * Returns the provided color string converted to a hexadecimal color string.
  */
-export function hex(color: string): string | undefined {
-  return d3.color(color)?.hex();
+export function hex(color: string): string {
+  return d3.color(color)?.hex() || '';
 }
 
 /** A single datum's defined colors. */
 export interface Colors {
-  primary: string | undefined;
-  secondary: string | undefined;
-  stroke: string | undefined;
+  primary: string|undefined;
+  secondary: string|undefined;
+  stroke: string|undefined;
 }
 
 /**
@@ -100,21 +97,21 @@ export class Coloring {
   colors(vm: ValueMap): Colors {
     return {
       primary: this.getColorString(
-        vm, Keys.PRIMARY_COLOR, Keys.PRIMARY_COLOR_SPACE,
-        Keys.PRIMARY_COLOR_SPACE_VALUE),
+          vm, Keys.PRIMARY_COLOR, Keys.PRIMARY_COLOR_SPACE,
+          Keys.PRIMARY_COLOR_SPACE_VALUE),
       secondary: this.getColorString(
-        vm, Keys.SECONDARY_COLOR, Keys.SECONDARY_COLOR_SPACE,
-        Keys.SECONDARY_COLOR_SPACE_VALUE),
+          vm, Keys.SECONDARY_COLOR, Keys.SECONDARY_COLOR_SPACE,
+          Keys.SECONDARY_COLOR_SPACE_VALUE),
       stroke: this.getColorString(
-        vm, Keys.STROKE_COLOR, Keys.STROKE_COLOR_SPACE,
-        Keys.STROKE_COLOR_SPACE_VALUE),
+          vm, Keys.STROKE_COLOR, Keys.STROKE_COLOR_SPACE,
+          Keys.STROKE_COLOR_SPACE_VALUE),
     };
   }
 
   private getColorString(
-    vm: ValueMap, colorKey: string, colorSpaceKey: string,
-    colorSpaceValueKey: string): string | undefined {
-    let colorString: string | undefined;
+      vm: ValueMap, colorKey: string, colorSpaceKey: string,
+      colorSpaceValueKey: string): string|undefined {
+    let colorString: string|undefined;
     if (vm.has(colorKey)) {
       return vm.expectString(colorKey);
     } else if (vm.has(colorSpaceKey)) {
@@ -123,9 +120,9 @@ export class Coloring {
       const colorSpace = this.spacesByName.get(colorSpaceName);
       if (!colorSpace) {
         throw new ConfigurationError(
-          `Color space '${colorSpaceName} is not defined`)
-          .at(Severity.ERROR)
-          .from(SOURCE);
+            `Color space '${colorSpaceName} is not defined`)
+            .at(Severity.ERROR)
+            .from(SOURCE);
       }
       colorString = colorSpace(colorValue);
     }

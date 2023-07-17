@@ -46,7 +46,9 @@ export class AppCore {
   // The shared DataQuery component, responsible for issuing all backend
   // DataSeries requests and handling their responses.  This should not be
   // examined until the AppCore is published.
-  readonly dataQuery = new DataQuery((err) => this.err(err));
+  readonly dataQuery = new DataQuery((err) => {
+    this.err(err);
+  });
   // The shared global state; a key-value mapping of Values available
   // throughout the application.  This should not be examined until the
   // AppCore is published.
@@ -58,14 +60,18 @@ export class AppCore {
   /** To be invoked once, when the AppCore is populated. */
   publish() {
     if (this.published) {
-      const err = new ConfigurationError(`Only one AppCore may be defined, and it may only be published once.`)
+      const err =
+          new ConfigurationError(
+              `Only one AppCore may be defined, and it may only be published once.`)
         .from(SOURCE)
         .at(Severity.FATAL);
       this.err(err);
       throw err;
     }
     this.published = true;
-    this.pendingCallbacks.forEach((cb) => cb(this));
+    this.pendingCallbacks.forEach((cb) => {
+      cb(this);
+    });
     this.pendingCallbacks.length = 0;
   }
 

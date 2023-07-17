@@ -50,18 +50,24 @@ export class DataQuery implements DataSeriesFetcher {
   // DataSeriesRequestProto and the response callback is stored.
   private pendingQueriesBySeriesName = new Map<string, PendingQuery>();
 
-  private fetcher: DataFetcherInterface | undefined;
-  // private unsubscribe = new Subject<void>();
+  private fetcher: DataFetcherInterface|undefined;
 
-  constructor(private readonly errorReporter: (err: any) => void) { }
+  constructor(private readonly errorReporter: (err: unknown) => void) {}
 
   connect(fetcher: DataFetcherInterface) {
-    // this.unsubscribe.next();
     this.fetcher = fetcher;
   }
 
   setGlobalFilters(globalFilters: ValueMap) {
     this.globalFilters = globalFilters;
+  }
+
+  // Returns a callback that immediately issues outstanding queries.  For test
+  // use only.
+  triggerUpdates(): () => void {
+    return () => {
+      this.issueQuery();
+    };
   }
 
   // Issues queries after a specified debounce interval.  If the interval is 0,
@@ -77,31 +83,30 @@ export class DataQuery implements DataSeriesFetcher {
     // new fetch, as long as at least one series wants an update.  Just before
     // the fetch, the set of ready series names is cleared.
     this.updateRequested.pipe(debounce(() => timer(debounceMs)))
-      .subscribe(() => {
-        this.issueQuery();
-      });
+        .subscribe(() => {
+          this.issueQuery();
+        });
   }
 
   fetchDataSeries(
-    req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
-    cancel: () => void) {
+      req: SeriesRequest, onResponse: (resp: ResponseNode) => void,
+      cancel: () => void) {
     const seriesName = req.seriesName;
     if (seriesName === undefined) {
       this.errorReporter(
-        new ConfigurationError(`DataSeriesRequest lacks required series name`)
-          .from(SOURCE)
-          .at(Severity.FATAL)
-      );
+          new ConfigurationError(`DataSeriesRequest lacks required series name`)
+              .from(SOURCE)
+              .at(Severity.FATAL));
       return;
     }
-    // Place this requet in the set of pending queries, overwriting any already
+    // Place this request in the set of pending queries, overwriting any already
     // present for this series.
-    this.pendingQueriesBySeriesName.set(seriesName, { req, onResponse, cancel });
+    this.pendingQueriesBySeriesName.set(seriesName, {req, onResponse, cancel});
     // Bump this.updateRequested for debouncing.
     this.updateRequested.next(null);
   }
 
-  cancelDataSeries(seriesName: string | undefined) {
+  cancelDataSeries(seriesName: string|undefined) {
     if (seriesName !== undefined) {
       this.pendingQueriesBySeriesName.delete(seriesName);
     }
@@ -110,10 +115,9 @@ export class DataQuery implements DataSeriesFetcher {
   protected issueQuery() {
     if (!this.fetcher) {
       this.errorReporter(
-        new ConfigurationError(`issueQuery() called before connect().`)
-          .from(SOURCE)
-          .at(Severity.FATAL)
-      );
+          new ConfigurationError(`issueQuery() called before connect().`)
+              .from(SOURCE)
+              .at(Severity.FATAL));
       return;
     }
     // Save a copy of the pending queries so that we can find and invoke the
@@ -127,7 +131,7 @@ export class DataQuery implements DataSeriesFetcher {
     for (const queryInFlight of queriesInFlightBySeriesName.values()) {
       seriesRequests.push(queryInFlight.req);
     }
-    const req: Request = { filters: this.globalFilters, seriesRequests };
+    const req: Request = {filters: this.globalFilters, seriesRequests};
     // Submit the request via the fetcher.
     this.fetcher.fetch(req).pipe(take(1)).subscribe({
       next: (data) => {

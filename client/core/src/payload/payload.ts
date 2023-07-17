@@ -9,14 +9,21 @@ enum Key {
 }
 
 /**
- * The children of a ResponseNode, with structural children separated from
- * payloads.  Payloads are stored as a map of arrays.
+ * The set of keys marking a payload.  May be used with ValueMap.without().
  */
+export const PAYLOAD_KEYS = [Key.TYPE];
+
+/** A response struct for the children() function. */
 export interface Children {
   structural: ResponseNode[];
   payload: Map<string, ResponseNode[]>;
 }
 
+/**
+ * Returns the Children of the provided ResponseNode, separating out structural
+ * children from payload children, and placing the latter in a map keyed by
+ * payload type.
+ */
 export function children(node: ResponseNode): Children {
   const structural: ResponseNode[] = [];
   const payload = new Map<string, ResponseNode[]>();
