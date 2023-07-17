@@ -35,7 +35,7 @@ const SOURCE = 'global_state';
  * given key.
  */
 export class GlobalState extends BehaviorSubject<string[]> implements
-  GlobalStateInterface {
+    GlobalStateInterface {
   private valuesByKey = new Map<string, Value>();
 
   constructor() {
@@ -56,8 +56,8 @@ export class GlobalState extends BehaviorSubject<string[]> implements
   set(key: string, val: Value) {
     if (this.valuesByKey.has(key)) {
       throw new ConfigurationError(`Global state key '${key}' is already set`)
-        .from(SOURCE)
-        .at(Severity.FATAL);
+          .from(SOURCE)
+          .at(Severity.FATAL);
     }
     this.valuesByKey.set(key, val);
     this.next([...this.valuesByKey.keys()]);
@@ -72,8 +72,8 @@ export class GlobalState extends BehaviorSubject<string[]> implements
     const storedVal = this.valuesByKey.get(key);
     if (storedVal === undefined) {
       throw new ConfigurationError(`Global state key '${key}' is not set`)
-        .from(SOURCE)
-        .at(Severity.FATAL);
+          .from(SOURCE)
+          .at(Severity.FATAL);
     }
     return storedVal;
   }

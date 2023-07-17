@@ -49,7 +49,7 @@ describe('axis test', () => {
           {key: 'missing field', val: ts(sec(50))},
           ));
     }).toThrow();
-    expect(tsAxis.atOffset(d(50 * 10E8))).toEqual(sec(50));
+    expect(tsAxis.atOffset(d(50 * 1E9))).toEqual(sec(50));
     expect(tsAxis.toDomainFraction(sec(25))).toEqual(.25);
   });
 

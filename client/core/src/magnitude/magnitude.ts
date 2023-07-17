@@ -18,8 +18,6 @@
  * or 0 if there is no self-magnitude defined in the ValueMap.  If it defines a
  * self-magnitude, this ValueMap should contain:
  *   * Keys.SELF_MAGNITUDE: a number specifying the self-magnitude.
- *
- *  See  ../../../../server/go/magnitude/magnitude.go for more detail.
  */
 
 import { ValueMap } from '../value/value_map.js';
@@ -28,7 +26,9 @@ enum Keys {
   SELF_MAGNITUDE = 'self_magnitude',
 }
 
-// The set of property keys expected by this package.
+/**
+ * The set of property keys expected by this package. 
+ */
 export const properties: string[] = [Keys.SELF_MAGNITUDE];
 
 /**

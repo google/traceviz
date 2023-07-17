@@ -18,76 +18,61 @@ import { node } from "../protocol/test_response.js";
  * A response node containing a weighted tree, renderable as a flame chart.
  */
 export const weightedTreeNode = node(
-  valueMap({ key: 'weighted_tree_frame_height_px', val: int(20) }),
-  node(
-    valueMap(
-      { key: 'self_magnitude', val: int(1) },
-      { key: 'weighted_tree_datum_type', val: int(0) },
-      { key: 'label_format', val: str('$(name)') },
-      { key: 'name', val: str('root 1') },
-    ),
+    valueMap({key: 'weighted_tree_frame_height_px', val: int(20)}),
     node(
-      valueMap(
-        { key: 'self_magnitude', val: int(2) },
-        { key: 'weighted_tree_datum_type', val: int(0) },
-        { key: 'label_format', val: str('$(name)') },
-        { key: 'name', val: str('a') },
-      ),
-      node(
         valueMap(
-          { key: 'self_magnitude', val: int(4) },
-          { key: 'weighted_tree_datum_type', val: int(0) },
-          { key: 'label_format', val: str('$(name)') },
-          { key: 'name', val: str('c') },
-        ),
-      ),
-      node(
-        valueMap(
-          { key: 'self_magnitude', val: int(3) },
-          { key: 'weighted_tree_datum_type', val: int(0) },
-          { key: 'label_format', val: str('$(name)') },
-          { key: 'name', val: str('b') },
-        ),
-      ),
-    ),
-  ),
-  node(
-    valueMap(
-      { key: 'self_magnitude', val: int(4) },
-      { key: 'weighted_tree_datum_type', val: int(0) },
-      { key: 'label_format', val: str('$(name)') },
-      { key: 'name', val: str('root 2') },
-    ),
-    node(
-      valueMap(
-        { key: 'self_magnitude', val: int(3) },
-        { key: 'weighted_tree_datum_type', val: int(0) },
-        { key: 'label_format', val: str('$(name)') },
-        { key: 'name', val: str('x') },
-      ),
-      node(
-        valueMap(
-          { key: 'self_magnitude', val: int(1) },
-          { key: 'weighted_tree_datum_type', val: int(0) },
-          { key: 'label_format', val: str('$(name)') },
-          { key: 'name', val: str('z') },
-        ),
+            {key: 'self_magnitude', val: int(1)},
+            {key: 'label_format', val: str('$(name)')},
+            {key: 'name', val: str('root 1')},
+            ),
         node(
-          valueMap(
-            { key: 'weighted_tree_datum_type', val: int(1) },
-            { key: 'weighted_tree_payload_type', val: str('stuffing') },
-            { key: 'count', val: int(3) },
-          ),
+            valueMap(
+                {key: 'self_magnitude', val: int(2)},
+                {key: 'label_format', val: str('$(name)')},
+                {key: 'name', val: str('a')},
+                ),
+            node(
+                valueMap(
+                    {key: 'self_magnitude', val: int(4)},
+                    {key: 'label_format', val: str('$(name)')},
+                    {key: 'name', val: str('c')},
+                    ),
+                ),
+            node(
+                valueMap(
+                    {key: 'self_magnitude', val: int(3)},
+                    {key: 'label_format', val: str('$(name)')},
+                    {key: 'name', val: str('b')},
+                    ),
+                ),
+            ),
         ),
-      ),
-    ),
     node(
-      valueMap(
-        { key: 'self_magnitude', val: int(2) },
-        { key: 'weighted_tree_datum_type', val: int(0) },
-        { key: 'label_format', val: str('$(name)') },
-        { key: 'name', val: str('y') },
-      ),
-    ),
-  ),
+        valueMap(
+            {key: 'self_magnitude', val: int(4)},
+            {key: 'label_format', val: str('$(name)')},
+            {key: 'name', val: str('root 2')},
+            ),
+        node(
+            valueMap(
+                {key: 'self_magnitude', val: int(3)},
+                {key: 'label_format', val: str('$(name)')},
+                {key: 'name', val: str('x')},
+                ),
+            node(
+                valueMap(
+                    {key: 'self_magnitude', val: int(1)},
+                    {key: 'label_format', val: str('$(name)')},
+                    {key: 'name', val: str('z')},
+                    ),
+                ),
+            ),
+        node(
+            valueMap(
+                {key: 'self_magnitude', val: int(2)},
+                {key: 'label_format', val: str('$(name)')},
+                {key: 'name', val: str('y')},
+                ),
+            ),
+        ),
 );

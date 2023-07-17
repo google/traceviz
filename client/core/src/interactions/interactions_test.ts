@@ -20,7 +20,7 @@ import { IntegerValue } from '../value/value.js';
 import { ValueMap } from '../value/value_map.js';
 import { ValueRef } from '../value/value_reference.js';
 import { LocalValue, FixedValue } from '../value/value_reference.js';
-import { ReplaySubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 describe('interactions test', () => {
   it('clears fixed values', () => {
@@ -32,7 +32,7 @@ describe('interactions test', () => {
 
   it('clears local values', () => {
     const ids = strs('a', 'b');
-    const vm = valueMap({ key: 'ids', val: ids });
+    const vm = valueMap({key: 'ids', val: ids});
     const clear = new Clear([new LocalValue('ids')]);
     clear.update(vm);
     expect(ids.val).toEqual([]);
@@ -49,8 +49,8 @@ describe('interactions test', () => {
   it('sets local values', () => {
     const ids = strs('a', 'b');
     const vm = valueMap(
-      { key: 'ids', val: ids },
-      { key: 'other_ids', val: strs('c', 'd') },
+        {key: 'ids', val: ids},
+        {key: 'other_ids', val: strs('c', 'd')},
     );
     const set = new SetP(new LocalValue('ids'), new LocalValue('other_ids'));
     set.update(vm);
@@ -68,8 +68,8 @@ describe('interactions test', () => {
   it('toggles local values', () => {
     const ids = strSet('a', 'b');
     const vm = valueMap(
-      { key: 'ids', val: ids },
-      { key: 'other_ids', val: strSet('b', 'c') },
+        {key: 'ids', val: ids},
+        {key: 'other_ids', val: strSet('b', 'c')},
     );
     const tog = new Toggle(new LocalValue('ids'), new LocalValue('other_ids'));
     tog.update(vm);
@@ -89,8 +89,8 @@ describe('interactions test', () => {
   it('toggles-or-sets local values', () => {
     const id = int(3);
     const vm = valueMap(
-      { key: 'id', val: id },
-      { key: 'other_id', val: int(3) },
+        {key: 'id', val: id},
+        {key: 'other_id', val: int(3)},
     );
     const tog = new Toggle(new LocalValue('id'), new LocalValue('other_id'));
     tog.update(vm);
@@ -110,8 +110,8 @@ describe('interactions test', () => {
   it('extends local values', () => {
     const ids = strs('a', 'b');
     const vm = valueMap(
-      { key: 'ids', val: ids },
-      { key: 'other_ids', val: strs('c', 'd') },
+        {key: 'ids', val: ids},
+        {key: 'other_ids', val: strs('c', 'd')},
     );
     const ext = new Extend(new LocalValue('ids'), new LocalValue('other_ids'));
     ext.update(vm);
@@ -122,10 +122,12 @@ describe('interactions test', () => {
     const labels = strs();
     const otherLabels = strs('a', 'b');
     const moreLabels = strs('c', 'd');
-    const sie = new SetIfEmpty(new FixedValue(labels), new FixedValue(otherLabels));
+    const sie =
+        new SetIfEmpty(new FixedValue(labels), new FixedValue(otherLabels));
     sie.update();
     expect(labels.val).toEqual(['a', 'b']);
-    const sie2 = new SetIfEmpty(new FixedValue(labels), new FixedValue(moreLabels));
+    const sie2 =
+        new SetIfEmpty(new FixedValue(labels), new FixedValue(moreLabels));
     sie2.update();
     expect(labels.val).toEqual(['a', 'b']);
   });
@@ -133,14 +135,16 @@ describe('interactions test', () => {
   it('sets-if-empty local values', () => {
     const ids = strs();
     const vm = valueMap(
-      { key: 'ids', val: ids },
-      { key: 'other_ids', val: strs('a', 'b') },
-      { key: 'more_ids', val: strs('c', 'd') },
+        {key: 'ids', val: ids},
+        {key: 'other_ids', val: strs('a', 'b')},
+        {key: 'more_ids', val: strs('c', 'd')},
     );
-    const sie = new SetIfEmpty(new LocalValue('ids'), new LocalValue('other_ids'));
+    const sie =
+        new SetIfEmpty(new LocalValue('ids'), new LocalValue('other_ids'));
     sie.update(vm);
     expect(ids.val).toEqual(['a', 'b']);
-    const sie2 = new SetIfEmpty(new LocalValue('ids'), new LocalValue('more_ids'));
+    const sie2 =
+        new SetIfEmpty(new LocalValue('ids'), new LocalValue('more_ids'));
     sie2.update(vm);
     expect(ids.val).toEqual(['a', 'b']);
   });
@@ -164,7 +168,7 @@ describe('interactions test', () => {
     ]);
     const weight = int(0);
     const vm = valueMap(
-      { key: 'weight', val: weight },
+        {key: 'weight', val: weight},
     );
 
     const tickerTape: string[] = [];
@@ -175,8 +179,12 @@ describe('interactions test', () => {
       weight.val = val;
     }
     expect(tickerTape).toEqual([
-      '0: false', '6: true', '7: false',
-      '8: true', '10: false', '12: true',
+      '0: false',
+      '6: true',
+      '7: false',
+      '8: true',
+      '10: false',
+      '12: true',
     ]);
   });
 
@@ -184,7 +192,9 @@ describe('interactions test', () => {
     const ref = str('a');
     const changed = new Changed(new FixedValue(ref), 0);
     const out: boolean[] = [];
-    changed.match()().subscribe((v) => out.push(v));
+    changed.match()().subscribe((v) => {
+      out.push(v);
+    });
     expect(out).toEqual([true, false]);
     ref.val = 'b';
     expect(out).toEqual([true, false, true, false]);
@@ -194,16 +204,15 @@ describe('interactions test', () => {
     const highlightedStartOffset = int(100);
     const highlightedEndOffset = int(200);
     const vm = valueMap(
-      { key: 'highlightedStartOffset', val: highlightedStartOffset },
-      { key: 'highlightedEndOffset', val: highlightedEndOffset },
+        {key: 'highlightedStartOffset', val: highlightedStartOffset},
+        {key: 'highlightedEndOffset', val: highlightedEndOffset},
     );
     const w = new Watch('highlight range', vm);
     const tickerTape: string[][] = [];
     const unsub = new Subject<void>();
-    const sub = w.watch((vm: ValueMap) => {
-      tickerTape.push(
-        Array.from(vm.keys()).map((key) =>
-          `${key}: ${vm.get(key).toString()}`));
+    w.watch((vm: ValueMap) => {
+      tickerTape.push(Array.from(vm.keys()).map(
+          (key) => `${key}: ${vm.get(key).toString()}`));
     }, unsub);
     highlightedStartOffset.val = 50;
     expect(tickerTape).toEqual([
@@ -226,12 +235,6 @@ describe('interactions test', () => {
     const labels = strs('a', 'b');
     const labelsRef = new FixedValue(labels, 'labels');
     const labelRef = new LocalValue('label');
-    const highlightedStartOffset = int(100);
-    const highlightedEndOffset = int(200);
-    const timerangeVM = valueMap(
-      { key: 'highlightedStartOffset', val: highlightedStartOffset },
-      { key: 'highlightedEndOffset', val: highlightedEndOffset },
-    );
     const lowerBound = new FixedValue(int(5), 'lower bound');
     const upperBound = new FixedValue(int(10), 'upper bound');
     const forbidden = new FixedValue(int(7), 'forbidden');
@@ -252,7 +255,7 @@ describe('interactions test', () => {
         super();
       }
 
-      override update(localState?: ValueMap | undefined) {
+      override update(localState?: ValueMap|undefined) {
         const val = this.vr.get(localState) as IntegerValue;
         val.val = val.val + 1;
       }
@@ -263,35 +266,50 @@ describe('interactions test', () => {
     }
 
     // Provide an action with a
-    const bumpWeightOnClick = new Action('weight', 'click', [new Bump(weightRef)]).withHelpText("Upon 'click' on a 'weight', bumps that 'weight'.", /* documentChildren= */ false);
+    const bumpWeightOnClick =
+        new Action('weight', 'click', [new Bump(weightRef)])
+            .withHelpText(
+                'Upon \'click\' on a \'weight\', bumps that \'weight\'.',
+                /* documentChildren= */ false);
 
     const start = int(3);
     const end = int(10);
-    const interactions = new Interactions()
-      .withAction(new Action('series', 'clear', [new Clear([labelRef])]))
-      .withAction(bumpWeightOnClick)
-      .withReaction(new Reaction('series', 'highlight', new Includes(labelsRef, labelRef)))
-      .withReaction(new Reaction('graph', 'show info', boundsChecker))
-      .withWatch(new Watch('highlight range', valueMap(
-        { key: 'start', val: start },
-        { key: 'end', val: end },
-      )));
+    const interactions =
+        new Interactions()
+            .withAction(new Action('series', 'clear', [new Clear([labelRef])]))
+            .withAction(bumpWeightOnClick)
+            .withReaction(new Reaction(
+                'series', 'highlight', new Includes(labelsRef, labelRef)))
+            .withReaction(new Reaction('graph', 'show info', boundsChecker))
+            .withWatch(new Watch(
+                'highlight range',
+                valueMap(
+                    {key: 'start', val: start},
+                    {key: 'end', val: end},
+                    )));
 
     // Confirm watchAll invokes callbacks and relays thrown errors.
     {
       let errCount = 0;
       let invocationCount = 0;
       const unsub = new Subject<void>();
-      interactions.watchAll(new Map([
-        ['highlight range', (vm) => {
-          invocationCount++;
-          if (vm.expectNumber('start') > vm.expectNumber('end')) {
-            throw new Error('oops');
-          }
-        }],
-      ]), unsub).subscribe((err) => {
-        errCount++;
-      });
+      interactions
+          .watchAll(
+              new Map([
+                [
+                  'highlight range',
+                  (vm) => {
+                    invocationCount++;
+                    if (vm.expectNumber('start') > vm.expectNumber('end')) {
+                      throw new Error('oops');
+                    }
+                  }
+                ],
+              ]),
+              unsub)
+          .subscribe((err) => {
+            errCount++;
+          });
       expect(errCount).toBe(0);
       expect(invocationCount).toBe(2);
       start.val = 5;
@@ -307,7 +325,8 @@ describe('interactions test', () => {
     }
 
     // Confirm self-documentation
-    expect(prettyPrintDocumenter(interactions).join('\n')).toEqual(`Interactions (Interactions)
+    expect(prettyPrintDocumenter(interactions).join('\n'))
+        .toEqual(`Interactions (Interactions)
   Upon 'clear' on 'series' (Action)
     clears [local value 'label'] (Update)
   Upon 'click' on a 'weight', bumps that 'weight'. (Action)
@@ -327,8 +346,8 @@ describe('interactions test', () => {
     const label = str('thing');
     const weight = int(0);
     const vm = valueMap(
-      { key: 'label', val: label },
-      { key: 'weight', val: weight },
+        {key: 'label', val: label},
+        {key: 'weight', val: weight},
     );
 
     const tickerTape: string[] = [];
@@ -339,8 +358,12 @@ describe('interactions test', () => {
       interactions.update('weight', 'click', vm);
     }
     expect(tickerTape).toEqual([
-      '0: false', '6: true', '7: false',
-      '8: true', '10: false', '12: true',
+      '0: false',
+      '6: true',
+      '7: false',
+      '8: true',
+      '10: false',
+      '12: true',
     ]);
   });
 });

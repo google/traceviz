@@ -25,6 +25,9 @@ export interface ExportedKeyValueMap {
   [key: string]: ExportedValue;
 }
 
+/**
+ * A serializable type representing an entry in a value map.
+ */
 export type KV = [number | string, V];
 
 /**
@@ -35,8 +38,8 @@ export class ValueMap {
   private readonly map: ReadonlyMap<string, Value>;
 
   constructor(
-    props: KV[] | Map<string, Value> = new Map<string, Value>([]),
-    stringTable: string[] = []) {
+      props: KV[]|Map<string, Value> = new Map<string, Value>([]),
+      stringTable: string[] = []) {
     let map = new Map<string, Value>();
     if (props instanceof Map) {
       map = props;
@@ -46,9 +49,9 @@ export class ValueMap {
         const value = fromV(kv[1], stringTable);
         if (value === undefined) {
           throw new ConfigurationError(
-            `value with key '${key}' can't be parsed`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+              `value with key '${key}' can't be parsed`)
+              .from(SOURCE)
+              .at(Severity.ERROR);
         }
         map.set(key, value);
       }
@@ -58,13 +61,7 @@ export class ValueMap {
     this.map = map;
   }
 
-  // toJSON is used by JSON.stringify. Without it, ValueMap.map is not
-  // stringified (maps are not "enumberable" properties).
-  toJSON(): ExportedKeyValueMap {
-    return this.exportKeyValueMap();
-  }
-
-  toVMap(stringTableBuilder?: StringTableBuilder): object {
+  toVMap(stringTableBuilder?: StringTableBuilder): {[k: string]: V} {
     if (stringTableBuilder === undefined) {
       const ret = new Map<string, V>([]);
       for (const [k, v] of this.map) {
@@ -97,15 +94,15 @@ export class ValueMap {
     for (const [key, exportedValue] of Object.entries(update)) {
       if (!this.has(key)) {
         throw new ConfigurationError(
-          `can't update ValueMap from JSON: missing key ${key}`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+            `can't update ValueMap from JSON: missing key ${key}`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
       }
       const val = this.get(key);
       if (!val.importFrom(exportedValue)) {
         throw new ConfigurationError(`can't update value ${key} from JSON`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+            .from(SOURCE)
+            .at(Severity.ERROR);
       }
     }
   }
@@ -134,8 +131,8 @@ export class ValueMap {
     const ret = this.map.get(key);
     if (ret === undefined) {
       throw new ConfigurationError(`no value with key '${key}'`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
     }
     return ret;
   }
@@ -146,8 +143,8 @@ export class ValueMap {
       return val.val;
     }
     throw new ConfigurationError(`no string-type value with key '${key}'`)
-      .from(SOURCE)
-      .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
   }
 
   expectStringList(key: string): string[] {
@@ -156,8 +153,8 @@ export class ValueMap {
       return val.val;
     }
     throw new ConfigurationError(`no string list-type value with key '${key}'`)
-      .from(SOURCE)
-      .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
   }
 
   expectNumber(key: string): number {
@@ -166,8 +163,8 @@ export class ValueMap {
       return val.val;
     }
     throw new ConfigurationError(`no number-type value with key '${key}'`)
-      .from(SOURCE)
-      .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
   }
 
   expectIntegerList(key: string): number[] {
@@ -176,8 +173,8 @@ export class ValueMap {
       return val.val;
     }
     throw new ConfigurationError(`no integer list-type value with key '${key}'`)
-      .from(SOURCE)
-      .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
   }
 
   expectTimestamp(key: string): Timestamp {
@@ -186,8 +183,8 @@ export class ValueMap {
       return val.val;
     }
     throw new ConfigurationError(`no timestamp-type value with key '${key}'`)
-      .from(SOURCE)
-      .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
   }
 
   expectDuration(key: string): Duration {
@@ -196,8 +193,8 @@ export class ValueMap {
       return val.val;
     }
     throw new ConfigurationError(`no duration-type value with key '${key}'`)
-      .from(SOURCE)
-      .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
   }
 
   /**
@@ -239,9 +236,9 @@ export class ValueMap {
       // format is ill-formed.
       if (!matches[1] && !matches[2]) {
         throw new ConfigurationError(
-          `format string '${fmtString}' is ill-formed`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+            `format string '${fmtString}' is ill-formed`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
       }
       // Append everything before a $ unmodified.
       ret = ret + matches[1];
@@ -254,9 +251,9 @@ export class ValueMap {
         const val = this.map.get(propName);
         if (val === undefined) {
           throw new ConfigurationError(
-            `required property '${propName}' is not present in Datum`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+              `required property '${propName}' is not present in Datum`)
+              .from(SOURCE)
+              .at(Severity.ERROR);
         } else {
           ret = ret + val.toString();
         }
@@ -297,8 +294,7 @@ export class ValueMap {
    * member of the receiving map.
    */
   watch(): Observable<ValueMap> {
-    return merge(...this.values())
-      .pipe(map(() => this));
+    return merge(...this.values()).pipe(map(() => this));
   }
 
   /**
@@ -319,9 +315,10 @@ export class ValueMap {
         const existingVal = newMap.get(key);
         if (existingVal !== undefined && existingVal.compare(value) !== 0) {
           throw new ConfigurationError(
-            `can't union ValueMaps: key ${key} maps to different values ${value} and ${existingVal}`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+              `can't union ValueMaps: key ${key} maps to different values ${
+                  value} and ${existingVal}`)
+              .from(SOURCE)
+              .at(Severity.ERROR);
         }
         if (existingVal === undefined) {
           newMap.set(key, value);

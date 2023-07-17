@@ -13,8 +13,7 @@
 */
 
 /**
- *  @fileoverview Tools for working with styling payloads.  See
- *  ../../../../server/go/style/style.go for more detail.
+ * @fileoverview Utilities for extracting styles defined within ValueMaps.
  */
 
 import { ValueMap } from '../value/value_map.js';

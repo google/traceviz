@@ -48,6 +48,6 @@ export function toObject(req: Request): DataRequest {
   return {
     GlobalFilters: req.filters.toVMap(),
     SeriesRequests:
-      req.seriesRequests.map((seriesReq) => fromSeriesRequest(seriesReq)),
+        req.seriesRequests.map((seriesReq) => fromSeriesRequest(seriesReq)),
   };
 }

@@ -21,17 +21,31 @@ import { Duration } from '../duration/duration.js';
 import { Timestamp } from '../timestamp/timestamp.js';
 import { ReplaySubject } from 'rxjs';
 
+/**
+ * The different types a backend Value may hold.
+ *
+ * Note that while all frontend Value types can convert to a corresponding
+ * backend Value type, and vice-versa, the set of distinct Value types supported
+ * in the backend and frontend are different.  Specifically:
+ *   * the frontend has 'set' variants of repeated Value types (string and
+ *     integer) for which order is unimportant and repeated values are dropped.
+ *     These are sent to the backend as regular repeated Value types.
+ *   * the backend has 'string index' variants of string Value types (string and
+ *     strings) which are encoded as indexes into the full response's string
+ *     table.  These are converted to the corresponding native String type upon
+ *     decoding in the frontend.
+ */
 export enum ValueType {
-  Unset = 0,
-  String = 1,
-  StringIndex = 2,
-  Strings = 3,
-  StringIndices = 4,
-  Integer = 5,
-  Integers = 6,
-  Double = 7,
-  Duration = 8,
-  Timestamp = 9
+  UNSET = 0,
+  STRING = 1,
+  STRING_INDEX = 2,
+  STRINGS = 3,
+  STRING_INDICES = 4,
+  INTEGER = 5,
+  INTEGERS = 6,
+  DOUBLE = 7,
+  DURATION = 8,
+  TIMESTAMP = 9
 }
 
 /**
@@ -54,25 +68,26 @@ export interface StringTableBuilder {
  * string-type values provided as string table indices; this stringTable should
  * generally come from the backend Data response.
  */
-export function fromV(v: V, stringTable: string[]): Value | undefined {
+export function fromV(v: V, stringTable: string[]): Value|undefined {
   switch (v[0]) {
-    case ValueType.String:
+    case ValueType.STRING:
       return new StringValue(v[1] as string);
-    case ValueType.StringIndex:
+    case ValueType.STRING_INDEX:
       return new StringValue(stringTable[v[1] as number]);
-    case ValueType.Strings:
+    case ValueType.STRINGS:
       return new StringListValue(v[1] as string[]);
-    case ValueType.StringIndices:
-      return new StringListValue((v[1] as number[]).map((idx) => stringTable[idx]));
-    case ValueType.Integer:
+    case ValueType.STRING_INDICES:
+      return new StringListValue(
+          (v[1] as number[]).map((idx) => stringTable[idx]));
+    case ValueType.INTEGER:
       return new IntegerValue(v[1] as number);
-    case ValueType.Integers:
+    case ValueType.INTEGERS:
       return new IntegerListValue(v[1] as number[]);
-    case ValueType.Double:
+    case ValueType.DOUBLE:
       return new DoubleValue(v[1] as number);
-    case ValueType.Duration:
+    case ValueType.DURATION:
       return new DurationValue(new Duration(v[1] as number));
-    case ValueType.Timestamp:
+    case ValueType.TIMESTAMP:
       const parts = v[1] as number[];
       return new TimestampValue(new Timestamp(parts[0], parts[1]));
     default:
@@ -85,7 +100,7 @@ export function fromV(v: V, stringTable: string[]): Value | undefined {
  * information about fold, see the Value interface.
  */
 function foldList<V>(
-  thisVal: V[], otherVal: V[], replace: boolean, toggle: boolean): V[] {
+    thisVal: V[], otherVal: V[], replace: boolean, toggle: boolean): V[] {
   if (toggle) {
     if (thisVal.length === otherVal.length) {
       let equal = true;
@@ -111,8 +126,8 @@ function foldList<V>(
  * information about fold, see the Value interface.
  */
 function foldSet<V>(
-  thisVal: Set<V>, otherVal: Set<V>, replace: boolean,
-  toggle: boolean): Set<V> {
+    thisVal: Set<V>, otherVal: Set<V>, replace: boolean,
+    toggle: boolean): Set<V> {
   if (replace) {
     // Replace replaces thisVal with other.val, unless thisVal == otherVal
     // and toggle is true, in which case it clears thisVal.
@@ -155,7 +170,8 @@ export interface ExportedTimestamp {
 }
 
 /** The union of all Value export types. */
-export type ExportedValue = {} | number | string | number[] | string[] | ExportedTimestamp;
+export type ExportedValue = {}|number|string|number[]|string[]|
+    ExportedTimestamp;
 
 /**
  * Extended by types containing a subscribable and updatable datum.  This file
@@ -168,7 +184,7 @@ export interface Value extends ReplaySubject<Value> {
   importFrom(exportedValue: ExportedValue): boolean;
   exportTo(): ExportedValue;
   toString(): string;
-  toV(stringTableBuilder?: StringTableBuilder): V | undefined;
+  toV(stringTableBuilder?: StringTableBuilder): V|undefined;
   // fold folds `other`'s Value into the receiver's, returning false if this
   // cannot be done due to incompatible types.
   //
@@ -226,7 +242,7 @@ export class EmptyValue extends ReplaySubject<Value> implements Value {
 
   val: null = null;
 
-  toV(): V | undefined {
+  toV(): V|undefined {
     return undefined;
   }
 
@@ -255,7 +271,7 @@ export class StringValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (typeof sv === "string") {
+    if (typeof sv === 'string') {
       this.val = sv;
       return true;
     }
@@ -281,15 +297,15 @@ export class StringValue extends ReplaySubject<Value> implements Value {
     return this.wrappedVal;
   }
 
-  toV(stringTableBuilder?: StringTableBuilder): V | undefined {
+  toV(stringTableBuilder?: StringTableBuilder): V|undefined {
     if (stringTableBuilder === undefined) {
       return [
-        ValueType.String,
+        ValueType.STRING,
         this.val,
       ];
     }
     return [
-      ValueType.StringIndex,
+      ValueType.STRING_INDEX,
       stringTableBuilder.index(this.val),
     ];
   }
@@ -335,7 +351,7 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
     if (Array.isArray(sv)) {
       const v: string[] = [];
       for (const n of sv) {
-        if (typeof n !== "string") {
+        if (typeof n !== 'string') {
           return false;
         }
         v.push(n);
@@ -376,20 +392,20 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
     return `[${this.wrappedStrings.join(', ')}]`;
   }
 
-  toV(stringTableBuilder?: StringTableBuilder): V | undefined {
+  toV(stringTableBuilder?: StringTableBuilder): V|undefined {
     if (stringTableBuilder === undefined) {
       return [
-        ValueType.Strings,
+        ValueType.STRINGS,
         Array.from(this.val),
       ];
     }
     return [
-      ValueType.StringIndices,
+      ValueType.STRING_INDICES,
       Array.from(this.val.map((str) => stringTableBuilder.index(str))),
     ];
   }
 
-  fold(other: Value, toggle: boolean, replace: boolean = true): boolean {
+  fold(other: Value, toggle: boolean, replace = true): boolean {
     let otherVal: string[];
     if (other instanceof EmptyValue) {
       this.val = [];
@@ -469,7 +485,7 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
     if (Array.isArray(sv)) {
       const v = new Set<string>();
       for (const n of sv) {
-        if (typeof n !== "string") {
+        if (typeof n !== 'string') {
           return false;
         }
         v.add(n);
@@ -510,20 +526,20 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
     return `{${Array.from(this.wrappedStrings).sort().join(', ')}}`;
   }
 
-  toV(stringTableBuilder?: StringTableBuilder): V | undefined {
+  toV(stringTableBuilder?: StringTableBuilder): V|undefined {
     if (stringTableBuilder === undefined) {
       return [
-        ValueType.Strings,
+        ValueType.STRINGS,
         Array.from(this.val).sort(),
       ];
     }
     return [
-      ValueType.StringIndices,
+      ValueType.STRING_INDICES,
       Array.from(this.val).map((str) => stringTableBuilder.index(str)),
     ];
   }
 
-  fold(other: Value, toggle: boolean, replace: boolean = true): boolean {
+  fold(other: Value, toggle: boolean, replace = true): boolean {
     let otherVal: Set<string>;
     if (other instanceof EmptyValue) {
       this.val = new Set<string>([]);
@@ -608,7 +624,7 @@ export class IntegerValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (typeof sv === "number") {
+    if (typeof sv === 'number') {
       this.val = sv;
       return true;
     }
@@ -635,9 +651,9 @@ export class IntegerValue extends ReplaySubject<Value> implements Value {
     return this.wrappedInt.toString();
   }
 
-  toV(): V | undefined {
+  toV(): V|undefined {
     return [
-      ValueType.Integer,
+      ValueType.INTEGER,
       this.val,
     ];
   }
@@ -677,7 +693,7 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
   constructor(private wrappedInts: number[]) {
     super(1);
     this.wrappedInts =
-      this.wrappedInts.map(wrappedInt => Math.floor(wrappedInt));
+        this.wrappedInts.map(wrappedInt => Math.floor(wrappedInt));
     this.next(this);
   }
 
@@ -685,7 +701,7 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
     if (Array.isArray(sv)) {
       const v: number[] = [];
       for (const n of sv) {
-        if (typeof n !== "number") {
+        if (typeof n !== 'number') {
           return false;
         }
         v.push(n);
@@ -724,17 +740,18 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
   }
 
   override toString(): string {
-    return `[${this.wrappedInts.map(wrappedInt => wrappedInt.toString()).join(', ')}]`;
+    return `[${
+        this.wrappedInts.map(wrappedInt => wrappedInt.toString()).join(', ')}]`;
   }
 
-  toV(): V | undefined {
+  toV(): V|undefined {
     return [
-      ValueType.Integers,
+      ValueType.INTEGERS,
       Array.from(this.val),
     ];
   }
 
-  fold(other: Value, toggle: boolean, replace: boolean = true): boolean {
+  fold(other: Value, toggle: boolean, replace = true): boolean {
     let otherVal: number[];
     if (other instanceof EmptyValue) {
       this.val = [];
@@ -818,7 +835,7 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
     if (Array.isArray(sv)) {
       const v = new Set<number>();
       for (const n of sv) {
-        if (typeof n !== "number") {
+        if (typeof n !== 'number') {
           return false;
         }
         v.add(n);
@@ -859,19 +876,20 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
   }
 
   override toString(): string {
-    return `{${Array.from(this.wrappedInts)
-      .map(wrappedInt => wrappedInt.toString())
-      .join(', ')}}`;
+    return `{${
+        Array.from(this.wrappedInts)
+            .map(wrappedInt => wrappedInt.toString())
+            .join(', ')}}`;
   }
 
-  toV(): V | undefined {
+  toV(): V|undefined {
     return [
-      ValueType.Integers,
+      ValueType.INTEGERS,
       Array.from(this.val).sort(),
     ];
   }
 
-  fold(other: Value, toggle: boolean, replace: boolean = true): boolean {
+  fold(other: Value, toggle: boolean, replace = true): boolean {
     let otherVal: Set<number>;
     if (other instanceof EmptyValue) {
       this.val = new Set<number>([]);
@@ -951,7 +969,7 @@ export class DoubleValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (typeof sv === "number") {
+    if (typeof sv === 'number') {
       this.val = sv;
       return true;
     }
@@ -977,9 +995,9 @@ export class DoubleValue extends ReplaySubject<Value> implements Value {
     return this.wrappedDbl.toString();
   }
 
-  toV(): V | undefined {
+  toV(): V|undefined {
     return [
-      ValueType.Double,
+      ValueType.DOUBLE,
       this.val,
     ];
   }
@@ -1022,7 +1040,7 @@ export class DurationValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (typeof sv === "number") {
+    if (typeof sv === 'number') {
       this.val = new Duration(sv);
       return true;
     }
@@ -1048,9 +1066,9 @@ export class DurationValue extends ReplaySubject<Value> implements Value {
     return this.wrappedDur.toString();
   }
 
-  toV(): V | undefined {
+  toV(): V|undefined {
     return [
-      ValueType.Duration,
+      ValueType.DURATION,
       this.val.nanos,
     ];
   }
@@ -1060,7 +1078,7 @@ export class DurationValue extends ReplaySubject<Value> implements Value {
       this.val = new Duration(0);
     } else if (other instanceof DurationValue) {
       this.val = ((this.val.cmp(other.val) === 0) && toggle) ? new Duration(0) :
-        other.val;
+                                                               other.val;
     } else {
       return false;
     }
@@ -1093,7 +1111,8 @@ export class TimestampValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (sv != null && typeof sv === 'object' && 'seconds' in sv && 'nanos' in sv) {
+    if (sv != null && typeof sv === 'object' && 'seconds' in sv &&
+        'nanos' in sv) {
       this.val = new Timestamp(sv.seconds, sv.nanos);
       return true;
     }
@@ -1122,9 +1141,9 @@ export class TimestampValue extends ReplaySubject<Value> implements Value {
     return this.wrappedTs.toDate().toISOString();
   }
 
-  toV(): V | undefined {
+  toV(): V|undefined {
     return [
-      ValueType.Timestamp,
+      ValueType.TIMESTAMP,
       [this.val.seconds, this.val.nanos],
     ];
   }
@@ -1134,8 +1153,8 @@ export class TimestampValue extends ReplaySubject<Value> implements Value {
       this.val = new Timestamp(0, 0);
     } else if (other instanceof TimestampValue) {
       this.val = ((this.val.cmp(other.val) === 0) && toggle) ?
-        new Timestamp(0, 0) :
-        other.val;
+          new Timestamp(0, 0) :
+          other.val;
     } else {
       return false;
     }

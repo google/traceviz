@@ -20,7 +20,6 @@ function dur(nanos: number): Duration {
 }
 
 describe('duration test', () => {
-
   it('compares', () => {
     expect(dur(100).cmp(dur(200))).toBeLessThan(0);
     expect(dur(100).cmp(dur(100))).toEqual(0);

@@ -35,8 +35,8 @@ enum Keys {
 
 /** Table rendering properties. */
 export class TableRenderProperties {
-  rowHeightPx: number = 0;
-  fontSizePx: number = 0;
+  rowHeightPx = 0;
+  fontSizePx = 0;
 
   constructor(vm: ValueMap) {
     if (vm.has(Keys.ROW_HEIGHT_PX)) {
@@ -48,6 +48,7 @@ export class TableRenderProperties {
   }
 }
 
+/** A highlightable table item. */
 export interface Highlightable {
   properties: ValueMap;
   highlighted: boolean;
@@ -61,13 +62,15 @@ export class Cell implements Highlightable {
 
   highlighted = false;
 
-  constructor(node: ResponseNode, readonly column: Header, matchFn: MatchFn | undefined, onChange: () => void) {
+  constructor(
+      node: ResponseNode, readonly column: Header, matchFn: MatchFn|undefined,
+      onChange: () => void) {
     this.properties = node.properties;
     const c = children(node);
     if (c.structural.length > 0) {
-      throw new ConfigurationError(`cell node chidlren may only be payloads`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+      throw new ConfigurationError(`cell node children may only be payloads`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
     }
     this.payloadsByType = c.payload;
   }
@@ -75,7 +78,7 @@ export class Cell implements Highlightable {
   get value(): Value {
     if (this.properties.has(Keys.FORMATTED_CELL)) {
       return new StringValue(this.properties.format(
-        this.properties.expectString(Keys.FORMATTED_CELL)));
+          this.properties.expectString(Keys.FORMATTED_CELL)));
     }
     if (this.properties.has(Keys.CELL)) {
       return this.properties.get(Keys.CELL);
@@ -92,7 +95,9 @@ export class Cell implements Highlightable {
 /** An empty table cell. */
 export class EmptyCell extends Cell {
   constructor(column: Header) {
-    super({ properties: new ValueMap(), children: [] }, column, () => EMPTY, () => { });
+    super(
+        {properties: new ValueMap(), children: []}, column, () => EMPTY,
+        () => {});
   }
 
   override get value(): Value {
@@ -109,36 +114,37 @@ export class Row implements Highlightable {
 
   highlighted = false;
 
-  constructor(node: ResponseNode, columns: Header[], rowMatchFn: MatchFn | undefined, cellMatchFn: MatchFn | undefined, onChange: () => void) {
+  constructor(
+      node: ResponseNode, columns: Header[], rowMatchFn: MatchFn|undefined,
+      cellMatchFn: MatchFn|undefined, onChange: () => void) {
     this.properties = node.properties;
     const c = children(node);
     this.payloadsByType = c.payload;
     const cellsByColumnID = new Map<string, Cell>();
     c.structural.forEach((child: ResponseNode) => {
-      const categorySet =
-        new CategorySet(...columns.map(col => col.category));
+      const categorySet = new CategorySet(...columns.map(col => col.category));
       const cats = categorySet.getTaggedCategories(child.properties);
       if (cats.length === 0) {
         return;
       }
       if (cats.length > 1) {
         throw new ConfigurationError(`Cells may only belong to one column`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+            .from(SOURCE)
+            .at(Severity.ERROR);
       }
       const column = columns.find(col => col.category === cats[0])!;
       const cell = new Cell(child, column, cellMatchFn, onChange);
       cellsByColumnID.set(column.category.id, cell);
       return cell;
-    })
+    });
     this.cellsByColumnID = cellsByColumnID;
     if (rowMatchFn !== undefined) {
       rowMatchFn(this.properties)
-        .pipe(takeUntil(this.unsubscribe), distinctUntilChanged())
-        .subscribe((highlighted) => {
-          this.highlighted = highlighted;
-          onChange();
-        });
+          .pipe(takeUntil(this.unsubscribe), distinctUntilChanged())
+          .subscribe((highlighted) => {
+            this.highlighted = highlighted;
+            onChange();
+          });
     }
   }
 
@@ -164,7 +170,7 @@ export class Row implements Highlightable {
   }
 }
 
-/** A Table ColumnHeader */
+/** A Table Column Header */
 export class Header {
   readonly properties: ValueMap;
   readonly category: Category;
@@ -174,8 +180,8 @@ export class Header {
     const category = getDefinedCategory(this.properties);
     if (!category) {
       throw new ConfigurationError(`Expected a column definition but got none!`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
     }
     this.category = category;
   }
@@ -206,10 +212,10 @@ export class CanonicalTable {
   private readonly columnsList = new Array<Header>();
 
   constructor(
-    private readonly node: ResponseNode,
-    private readonly rowMatchFn: MatchFn | undefined,
-    private readonly cellMatchFn: MatchFn | undefined,
-    private readonly onChange: () => void) {
+      private readonly node: ResponseNode,
+      private readonly rowMatchFn: MatchFn|undefined,
+      private readonly cellMatchFn: MatchFn|undefined,
+      private readonly onChange: () => void) {
     this.renderProperties = new TableRenderProperties(node.properties);
     this.coloring = new Coloring(node.properties);
     const columnsByID = new Map<string, Header>();
@@ -243,8 +249,8 @@ export class CanonicalTable {
       const col = this.columnsByID.get(columnID);
       if (!col) {
         throw new ConfigurationError(`unknown column ID ${columnID}`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+            .from(SOURCE)
+            .at(Severity.ERROR);
       }
       ret.push(col);
     }
@@ -254,12 +260,14 @@ export class CanonicalTable {
   rowSlice(startIdx?: number, endIdx?: number): Row[] {
     if (!!endIdx && !!startIdx && endIdx < startIdx) {
       throw new ConfigurationError(
-        `slice range [${startIdx}, ${endIdx}] is invalid`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+          `slice range [${startIdx}, ${endIdx}] is invalid`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
     }
     return this.rowNodes.slice(startIdx, endIdx)
-      .map((row: ResponseNode) => new Row(
-        row, this.columnsList, this.rowMatchFn, this.cellMatchFn, this.onChange));
+        .map(
+            (row: ResponseNode) => new Row(
+                row, this.columnsList, this.rowMatchFn, this.cellMatchFn,
+                this.onChange));
   }
 }
