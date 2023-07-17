@@ -57,6 +57,13 @@ export class AppCore {
   private published = false;
   private readonly pendingCallbacks: Array<(appCore: AppCore) => void> = [];
 
+  /** Resets the receiver.  Only for use in tests. */
+  reset() {
+    this.published = false;
+    this.pendingCallbacks.splice(0, this.pendingCallbacks.length);
+    this.globalState.reset();
+  }
+  
   /** To be invoked once, when the AppCore is populated. */
   publish() {
     if (this.published) {
