@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-import { ValueMap } from "../value/value_map.js";
+import { ValueMap } from '../value/value_map.js';
 
 /**
  * @fileoverview Tools for working with labels included in ValueMaps.

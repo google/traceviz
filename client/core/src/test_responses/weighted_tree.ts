@@ -11,8 +11,8 @@
     limitations under the License.
 */
 
-import { int, str, valueMap } from "../value/test_value.js";
-import { node } from "../protocol/test_response.js";
+import { int, str, valueMap } from '../value/test_value.js';
+import { node } from '../protocol/test_response.js';
 
 /**
  * A response node containing a weighted tree, renderable as a flame chart.

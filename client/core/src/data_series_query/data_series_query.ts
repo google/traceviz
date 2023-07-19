@@ -16,12 +16,12 @@
  * request.
  */
 
-import { BehaviorSubject, distinctUntilChanged, Observable, Subject, takeUntil } from "rxjs";
-import { StringValue } from "../value/value.js";
-import { ResponseNode } from "../protocol/response_interface.js";
-import { DataSeriesFetcher } from "./data_series_fetcher.js";
-import { ValueMap } from "../value/value_map.js";
-import { SeriesRequest } from "../protocol/request_interface.js";
+import { BehaviorSubject, distinctUntilChanged, Observable, Subject, takeUntil } from 'rxjs';
+import { StringValue } from '../value/value.js';
+import { ResponseNode } from '../protocol/response_interface.js';
+import { DataSeriesFetcher } from './data_series_fetcher.js';
+import { ValueMap } from '../value/value_map.js';
+import { SeriesRequest } from '../protocol/request_interface.js';
 
 /**
  * Each data series request includes a string series_name which the backend

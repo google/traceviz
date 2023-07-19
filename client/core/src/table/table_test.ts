@@ -11,10 +11,10 @@
         limitations under the License.
 */
 
-import { int, str, strs, valueMap } from "../value/test_value.js";
-import { node } from "../protocol/test_response.js";
-import { CanonicalTable, Cell, Header, Row } from "./table.js";
-import { ResponseNode } from "../protocol/response_interface.js";
+import { int, str, strs, valueMap } from '../value/test_value.js';
+import { node } from '../protocol/test_response.js';
+import { CanonicalTable, Cell, Header, Row } from './table.js';
+import { ResponseNode } from '../protocol/response_interface.js';
 
 describe('columns test', () => {
   const nameColumn = node(valueMap(

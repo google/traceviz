@@ -11,10 +11,12 @@
         limitations under the License.
 */
 
-import { Request, SeriesRequest } from "../protocol/request_interface.js";
-import { Response, ResponseNode } from "../protocol/response_interface.js";
-import { node, response } from "../protocol/test_response.js";
-import { GLOBAL_TEST_DATA_FETCHER } from "./test_data_fetcher.js";
+import 'jasmine';
+
+import { Request, SeriesRequest } from '../protocol/request_interface.js';
+import { Response, ResponseNode } from '../protocol/response_interface.js';
+import { node, response } from '../protocol/test_response.js';
+import { GLOBAL_TEST_DATA_FETCHER } from './test_data_fetcher.js';
 import { int, str, valueMap } from '../value/test_value.js';
 import { DataQuery } from './data_query.js';
 

@@ -1,6 +1,6 @@
 /*
     Copyright 2023 Google Inc.
-    Licensed under the Apache License, Version 2.0 (the "License");
+    Licensed under the Apache License, Version 2.0 (the 'License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
         https://www.apache.org/licenses/LICENSE-2.0
@@ -11,8 +11,8 @@
     limitations under the License.
 */
 
-import { ts, dur, int, ints, str, strs, valueMap } from "../value/test_value.js";
-import { node } from "../protocol/test_response.js";
+import { ts, dur, int, ints, str, strs, valueMap } from '../value/test_value.js';
+import { node } from '../protocol/test_response.js';
 import { Timestamp } from '../timestamp/timestamp.js';
 import { Duration } from '../duration/duration.js';
 
