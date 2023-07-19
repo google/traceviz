@@ -129,16 +129,16 @@ describe('xy chart test', () => {
     ));
     expect(prettyPrint(chart))
       .toEqual(`X Domain: [${sec(0).toDate().toString()}, ${sec(100).toDate().toString()}] (time from start)
-Y Domain: [0, 3] (events per second)
-  Category things: 'Remembered Things' (Things we remembered, rgb(0, 0, 255))
-    (${sec(0).toDate().toString()}, 3)
-      -> "We started out so well..."
-    (${sec(10).toDate().toString()}, 2)
-    (${sec(20).toDate().toString()}, 1)
-  Category stuff: 'Forgotten Stuff' (Stuff we forgot, rgb(255, 0, 0))
-    (${sec(80).toDate().toString()}, 1)
-    (${sec(90).toDate().toString()}, 2)
-    (${sec(100).toDate().toString()}, 3)
-      -> "But it all ended so badly..."`);
+  Y Domain: [0, 3] (events per second)
+    Category things: 'Remembered Things' (Things we remembered, rgb(0, 0, 255))
+      (${sec(0).toDate().toString()}, 3)
+        -> "We started out so well..."
+      (${sec(10).toDate().toString()}, 2)
+      (${sec(20).toDate().toString()}, 1)
+    Category stuff: 'Forgotten Stuff' (Stuff we forgot, rgb(255, 0, 0))
+      (${sec(80).toDate().toString()}, 1)
+      (${sec(90).toDate().toString()}, 2)
+      (${sec(100).toDate().toString()}, 3)
+        -> "But it all ended so badly..."`);
   });
 });

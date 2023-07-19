@@ -27,8 +27,8 @@
  *   * `Update`, which TraceViz components can trigger to update values;
  *   * `Predicate`, which yields matches that TraceViz components can monitor to
  *      perform reactions;
- *   * `Watch`, which TraceViz components can use to invoke an arbitrary callback
- *      whenever any value in a map changes.
+ *   * `Watch`, which TraceViz components can use to invoke an arbitrary
+ *      callback whenever any value in a map changes.
  *
  * The `Interactions` type groups zero or more Updates, Predicates, and Watches,
  * keying Updates and Predicates by target (e.g., 'row', 'node') and type (e.g.,
@@ -37,32 +37,32 @@
  * describe how the component should interact.
  */
 
-import { Documenter, DocumenterType } from '../documentation/documentation.js';
-import { ConfigurationError, Severity } from '../errors/errors.js';
-import { EmptyValue, Value } from '../value/value.js';
-import { ValueMap } from '../value/value_map.js';
-import { ValueRef } from '../value/value_reference.js';
-import { combineLatest, distinctUntilChanged, EMPTY, merge, Observable, ReplaySubject, Subject } from 'rxjs';
-import { delay, map, mergeMap, takeUntil } from 'rxjs/operators';
+import {Documenter, DocumenterType} from '../documentation/documentation.js';
+import {ConfigurationError, Severity} from '../errors/errors.js';
+import {EmptyValue, Value} from '../value/value.js';
+import {ValueMap} from '../value/value_map.js';
+import {ValueRef} from '../value/value_reference.js';
+import {combineLatest, distinctUntilChanged, EMPTY, merge, Observable, ReplaySubject, Subject} from 'rxjs';
+import {delay, map, mergeMap, takeUntil} from 'rxjs/operators';
 
-const SOURCE = 'interactions';
+const SOURCE='interactions';
 
 /**
  * A base class for directives serving as action updates.  Invoking the
  * 'update' method immediately performs the associated action(s).
  */
 export abstract class Update implements Documenter {
-  overrideDocument = '';
-  documentChildren = true;
-  constructor(readonly documenterType = DocumenterType.UPDATE) {}
+  overrideDocument='';
+  documentChildren=true;
+  constructor(readonly documenterType=DocumenterType.UPDATE) { }
   abstract update(localState?: ValueMap|undefined): void;
   abstract get autoDocument(): string;
   get children(): Documenter[] {
     return [];
   }
   withHelpText(helpText: string, documentChildren: boolean): Update {
-    this.overrideDocument = helpText;
-    this.documentChildren = documentChildren;
+    this.overrideDocument=helpText;
+    this.documentChildren=documentChildren;
     return this;
   }
 }
@@ -75,15 +75,15 @@ export class Clear extends Update {
 
   override update(localState?: ValueMap|undefined) {
     for (const vr of this.valueRefs) {
-      const val = vr.get(localState);
-      if (val === undefined) {
+      const val=vr.get(localState);
+      if (val===undefined) {
         return;
       }
       if (!val.fold(
-              new EmptyValue(), /* toggle= */ false, /* replace = */ true)) {
+        new EmptyValue(), /* toggle= */ false, /* replace = */ true)) {
         throw new ConfigurationError(`Can't clear ${vr.label()}.`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
       }
     }
   }
@@ -96,24 +96,23 @@ export class Clear extends Update {
 /** On update, sets its destination child from its source child. */
 export class Set extends Update {
   constructor(
-      private readonly destinationVR: ValueRef,
-      private readonly sourceVR: ValueRef) {
+    private readonly destinationVR: ValueRef,
+    private readonly sourceVR: ValueRef) {
     super();
   }
 
   override update(localState?: ValueMap|undefined) {
-    const destinationValue = this.destinationVR.get(localState);
-    const sourceValue = this.sourceVR.get(localState);
-    if (destinationValue === undefined || sourceValue === undefined) {
+    const destinationValue=this.destinationVR.get(localState);
+    const sourceValue=this.sourceVR.get(localState);
+    if (destinationValue===undefined||sourceValue===undefined) {
       return;
     }
     if (!destinationValue.fold(
-            sourceValue, /* toggle= */ false, /* replace= */ true)) {
+      sourceValue, /* toggle= */ false, /* replace= */ true)) {
       throw new ConfigurationError(
-          `Can't set ${this.destinationVR.label()} from ${
-              this.sourceVR.label()}.`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+        `Can't set ${this.destinationVR.label()} from ${this.sourceVR.label()}.`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
   }
 
@@ -125,30 +124,28 @@ export class Set extends Update {
 /** On update, toggles its destination child from its source child. */
 export class Toggle extends Update {
   constructor(
-      private readonly destinationVR: ValueRef,
-      private readonly sourceVR: ValueRef) {
+    private readonly destinationVR: ValueRef,
+    private readonly sourceVR: ValueRef) {
     super();
   }
 
   override update(localState?: ValueMap|undefined) {
-    const destinationValue = this.destinationVR.get(localState);
-    const sourceValue = this.sourceVR.get(localState);
-    if (destinationValue === undefined || sourceValue === undefined) {
+    const destinationValue=this.destinationVR.get(localState);
+    const sourceValue=this.sourceVR.get(localState);
+    if (destinationValue===undefined||sourceValue===undefined) {
       return;
     }
     if (!destinationValue.fold(
-            sourceValue, /* toggle= */ true, /* replace= */ false)) {
+      sourceValue, /* toggle= */ true, /* replace= */ false)) {
       throw new ConfigurationError(
-          `Can't toggle ${this.destinationVR.label()} from ${
-              this.sourceVR.label()}.`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+        `Can't toggle ${this.destinationVR.label()} from ${this.sourceVR.label()}.`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
   }
 
   override get autoDocument(): string {
-    return `toggles ${this.destinationVR.label()} from ${
-        this.sourceVR.label()}.`;
+    return `toggles ${this.destinationVR.label()} from ${this.sourceVR.label()}.`;
   }
 }
 
@@ -158,60 +155,56 @@ export class Toggle extends Update {
  */
 export class SetOrClear extends Update {
   constructor(
-      private readonly destinationVR: ValueRef,
-      private readonly sourceVR: ValueRef) {
+    private readonly destinationVR: ValueRef,
+    private readonly sourceVR: ValueRef) {
     super();
   }
 
   override update(localState?: ValueMap|undefined) {
-    const destinationValue = this.destinationVR.get(localState);
-    const sourceValue = this.sourceVR.get(localState);
-    if (destinationValue === undefined || sourceValue === undefined) {
+    const destinationValue=this.destinationVR.get(localState);
+    const sourceValue=this.sourceVR.get(localState);
+    if (destinationValue===undefined||sourceValue===undefined) {
       return;
     }
     if (!destinationValue.fold(
-            sourceValue, /* toggle= */ true, /* replace= */ true)) {
+      sourceValue, /* toggle= */ true, /* replace= */ true)) {
       throw new ConfigurationError(
-          `Can't toggle-or-set ${this.destinationVR.label()} from ${
-              this.sourceVR.label()}.`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+        `Can't toggle-or-set ${this.destinationVR.label()} from ${this.sourceVR.label()}.`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
   }
 
   override get autoDocument(): string {
-    return `toggles-or-sets ${this.destinationVR.label()} from ${
-        this.sourceVR.label()}.`;
+    return `toggles-or-sets ${this.destinationVR.label()} from ${this.sourceVR.label()}.`;
   }
 }
 
 /** On update, extends its destination child from its source child. */
 export class Extend extends Update {
   constructor(
-      private readonly destinationVR: ValueRef,
-      private readonly sourceVR: ValueRef) {
+    private readonly destinationVR: ValueRef,
+    private readonly sourceVR: ValueRef) {
     super();
   }
 
   override update(localState?: ValueMap|undefined) {
-    const destinationValue = this.destinationVR.get(localState);
-    const sourceValue = this.sourceVR.get(localState);
-    if (destinationValue === undefined || sourceValue === undefined) {
+    const destinationValue=this.destinationVR.get(localState);
+    const sourceValue=this.sourceVR.get(localState);
+    if (destinationValue===undefined||sourceValue===undefined) {
       return;
     }
     if (!destinationValue.fold(
-            sourceValue, /* toggle= */ false, /* replace= */ false)) {
+      sourceValue, /* toggle= */ false, /* replace= */ false)) {
       throw new ConfigurationError(
-          `Can't extend ${this.destinationVR.label()} from ${
-              this.sourceVR.label()}.`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+        `Can't extend ${this.destinationVR.label()} from ${this.sourceVR.label()}.`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
   }
 
   override get autoDocument(): string {
-    return `extends ${this.destinationVR.label()} from ${
-        this.sourceVR.label()}.`;
+    return `extends ${this.destinationVR.label()} from ${this.sourceVR.label()}.`;
   }
 }
 
@@ -221,31 +214,29 @@ export class Extend extends Update {
  */
 export class SetIfEmpty extends Update {
   constructor(
-      private readonly destinationVR: ValueRef,
-      private readonly sourceVR: ValueRef) {
+    private readonly destinationVR: ValueRef,
+    private readonly sourceVR: ValueRef) {
     super();
   }
 
   override update(localState?: ValueMap|undefined) {
-    const destinationValue = this.destinationVR.get(localState);
-    const sourceValue = this.sourceVR.get(localState);
-    if (destinationValue === undefined || sourceValue === undefined ||
-        destinationValue.compare(new EmptyValue()) !== 0) {
+    const destinationValue=this.destinationVR.get(localState);
+    const sourceValue=this.sourceVR.get(localState);
+    if (destinationValue===undefined||sourceValue===undefined||
+      destinationValue.compare(new EmptyValue())!==0) {
       return;
     }
     if (!destinationValue.fold(
-            sourceValue, /* toggle= */ false, /* replace= */ true)) {
+      sourceValue, /* toggle= */ false, /* replace= */ true)) {
       throw new ConfigurationError(
-          `Can't set-if-empty ${this.destinationVR.label()} from ${
-              this.sourceVR.label()}.`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+        `Can't set-if-empty ${this.destinationVR.label()} from ${this.sourceVR.label()}.`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
   }
 
   override get autoDocument(): string {
-    return `sets ${this.destinationVR.label()}, if empty, from ${
-        this.sourceVR.label()}.`;
+    return `sets ${this.destinationVR.label()}, if empty, from ${this.sourceVR.label()}.`;
   }
 }
 
@@ -255,8 +246,8 @@ export class SetIfEmpty extends Update {
  */
 export class Action extends Update {
   constructor(
-      readonly target: string, readonly type: string,
-      readonly updates: Update[]) {
+    readonly target: string, readonly type: string,
+    readonly updates: Update[]) {
     super(DocumenterType.ACTION);
   }
 
@@ -284,7 +275,7 @@ export class Action extends Update {
  * Returns a Boolean observable that rises to true when a predicate condition
  * holds.
  */
-export type MatchFn = (localState?: ValueMap|undefined) => Observable<boolean>;
+export type MatchFn=(localState?: ValueMap|undefined) => Observable<boolean>;
 
 /**
  * A base class for directives serving as reaction predicates.  The 'match'
@@ -292,17 +283,17 @@ export type MatchFn = (localState?: ValueMap|undefined) => Observable<boolean>;
  * value.
  */
 export abstract class Predicate implements Documenter {
-  overrideDocument = '';
-  documentChildren = true;
-  constructor(readonly documenterType = DocumenterType.PREDICATE) {}
+  overrideDocument='';
+  documentChildren=true;
+  constructor(readonly documenterType=DocumenterType.PREDICATE) { }
   abstract match(): MatchFn;
   abstract get autoDocument(): string;
   get children(): Documenter[] {
     return [];
   }
   withHelpText(helpText: string, documentChildren: boolean): Predicate {
-    this.overrideDocument = helpText;
-    this.documentChildren = documentChildren;
+    this.overrideDocument=helpText;
+    this.documentChildren=documentChildren;
     return this;
   }
 }
@@ -312,28 +303,28 @@ export abstract class Predicate implements Documenter {
  * changed.
  */
 export class Changed extends Predicate {
-  constructor(private readonly x: ValueRef, private readonly sinceMs = 0) {
+  constructor(private readonly x: ValueRef, private readonly sinceMs=0) {
     super();
   }
 
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
-      const val = this.x.get(localState);
-      if (val === undefined) {
+      const val=this.x.get(localState);
+      if (val===undefined) {
         return EMPTY;
       }
-      if (this.sinceMs === 0) {
+      if (this.sinceMs===0) {
         // If sinceMs is 0, just emit a pulse on the rising edge of the change.
         return val.pipe(mergeMap(() => [true, false]));
       }
-      const valueChanged = val.pipe(map(() => true));
-      const changeTimeout =
-          valueChanged.pipe(delay(this.sinceMs), map(() => false));
+      const valueChanged=val.pipe(map(() => true));
+      const changeTimeout=
+        valueChanged.pipe(delay(this.sinceMs), map(() => false));
       return merge(
-                 valueChanged,
-                 changeTimeout,
-                 )
-          .pipe(distinctUntilChanged());
+        valueChanged,
+        changeTimeout,
+      )
+        .pipe(distinctUntilChanged());
     };
   }
 
@@ -351,7 +342,7 @@ export class Not extends Predicate {
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
       return this.x.match()(localState)
-          .pipe(map((v: boolean) => !v), distinctUntilChanged());
+        .pipe(map((v: boolean) => !v), distinctUntilChanged());
     };
   }
 
@@ -372,13 +363,13 @@ export class And extends Predicate {
 
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
-      const childMatchers =
-          this.childPredicates.map((child) => child.match()(localState));
+      const childMatchers=
+        this.childPredicates.map((child) => child.match()(localState));
       return combineLatest(childMatchers)
-          .pipe(
-              map((vals: boolean[]) =>
-                      vals.reduce((prev, curr) => prev && curr, true)),
-              distinctUntilChanged());
+        .pipe(
+          map((vals: boolean[]) =>
+            vals.reduce((prev, curr) => prev&&curr, true)),
+          distinctUntilChanged());
     };
   }
 
@@ -399,13 +390,13 @@ export class Or extends Predicate {
 
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
-      const childMatchers =
-          this.childPredicates.map((child) => child.match()(localState));
+      const childMatchers=
+        this.childPredicates.map((child) => child.match()(localState));
       return combineLatest(childMatchers)
-          .pipe(
-              map((vals: boolean[]) =>
-                      vals.reduce((prev, curr) => prev || curr, false)),
-              distinctUntilChanged());
+        .pipe(
+          map((vals: boolean[]) =>
+            vals.reduce((prev, curr) => prev||curr, false)),
+          distinctUntilChanged());
     };
   }
 
@@ -428,12 +419,12 @@ export class Equals extends Predicate {
 
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
-      const x = this.x.get(localState);
-      const y = this.y.get(localState);
-      if (x !== undefined && y !== undefined) {
+      const x=this.x.get(localState);
+      const y=this.y.get(localState);
+      if (x!==undefined&&y!==undefined) {
         return combineLatest([x, y]).pipe(
-            map((vals: Value[]) => vals[0].compare(vals[1]) === 0),
-            distinctUntilChanged());
+          map((vals: Value[]) => vals[0].compare(vals[1])===0),
+          distinctUntilChanged());
       }
       return EMPTY;
     };
@@ -455,12 +446,12 @@ export class LessThan extends Predicate {
 
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
-      const x = this.x.get(localState);
-      const y = this.y.get(localState);
-      if (x !== undefined && y !== undefined) {
+      const x=this.x.get(localState);
+      const y=this.y.get(localState);
+      if (x!==undefined&&y!==undefined) {
         return combineLatest([x, y]).pipe(
-            map((vals: Value[]) => vals[0].compare(vals[1]) < 0),
-            distinctUntilChanged());
+          map((vals: Value[]) => vals[0].compare(vals[1])<0),
+          distinctUntilChanged());
       }
       return EMPTY;
     };
@@ -482,12 +473,12 @@ export class GreaterThan extends Predicate {
 
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
-      const x = this.x.get(localState);
-      const y = this.y.get(localState);
-      if (x !== undefined && y !== undefined) {
+      const x=this.x.get(localState);
+      const y=this.y.get(localState);
+      if (x!==undefined&&y!==undefined) {
         return combineLatest([x, y]).pipe(
-            map((vals: Value[]) => vals[0].compare(vals[1]) > 0),
-            distinctUntilChanged());
+          map((vals: Value[]) => vals[0].compare(vals[1])>0),
+          distinctUntilChanged());
       }
       return EMPTY;
     };
@@ -509,11 +500,11 @@ export class Includes extends Predicate {
 
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
-      const x = this.x.get(localState);
-      const y = this.y.get(localState);
-      if (x !== undefined && y !== undefined) {
+      const x=this.x.get(localState);
+      const y=this.y.get(localState);
+      if (x!==undefined&&y!==undefined) {
         return combineLatest([x, y]).pipe(
-            map((vals: Value[]) => vals[0].includes(vals[1])));
+          map((vals: Value[]) => vals[0].includes(vals[1])));
       }
       return EMPTY;
     };
@@ -530,8 +521,8 @@ export class Includes extends Predicate {
  */
 export class Reaction extends Predicate {
   constructor(
-      readonly target: string, readonly type: string,
-      readonly predicate: Predicate) {
+    readonly target: string, readonly type: string,
+    readonly predicate: Predicate) {
     super(DocumenterType.REACTION);
   }
 
@@ -561,11 +552,11 @@ export class Reaction extends Predicate {
  * callback are propagated;
  */
 export class Watch implements Documenter {
-  readonly documenterType = DocumenterType.WATCH;
-  overrideDocument = '';
-  documentChildren = true;
+  readonly documenterType=DocumenterType.WATCH;
+  overrideDocument='';
+  documentChildren=true;
 
-  constructor(readonly type: string, readonly valueMap: ValueMap) {}
+  constructor(readonly type: string, readonly valueMap: ValueMap) { }
 
   /**
    * Invokes the provided callback if the receiver's value map changes, until
@@ -573,17 +564,17 @@ export class Watch implements Documenter {
    * any errors thrown during callback invocation.
    */
   watch(cb: (vm: ValueMap) => void, unsubscribe: Subject<void>):
-      ReplaySubject<unknown> {
-    const ret = new ReplaySubject<unknown>();
+    ReplaySubject<unknown> {
+    const ret=new ReplaySubject<unknown>();
     this.valueMap.watch()
-        .pipe(takeUntil(unsubscribe))
-        .subscribe((vm: ValueMap) => {
-          try {
-            cb(vm);
-          } catch (err: unknown) {
-            ret.next(err);
-          }
-        });
+      .pipe(takeUntil(unsubscribe))
+      .subscribe((vm: ValueMap) => {
+        try {
+          cb(vm);
+        } catch (err: unknown) {
+          ret.next(err);
+        }
+      });
     return ret;
   }
 
@@ -596,8 +587,8 @@ export class Watch implements Documenter {
   }
 
   withHelpText(helpText: string, documentChildren: boolean): Watch {
-    this.overrideDocument = helpText;
-    this.documentChildren = documentChildren;
+    this.overrideDocument=helpText;
+    this.documentChildren=documentChildren;
     return this;
   }
 }
@@ -608,19 +599,19 @@ export class Watch implements Documenter {
  * 'timeCallout'), supporting convenience accessors for each of them.
  */
 export class Interactions implements Documenter {
-  readonly documenterType = DocumenterType.INTERACTIONS;
-  overrideDocument = '';
-  documentChildren = true;
-  private readonly actionsByTargetAndType =
-      new Map<string, Map<string, Action>>([]);
-  private readonly reactionsByTargetAndType =
-      new Map<string, Map<string, Reaction>>([]);
-  private readonly watchesByType = new Map<string, Watch>([]);
+  readonly documenterType=DocumenterType.INTERACTIONS;
+  overrideDocument='';
+  documentChildren=true;
+  private readonly actionsByTargetAndType=
+    new Map<string, Map<string, Action>>([]);
+  private readonly reactionsByTargetAndType=
+    new Map<string, Map<string, Reaction>>([]);
+  private readonly watchesByType=new Map<string, Watch>([]);
 
   withAction(action: Action): Interactions {
-    let actionsByType = this.actionsByTargetAndType.get(action.target);
-    if (actionsByType === undefined) {
-      actionsByType = new Map<string, Action>([]);
+    let actionsByType=this.actionsByTargetAndType.get(action.target);
+    if (actionsByType===undefined) {
+      actionsByType=new Map<string, Action>([]);
       this.actionsByTargetAndType.set(action.target, actionsByType);
     }
     actionsByType.set(action.type, action);
@@ -628,9 +619,9 @@ export class Interactions implements Documenter {
   }
 
   withReaction(reaction: Reaction): Interactions {
-    let reactionsByType = this.reactionsByTargetAndType.get(reaction.target);
-    if (reactionsByType === undefined) {
-      reactionsByType = new Map<string, Reaction>([]);
+    let reactionsByType=this.reactionsByTargetAndType.get(reaction.target);
+    if (reactionsByType===undefined) {
+      reactionsByType=new Map<string, Reaction>([]);
       this.reactionsByTargetAndType.set(reaction.target, reactionsByType);
     }
     reactionsByType.set(reaction.type, reaction);
@@ -643,15 +634,15 @@ export class Interactions implements Documenter {
   }
 
   update(target: string, type: string, localValues?: ValueMap|undefined) {
-    const action = this.actionsByTargetAndType.get(target)?.get(type);
-    if (action !== undefined) {
+    const action=this.actionsByTargetAndType.get(target)?.get(type);
+    if (action!==undefined) {
       action.update(localValues);
     }
   }
 
   match(target: string, type: string): MatchFn {
-    const reaction = this.reactionsByTargetAndType.get(target)?.get(type);
-    if (reaction === undefined) {
+    const reaction=this.reactionsByTargetAndType.get(target)?.get(type);
+    if (reaction===undefined) {
       return () => EMPTY;
     }
     return reaction.match();
@@ -664,9 +655,9 @@ export class Interactions implements Documenter {
    * thrown by the callback.
    */
   watch(type: string, cb: (vm: ValueMap) => void, unsubscribe: Subject<void>):
-      Observable<unknown> {
-    const watch = this.watchesByType.get(type);
-    if (watch === undefined) {
+    Observable<unknown> {
+    const watch=this.watchesByType.get(type);
+    if (watch===undefined) {
       return EMPTY;
     }
     return watch.watch(cb, unsubscribe);
@@ -679,12 +670,12 @@ export class Interactions implements Documenter {
    * callback.
    */
   watchAll(
-      watchActions: ReadonlyMap<string, (vm: ValueMap) => void>,
-      unsubscribe: Subject<void>): Observable<unknown> {
-    const chans: Array<ReplaySubject<unknown>> = [];
+    watchActions: ReadonlyMap<string, (vm: ValueMap) => void>,
+    unsubscribe: Subject<void>): Observable<unknown> {
+    const chans: Array<ReplaySubject<unknown>>=[];
     for (const [type, cb] of watchActions) {
-      const w = this.watchesByType.get(type);
-      if (w !== undefined) {
+      const w=this.watchesByType.get(type);
+      if (w!==undefined) {
         chans.push(w.watch(cb, unsubscribe));
       }
     }
@@ -696,26 +687,26 @@ export class Interactions implements Documenter {
   }
 
   get children(): Documenter[] {
-    const actions = [...this.actionsByTargetAndType.values()]
-                        .map((actionsByType) => [...actionsByType.values()])
-                        .flat();
-    const reactions =
-        [...this.reactionsByTargetAndType.values()]
-            .map((reactionsByType) => [...reactionsByType.values()])
-            .flat();
-    const watches = [...this.watchesByType.values()];
+    const actions=[...this.actionsByTargetAndType.values()]
+      .map((actionsByType) => [...actionsByType.values()])
+      .flat();
+    const reactions=
+      [...this.reactionsByTargetAndType.values()]
+        .map((reactionsByType) => [...reactionsByType.values()])
+        .flat();
+    const watches=[...this.watchesByType.values()];
     return [...actions, ...reactions, ...watches];
   }
 
   withHelpText(helpText: string, documentChildren: boolean): Interactions {
-    this.overrideDocument = helpText;
-    this.documentChildren = documentChildren;
+    this.overrideDocument=helpText;
+    this.documentChildren=documentChildren;
     return this;
   }
 
   checkForSupportedActions(supportedTargetsAndTypes: Array<[string, string]>):
-      void {
-    const supportedLookup = new Map<string, string[]>([]);
+    void {
+    const supportedLookup=new Map<string, string[]>([]);
     for (const [target, type] of supportedTargetsAndTypes) {
       if (supportedLookup.has(target)) {
         supportedLookup.get(target)?.push(type);
@@ -726,22 +717,22 @@ export class Interactions implements Documenter {
     for (const [target, actionsByType] of this.actionsByTargetAndType) {
       if (!supportedLookup.has(target)) {
         throw new ConfigurationError(
-            `Action target '${target}' is not supported`);
+          `Action target '${target}' is not supported`);
       }
       for (const type of actionsByType.keys()) {
         if (!supportedLookup.get(target)?.includes(type)) {
           throw new ConfigurationError(
-              `Action type '${type}' on target '${target}' is not supported.`)
-              .from(SOURCE)
-              .at(Severity.ERROR);
+            `Action type '${type}' on target '${target}' is not supported.`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
         }
       }
     }
   }
 
   checkForSupportedReactions(supportedTargetsAndTypes: Array<[string, string]>):
-      void {
-    const supportedLookup = new Map<string, string[]>([]);
+    void {
+    const supportedLookup=new Map<string, string[]>([]);
     for (const [target, type] of supportedTargetsAndTypes) {
       if (supportedLookup.has(target)) {
         supportedLookup.get(target)?.push(type);
@@ -752,14 +743,14 @@ export class Interactions implements Documenter {
     for (const [target, reactionsByType] of this.reactionsByTargetAndType) {
       if (!supportedLookup.has(target)) {
         throw new ConfigurationError(
-            `Reaction target '${target}' is not supported`);
+          `Reaction target '${target}' is not supported`);
       }
       for (const type of reactionsByType.keys()) {
         if (!supportedLookup.get(target)?.includes(type)) {
           throw new ConfigurationError(
-              `Reaction type '${type}' on target '${target}' is not supported.`)
-              .from(SOURCE)
-              .at(Severity.ERROR);
+            `Reaction type '${type}' on target '${target}' is not supported.`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
         }
       }
     }
@@ -769,8 +760,8 @@ export class Interactions implements Documenter {
     for (const type of this.watchesByType.keys()) {
       if (!supportedTypes.includes(type)) {
         throw new ConfigurationError(`Watch type '${type}' is not supported.`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
       }
     }
   }

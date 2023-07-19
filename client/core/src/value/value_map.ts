@@ -11,14 +11,14 @@
         limitations under the License.
 */
 
-import { DoubleValue, DurationValue, ExportedValue, fromV, IntegerListValue, IntegerValue, StringListValue, StringTableBuilder, StringValue, TimestampValue, V, Value } from './value.js';
-import { Duration } from '../duration/duration.js';
-import { ConfigurationError, Severity } from '../errors/errors.js';
-import { Timestamp } from '../timestamp/timestamp.js';
-import { merge, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {DoubleValue, DurationValue, ExportedValue, fromV, IntegerListValue, IntegerValue, StringListValue, StringTableBuilder, StringValue, TimestampValue, V, Value} from './value.js';
+import {Duration} from '../duration/duration.js';
+import {ConfigurationError, Severity} from '../errors/errors.js';
+import {Timestamp} from '../timestamp/timestamp.js';
+import {merge, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
-const SOURCE = 'value_map';
+const SOURCE='value_map';
 
 /** Type created when turning a ValueMap into JSON. */
 export interface ExportedKeyValueMap {
@@ -28,7 +28,7 @@ export interface ExportedKeyValueMap {
 /**
  * A serializable type representing an entry in a value map.
  */
-export type KV = [number | string, V];
+export type KV=[number|string, V];
 
 /**
  * A read-only (string) key-to-Value mapping, such as a <value-map> in a
@@ -38,44 +38,44 @@ export class ValueMap {
   private readonly map: ReadonlyMap<string, Value>;
 
   constructor(
-      props: KV[]|Map<string, Value> = new Map<string, Value>([]),
-      stringTable: string[] = []) {
-    let map = new Map<string, Value>();
+    props: KV[]|Map<string, Value>=new Map<string, Value>([]),
+    stringTable: string[]=[]) {
+    let map=new Map<string, Value>();
     if (props instanceof Map) {
-      map = props;
+      map=props;
     } else if (props instanceof Array) {
       for (const kv of props) {
-        const key = (typeof kv[0] === 'string') ? kv[0] : stringTable[kv[0]];
-        const value = fromV(kv[1], stringTable);
-        if (value === undefined) {
+        const key=(typeof kv[0]==='string')? kv[0]:stringTable[kv[0]];
+        const value=fromV(kv[1], stringTable);
+        if (value===undefined) {
           throw new ConfigurationError(
-              `value with key '${key}' can't be parsed`)
-              .from(SOURCE)
-              .at(Severity.ERROR);
+            `value with key '${key}' can't be parsed`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
         }
         map.set(key, value);
       }
     } else {
-      map = new Map();
+      map=new Map();
     }
-    this.map = map;
+    this.map=map;
   }
 
   toVMap(stringTableBuilder?: StringTableBuilder): {[k: string]: V} {
-    if (stringTableBuilder === undefined) {
-      const ret = new Map<string, V>([]);
+    if (stringTableBuilder===undefined) {
+      const ret=new Map<string, V>([]);
       for (const [k, v] of this.map) {
-        const gotV = v.toV();
-        if (gotV !== undefined) {
+        const gotV=v.toV();
+        if (gotV!==undefined) {
           ret.set(k, gotV);
         }
       }
       return Object.fromEntries(ret);
     }
-    const ret = new Map<number, V>([]);
+    const ret=new Map<number, V>([]);
     for (const [k, v] of this.map) {
-      const gotV = v.toV();
-      if (gotV !== undefined) {
+      const gotV=v.toV();
+      if (gotV!==undefined) {
         ret.set(stringTableBuilder.index(k), gotV);
       }
     }
@@ -83,9 +83,9 @@ export class ValueMap {
   }
 
   exportKeyValueMap(): ExportedKeyValueMap {
-    const serializedValues: ExportedKeyValueMap = {};
+    const serializedValues: ExportedKeyValueMap={};
     for (const [key, value] of this.map.entries()) {
-      serializedValues[key] = value.exportTo();
+      serializedValues[key]=value.exportTo();
     }
     return serializedValues;
   }
@@ -94,15 +94,15 @@ export class ValueMap {
     for (const [key, exportedValue] of Object.entries(update)) {
       if (!this.has(key)) {
         throw new ConfigurationError(
-            `can't update ValueMap from JSON: missing key ${key}`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+          `can't update ValueMap from JSON: missing key ${key}`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
       }
-      const val = this.get(key);
+      const val=this.get(key);
       if (!val.importFrom(exportedValue)) {
         throw new ConfigurationError(`can't update value ${key} from JSON`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
       }
     }
   }
@@ -128,73 +128,73 @@ export class ValueMap {
   }
 
   get(key: string): Value {
-    const ret = this.map.get(key);
-    if (ret === undefined) {
+    const ret=this.map.get(key);
+    if (ret===undefined) {
       throw new ConfigurationError(`no value with key '${key}'`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+        .from(SOURCE)
+        .at(Severity.ERROR);
     }
     return ret;
   }
 
   expectString(key: string): string {
-    const val = this.get(key);
+    const val=this.get(key);
     if (val instanceof StringValue) {
       return val.val;
     }
     throw new ConfigurationError(`no string-type value with key '${key}'`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+      .from(SOURCE)
+      .at(Severity.ERROR);
   }
 
   expectStringList(key: string): string[] {
-    const val = this.get(key);
+    const val=this.get(key);
     if (val instanceof StringListValue) {
       return val.val;
     }
     throw new ConfigurationError(`no string list-type value with key '${key}'`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+      .from(SOURCE)
+      .at(Severity.ERROR);
   }
 
   expectNumber(key: string): number {
-    const val = this.get(key);
-    if (val instanceof IntegerValue || val instanceof DoubleValue) {
+    const val=this.get(key);
+    if (val instanceof IntegerValue||val instanceof DoubleValue) {
       return val.val;
     }
     throw new ConfigurationError(`no number-type value with key '${key}'`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+      .from(SOURCE)
+      .at(Severity.ERROR);
   }
 
   expectIntegerList(key: string): number[] {
-    const val = this.get(key);
+    const val=this.get(key);
     if (val instanceof IntegerListValue) {
       return val.val;
     }
     throw new ConfigurationError(`no integer list-type value with key '${key}'`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+      .from(SOURCE)
+      .at(Severity.ERROR);
   }
 
   expectTimestamp(key: string): Timestamp {
-    const val = this.get(key);
+    const val=this.get(key);
     if (val instanceof TimestampValue) {
       return val.val;
     }
     throw new ConfigurationError(`no timestamp-type value with key '${key}'`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+      .from(SOURCE)
+      .at(Severity.ERROR);
   }
 
   expectDuration(key: string): Duration {
-    const val = this.get(key);
+    const val=this.get(key);
     if (val instanceof DurationValue) {
       return val.val;
     }
     throw new ConfigurationError(`no duration-type value with key '${key}'`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+      .from(SOURCE)
+      .at(Severity.ERROR);
   }
 
   /**
@@ -224,38 +224,38 @@ export class ValueMap {
     //          ||       +-- Matching a '$$' or a '$<propName>'
     //          ||       |                            +-- Matching remainder.
     //          vv       v                            v
-    const re = /^([^$]*)(\$\$|\$\([a-zA-Z_\-0-9]+\))?((.|\n)*)/;
-    let ret = '';
-    let formatRemainder: string = fmtString;
+    const re=/^([^$]*)(\$\$|\$\([a-zA-Z_\-0-9]+\))?((.|\n)*)/;
+    let ret='';
+    let formatRemainder: string=fmtString;
     while (true) {
-      const matches = formatRemainder.match(re);
-      if (matches === null) {
+      const matches=formatRemainder.match(re);
+      if (matches===null) {
         break;
       }
       // If neither of the first two capture groups found anything, then the
       // format is ill-formed.
-      if (!matches[1] && !matches[2]) {
+      if (!matches[1]&&!matches[2]) {
         throw new ConfigurationError(
-            `format string '${fmtString}' is ill-formed`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
+          `format string '${fmtString}' is ill-formed`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
       }
       // Append everything before a $ unmodified.
-      ret = ret + matches[1];
-      if (matches[2] === '$$') {
+      ret=ret+matches[1];
+      if (matches[2]==='$$') {
         // Replace '$$' with a literal '$'.
-        ret = ret + '$';
+        ret=ret+'$';
       } else if (!!matches[2]) {
         // Replace '$<propname>' with keysToValues[propName].toString()
-        const propName = matches[2].slice(2, -1);
-        const val = this.map.get(propName);
-        if (val === undefined) {
+        const propName=matches[2].slice(2, -1);
+        const val=this.map.get(propName);
+        if (val===undefined) {
           throw new ConfigurationError(
-              `required property '${propName}' is not present in Datum`)
-              .from(SOURCE)
-              .at(Severity.ERROR);
+            `required property '${propName}' is not present in Datum`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
         } else {
-          ret = ret + val.toString();
+          ret=ret+val.toString();
         }
       }
       // Repeat on the remainder of the string.
@@ -263,7 +263,7 @@ export class ValueMap {
         // If there is no matches[3], or it's empty, we're done.
         break;
       }
-      formatRemainder = matches[3];
+      formatRemainder=matches[3];
     }
     return ret;
   }
@@ -273,8 +273,8 @@ export class ValueMap {
    * those whose keys are provided.
    */
   without(...keys: string[]): ValueMap {
-    const excludedKeys = new Set(keys);
-    const newMap = new Map<string, Value>();
+    const excludedKeys=new Set(keys);
+    const newMap=new Map<string, Value>();
     for (const [key, value] of this.map) {
       if (!excludedKeys.has(key)) {
         newMap.set(key, value);
@@ -284,7 +284,7 @@ export class ValueMap {
   }
 
   with(...entries: Array<[string, Value]>): ValueMap {
-    const combinedMapEntries = [...this.map.entries(), ...entries];
+    const combinedMapEntries=[...this.map.entries(), ...entries];
     return new ValueMap(new Map<string, Value>(combinedMapEntries));
   }
 
@@ -303,24 +303,23 @@ export class ValueMap {
    * ConfigurationError.
    */
   static union(...vms: ValueMap[]): ValueMap {
-    if (vms.length < 2) {
+    if (vms.length<2) {
       throw new Error(`ValueMap.union requires at least two ValueMaps`);
     }
-    const newMap = new Map<string, Value>();
+    const newMap=new Map<string, Value>();
     for (const [key, value] of vms[0].map) {
       newMap.set(key, value);
     }
-    for (let idx = 1; idx < vms.length; idx++) {
+    for (let idx=1; idx<vms.length; idx++) {
       for (const [key, value] of vms[idx].map) {
-        const existingVal = newMap.get(key);
-        if (existingVal !== undefined && existingVal.compare(value) !== 0) {
+        const existingVal=newMap.get(key);
+        if (existingVal!==undefined&&existingVal.compare(value)!==0) {
           throw new ConfigurationError(
-              `can't union ValueMaps: key ${key} maps to different values ${
-                  value} and ${existingVal}`)
-              .from(SOURCE)
-              .at(Severity.ERROR);
+            `can't union ValueMaps: key ${key} maps to different values ${value} and ${existingVal}`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
         }
-        if (existingVal === undefined) {
+        if (existingVal===undefined) {
           newMap.set(key, value);
         }
       }

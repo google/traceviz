@@ -33,7 +33,7 @@ export enum Severity {
    * Indicates a fundamental and unrecoverable problem affecting the entire
    * TraceViz application, such a problem requesting or handling Data queries.
    */
-  FATAL = 0,
+  FATAL=0,
   /**
    * Indicates an unrecoverable problem affecting a single TraceViz UI
    * component, such as a DataQuery having an unexpected format.
@@ -54,8 +54,8 @@ export enum Severity {
  * for application invariant violations.
  */
 export class ConfigurationError extends Error {
-  source = '';
-  severity = Severity.WARNING;
+  source='';
+  severity=Severity.WARNING;
 
   constructor(public override message: string) {
     super(message);
@@ -64,13 +64,13 @@ export class ConfigurationError extends Error {
 
   /** Specifies the file or module issuing the error. */
   from(source: string): ConfigurationError {
-    this.source = source;
+    this.source=source;
     return this;
   }
 
   /** Specifies the error's severity. */
   at(sev: Severity): ConfigurationError {
-    this.severity = sev;
+    this.severity=sev;
     return this;
   }
 
@@ -78,21 +78,21 @@ export class ConfigurationError extends Error {
     let ret: string;
     switch (this.severity) {
       case Severity.FATAL:
-        ret = '[FATAL] ';
+        ret='[FATAL] ';
         break;
       case Severity.ERROR:
-        ret = '[ERROR] ';
+        ret='[ERROR] ';
         break;
       case Severity.WARNING:
-        ret = '[WARNING] ';
+        ret='[WARNING] ';
         break;
       default:
-        ret = '[UNKNOWN SEVERITY] ';
+        ret='[UNKNOWN SEVERITY] ';
         break;
     }
-    if (this.source !== '') {
-      ret = ret + `(${this.source}) `;
+    if (this.source!=='') {
+      ret=ret+`(${this.source}) `;
     }
-    return ret + `${this.message}`;
+    return ret+`${this.message}`;
   }
 }

@@ -16,8 +16,8 @@
  * to Values.
  */
 
-import { Value } from './value.js';
-import { ValueMap } from './value_map.js';
+import {Value} from './value.js';
+import {ValueMap} from './value_map.js';
 
 /** A reference to a Value. */
 export interface ValueRef {
@@ -32,10 +32,10 @@ export interface ValueRef {
  * LocalValue('ID')` would support access to each row's ID.
  */
 export class LocalValue implements ValueRef {
-  constructor(private readonly key: string) {}
+  constructor(private readonly key: string) { }
 
   get(localState: ValueMap|undefined): Value|undefined {
-    if (localState === undefined || !localState.has(this.key)) {
+    if (localState===undefined||!localState.has(this.key)) {
       return undefined;
     }
     return localState.get(this.key);
@@ -48,7 +48,7 @@ export class LocalValue implements ValueRef {
 
 /** A reference to a fixed value: one whose definition never changes. */
 export class FixedValue implements ValueRef {
-  constructor(private readonly val: Value, private readonly name = '') {
+  constructor(private readonly val: Value, private readonly name='') {
   }
 
   get(localState: ValueMap|undefined): Value|undefined {
@@ -67,13 +67,13 @@ export interface KeyedValueRef extends ValueRef {
 
 /** A keyed map of ValueRefs. */
 export class ValueRefMap {
-  constructor(private readonly refMap: KeyedValueRef[]) {}
+  constructor(private readonly refMap: KeyedValueRef[]) { }
 
   get(localState: ValueMap|undefined): ValueMap|undefined {
-    const ret = new Map<string, Value>();
+    const ret=new Map<string, Value>();
     for (const keyedValueRef of this.refMap) {
-      const val = keyedValueRef.get(localState);
-      if (val !== undefined) {
+      const val=keyedValueRef.get(localState);
+      if (val!==undefined) {
         ret.set(keyedValueRef.key, val);
       }
     }

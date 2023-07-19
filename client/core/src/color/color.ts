@@ -18,42 +18,42 @@
  */
 
 import * as d3 from 'd3';
-import { ConfigurationError, Severity } from '../errors/errors.js';
-import { ValueMap } from '../value/value_map.js';
+import {ConfigurationError, Severity} from '../errors/errors.js';
+import {ValueMap} from '../value/value_map.js';
 
-const SOURCE = 'colors';
+const SOURCE='colors';
 
 enum Keys {
-  COLOR_SPACE = 'color_space',
-  PRIMARY_COLOR_SPACE = 'primary_color_space',
-  PRIMARY_COLOR_SPACE_VALUE = 'primary_color_space_value',
-  PRIMARY_COLOR = 'primary_color',
-  SECONDARY_COLOR_SPACE = 'secondary_color_space',
-  SECONDARY_COLOR_SPACE_VALUE = 'secondary_color_space_value',
-  SECONDARY_COLOR = 'secondary_color',
-  STROKE_COLOR_SPACE = 'stroke_color_space',
-  STROKE_COLOR_SPACE_VALUE = 'stroke_color_space_value',
-  STROKE_COLOR = 'stroke_color',
+  COLOR_SPACE='color_space',
+  PRIMARY_COLOR_SPACE='primary_color_space',
+  PRIMARY_COLOR_SPACE_VALUE='primary_color_space_value',
+  PRIMARY_COLOR='primary_color',
+  SECONDARY_COLOR_SPACE='secondary_color_space',
+  SECONDARY_COLOR_SPACE_VALUE='secondary_color_space_value',
+  SECONDARY_COLOR='secondary_color',
+  STROKE_COLOR_SPACE='stroke_color_space',
+  STROKE_COLOR_SPACE_VALUE='stroke_color_space_value',
+  STROKE_COLOR='stroke_color',
 }
 
-const COLOR_SPACE_NAME_PREFIX = 'color_space_';
+const COLOR_SPACE_NAME_PREFIX='color_space_';
 
 /** A color space linearly interpolating across a set of colors. */
 function linearColorSpace(...colors: string[]): (colorValue: number) => string {
-  if (colors.length === 0) {
+  if (colors.length===0) {
     throw new ConfigurationError(`Color spaces must define at least one color`)
-        .at(Severity.ERROR)
-        .from(SOURCE);
+      .at(Severity.ERROR)
+      .from(SOURCE);
   }
-  if (colors.length === 1) {
+  if (colors.length===1) {
     // The input domain must vary between 0 and 1, so we need at least two
     // colors.
     colors.push(colors[0]);
   }
-  const domains: number[] = [];
-  for (let i = 0; i < colors.length; i++) {
-    domains.push(i / (colors.length - 1));
-    colors[i] = d3.color(colors[i])?.toString() || '';
+  const domains: number[]=[];
+  for (let i=0; i<colors.length; i++) {
+    domains.push(i/(colors.length-1));
+    colors[i]=d3.color(colors[i])?.toString()||'';
   }
   return d3.scaleLinear<string>().domain(domains).range(colors);
 }
@@ -62,7 +62,7 @@ function linearColorSpace(...colors: string[]): (colorValue: number) => string {
  * Returns the provided color string converted to a hexadecimal color string.
  */
 export function hex(color: string): string {
-  return d3.color(color)?.hex() || '';
+  return d3.color(color)?.hex()||'';
 }
 
 /** A single datum's defined colors. */
@@ -79,14 +79,14 @@ export interface Colors {
 export class Coloring {
   readonly spacesByName: ReadonlyMap<string, (colorValue: number) => string>;
   constructor(vm: ValueMap) {
-    const spacesByName = new Map<string, (colorValue: number) => string>();
+    const spacesByName=new Map<string, (colorValue: number) => string>();
     for (const key of vm.keys()) {
       if (key.startsWith(COLOR_SPACE_NAME_PREFIX)) {
-        const colors = vm.expectStringList(key);
+        const colors=vm.expectStringList(key);
         spacesByName.set(key, linearColorSpace(...colors));
       }
     }
-    this.spacesByName = spacesByName;
+    this.spacesByName=spacesByName;
   }
 
   /**
@@ -97,34 +97,34 @@ export class Coloring {
   colors(vm: ValueMap): Colors {
     return {
       primary: this.getColorString(
-          vm, Keys.PRIMARY_COLOR, Keys.PRIMARY_COLOR_SPACE,
-          Keys.PRIMARY_COLOR_SPACE_VALUE),
+        vm, Keys.PRIMARY_COLOR, Keys.PRIMARY_COLOR_SPACE,
+        Keys.PRIMARY_COLOR_SPACE_VALUE),
       secondary: this.getColorString(
-          vm, Keys.SECONDARY_COLOR, Keys.SECONDARY_COLOR_SPACE,
-          Keys.SECONDARY_COLOR_SPACE_VALUE),
+        vm, Keys.SECONDARY_COLOR, Keys.SECONDARY_COLOR_SPACE,
+        Keys.SECONDARY_COLOR_SPACE_VALUE),
       stroke: this.getColorString(
-          vm, Keys.STROKE_COLOR, Keys.STROKE_COLOR_SPACE,
-          Keys.STROKE_COLOR_SPACE_VALUE),
+        vm, Keys.STROKE_COLOR, Keys.STROKE_COLOR_SPACE,
+        Keys.STROKE_COLOR_SPACE_VALUE),
     };
   }
 
   private getColorString(
-      vm: ValueMap, colorKey: string, colorSpaceKey: string,
-      colorSpaceValueKey: string): string|undefined {
+    vm: ValueMap, colorKey: string, colorSpaceKey: string,
+    colorSpaceValueKey: string): string|undefined {
     let colorString: string|undefined;
     if (vm.has(colorKey)) {
       return vm.expectString(colorKey);
     } else if (vm.has(colorSpaceKey)) {
-      const colorSpaceName = vm.expectString(colorSpaceKey);
-      const colorValue = vm.expectNumber(colorSpaceValueKey);
-      const colorSpace = this.spacesByName.get(colorSpaceName);
+      const colorSpaceName=vm.expectString(colorSpaceKey);
+      const colorValue=vm.expectNumber(colorSpaceValueKey);
+      const colorSpace=this.spacesByName.get(colorSpaceName);
       if (!colorSpace) {
         throw new ConfigurationError(
-            `Color space '${colorSpaceName} is not defined`)
-            .at(Severity.ERROR)
-            .from(SOURCE);
+          `Color space '${colorSpaceName} is not defined`)
+          .at(Severity.ERROR)
+          .from(SOURCE);
       }
-      colorString = colorSpace(colorValue);
+      colorString=colorSpace(colorValue);
     }
     return colorString;
   }
