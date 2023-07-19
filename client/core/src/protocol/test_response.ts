@@ -13,19 +13,19 @@
 
 /** @fileoverview A set of test helpers for assembling TraceViz responses. */
 
-import { valueMap } from '../value/test_value.js';
-import { ValueMap } from '../value/value_map.js';
-import { Response, ResponseNode } from '../protocol/response_interface.js';
+import {valueMap} from '../value/test_value.js';
+import {ValueMap} from '../value/value_map.js';
+import {Response, ResponseNode} from '../protocol/response_interface.js';
 
 /** A constructable ResponseNode for use in tests. */
 export class TestResponseNode implements ResponseNode {
   constructor(
-      private internalProperties: ValueMap, readonly children: ResponseNode[]) {
+    private internalProperties: ValueMap, readonly children: ResponseNode[]) {
   }
 
   with(properties: ValueMap): ResponseNode {
-    this.internalProperties =
-        ValueMap.union(this.internalProperties, properties);
+    this.internalProperties=
+      ValueMap.union(this.internalProperties, properties);
     return this;
   }
 
@@ -36,22 +36,22 @@ export class TestResponseNode implements ResponseNode {
 
 /** Returns a new TestResponseNode with the provided properties and children. */
 export function node(
-    properties?: ValueMap, ...children: ResponseNode[]): TestResponseNode {
-  if (properties === undefined) {
-    properties = valueMap();
+  properties?: ValueMap, ...children: ResponseNode[]): TestResponseNode {
+  if (properties===undefined) {
+    properties=valueMap();
   }
   return new TestResponseNode(properties, [...children]);
 }
 
 /** A constructable Response for use in tests. */
 class TestResponse implements Response {
-  constructor(readonly series: Map<string, ResponseNode>) {}
+  constructor(readonly series: Map<string, ResponseNode>) { }
 }
 
 /** Returns a new TestResponse with the provided series. */
 export function response(
-    ...series: Array<{name: string, series: ResponseNode}>): Response {
-  const seriesByName = new Map<string, ResponseNode>();
+  ...series: Array<{name: string, series: ResponseNode}>): Response {
+  const seriesByName=new Map<string, ResponseNode>();
   for (const dataSeries of series) {
     seriesByName.set(dataSeries.name, dataSeries.series);
   }

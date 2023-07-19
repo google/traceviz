@@ -13,15 +13,15 @@
 
 import 'jasmine';
 
-import { fromObject } from './json_response.js';
-import { ResponseNode } from './response_interface.js';
-import { int, strs, str, ints, dbl, dur, ts, valueMap } from '../value/test_value.js';
-import { Duration } from '../duration/duration.js';
-import { Timestamp } from '../timestamp/timestamp.js';
+import {fromObject} from './json_response.js';
+import {ResponseNode} from './response_interface.js';
+import {int, strs, str, ints, dbl, dur, ts, valueMap} from '../value/test_value.js';
+import {Duration} from '../duration/duration.js';
+import {Timestamp} from '../timestamp/timestamp.js';
 
 describe('json response node test', () => {
   it('loads a response', () => {
-    const response = fromObject(`{
+    const response=fromObject(`{
     "StringTable": [
       "stridx", "stridxs", "int", "ints", "dbl", "dur", "ts",
       "hello", "goodbye"
@@ -55,13 +55,13 @@ describe('json response node test', () => {
             properties: valueMap(),
             children: [{
               properties: valueMap(
-                  {key: 'stridx', val: str('hello')},
-                  {key: 'stridxs', val: strs('hello', 'goodbye')},
-                  {key: 'int', val: int(100)},
-                  {key: 'ints', val: ints(50, 150, 250)},
-                  {key: 'dbl', val: dbl(3.14159)},
-                  {key: 'dur', val: dur(new Duration(150000000))},
-                  {key: 'ts', val: ts(new Timestamp(500, 100))}),
+                {key: 'stridx', val: str('hello')},
+                {key: 'stridxs', val: strs('hello', 'goodbye')},
+                {key: 'int', val: int(100)},
+                {key: 'ints', val: ints(50, 150, 250)},
+                {key: 'dbl', val: dbl(3.14159)},
+                {key: 'dur', val: dur(new Duration(150000000))},
+                {key: 'ts', val: ts(new Timestamp(500, 100))}),
               children: []
             }],
           }

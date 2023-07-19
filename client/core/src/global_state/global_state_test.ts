@@ -13,28 +13,28 @@
 
 import 'jasmine';
 
-import { GlobalState } from './global_state.js';
-import { str } from '../value/test_value.js';
-import { StringValue } from '../value/value.js';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import {GlobalState} from './global_state.js';
+import {str} from '../value/test_value.js';
+import {StringValue} from '../value/value.js';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 describe('global state test', () => {
   it('sets, gets, and complains as expected', () => {
-    const gs = new GlobalState();
+    const gs=new GlobalState();
 
     // Subscribe to gs, updating keysAdded with each update.
-    let keysAdded: string[] = [];
-    const unsubscribe = new Subject<void>();
+    let keysAdded: string[]=[];
+    const unsubscribe=new Subject<void>();
 
     gs.pipe(takeUntil(unsubscribe)).subscribe((keys) => {
-      keysAdded = keys;
+      keysAdded=keys;
     });
     expect(keysAdded).toEqual([]);
     expect(() => gs.get('count')).toThrow();
 
     // Set a global value, expect an update.
-    const sv = str('howdy');
+    const sv=str('howdy');
     gs.set('greetings', sv);
     expect(keysAdded).toEqual(['greetings']);
 
@@ -45,11 +45,11 @@ describe('global state test', () => {
 
     // Ensure that the Value fetched with 'get' is the same as that originally
     // set.
-    const got = gs.get('greetings');
+    const got=gs.get('greetings');
     expect(got instanceof StringValue).toBeTrue();
-    const gotSv = got as StringValue;
+    const gotSv=got as StringValue;
     expect(gotSv.val).toEqual('howdy');
-    sv.val = 'welcome';
+    sv.val='welcome';
     expect(gotSv.val).toEqual('welcome');
 
     unsubscribe.next();

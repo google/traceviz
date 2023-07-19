@@ -11,8 +11,8 @@
         limitations under the License.
 */
 
-import { Value } from '../value/value.js';
-import { Subject } from 'rxjs';
+import {Value} from '../value/value.js';
+import {Subject} from 'rxjs';
 
 /**
  * Extended by types that include the portion of the GlobalState API available
@@ -20,10 +20,10 @@ import { Subject } from 'rxjs';
  * an Observable broadcasting changes to its managed set of keys.
  */
 export interface GlobalStateInterface extends Subject<string[]> {
-  /**
-   * Returns the Value associated with the specified key in the global state
-   * mapping.  It is an error to call get() on a key not present in the global
-   * mapping.
-   */
-  get(key: string): Value;
+        /**
+         * Returns the Value associated with the specified key in the global state
+         * mapping.  It is an error to call get() on a key not present in the global
+         * mapping.
+         */
+        get(key: string): Value;
 }

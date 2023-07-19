@@ -16,12 +16,12 @@
  * request.
  */
 
-import { BehaviorSubject, distinctUntilChanged, Observable, Subject, takeUntil } from 'rxjs';
-import { StringValue } from '../value/value.js';
-import { ResponseNode } from '../protocol/response_interface.js';
-import { DataSeriesFetcher } from './data_series_fetcher.js';
-import { ValueMap } from '../value/value_map.js';
-import { SeriesRequest } from '../protocol/request_interface.js';
+import {BehaviorSubject, distinctUntilChanged, Observable, Subject, takeUntil} from 'rxjs';
+import {StringValue} from '../value/value.js';
+import {ResponseNode} from '../protocol/response_interface.js';
+import {DataSeriesFetcher} from './data_series_fetcher.js';
+import {ValueMap} from '../value/value_map.js';
+import {SeriesRequest} from '../protocol/request_interface.js';
 
 /**
  * Each data series request includes a string series_name which the backend
@@ -34,9 +34,9 @@ import { SeriesRequest } from '../protocol/request_interface.js';
  * is used by the DataQuery component to route data series responses to their
  * proper consumers.
  */
-let nextID = 0;
+let nextID=0;
 function getUniqueSeriesName(): string {
-  if (nextID >= Number.MAX_SAFE_INTEGER) {
+  if (nextID>=Number.MAX_SAFE_INTEGER) {
     // If we've generated 90 quadrillion unique names, we deserve a prize: this
     // error.
     throw new Error(`Too many series IDs generated.`);
@@ -58,34 +58,34 @@ function getUniqueSeriesName(): string {
  * Users of DataSeriesQuery must call its dispose method when done with it.
  */
 export class DataSeriesQuery {
-  readonly unsubscribe = new Subject<void>();
+  readonly unsubscribe=new Subject<void>();
   // loading emits true when the data series is being fetched, and emits false
   // when a response is handled.
-  readonly loading = new BehaviorSubject<boolean>(false);
+  readonly loading=new BehaviorSubject<boolean>(false);
   // response emits a root ResponseNode populated with the series query response
   // each time such a response is available.
-  readonly response = new Subject<ResponseNode>();
+  readonly response=new Subject<ResponseNode>();
   // This series' unique name, for routing.  Nothing should depend on this
   // member having any particular value, but it will be unique to each
   // DataSeriesQuery instance and will remain stable throughout its lifetime.
   readonly uniqueSeriesName: string;
 
   constructor(
-      readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
-      readonly parameters: ValueMap, fetch: Observable<boolean>) {
-    this.uniqueSeriesName = getUniqueSeriesName();
+    readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
+    readonly parameters: ValueMap, fetch: Observable<boolean>) {
+    this.uniqueSeriesName=getUniqueSeriesName();
     fetch
-        .pipe(
-            distinctUntilChanged(),
-            takeUntil(this.unsubscribe),
-            )
-        .subscribe((fetch) => {
-          fetch && this.fetch();
-        });
+      .pipe(
+        distinctUntilChanged(),
+        takeUntil(this.unsubscribe),
+      )
+      .subscribe((fetch) => {
+        fetch&&this.fetch();
+      });
   }
 
   private fetch() {
-    const req: SeriesRequest = {
+    const req: SeriesRequest={
       queryName: this.queryName.val,
       seriesName: this.uniqueSeriesName,
       parameters: this.parameters,
@@ -93,16 +93,16 @@ export class DataSeriesQuery {
     // Publish the fact that a query is pending.
     this.loading.next(true);
     this.dataQuery.fetchDataSeries(
-        req,
-        (resp: ResponseNode) => {
-          // Upon receiving the response, broadcast the response and publish
-          // the fact that no query is pending.
-          this.response.next(resp);
-          this.loading.next(false);
-        },
-        () => {
-          this.loading.next(false);
-        });
+      req,
+      (resp: ResponseNode) => {
+        // Upon receiving the response, broadcast the response and publish
+        // the fact that no query is pending.
+        this.response.next(resp);
+        this.loading.next(false);
+      },
+      () => {
+        this.loading.next(false);
+      });
   }
 
   dispose() {

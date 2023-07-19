@@ -15,21 +15,20 @@
  * @fileoverview A global singleton DataFetcherInterface for testing.  .
  */
 
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { Request } from '../protocol/request_interface.js';
-import { Response } from '../protocol/response_interface.js';
-import { DataFetcherInterface } from './data_fetcher_interface.js';
+import {Observable, ReplaySubject, Subject} from 'rxjs';
+import {Request} from '../protocol/request_interface.js';
+import {Response} from '../protocol/response_interface.js';
+import {DataFetcherInterface} from './data_fetcher_interface.js';
 
 /**
  * Implements DataFetcher for fake data.  Monitor expected requests on
  * requestChannel, and enqueue the next response on responseChannel.
- * reset() 
  */
 class TestDataFetcher implements DataFetcherInterface {
   // Subscribe to monitor recent requests.
-  requestChannel = new Subject<Request>();
+  requestChannel=new Subject<Request>();
   // Enqueue up to one response for broadcasting.
-  responseChannel = new ReplaySubject<Response>(1);
+  responseChannel=new ReplaySubject<Response>(1);
 
   fetch(req: Request): Observable<Response> {
     this.requestChannel.next(req);
@@ -39,9 +38,9 @@ class TestDataFetcher implements DataFetcherInterface {
   // Clears the responseChannel, resetting it to a state in which it has never
   // received a response.  For use between tests.
   reset() {
-    this.responseChannel = new ReplaySubject<Response>(1);
+    this.responseChannel=new ReplaySubject<Response>(1);
   }
 }
 
 /** A singleton data fetcher available for testing. */
-export const GLOBAL_TEST_DATA_FETCHER = new TestDataFetcher();
+export const GLOBAL_TEST_DATA_FETCHER=new TestDataFetcher();

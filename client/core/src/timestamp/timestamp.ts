@@ -15,9 +15,9 @@
  * @fileoverview A type representing a fine-granularity trace timestamp.
  */
 
-import { Duration } from '../duration/duration.js';
+import {Duration} from '../duration/duration.js';
 
-const NANOS_PER_SECOND = 1000000000.0;
+const NANOS_PER_SECOND=1000000000.0;
 
 /**
  * JS's native Date type has millisecond resolution, whereas trace data is at
@@ -26,22 +26,22 @@ const NANOS_PER_SECOND = 1000000000.0;
  */
 export class Timestamp {
   constructor(readonly seconds: number, readonly nanos: number) {
-    this.seconds += Math.floor(this.nanos / NANOS_PER_SECOND);
-    this.nanos = this.nanos % NANOS_PER_SECOND;
+    this.seconds+=Math.floor(this.nanos/NANOS_PER_SECOND);
+    this.nanos=this.nanos%NANOS_PER_SECOND;
   }
 
   static fromDate(date: Date): Timestamp {
-    const dateMs = date.getTime();
-    return new Timestamp(Math.floor(dateMs / 1000), (dateMs % 1000) * 1000000);
+    const dateMs=date.getTime();
+    return new Timestamp(Math.floor(dateMs/1000), (dateMs%1000)*1000000);
   }
 
   add(duration: Duration): Timestamp {
-    return new Timestamp(this.seconds, this.nanos + duration.nanos);
+    return new Timestamp(this.seconds, this.nanos+duration.nanos);
   }
 
   sub(other: Timestamp): Duration {
     return new Duration(
-      (this.seconds - other.seconds) * NANOS_PER_SECOND + this.nanos -
+      (this.seconds-other.seconds)*NANOS_PER_SECOND+this.nanos-
       other.nanos);
   }
 
@@ -50,7 +50,7 @@ export class Timestamp {
    * granularity.
    */
   toDate(): Date {
-    return new Date((this.seconds + (this.nanos / NANOS_PER_SECOND)) * 1000.0);
+    return new Date((this.seconds+(this.nanos/NANOS_PER_SECOND))*1000.0);
   }
 
   /**
@@ -58,9 +58,9 @@ export class Timestamp {
    * respectively less than, equal to, or greater than the argument.
    */
   cmp(other: Timestamp): number {
-    if (this.seconds === other.seconds) {
-      return this.nanos - other.nanos;
+    if (this.seconds===other.seconds) {
+      return this.nanos-other.nanos;
     }
-    return this.seconds - other.seconds;
+    return this.seconds-other.seconds;
   }
 }

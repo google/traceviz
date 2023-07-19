@@ -13,10 +13,10 @@
 
 import 'jasmine';
 
-import { strs, str, strSet, dbl, dur, ts, int, ints, intSet } from './test_value.js';
-import { Value, V, ValueType, fromV } from './value.js';
-import { Duration } from '../duration/duration.js';
-import { Timestamp } from '../timestamp/timestamp.js';
+import {strs, str, strSet, dbl, dur, ts, int, ints, intSet} from './test_value.js';
+import {Value, V, ValueType, fromV} from './value.js';
+import {Duration} from '../duration/duration.js';
+import {Timestamp} from '../timestamp/timestamp.js';
 
 describe('value test', () => {
   it('converts to and from json', () => {
@@ -25,7 +25,7 @@ describe('value test', () => {
       v: V;
       value: Value;
     }
-    const tests: Test[] = [
+    const tests: Test[]=[
       {
         json: '[ 1, "hello" ]',
         v: [ValueType.STRING, 'hello'],
@@ -64,78 +64,78 @@ describe('value test', () => {
     ];
     for (const [idx, test] of tests.entries()) {
       expect(fromV(JSON.parse(test.json) as V, []))
-          .withContext(`testcase ${idx}`)
-          .toEqual(test.value);
+        .withContext(`testcase ${idx}`)
+        .toEqual(test.value);
       expect(test.value.toV()).withContext(`testcase ${idx}`).toEqual(test.v);
       expect(JSON.parse(test.json) as V)
-          .withContext(`testcase ${idx}`)
-          .toEqual(test.v);
+        .withContext(`testcase ${idx}`)
+        .toEqual(test.v);
       expect(fromV(test.v, []))
-          .withContext(`testcase ${idx}`)
-          .toEqual(test.value);
+        .withContext(`testcase ${idx}`)
+        .toEqual(test.value);
     }
     // A handful of types don't do symmetric conversion.  For those, test
     // what we can.
-     expect(fromV(JSON.parse(`[ 2, 0 ]`) as V, ['hello']))
-         .toEqual(str('hello'));
-     expect(fromV(JSON.parse(`[ 4, [ 0, 1, 2] ]`) as V, ['a', 'b', 'c']))
-         .toEqual(strs('a', 'b', 'c'));
+    expect(fromV(JSON.parse(`[ 2, 0 ]`) as V, ['hello']))
+      .toEqual(str('hello'));
+    expect(fromV(JSON.parse(`[ 4, [ 0, 1, 2] ]`) as V, ['a', 'b', 'c']))
+      .toEqual(strs('a', 'b', 'c'));
     expect(JSON.stringify(strSet('c', 'a', 'b').toV()))
-        .toEqual(`[ 3, [ "a", "b", "c" ] ]`.replace(/\s/g, ''));
+      .toEqual(`[ 3, [ "a", "b", "c" ] ]`.replace(/\s/g, ''));
     expect(JSON.stringify(intSet(3, 1, 2).toV()))
-        .toEqual(`[ 6, [ 1, 2, 3 ] ]`.replace(/\s/g, ''));
+      .toEqual(`[ 6, [ 1, 2, 3 ] ]`.replace(/\s/g, ''));
   });
 
   it('serializes and deserializes', () => {
-    const sval = str('a');
+    const sval=str('a');
     expect(sval.val).toEqual('a');
     expect(sval.exportTo()).toEqual('a');
     expect(sval.importFrom('b')).toBeTrue();
     expect(sval.val).toEqual('b');
 
-    const ssval = strs('a', 'b');
+    const ssval=strs('a', 'b');
     expect(ssval.val).toEqual(['a', 'b']);
     expect(ssval.exportTo()).toEqual(['a', 'b']);
     expect(ssval.importFrom(['b', 'c'])).toBeTrue();
     expect(ssval.val).toEqual(['b', 'c']);
 
-    const ssetval = strSet('a', 'b');
+    const ssetval=strSet('a', 'b');
     expect(ssetval.val).toEqual(new Set(['a', 'b']));
     expect(ssetval.exportTo()).toEqual(['a', 'b']);
     expect(ssetval.importFrom(['b', 'c'])).toBeTrue();
     expect(ssetval.val).toEqual(new Set(['b', 'c']));
 
-    const ival = int(10);
+    const ival=int(10);
     expect(ival.val).toEqual(10);
     expect(ival.exportTo()).toEqual(10);
     expect(ival.importFrom(20)).toBeTrue();
     expect(ival.val).toEqual(20);
 
-    const isval = ints(10, 20);
+    const isval=ints(10, 20);
     expect(isval.val).toEqual([10, 20]);
     expect(isval.exportTo()).toEqual([10, 20]);
     expect(isval.importFrom([20, 30])).toBeTrue();
     expect(isval.val).toEqual([20, 30]);
 
-    const isetval = intSet(10, 20);
+    const isetval=intSet(10, 20);
     expect(isetval.val).toEqual(new Set([10, 20]));
     expect(isetval.exportTo()).toEqual([10, 20]);
     expect(isetval.importFrom([20, 30])).toBeTrue();
     expect(isetval.val).toEqual(new Set([20, 30]));
 
-    const dblval = dbl(3.5);
+    const dblval=dbl(3.5);
     expect(dblval.val).toEqual(3.5);
     expect(dblval.exportTo()).toEqual(3.5);
     expect(dblval.importFrom(5.5)).toBeTrue();
     expect(dblval.val).toEqual(5.5);
 
-    const durval = dur(new Duration(1000));
+    const durval=dur(new Duration(1000));
     expect(durval.val).toEqual(new Duration(1000));
     expect(durval.exportTo()).toEqual(1000);
     expect(durval.importFrom(2000)).toBeTrue();
     expect(durval.val).toEqual(new Duration(2000));
 
-    const tsval = ts(new Timestamp(1000, 500));
+    const tsval=ts(new Timestamp(1000, 500));
     expect(tsval.val).toEqual(new Timestamp(1000, 500));
     expect(tsval.exportTo()).toEqual({seconds: 1000, nanos: 500});
     expect(tsval.importFrom({seconds: 2000, nanos: 300})).toBeTrue();
@@ -143,25 +143,25 @@ describe('value test', () => {
   });
 
   it('updates subscribers', () => {
-    const got1: number[] = [];
-    const got2: number[] = [];
-    const ival = int(10);
-    const sub1 = ival.subscribe(() => {
+    const got1: number[]=[];
+    const got2: number[]=[];
+    const ival=int(10);
+    const sub1=ival.subscribe(() => {
       got1.push(ival.val);
     });
-    ival.val = 12;
-    const sub2 = ival.subscribe(() => {
+    ival.val=12;
+    const sub2=ival.subscribe(() => {
       got2.push(ival.val);
     });
     // Updating ival with the value it already contains does not push to
     // subscribers.
-    ival.val = 12;
+    ival.val=12;
     // Integers take the floor of their number arguments.  12.345 floors to 12,
     // so the value does not broadcast an update.
-    ival.val = 12.345;
-    ival.val = 10;
+    ival.val=12.345;
+    ival.val=10;
     sub1.unsubscribe();
-    ival.val = 13;
+    ival.val=13;
     sub2.unsubscribe();
     expect(got1).toEqual([10, 12, 10]);
     expect(got2).toEqual([12, 10, 13]);
@@ -175,7 +175,7 @@ describe('value test', () => {
       other: Value;
       final: Value;
     }
-    const tests: Test[] = [
+    const tests: Test[]=[
       {
         target: str('hello'),
         other: str('goodbye'),
@@ -308,124 +308,124 @@ describe('value test', () => {
       }
     ];
     for (const [idx, test] of tests.entries()) {
-      const toggle = (test.toggle !== undefined) ? test.toggle : true;
-      const replace = (test.replace !== undefined) ? test.replace : false;
+      const toggle=(test.toggle!==undefined)? test.toggle:true;
+      const replace=(test.replace!==undefined)? test.replace:false;
       expect(test.target.fold(test.other, toggle, replace))
-          .withContext(`testcase ${idx}`)
-          .toBeTrue();
+        .withContext(`testcase ${idx}`)
+        .toBeTrue();
       // if target includes final and final includes target, they're equal.
       expect(test.target.includes(test.final))
-          .withContext(`testcase ${idx}`)
-          .toBeTrue();
+        .withContext(`testcase ${idx}`)
+        .toBeTrue();
       expect(test.final.includes(test.target))
-          .withContext(`testcase ${idx}`)
-          .toBeTrue();
+        .withContext(`testcase ${idx}`)
+        .toBeTrue();
     }
   });
 
   it('subscribes properly', () => {
-    const s = str('a');
-    const sVals: string[] = [];
+    const s=str('a');
+    const sVals: string[]=[];
     s.subscribe(() => {
       sVals.push(s.val);
     });
-    s.val = 'b';
-    s.val = 'c';
-    s.val = 'c';
+    s.val='b';
+    s.val='c';
+    s.val='c';
     expect(sVals).toEqual(['a', 'b', 'c']);
 
-    const sl = strs('a', 'b', 'c');
-    const slVals: string[][] = [];
+    const sl=strs('a', 'b', 'c');
+    const slVals: string[][]=[];
     sl.subscribe(() => {
       slVals.push(sl.val);
     });
-    sl.val = ['c', 'b', 'a'];
-    sl.val = ['c', 'b', 'a'];
-    sl.val = ['a', 'b'];
+    sl.val=['c', 'b', 'a'];
+    sl.val=['c', 'b', 'a'];
+    sl.val=['a', 'b'];
     expect(slVals).toEqual([
       ['a', 'b', 'c'],
       ['c', 'b', 'a'],
       ['a', 'b'],
     ]);
 
-    const ss = strSet('a', 'b', 'c');
-    const ssVals: Array<Set<string>> = [];
+    const ss=strSet('a', 'b', 'c');
+    const ssVals: Array<Set<string>>=[];
     ss.subscribe(() => {
       ssVals.push(ss.val);
     });
-    ss.val = new Set(['c', 'b', 'a']);
-    ss.val = new Set(['b', 'a']);
+    ss.val=new Set(['c', 'b', 'a']);
+    ss.val=new Set(['b', 'a']);
     expect(ssVals).toEqual([
       new Set(['a', 'b', 'c']),
       new Set(['a', 'b']),
     ]);
 
-    const i = int(1);
-    const iVals: number[] = [];
+    const i=int(1);
+    const iVals: number[]=[];
     i.subscribe(() => {
       iVals.push(i.val);
     });
-    i.val = 2;
-    i.val = 3;
+    i.val=2;
+    i.val=3;
     expect(iVals).toEqual([1, 2, 3]);
 
-    const il = ints(1, 2, 3);
-    const ilVals: number[][] = [];
+    const il=ints(1, 2, 3);
+    const ilVals: number[][]=[];
     il.subscribe(() => {
       ilVals.push(il.val);
     });
-    il.val = [3, 2, 1];
-    il.val = [3, 2, 1];
-    il.val = [1, 2];
+    il.val=[3, 2, 1];
+    il.val=[3, 2, 1];
+    il.val=[1, 2];
     expect(ilVals).toEqual([
       [1, 2, 3],
       [3, 2, 1],
       [1, 2],
     ]);
 
-    const is = intSet(1, 2, 3);
-    const isVals: Array<Set<number>> = [];
+    const is=intSet(1, 2, 3);
+    const isVals: Array<Set<number>>=[];
     is.subscribe(() => {
       isVals.push(is.val);
     });
-    is.val = new Set([3, 1, 2]);
-    is.val = new Set([1, 2]);
+    is.val=new Set([3, 1, 2]);
+    is.val=new Set([1, 2]);
     expect(isVals).toEqual([
       new Set([1, 2, 3]),
       new Set([1, 2]),
     ]);
 
-    const d = dbl(.5);
-    const dVals: number[] = [];
+    const d=dbl(.5);
+    const dVals: number[]=[];
     d.subscribe(() => {
       dVals.push(d.val);
     });
-    d.val = 1.5;
-    d.val = 1.5;
-    d.val = 2.5;
+    d.val=1.5;
+    d.val=1.5;
+    d.val=2.5;
     expect(dVals).toEqual([.5, 1.5, 2.5]);
 
-    const duration = dur(new Duration(1000));
-    const durVals: Duration[] = [];
+    const duration=dur(new Duration(1000));
+    const durVals: Duration[]=[];
     duration.subscribe(() => {
       durVals.push(duration.val);
     });
-    duration.val = new Duration(2000);
-    duration.val = new Duration(2000), duration.val = new Duration(3000);
+    duration.val=new Duration(2000);
+    duration.val=new Duration(2000), duration.val=new Duration(3000);
     expect(durVals).toEqual([
       new Duration(1000),
       new Duration(2000),
       new Duration(3000),
     ]);
 
-    const timestamp = ts(new Timestamp(1000, 0));
-    const tsVals: Timestamp[] = [];
+    const timestamp=ts(new Timestamp(1000, 0));
+    const tsVals: Timestamp[]=[];
     timestamp.subscribe(() => {
       tsVals.push(timestamp.val);
     });
-    timestamp.val = new Timestamp(2000, 0);
-    timestamp.val = new Timestamp(2000, 0),
-    timestamp.val = new Timestamp(3000, 0);
+    timestamp.val=new Timestamp(2000, 0);
+    timestamp.val=new Timestamp(2000, 0),
+      timestamp.val=new Timestamp(3000, 0);
     expect(tsVals).toEqual([
       new Timestamp(1000, 0),
       new Timestamp(2000, 0),
@@ -449,12 +449,12 @@ describe('value test', () => {
   it('compares properly', () => {
     expect(strSet('a', 'b', 'c').compare(str('a'))).toBeGreaterThan(0);
     expect(strSet('c', 'b', 'a').compare(strSet('a', 'd', 'b')))
-        .toBeLessThan(0);
+      .toBeLessThan(0);
     expect(strSet('d', 'b', 'a').compare(strSet('a', 'c', 'b')))
-        .toBeGreaterThan(0);
+      .toBeGreaterThan(0);
     expect(strSet('c', 'b', 'a').compare(strs('a', 'd', 'b'))).toBeLessThan(0);
     expect(strSet('d', 'b', 'a').compare(strs('a', 'c', 'b')))
-        .toBeGreaterThan(0);
+      .toBeGreaterThan(0);
     expect(strs('a', 'b', 'c').compare(str('a'))).toBeGreaterThan(0);
     expect(strs('a', 'b', 'c').compare(strs('c', 'b', 'a'))).toBeLessThan(0);
     expect(strs('a').compare(strs('a', 'c', 'b'))).toBeLessThan(0);
@@ -476,16 +476,16 @@ describe('value test', () => {
     expect(dbl(0.5).compare(dbl(.5))).toBe(0);
     expect(dbl(1.5).compare(dbl(1))).toBeGreaterThan(0);
     expect(dur(new Duration(0)).compare(dur(new Duration(1000))))
-        .toBeLessThan(0);
+      .toBeLessThan(0);
     expect(dur(new Duration(1000)).compare(dur(new Duration(1000)))).toBe(0);
     expect(dur(new Duration(2000)).compare(dur(new Duration(1000))))
-        .toBeGreaterThan(0);
+      .toBeGreaterThan(0);
     expect(ts(new Timestamp(1000, 0)).compare(ts(new Timestamp(2000, 1000))))
-        .toBeLessThan(0);
+      .toBeLessThan(0);
     expect(ts(new Timestamp(1000, 1000)).compare(ts(new Timestamp(1000, 1000))))
-        .toBe(0);
+      .toBe(0);
     expect(ts(new Timestamp(1000, 2000)).compare(ts(new Timestamp(0, 1000))))
-        .toBeGreaterThan(0);
+      .toBeGreaterThan(0);
 
     expect(str('a').compare(strs('a', 'b'))).not.toBe(0);
     expect(str('a').compare(strSet('a', 'b'))).not.toBe(0);
@@ -545,7 +545,7 @@ describe('value test', () => {
     expect(dur(new Duration(1000)).compare(intSet(1, 2))).not.toBe(0);
     expect(dur(new Duration(1000)).compare(dbl(1.5))).not.toBe(0);
     expect(dur(new Duration(1000)).compare(ts(new Timestamp(1000, 1000))))
-        .not.toBe(0);
+      .not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(str('a'))).not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(strs('a', 'b'))).not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(strSet('a', 'b'))).not.toBe(0);
@@ -554,6 +554,6 @@ describe('value test', () => {
     expect(ts(new Timestamp(1000, 1000)).compare(intSet(1, 2))).not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(dbl(1.5))).not.toBe(0);
     expect(ts(new Timestamp(1000, 1000)).compare(dur(new Duration(1000))))
-        .not.toBe(0);
+      .not.toBe(0);
   });
 });

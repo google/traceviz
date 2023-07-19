@@ -17,9 +17,9 @@
  * associated with string keys.
  */
 
-import { Duration } from '../duration/duration.js';
-import { Timestamp } from '../timestamp/timestamp.js';
-import { ReplaySubject } from 'rxjs';
+import {Duration} from '../duration/duration.js';
+import {Timestamp} from '../timestamp/timestamp.js';
+import {ReplaySubject} from 'rxjs';
 
 /**
  * The different types a backend Value may hold.
@@ -36,22 +36,22 @@ import { ReplaySubject } from 'rxjs';
  *     decoding in the frontend.
  */
 export enum ValueType {
-  UNSET = 0,
-  STRING = 1,
-  STRING_INDEX = 2,
-  STRINGS = 3,
-  STRING_INDICES = 4,
-  INTEGER = 5,
-  INTEGERS = 6,
-  DOUBLE = 7,
-  DURATION = 8,
-  TIMESTAMP = 9
+  UNSET=0,
+  STRING=1,
+  STRING_INDEX=2,
+  STRINGS=3,
+  STRING_INDICES=4,
+  INTEGER=5,
+  INTEGERS=6,
+  DOUBLE=7,
+  DURATION=8,
+  TIMESTAMP=9
 }
 
 /**
  * Represents a single Value expressed in JSON.
  */
-export type V = [ValueType, unknown];
+export type V=[ValueType, unknown];
 
 /**
  * Extended by types that provide a unique string-to-number mapping.  Mapping
@@ -78,7 +78,7 @@ export function fromV(v: V, stringTable: string[]): Value|undefined {
       return new StringListValue(v[1] as string[]);
     case ValueType.STRING_INDICES:
       return new StringListValue(
-          (v[1] as number[]).map((idx) => stringTable[idx]));
+        (v[1] as number[]).map((idx) => stringTable[idx]));
     case ValueType.INTEGER:
       return new IntegerValue(v[1] as number);
     case ValueType.INTEGERS:
@@ -88,7 +88,7 @@ export function fromV(v: V, stringTable: string[]): Value|undefined {
     case ValueType.DURATION:
       return new DurationValue(new Duration(v[1] as number));
     case ValueType.TIMESTAMP:
-      const parts = v[1] as number[];
+      const parts=v[1] as number[];
       return new TimestampValue(new Timestamp(parts[0], parts[1]));
     default:
       return undefined;
@@ -100,13 +100,13 @@ export function fromV(v: V, stringTable: string[]): Value|undefined {
  * information about fold, see the Value interface.
  */
 function foldList<V>(
-    thisVal: V[], otherVal: V[], replace: boolean, toggle: boolean): V[] {
+  thisVal: V[], otherVal: V[], replace: boolean, toggle: boolean): V[] {
   if (toggle) {
-    if (thisVal.length === otherVal.length) {
-      let equal = true;
-      for (let i = 0; i < thisVal.length; i++) {
-        if (thisVal[i] !== otherVal[i]) {
-          equal = false;
+    if (thisVal.length===otherVal.length) {
+      let equal=true;
+      for (let i=0; i<thisVal.length; i++) {
+        if (thisVal[i]!==otherVal[i]) {
+          equal=false;
         }
       }
       if (equal) {
@@ -126,16 +126,16 @@ function foldList<V>(
  * information about fold, see the Value interface.
  */
 function foldSet<V>(
-    thisVal: Set<V>, otherVal: Set<V>, replace: boolean,
-    toggle: boolean): Set<V> {
+  thisVal: Set<V>, otherVal: Set<V>, replace: boolean,
+  toggle: boolean): Set<V> {
   if (replace) {
     // Replace replaces thisVal with other.val, unless thisVal == otherVal
     // and toggle is true, in which case it clears thisVal.
-    if (toggle && (thisVal.size === otherVal.size)) {
-      let equal = true;
+    if (toggle&&(thisVal.size===otherVal.size)) {
+      let equal=true;
       for (const v of thisVal) {
         if (!otherVal.has(v)) {
-          equal = false;
+          equal=false;
         }
       }
       if (equal) {
@@ -146,7 +146,7 @@ function foldSet<V>(
   }
   if (toggle) {
     // Construct a new Set to avoid mutating thisVal.
-    const newVal = new Set<V>(thisVal);
+    const newVal=new Set<V>(thisVal);
     for (const v of otherVal) {
       if (thisVal.has(v)) {
         newVal.delete(v);
@@ -156,7 +156,7 @@ function foldSet<V>(
     }
     return newVal;
   }
-  const newVal = thisVal;
+  const newVal=thisVal;
   for (const v of otherVal) {
     newVal.add(v);
   }
@@ -170,8 +170,8 @@ export interface ExportedTimestamp {
 }
 
 /** The union of all Value export types. */
-export type ExportedValue = {}|number|string|number[]|string[]|
-    ExportedTimestamp;
+export type ExportedValue={}|number|string|number[]|string[]|
+  ExportedTimestamp;
 
 /**
  * Extended by types containing a subscribable and updatable datum.  This file
@@ -240,7 +240,7 @@ export class EmptyValue extends ReplaySubject<Value> implements Value {
     return '';
   }
 
-  val: null = null;
+  val: null=null;
 
   toV(): V|undefined {
     return undefined;
@@ -255,7 +255,7 @@ export class EmptyValue extends ReplaySubject<Value> implements Value {
   }
 
   compare(other: Value): number {
-    return this.includes(other) ? 0 : 1;
+    return this.includes(other)? 0:1;
   }
 
   typeName(): string {
@@ -271,8 +271,8 @@ export class StringValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (typeof sv === 'string') {
-      this.val = sv;
+    if (typeof sv==='string') {
+      this.val=sv;
       return true;
     }
     return false;
@@ -287,8 +287,8 @@ export class StringValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedString: string) {
-    if (wrappedString !== this.wrappedVal) {
-      this.wrappedVal = wrappedString;
+    if (wrappedString!==this.wrappedVal) {
+      this.wrappedVal=wrappedString;
       this.next(this);
     }
   }
@@ -298,7 +298,7 @@ export class StringValue extends ReplaySubject<Value> implements Value {
   }
 
   toV(stringTableBuilder?: StringTableBuilder): V|undefined {
-    if (stringTableBuilder === undefined) {
+    if (stringTableBuilder===undefined) {
       return [
         ValueType.STRING,
         this.val,
@@ -312,9 +312,9 @@ export class StringValue extends ReplaySubject<Value> implements Value {
 
   fold(other: Value, toggle: boolean): boolean {
     if (other instanceof EmptyValue) {
-      this.val = '';
+      this.val='';
     } else if (other instanceof StringValue) {
-      this.val = ((this.val === other.val) && toggle) ? '' : other.val;
+      this.val=((this.val===other.val)&&toggle)? '':other.val;
     } else {
       return false;
     }
@@ -322,7 +322,7 @@ export class StringValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    return this.compare(other) === 0;
+    return this.compare(other)===0;
   }
 
   compare(other: Value): number {
@@ -349,14 +349,14 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
 
   importFrom(sv: ExportedValue): boolean {
     if (Array.isArray(sv)) {
-      const v: string[] = [];
+      const v: string[]=[];
       for (const n of sv) {
-        if (typeof n !== 'string') {
+        if (typeof n!=='string') {
           return false;
         }
         v.push(n);
       }
-      this.val = v;
+      this.val=v;
       return true;
     }
     return false;
@@ -371,19 +371,19 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedStrings: string[]) {
-    let update = false;
-    if ((wrappedStrings.length !== this.wrappedStrings.length)) {
-      update = true;
+    let update=false;
+    if ((wrappedStrings.length!==this.wrappedStrings.length)) {
+      update=true;
     } else {
-      for (let idx = 0; idx < wrappedStrings.length; idx++) {
-        if (wrappedStrings[idx] !== this.wrappedStrings[idx]) {
-          update = true;
+      for (let idx=0; idx<wrappedStrings.length; idx++) {
+        if (wrappedStrings[idx]!==this.wrappedStrings[idx]) {
+          update=true;
           break;
         }
       }
     }
     if (update) {
-      this.wrappedStrings = wrappedStrings;
+      this.wrappedStrings=wrappedStrings;
       this.next(this);
     }
   }
@@ -393,7 +393,7 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
   }
 
   toV(stringTableBuilder?: StringTableBuilder): V|undefined {
-    if (stringTableBuilder === undefined) {
+    if (stringTableBuilder===undefined) {
       return [
         ValueType.STRINGS,
         Array.from(this.val),
@@ -405,19 +405,19 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
     ];
   }
 
-  fold(other: Value, toggle: boolean, replace = true): boolean {
+  fold(other: Value, toggle: boolean, replace=true): boolean {
     let otherVal: string[];
     if (other instanceof EmptyValue) {
-      this.val = [];
+      this.val=[];
       return true;
     } else if (other instanceof StringValue) {
-      otherVal = [other.val];
+      otherVal=[other.val];
     } else if (other instanceof StringListValue) {
-      otherVal = other.val;
+      otherVal=other.val;
     } else {
       return false;
     }
-    this.val = foldList<string>(this.val, otherVal, replace, toggle);
+    this.val=foldList<string>(this.val, otherVal, replace, toggle);
     return true;
   }
 
@@ -432,12 +432,12 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    const otherVal = this.comparable(other);
-    if (this.val.length !== otherVal.length) {
+    const otherVal=this.comparable(other);
+    if (this.val.length!==otherVal.length) {
       return false;
     }
-    for (let idx = 0; idx < this.val.length; idx++) {
-      if (otherVal[idx] !== this.val[idx]) {
+    for (let idx=0; idx<this.val.length; idx++) {
+      if (otherVal[idx]!==this.val[idx]) {
         return false;
       }
     }
@@ -454,15 +454,15 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
   //   0 if there is no different position.
   compare(other: Value): number {
     if (other instanceof EmptyValue) {
-      return this.val.length - 0;
+      return this.val.length-0;
     }
-    const otherVal = this.comparable(other);
-    if (this.val.length !== otherVal.length) {
-      return this.val.length - otherVal.length;
+    const otherVal=this.comparable(other);
+    if (this.val.length!==otherVal.length) {
+      return this.val.length-otherVal.length;
     }
-    for (let idx = 0; idx < this.val.length; idx++) {
-      const cmp = this.val[idx].localeCompare(otherVal[idx]);
-      if (cmp !== 0) {
+    for (let idx=0; idx<this.val.length; idx++) {
+      const cmp=this.val[idx].localeCompare(otherVal[idx]);
+      if (cmp!==0) {
         return cmp;
       }
     }
@@ -483,14 +483,14 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
 
   importFrom(sv: ExportedValue): boolean {
     if (Array.isArray(sv)) {
-      const v = new Set<string>();
+      const v=new Set<string>();
       for (const n of sv) {
-        if (typeof n !== 'string') {
+        if (typeof n!=='string') {
           return false;
         }
         v.add(n);
       }
-      this.val = v;
+      this.val=v;
       return true;
     }
     return false;
@@ -505,19 +505,19 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedStrings: Set<string>) {
-    let update = false;
-    if (wrappedStrings.size !== this.wrappedStrings.size) {
-      update = true;
+    let update=false;
+    if (wrappedStrings.size!==this.wrappedStrings.size) {
+      update=true;
     } else {
       for (const str of wrappedStrings) {
         if (!this.wrappedStrings.has(str)) {
-          update = true;
+          update=true;
           break;
         }
       }
     }
     if (update) {
-      this.wrappedStrings = wrappedStrings;
+      this.wrappedStrings=wrappedStrings;
       this.next(this);
     }
   }
@@ -527,7 +527,7 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
   }
 
   toV(stringTableBuilder?: StringTableBuilder): V|undefined {
-    if (stringTableBuilder === undefined) {
+    if (stringTableBuilder===undefined) {
       return [
         ValueType.STRINGS,
         Array.from(this.val).sort(),
@@ -539,21 +539,21 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
     ];
   }
 
-  fold(other: Value, toggle: boolean, replace = true): boolean {
+  fold(other: Value, toggle: boolean, replace=true): boolean {
     let otherVal: Set<string>;
     if (other instanceof EmptyValue) {
-      this.val = new Set<string>([]);
+      this.val=new Set<string>([]);
       return true;
     } else if (other instanceof StringValue) {
-      otherVal = new Set<string>([other.val]);
+      otherVal=new Set<string>([other.val]);
     } else if (other instanceof StringListValue) {
-      otherVal = new Set<string>(other.val);
+      otherVal=new Set<string>(other.val);
     } else if (other instanceof StringSetValue) {
-      otherVal = other.val;
+      otherVal=other.val;
     } else {
       return false;
     }
-    this.val = foldSet<string>(this.val, otherVal, replace, toggle);
+    this.val=foldSet<string>(this.val, otherVal, replace, toggle);
     return true;
   }
 
@@ -571,7 +571,7 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    const otherVal = this.comparable(other);
+    const otherVal=this.comparable(other);
     for (const v of otherVal) {
       if (!this.val.has(v)) {
         return false;
@@ -590,16 +590,16 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
   //   0 if there is no different position.
   compare(other: Value): number {
     if (other instanceof EmptyValue) {
-      return this.val.size - 0;
+      return this.val.size-0;
     }
-    const otherVal = this.comparable(other);
-    const thisVal = this.comparable(this);
-    if (thisVal.length !== otherVal.length) {
-      return thisVal.length - otherVal.length;
+    const otherVal=this.comparable(other);
+    const thisVal=this.comparable(this);
+    if (thisVal.length!==otherVal.length) {
+      return thisVal.length-otherVal.length;
     }
-    for (let idx = 0; idx < thisVal.length; idx++) {
-      const cmp = thisVal[idx].localeCompare(otherVal[idx]);
-      if (cmp !== 0) {
+    for (let idx=0; idx<thisVal.length; idx++) {
+      const cmp=thisVal[idx].localeCompare(otherVal[idx]);
+      if (cmp!==0) {
         return cmp;
       }
     }
@@ -619,13 +619,13 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
 export class IntegerValue extends ReplaySubject<Value> implements Value {
   constructor(private wrappedInt: number) {
     super(1);
-    this.wrappedInt = Math.floor(this.wrappedInt);
+    this.wrappedInt=Math.floor(this.wrappedInt);
     this.next(this);
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (typeof sv === 'number') {
-      this.val = sv;
+    if (typeof sv==='number') {
+      this.val=sv;
       return true;
     }
     return false;
@@ -640,9 +640,9 @@ export class IntegerValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedInt: number) {
-    wrappedInt = Math.floor(wrappedInt);
-    if (wrappedInt !== this.wrappedInt) {
-      this.wrappedInt = wrappedInt;
+    wrappedInt=Math.floor(wrappedInt);
+    if (wrappedInt!==this.wrappedInt) {
+      this.wrappedInt=wrappedInt;
       this.next(this);
     }
   }
@@ -660,9 +660,9 @@ export class IntegerValue extends ReplaySubject<Value> implements Value {
 
   fold(other: Value, toggle: boolean): boolean {
     if (other instanceof EmptyValue) {
-      this.val = 0;
+      this.val=0;
     } else if (other instanceof IntegerValue) {
-      this.val = ((this.val === other.val) && toggle) ? 0 : other.val;
+      this.val=((this.val===other.val)&&toggle)? 0:other.val;
     } else {
       return false;
     }
@@ -670,14 +670,14 @@ export class IntegerValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    return this.compare(other) === 0;
+    return this.compare(other)===0;
   }
 
   compare(other: Value): number {
     if (other instanceof EmptyValue) {
-      return this.val - 0;
+      return this.val-0;
     } else if (other instanceof IntegerValue) {
-      return this.val - other.val;
+      return this.val-other.val;
     } else {
       return 1;
     }
@@ -692,21 +692,21 @@ export class IntegerValue extends ReplaySubject<Value> implements Value {
 export class IntegerListValue extends ReplaySubject<Value> implements Value {
   constructor(private wrappedInts: number[]) {
     super(1);
-    this.wrappedInts =
-        this.wrappedInts.map(wrappedInt => Math.floor(wrappedInt));
+    this.wrappedInts=
+      this.wrappedInts.map(wrappedInt => Math.floor(wrappedInt));
     this.next(this);
   }
 
   importFrom(sv: ExportedValue): boolean {
     if (Array.isArray(sv)) {
-      const v: number[] = [];
+      const v: number[]=[];
       for (const n of sv) {
-        if (typeof n !== 'number') {
+        if (typeof n!=='number') {
           return false;
         }
         v.push(n);
       }
-      this.val = v;
+      this.val=v;
       return true;
     }
     return false;
@@ -721,27 +721,26 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedInts: number[]) {
-    wrappedInts = wrappedInts.map(wrappedInt => Math.floor(wrappedInt));
-    let update = false;
-    if ((wrappedInts.length !== this.wrappedInts.length)) {
-      update = true;
+    wrappedInts=wrappedInts.map(wrappedInt => Math.floor(wrappedInt));
+    let update=false;
+    if ((wrappedInts.length!==this.wrappedInts.length)) {
+      update=true;
     } else {
-      for (let idx = 0; idx < wrappedInts.length; idx++) {
-        if (wrappedInts[idx] !== this.wrappedInts[idx]) {
-          update = true;
+      for (let idx=0; idx<wrappedInts.length; idx++) {
+        if (wrappedInts[idx]!==this.wrappedInts[idx]) {
+          update=true;
           break;
         }
       }
     }
     if (update) {
-      this.wrappedInts = wrappedInts;
+      this.wrappedInts=wrappedInts;
       this.next(this);
     }
   }
 
   override toString(): string {
-    return `[${
-        this.wrappedInts.map(wrappedInt => wrappedInt.toString()).join(', ')}]`;
+    return `[${this.wrappedInts.map(wrappedInt => wrappedInt.toString()).join(', ')}]`;
   }
 
   toV(): V|undefined {
@@ -751,19 +750,19 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
     ];
   }
 
-  fold(other: Value, toggle: boolean, replace = true): boolean {
+  fold(other: Value, toggle: boolean, replace=true): boolean {
     let otherVal: number[];
     if (other instanceof EmptyValue) {
-      this.val = [];
+      this.val=[];
       return true;
     } else if (other instanceof IntegerValue) {
-      otherVal = [other.val];
+      otherVal=[other.val];
     } else if (other instanceof IntegerListValue) {
-      otherVal = other.val;
+      otherVal=other.val;
     } else {
       return false;
     }
-    this.val = foldList<number>(this.val, otherVal, replace, toggle);
+    this.val=foldList<number>(this.val, otherVal, replace, toggle);
     return true;
   }
 
@@ -778,12 +777,12 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    const otherVal = this.comparable(other);
-    if (this.val.length !== otherVal.length) {
+    const otherVal=this.comparable(other);
+    if (this.val.length!==otherVal.length) {
       return false;
     }
-    for (let idx = 0; idx < this.val.length; idx++) {
-      if (otherVal[idx] !== this.val[idx]) {
+    for (let idx=0; idx<this.val.length; idx++) {
+      if (otherVal[idx]!==this.val[idx]) {
         return false;
       }
     }
@@ -800,15 +799,15 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
   //   0 if there is no different position.
   compare(other: Value): number {
     if (other instanceof EmptyValue) {
-      return this.val.length - 0;
+      return this.val.length-0;
     }
-    const otherVal = this.comparable(other);
-    if (this.val.length !== otherVal.length) {
-      return this.val.length - otherVal.length;
+    const otherVal=this.comparable(other);
+    if (this.val.length!==otherVal.length) {
+      return this.val.length-otherVal.length;
     }
-    for (let idx = 0; idx < this.val.length; idx++) {
-      const cmp = this.val[idx] - otherVal[idx];
-      if (cmp !== 0) {
+    for (let idx=0; idx<this.val.length; idx++) {
+      const cmp=this.val[idx]-otherVal[idx];
+      if (cmp!==0) {
         return cmp;
       }
     }
@@ -822,7 +821,7 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
 
 /** A Value containing an unordered set of unique integers. */
 export class IntegerSetValue extends ReplaySubject<Value> implements Value {
-  private wrappedInts = new Set<number>();
+  private wrappedInts=new Set<number>();
   constructor(wrappedInts: Set<number>) {
     super(1);
     for (const wrappedInt of wrappedInts) {
@@ -833,14 +832,14 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
 
   importFrom(sv: ExportedValue): boolean {
     if (Array.isArray(sv)) {
-      const v = new Set<number>();
+      const v=new Set<number>();
       for (const n of sv) {
-        if (typeof n !== 'number') {
+        if (typeof n!=='number') {
           return false;
         }
         v.add(n);
       }
-      this.val = v;
+      this.val=v;
       return true;
     }
     return false;
@@ -855,31 +854,30 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedInts: Set<number>) {
-    let update = false;
-    if (wrappedInts.size !== this.wrappedInts.size) {
-      update = true;
+    let update=false;
+    if (wrappedInts.size!==this.wrappedInts.size) {
+      update=true;
     } else {
-      const newWrappedInts = new Set<number>();
+      const newWrappedInts=new Set<number>();
       for (const wrappedInt of wrappedInts) {
-        const newWrappedInt = Math.floor(wrappedInt);
+        const newWrappedInt=Math.floor(wrappedInt);
         if (!this.wrappedInts.has(newWrappedInt)) {
-          update = true;
+          update=true;
         }
         newWrappedInts.add(newWrappedInt);
       }
-      wrappedInts = newWrappedInts;
+      wrappedInts=newWrappedInts;
     }
     if (update) {
-      this.wrappedInts = wrappedInts;
+      this.wrappedInts=wrappedInts;
       this.next(this);
     }
   }
 
   override toString(): string {
-    return `{${
-        Array.from(this.wrappedInts)
-            .map(wrappedInt => wrappedInt.toString())
-            .join(', ')}}`;
+    return `{${Array.from(this.wrappedInts)
+        .map(wrappedInt => wrappedInt.toString())
+        .join(', ')}}`;
   }
 
   toV(): V|undefined {
@@ -889,21 +887,21 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
     ];
   }
 
-  fold(other: Value, toggle: boolean, replace = true): boolean {
+  fold(other: Value, toggle: boolean, replace=true): boolean {
     let otherVal: Set<number>;
     if (other instanceof EmptyValue) {
-      this.val = new Set<number>([]);
+      this.val=new Set<number>([]);
       return true;
     } else if (other instanceof IntegerValue) {
-      otherVal = new Set<number>([other.val]);
+      otherVal=new Set<number>([other.val]);
     } else if (other instanceof IntegerListValue) {
-      otherVal = new Set<number>(other.val);
+      otherVal=new Set<number>(other.val);
     } else if (other instanceof IntegerSetValue) {
-      otherVal = other.val;
+      otherVal=other.val;
     } else {
       return false;
     }
-    this.val = foldSet<number>(this.val, otherVal, replace, toggle);
+    this.val=foldSet<number>(this.val, otherVal, replace, toggle);
     return true;
   }
 
@@ -921,7 +919,7 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    const otherVal = this.comparable(other);
+    const otherVal=this.comparable(other);
     for (const v of otherVal) {
       if (!this.val.has(v)) {
         return false;
@@ -940,16 +938,16 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
   //   0 if there is no different position.
   compare(other: Value): number {
     if (other instanceof EmptyValue) {
-      return this.val.size - 0;
+      return this.val.size-0;
     }
-    const otherVal = this.comparable(other);
-    const thisVal = this.comparable(this);
-    if (thisVal.length !== otherVal.length) {
-      return thisVal.length - otherVal.length;
+    const otherVal=this.comparable(other);
+    const thisVal=this.comparable(this);
+    if (thisVal.length!==otherVal.length) {
+      return thisVal.length-otherVal.length;
     }
-    for (let idx = 0; idx < thisVal.length; idx++) {
-      const cmp = thisVal[idx] - otherVal[idx];
-      if (cmp !== 0) {
+    for (let idx=0; idx<thisVal.length; idx++) {
+      const cmp=thisVal[idx]-otherVal[idx];
+      if (cmp!==0) {
         return cmp;
       }
     }
@@ -969,8 +967,8 @@ export class DoubleValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (typeof sv === 'number') {
-      this.val = sv;
+    if (typeof sv==='number') {
+      this.val=sv;
       return true;
     }
     return false;
@@ -985,8 +983,8 @@ export class DoubleValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedDbl: number) {
-    if (wrappedDbl !== this.wrappedDbl) {
-      this.wrappedDbl = wrappedDbl;
+    if (wrappedDbl!==this.wrappedDbl) {
+      this.wrappedDbl=wrappedDbl;
       this.next(this);
     }
   }
@@ -1004,9 +1002,9 @@ export class DoubleValue extends ReplaySubject<Value> implements Value {
 
   fold(other: Value, toggle: boolean): boolean {
     if (other instanceof EmptyValue) {
-      this.val = 0;
+      this.val=0;
     } else if (other instanceof DoubleValue) {
-      this.val = ((this.val === other.val) && toggle) ? 0 : other.val;
+      this.val=((this.val===other.val)&&toggle)? 0:other.val;
     } else {
       return false;
     }
@@ -1014,14 +1012,14 @@ export class DoubleValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    return this.compare(other) === 0;
+    return this.compare(other)===0;
   }
 
   compare(other: Value): number {
     if (other instanceof EmptyValue) {
-      return this.val - 0;
+      return this.val-0;
     } else if (other instanceof DoubleValue) {
-      return this.val - other.val;
+      return this.val-other.val;
     } else {
       return 1;
     }
@@ -1040,8 +1038,8 @@ export class DurationValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (typeof sv === 'number') {
-      this.val = new Duration(sv);
+    if (typeof sv==='number') {
+      this.val=new Duration(sv);
       return true;
     }
     return false;
@@ -1056,8 +1054,8 @@ export class DurationValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedDur: Duration) {
-    if (wrappedDur.cmp(this.wrappedDur) !== 0) {
-      this.wrappedDur = wrappedDur;
+    if (wrappedDur.cmp(this.wrappedDur)!==0) {
+      this.wrappedDur=wrappedDur;
       this.next(this);
     }
   }
@@ -1075,10 +1073,10 @@ export class DurationValue extends ReplaySubject<Value> implements Value {
 
   fold(other: Value, toggle: boolean) {
     if (other instanceof EmptyValue) {
-      this.val = new Duration(0);
+      this.val=new Duration(0);
     } else if (other instanceof DurationValue) {
-      this.val = ((this.val.cmp(other.val) === 0) && toggle) ? new Duration(0) :
-                                                               other.val;
+      this.val=((this.val.cmp(other.val)===0)&&toggle)? new Duration(0):
+        other.val;
     } else {
       return false;
     }
@@ -1086,14 +1084,14 @@ export class DurationValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    return this.compare(other) === 0;
+    return this.compare(other)===0;
   }
 
   compare(other: Value): number {
     if (other instanceof DurationValue) {
       return this.val.cmp(other.val);
     } else if (other instanceof EmptyValue) {
-      return this.val.nanos - 0;
+      return this.val.nanos-0;
     }
     return 1;
   }
@@ -1111,9 +1109,9 @@ export class TimestampValue extends ReplaySubject<Value> implements Value {
   }
 
   importFrom(sv: ExportedValue): boolean {
-    if (sv != null && typeof sv === 'object' && 'seconds' in sv &&
-        'nanos' in sv) {
-      this.val = new Timestamp(sv.seconds, sv.nanos);
+    if (sv!=null&&typeof sv==='object'&&'seconds' in sv&&
+      'nanos' in sv) {
+      this.val=new Timestamp(sv.seconds, sv.nanos);
       return true;
     }
     return false;
@@ -1131,8 +1129,8 @@ export class TimestampValue extends ReplaySubject<Value> implements Value {
   }
 
   set val(wrappedTs: Timestamp) {
-    if (wrappedTs.cmp(this.wrappedTs) !== 0) {
-      this.wrappedTs = wrappedTs;
+    if (wrappedTs.cmp(this.wrappedTs)!==0) {
+      this.wrappedTs=wrappedTs;
       this.next(this);
     }
   }
@@ -1150,11 +1148,11 @@ export class TimestampValue extends ReplaySubject<Value> implements Value {
 
   fold(other: Value, toggle: boolean) {
     if (other instanceof EmptyValue) {
-      this.val = new Timestamp(0, 0);
+      this.val=new Timestamp(0, 0);
     } else if (other instanceof TimestampValue) {
-      this.val = ((this.val.cmp(other.val) === 0) && toggle) ?
-          new Timestamp(0, 0) :
-          other.val;
+      this.val=((this.val.cmp(other.val)===0)&&toggle)?
+        new Timestamp(0, 0):
+        other.val;
     } else {
       return false;
     }
@@ -1162,7 +1160,7 @@ export class TimestampValue extends ReplaySubject<Value> implements Value {
   }
 
   includes(other: Value): boolean {
-    return this.compare(other) === 0;
+    return this.compare(other)===0;
   }
 
   compare(other: Value): number {

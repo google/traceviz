@@ -20,16 +20,16 @@
  *   * Keys.SELF_MAGNITUDE: a number specifying the self-magnitude.
  */
 
-import { ValueMap } from '../value/value_map.js';
+import {ValueMap} from '../value/value_map.js';
 
 enum Keys {
-  SELF_MAGNITUDE = 'self_magnitude',
+  SELF_MAGNITUDE='self_magnitude',
 }
 
 /**
  * The set of property keys expected by this package. 
  */
-export const properties: string[] = [Keys.SELF_MAGNITUDE];
+export const properties: string[]=[Keys.SELF_MAGNITUDE];
 
 /**
  * Returns the self-magnitude in the provided ValueMap, or 0 if there is none.

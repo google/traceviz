@@ -13,15 +13,15 @@
 
 import 'jasmine';
 
-import { Request, SeriesRequest } from '../protocol/request_interface.js';
-import { Response, ResponseNode } from '../protocol/response_interface.js';
-import { node, response } from '../protocol/test_response.js';
-import { GLOBAL_TEST_DATA_FETCHER } from './test_data_fetcher.js';
-import { int, str, valueMap } from '../value/test_value.js';
-import { DataQuery } from './data_query.js';
+import {Request, SeriesRequest} from '../protocol/request_interface.js';
+import {Response, ResponseNode} from '../protocol/response_interface.js';
+import {node, response} from '../protocol/test_response.js';
+import {GLOBAL_TEST_DATA_FETCHER} from './test_data_fetcher.js';
+import {int, str, valueMap} from '../value/test_value.js';
+import {DataQuery} from './data_query.js';
 
 function buildEmptyResponse(...seriesRequests: SeriesRequest[]): Response {
-  const responses = new Array<{name: string, series: ResponseNode}>();
+  const responses=new Array<{name: string, series: ResponseNode}>();
   for (const seriesRequest of seriesRequests) {
     responses.push({name: seriesRequest.seriesName, series: node()});
   }
@@ -32,14 +32,14 @@ describe('data query test', () => {
   // Build a test DataQuery (a DataQuery with its debouncing behavior overridden
   // to support explicit fetch.  It will use a TestDataFetcher which serves
   // canned data.
-  const tdq = new DataQuery((err: unknown) => {
+  const tdq=new DataQuery((err: unknown) => {
     fail(err);
   });
   // Set up global filters, and provide them to the TestDataQuery
-  const gf1 = int(1);
-  const gf2 = str('hello');
-  const globalFilters =
-      valueMap({key: 'count', val: gf1}, {key: 'greetings', val: gf2});
+  const gf1=int(1);
+  const gf2=str('hello');
+  const globalFilters=
+    valueMap({key: 'count', val: gf1}, {key: 'greetings', val: gf2});
   // A helper to build DataRequests.
   function dataRequest(...seriesRequests: SeriesRequest[]): Request {
     return {
@@ -55,142 +55,142 @@ describe('data query test', () => {
   });
 
   it('does not fetch when there is nothing to fetch', (() => {
-       // Expect a 'debounce timeout' now to do nothing.  The TestDataFetcher's
-       // expected request is undefined, so tdf.fetch() would fail if invoked.
-       tdq.triggerUpdates()();
-     }));
+    // Expect a 'debounce timeout' now to do nothing.  The TestDataFetcher's
+    // expected request is undefined, so tdf.fetch() would fail if invoked.
+    tdq.triggerUpdates()();
+  }));
 
   it('issues a request with a single DataSeriesRequest, expecting success',
-     (() => {
-       // Issue a fetchDataSeries request, expect it to return.
-       const seriesReq1: SeriesRequest = {
-         queryName: 'query1',
-         seriesName: 'series1',
-         parameters: valueMap(),
-       };
-       GLOBAL_TEST_DATA_FETCHER.requestChannel.next(dataRequest(seriesReq1));
-       GLOBAL_TEST_DATA_FETCHER.responseChannel.next(
-           buildEmptyResponse(seriesReq1));
-       let response: ResponseNode|undefined;
-       tdq.fetchDataSeries(
-           seriesReq1,
-           (r) => {
-             response = r;
-           },
-           () => {
-             fail('unexpected cancellation');
-           });
-       expect(response).toBeUndefined();
-       tdq.triggerUpdates()();
-       expect(response).toBeDefined();
-     }));
+    (() => {
+      // Issue a fetchDataSeries request, expect it to return.
+      const seriesReq1: SeriesRequest={
+        queryName: 'query1',
+        seriesName: 'series1',
+        parameters: valueMap(),
+      };
+      GLOBAL_TEST_DATA_FETCHER.requestChannel.next(dataRequest(seriesReq1));
+      GLOBAL_TEST_DATA_FETCHER.responseChannel.next(
+        buildEmptyResponse(seriesReq1));
+      let response: ResponseNode|undefined;
+      tdq.fetchDataSeries(
+        seriesReq1,
+        (r) => {
+          response=r;
+        },
+        () => {
+          fail('unexpected cancellation');
+        });
+      expect(response).toBeUndefined();
+      tdq.triggerUpdates()();
+      expect(response).toBeDefined();
+    }));
 
   it('deduplicates multiple DataSeriesRequests with the same series name',
-     (() => {
-       // The same series issues two requests; we want the latter to be used.
-       const seriesReq1: SeriesRequest = {
-         queryName: 'query1',
-         seriesName: 'series1',
-         parameters: valueMap(),
-       };
-       const seriesReq2: SeriesRequest = {
-         queryName: 'query2',
-         seriesName: 'series1',
-         parameters: valueMap(),
-       };
-       GLOBAL_TEST_DATA_FETCHER.requestChannel.next(dataRequest(seriesReq2));
-       GLOBAL_TEST_DATA_FETCHER.responseChannel.next(
-           buildEmptyResponse(seriesReq2));
-       let response: ResponseNode|undefined;
-       tdq.fetchDataSeries(
-           seriesReq1,
-           (r) => {
-             response = r;
-           },
-           () => {
-             fail('unexpected cancellation');
-           });
-       expect(response).toBeUndefined();
-       tdq.triggerUpdates()();
-       expect(response).toBeDefined();
-     }));
+    (() => {
+      // The same series issues two requests; we want the latter to be used.
+      const seriesReq1: SeriesRequest={
+        queryName: 'query1',
+        seriesName: 'series1',
+        parameters: valueMap(),
+      };
+      const seriesReq2: SeriesRequest={
+        queryName: 'query2',
+        seriesName: 'series1',
+        parameters: valueMap(),
+      };
+      GLOBAL_TEST_DATA_FETCHER.requestChannel.next(dataRequest(seriesReq2));
+      GLOBAL_TEST_DATA_FETCHER.responseChannel.next(
+        buildEmptyResponse(seriesReq2));
+      let response: ResponseNode|undefined;
+      tdq.fetchDataSeries(
+        seriesReq1,
+        (r) => {
+          response=r;
+        },
+        () => {
+          fail('unexpected cancellation');
+        });
+      expect(response).toBeUndefined();
+      tdq.triggerUpdates()();
+      expect(response).toBeDefined();
+    }));
 
   it('issues a request with two DataSeriesRequests, expecting success', (() => {
-       // Expect two different queries to both be satisfied.
-       const seriesReq1: SeriesRequest = {
-         queryName: 'query1',
-         seriesName: 'series1',
-         parameters: valueMap(),
-       };
-       const seriesReq2: SeriesRequest = {
-         queryName: 'query2',
-         seriesName: 'series2',
-         parameters: valueMap(),
-       };
-       GLOBAL_TEST_DATA_FETCHER.requestChannel.next(
-           dataRequest(seriesReq1, seriesReq2));
-       GLOBAL_TEST_DATA_FETCHER.responseChannel.next(
-           buildEmptyResponse(seriesReq1, seriesReq2));
-       let response1: ResponseNode|undefined;
-       let response2: ResponseNode|undefined;
-       tdq.fetchDataSeries(
-           seriesReq1,
-           (r) => {
-             response1 = r;
-           },
-           () => {
-             fail('unexpected cancellation');
-           });
-       tdq.fetchDataSeries(
-           seriesReq2,
-           (r) => {
-             response2 = r;
-           },
-           () => {
-             fail('unexpected cancellation');
-           });
-       expect(response1).toBeUndefined();
-       expect(response2).toBeUndefined();
-       tdq.triggerUpdates()();
-       expect(response1).toBeDefined();
-       expect(response2).toBeDefined();
-     }));
+    // Expect two different queries to both be satisfied.
+    const seriesReq1: SeriesRequest={
+      queryName: 'query1',
+      seriesName: 'series1',
+      parameters: valueMap(),
+    };
+    const seriesReq2: SeriesRequest={
+      queryName: 'query2',
+      seriesName: 'series2',
+      parameters: valueMap(),
+    };
+    GLOBAL_TEST_DATA_FETCHER.requestChannel.next(
+      dataRequest(seriesReq1, seriesReq2));
+    GLOBAL_TEST_DATA_FETCHER.responseChannel.next(
+      buildEmptyResponse(seriesReq1, seriesReq2));
+    let response1: ResponseNode|undefined;
+    let response2: ResponseNode|undefined;
+    tdq.fetchDataSeries(
+      seriesReq1,
+      (r) => {
+        response1=r;
+      },
+      () => {
+        fail('unexpected cancellation');
+      });
+    tdq.fetchDataSeries(
+      seriesReq2,
+      (r) => {
+        response2=r;
+      },
+      () => {
+        fail('unexpected cancellation');
+      });
+    expect(response1).toBeUndefined();
+    expect(response2).toBeUndefined();
+    tdq.triggerUpdates()();
+    expect(response1).toBeDefined();
+    expect(response2).toBeDefined();
+  }));
 
   it('Cancels two DataSeriesRequests', (() => {
-       // Expect two different queries to both be satisfied.
-       const seriesReq1: SeriesRequest = {
-         queryName: 'query1',
-         seriesName: 'series1',
-         parameters: valueMap(),
-       };
-       const seriesReq2: SeriesRequest = {
-         queryName: 'query2',
-         seriesName: 'series2',
-         parameters: valueMap(),
-       };
-       GLOBAL_TEST_DATA_FETCHER.requestChannel.next(
-           dataRequest(seriesReq1, seriesReq2));
-       GLOBAL_TEST_DATA_FETCHER.responseChannel.error('oops');
-       let responses = 0;
-       let cancellations = 0;
-       tdq.fetchDataSeries(
-           seriesReq1,
-           (r) => {
-             responses++;
-           },
-           () => {
-             cancellations++;
-           });
-       tdq.fetchDataSeries(
-           seriesReq2,
-           (r) => {
-             responses++;
-           },
-           () => {
-             cancellations++;
-           });
-       tdq.triggerUpdates()();
-       expect(responses).toEqual(0);
-       expect(cancellations).toEqual(2);
-     }));
+    // Expect two different queries to both be satisfied.
+    const seriesReq1: SeriesRequest={
+      queryName: 'query1',
+      seriesName: 'series1',
+      parameters: valueMap(),
+    };
+    const seriesReq2: SeriesRequest={
+      queryName: 'query2',
+      seriesName: 'series2',
+      parameters: valueMap(),
+    };
+    GLOBAL_TEST_DATA_FETCHER.requestChannel.next(
+      dataRequest(seriesReq1, seriesReq2));
+    GLOBAL_TEST_DATA_FETCHER.responseChannel.error('oops');
+    let responses=0;
+    let cancellations=0;
+    tdq.fetchDataSeries(
+      seriesReq1,
+      (r) => {
+        responses++;
+      },
+      () => {
+        cancellations++;
+      });
+    tdq.fetchDataSeries(
+      seriesReq2,
+      (r) => {
+        responses++;
+      },
+      () => {
+        cancellations++;
+      });
+    tdq.triggerUpdates()();
+    expect(responses).toEqual(0);
+    expect(cancellations).toEqual(2);
+  }));
 });

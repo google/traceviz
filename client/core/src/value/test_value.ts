@@ -15,10 +15,10 @@
  * @fileoverview Test helpers for building TraceViz Values.
  */
 
-import { DoubleValue, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringTableBuilder, StringValue, TimestampValue, Value } from './value.js';
-import { ValueMap } from './value_map.js';
-import { Duration } from '../duration/duration.js';
-import { Timestamp } from '../timestamp/timestamp.js';
+import {DoubleValue, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringTableBuilder, StringValue, TimestampValue, Value} from './value.js';
+import {ValueMap} from './value_map.js';
+import {Duration} from '../duration/duration.js';
+import {Timestamp} from '../timestamp/timestamp.js';
 
 /** Builds a StringValue. */
 export function str(str: string): StringValue {
@@ -70,9 +70,9 @@ export function ts(ts: Timestamp): TimestampValue {
  * realistic server responses.
  */
 class TestStringTableBuilder {
-  readonly indicesByString = new Map<string, number>();
+  readonly indicesByString=new Map<string, number>();
 
-  constructor(readonly strs: string[] = []) {
+  constructor(readonly strs: string[]=[]) {
     for (const [idx, str] of strs.entries()) {
       this.indicesByString.set(str, idx);
     }
@@ -83,9 +83,9 @@ class TestStringTableBuilder {
    * table if needed.
    */
   index(str: string): number {
-    let ret = this.indicesByString.get(str);
-    if (ret === undefined) {
-      ret = this.strs.length;
+    let ret=this.indicesByString.get(str);
+    if (ret===undefined) {
+      ret=this.strs.length;
       this.strs.push(str);
       this.indicesByString.set(str, ret);
     }
@@ -109,8 +109,8 @@ export function st(...strs: string[]): StringTableBuilder {
 }
 
 /** Builds a ValueMap from an array of key/value pairs. */
-export function valueMap(...props: Array<{ key: string, val: Value }>): ValueMap {
-  const valMap = new Map<string, Value>();
+export function valueMap(...props: Array<{key: string, val: Value}>): ValueMap {
+  const valMap=new Map<string, Value>();
   for (const prop of props) {
     valMap.set(prop.key, prop.val);
   }
