@@ -22,7 +22,6 @@ export * from './duration/duration.js';
 export * from './errors/errors.js';
 export * from './global_state/global_state.js';
 export * from './global_state/global_state_interface.js';
-export * from './highlightable_item/highlightable_item.js';
 export * from './interactions/interactions.js';
 export * from './label/label.js';
 export * from './magnitude/magnitude.js';
