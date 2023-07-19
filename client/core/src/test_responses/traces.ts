@@ -23,13 +23,13 @@ export function sec(sec: number): Timestamp {
 
 /** Returns a Duration of the specified seconds. */
 export function d(sec: number): Duration {
-    return new Duration(sec*1E9);
+    return new Duration(sec * 1E9);
 }
 
 /**
  * A response node encoding an example SchedViz running-thread trace response.
  */
-export const schedvizRunningNode=node(
+export const schedvizRunningNode = node(
     valueMap(
         {key: 'category_defined_id', val: str('x_axis')},
         {key: 'category_display_name', val: str('time from start')},
@@ -88,7 +88,7 @@ export const schedvizRunningNode=node(
 /**
  * A response node encoding an example SchedViz waiting-thread trace response.
  */
-export const schedvizWaitingNode=node(
+export const schedvizWaitingNode = node(
     valueMap(
         {key: 'category_defined_id', val: str('x_axis')},
         {key: 'category_display_name', val: str('time from start')},
@@ -155,7 +155,7 @@ export const schedvizWaitingNode=node(
 /**
  * A response node encoding an example RPC trace.
  */
-export const rpcNode=node(
+export const rpcNode = node(
     valueMap(
         {key: 'category_defined_id', val: str('x_axis')},
         {key: 'category_display_name', val: str('time from start')},
@@ -406,7 +406,7 @@ export const rpcNode=node(
  * A response node encoding an example user-code instrumentation thread/scope
  * trace.
  */
-export const userInstrumentationNode=node(
+export const userInstrumentationNode = node(
     valueMap(
         {key: 'category_defined_id', val: str('x_axis')},
         {key: 'category_display_name', val: str('time from start')},
@@ -520,7 +520,7 @@ export const userInstrumentationNode=node(
  * A response node encoding an example process/thread trace with embedded
  * binned data at the process level.
  */
-export const embeddedNode=node(
+export const embeddedNode = node(
     valueMap(
         {key: 'category_defined_id', val: str('x_axis')},
         {key: 'category_display_name', val: str('time from start')},

@@ -24,7 +24,7 @@ import {ValueMap} from '../value/value_map.js';
  */
 
 enum Keys {
-  LABEL_FORMAT='label_format',
+  LABEL_FORMAT = 'label_format',
 }
 
 /**

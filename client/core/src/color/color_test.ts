@@ -18,12 +18,12 @@ import {dbl, strs, str, valueMap} from '../value/test_value.js';
 
 describe('color test', () => {
   it('colors', () => {
-    const definitions=valueMap(
+    const definitions = valueMap(
       {key: 'color_space_winners', val: strs('goldenrod', 'silver', 'gold')},
       {key: 'color_space_bandw', val: strs('#ffffff', '#000000')},
       {key: 'ratatouille', val: strs('darkmagenta', 'crimson')},
     );
-    const coloring=new Coloring(definitions);
+    const coloring = new Coloring(definitions);
     expect(coloring.colors(valueMap(
       {key: 'primary_color', val: str('black')},
       {key: 'secondary_color_space', val: str('color_space_winners')},

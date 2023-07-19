@@ -21,7 +21,7 @@ import {Timestamp} from '../timestamp/timestamp.js';
 
 describe('json response node test', () => {
   it('loads a response', () => {
-    const response=fromObject(`{
+    const response = fromObject(`{
     "StringTable": [
       "stridx", "stridxs", "int", "ints", "dbl", "dur", "ts",
       "hello", "goodbye"

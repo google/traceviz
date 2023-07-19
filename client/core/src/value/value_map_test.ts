@@ -21,7 +21,7 @@ import {Timestamp} from '../timestamp/timestamp.js';
 
 describe('value map test', () => {
   it('constructs from object with stridx keys', () => {
-    const vm=new ValueMap(
+    const vm = new ValueMap(
       [
         [0, [2, 7]], [1, [4, [7, 8]]], [2, [5, 100]],
         [3, [6, [50, 150, 250]]], [4, [7, 3.14159]], [5, [8, 150000000]],
@@ -38,7 +38,7 @@ describe('value map test', () => {
     ]);
   });
   it('constructs from object with str keys', () => {
-    const vm=new ValueMap([
+    const vm = new ValueMap([
       ['str', [1, 'hello']], ['strs', [3, ['hello', 'goodbye']]],
       ['int', [5, 100]], ['ints', [6, [50, 150, 250]]], ['dbl', [7, 3.14159]],
       ['dur', [8, 150000000]], ['ts', [9, [500, 100]]]
@@ -51,17 +51,17 @@ describe('value map test', () => {
   });
 
   it('constructs from raw map', () => {
-    const mapMap=new ValueMap(new Map<string, Value>([['key', int(3)]]));
+    const mapMap = new ValueMap(new Map<string, Value>([['key', int(3)]]));
     expect([...mapMap.entries()]).toEqual([['key', int(3)]]);
   });
 
   it('formats', () => {
-    const vm=new ValueMap(new Map<string, Value>([
+    const vm = new ValueMap(new Map<string, Value>([
       ['title', str('Alice\'s Adventures in Wonderland')],
       ['type', str('book')], ['author', str('Lewis Carroll')],
       ['publication_year', int(1865)]
     ]));
-    const fmtStr=
+    const fmtStr =
       `Let's look at '$(title)', a $(type) published by $(author) in $(publication_year).`;
     expect(vm.format(fmtStr))
       .toEqual(
@@ -78,7 +78,7 @@ describe('value map test', () => {
   });
 
   it('expects types, and complains on incorrect types', () => {
-    const vm=new ValueMap(new Map<string, Value>([
+    const vm = new ValueMap(new Map<string, Value>([
       ['str', str('a')],
       ['int', int(1)],
       ['strs', strs('x', 'y', 'z')],
@@ -99,7 +99,7 @@ describe('value map test', () => {
   });
 
   it('serializes to JSON and updates from JSON', () => {
-    const vm=new ValueMap(new Map<string, Value>([
+    const vm = new ValueMap(new Map<string, Value>([
       ['str', str('a')],
       ['int', int(1)],
       ['strs', strs('x', 'y', 'z')],
@@ -110,7 +110,7 @@ describe('value map test', () => {
       .toEqual(
         {'str': 'a', 'int': 1, 'strs': ['x', 'y', 'z'], 'ints': [7, 8, 9]});
     // Expect working unserialization
-    const vm2=new ValueMap(new Map<string, Value>([
+    const vm2 = new ValueMap(new Map<string, Value>([
       ['str', str('b')],
       ['int', int(3)],
       ['strs', strs('l', 'm', 'n', 'o', 'p')],
@@ -145,22 +145,22 @@ describe('value map test', () => {
   });
 
   it('watches properly', () => {
-    const i=int(1);
-    const s=str('hello');
-    const vm=valueMap(
+    const i = int(1);
+    const s = str('hello');
+    const vm = valueMap(
       {key: 'foo', val: i},
       {key: 'bar', val: s},
     );
-    const obs=vm.watch();
-    let updates=0;
-    const sub=obs.subscribe((vm) => {
+    const obs = vm.watch();
+    let updates = 0;
+    const sub = obs.subscribe((vm) => {
       updates++;
     });
     // When first subscribed, each value in the map produces one update.
     expect(updates).toEqual(2);
-    i.val=2;
+    i.val = 2;
     expect(updates).toEqual(3);
-    s.val='bye';
+    s.val = 'bye';
     expect(updates).toEqual(4);
     sub.unsubscribe();
   });

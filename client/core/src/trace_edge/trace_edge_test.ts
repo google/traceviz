@@ -27,11 +27,11 @@ export function sec(sec: number): Timestamp {
 
 /** Returns a Duration of the specified seconds. */
 export function d(sec: number): Duration {
-  return new Duration(sec*1E9);
+  return new Duration(sec * 1E9);
 }
 
 function findAllEdges(
-  parent: Trace|TraceCategory|Span|Subspan, nodesByID: Map<string, Node>) {
+  parent: Trace | TraceCategory | Span | Subspan, nodesByID: Map<string, Node>) {
   if (parent instanceof Trace) {
     for (const category of parent.categories) {
       findAllEdges(category, nodesByID);
@@ -59,7 +59,7 @@ function findAllEdges(
 
 describe('trace edge test', () => {
   it('loads from trace', () => {
-    const response=node(
+    const response = node(
       valueMap(
         {key: 'category_defined_id', val: str('x_axis')},
         {key: 'category_display_name', val: str('time from start')},
@@ -133,8 +133,8 @@ describe('trace edge test', () => {
         ),
       ),
     );
-    const trace=Trace.fromNode(response);
-    const nodesByID=new Map<string, Node>();
+    const trace = Trace.fromNode(response);
+    const nodesByID = new Map<string, Node>();
     findAllEdges(trace, nodesByID);
     expect(nodesByID).toEqual(new Map<string, Node>([
       [

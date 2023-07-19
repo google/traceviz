@@ -17,22 +17,22 @@ import {ConfigurationError, Severity} from '../errors/errors.js';
 import {Timestamp} from '../timestamp/timestamp.js';
 import {ValueMap} from '../value/value_map.js';
 
-const SOURCE='continuous_axis';
+const SOURCE = 'continuous_axis';
 
 enum Key {
-  AXIS_TYPE='axis_type',
-  AXIS_MIN='axis_min',
-  AXIS_MAX='axis_max',
+  AXIS_TYPE = 'axis_type',
+  AXIS_MIN = 'axis_min',
+  AXIS_MAX = 'axis_max',
 }
 
 enum AxisType {
-  TIMESTAMP_AXIS_TYPE='timestamp',
-  DURATION_AXIS_TYPE='duration',
-  DOUBLE_AXIS_TYPE='double',
+  TIMESTAMP_AXIS_TYPE = 'timestamp',
+  DURATION_AXIS_TYPE = 'duration',
+  DOUBLE_AXIS_TYPE = 'double',
 }
 
 /** The set of properties used to define an axis. */
-export const axisProperties=
+export const axisProperties =
   [Key.AXIS_TYPE, Key.AXIS_MIN, Key.AXIS_MAX, ...categoryProperties];
 
 /** Represents an axis with a domain of type T. */
@@ -56,7 +56,7 @@ export class TimestampAxis extends Axis<Timestamp> {
 
   constructor(cat: Category, min: Timestamp, max: Timestamp) {
     super(cat, min, max);
-    this.duration=max.sub(min);
+    this.duration = max.sub(min);
   }
 
   override pointValue(properties: ValueMap): Timestamp {
@@ -64,12 +64,12 @@ export class TimestampAxis extends Axis<Timestamp> {
   }
 
   override toDomainFraction(val: Timestamp): number {
-    const offsetFromMin=val.sub(this.min);
-    return offsetFromMin.nanos/this.duration.nanos;
+    const offsetFromMin = val.sub(this.min);
+    return offsetFromMin.nanos / this.duration.nanos;
   }
 
   override contains(val: Timestamp): boolean {
-    return this.min.cmp(val)<=0&&this.max.cmp(val)>=0;
+    return this.min.cmp(val) <= 0 && this.max.cmp(val) >= 0;
   }
 
   // Converts an axis offset into an absolute time.
@@ -84,7 +84,7 @@ export class DurationAxis extends Axis<Duration> {
 
   constructor(cat: Category, min: Duration, max: Duration) {
     super(cat, min, max);
-    this.duration=max.sub(min);
+    this.duration = max.sub(min);
   }
 
   override pointValue(properties: ValueMap): Duration {
@@ -92,12 +92,12 @@ export class DurationAxis extends Axis<Duration> {
   }
 
   override toDomainFraction(val: Duration): number {
-    const offsetFromMin=val.sub(this.min);
-    return offsetFromMin.nanos/this.duration.nanos;
+    const offsetFromMin = val.sub(this.min);
+    return offsetFromMin.nanos / this.duration.nanos;
   }
 
   override contains(val: Duration): boolean {
-    return this.min.cmp(val)<=0&&this.max.cmp(val)>=0;
+    return this.min.cmp(val) <= 0 && this.max.cmp(val) >= 0;
   }
 }
 
@@ -107,7 +107,7 @@ export class NumberAxis extends Axis<number> {
 
   constructor(cat: Category, min: number, max: number) {
     super(cat, min, max);
-    this.width=max-min;
+    this.width = max - min;
   }
 
   pointValue(properties: ValueMap): number {
@@ -115,19 +115,19 @@ export class NumberAxis extends Axis<number> {
   }
 
   override toDomainFraction(val: number): number {
-    return (val-this.min)/this.width;
+    return (val - this.min) / this.width;
   }
 
   contains(val: number): boolean {
-    return this.min<=val&&this.max>=val;
+    return this.min <= val && this.max >= val;
   }
 }
 
 /** Returns the axis defined within the provided properties. */
-export function getAxis(properties: ValueMap): NumberAxis|DurationAxis|
+export function getAxis(properties: ValueMap): NumberAxis | DurationAxis |
   TimestampAxis {
-  const axisType=properties.expectString(Key.AXIS_TYPE);
-  const cat=getDefinedCategory(properties);
+  const axisType = properties.expectString(Key.AXIS_TYPE);
+  const cat = getDefinedCategory(properties);
   if (!cat) {
     throw new ConfigurationError(`an axis must define a category`)
       .from(SOURCE)
@@ -154,14 +154,14 @@ export function getAxis(properties: ValueMap): NumberAxis|DurationAxis|
 }
 
 function cmp(a: unknown, b: unknown): number {
-  if (a instanceof Timestamp&&b instanceof Timestamp) {
+  if (a instanceof Timestamp && b instanceof Timestamp) {
     return a.cmp(b);
   }
-  if (a instanceof Duration&&b instanceof Duration) {
+  if (a instanceof Duration && b instanceof Duration) {
     return a.cmp(b);
   }
-  if (typeof a==='number'&&typeof b==='number') {
-    return b-a;
+  if (typeof a === 'number' && typeof b === 'number') {
+    return b - a;
   }
   throw new ConfigurationError(`can't compare incomparable types`)
     .from(SOURCE)
@@ -173,35 +173,35 @@ function cmp(a: unknown, b: unknown): number {
  * and with the same category, covering all of the arguments' domains.
  */
 export function unionAxes(
-  ...axes: Array<DurationAxis|TimestampAxis|NumberAxis>): DurationAxis|
-  TimestampAxis|NumberAxis {
-  if (axes.length<2) {
+  ...axes: Array<DurationAxis | TimestampAxis | NumberAxis>): DurationAxis |
+  TimestampAxis | NumberAxis {
+  if (axes.length < 2) {
     throw new ConfigurationError(`unionAxes() requires at least two axes`)
       .from(SOURCE)
       .at(Severity.ERROR);
   }
-  const cat=axes[0].category;
-  let min=axes[0].min;
-  let max=axes[0].max;
-  for (let idx=1; idx<axes.length; idx++) {
+  const cat = axes[0].category;
+  let min = axes[0].min;
+  let max = axes[0].max;
+  for (let idx = 1; idx < axes.length; idx++) {
     if (!categoryEquals(cat, axes[idx].category)) {
       throw new ConfigurationError(
         `can't merge axes with different categories`);
     }
-    if (cmp(min, axes[idx].min)>0) {
-      min=axes[idx].min;
+    if (cmp(min, axes[idx].min) > 0) {
+      min = axes[idx].min;
     }
-    if (cmp(max, axes[idx].max)<0) {
-      max=axes[idx].max;
+    if (cmp(max, axes[idx].max) < 0) {
+      max = axes[idx].max;
     }
   }
-  if (min instanceof Timestamp&&max instanceof Timestamp) {
+  if (min instanceof Timestamp && max instanceof Timestamp) {
     return new TimestampAxis(cat, min, max);
   }
-  if (min instanceof Duration&&max instanceof Duration) {
+  if (min instanceof Duration && max instanceof Duration) {
     return new DurationAxis(cat, min, max);
   }
-  if (typeof min==='number'&&typeof max==='number') {
+  if (typeof min === 'number' && typeof max === 'number') {
     return new NumberAxis(cat, min, max);
   }
   throw new ConfigurationError('can\'t union timestamps of incompatible types');

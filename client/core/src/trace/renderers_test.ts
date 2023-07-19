@@ -23,7 +23,7 @@ import {renderCategoryHierarchyForHorizontalSpans, RenderedTraceEdge, RenderedTr
 
 describe('renderers test', () => {
     it('renders dapper on a horizontal timeline', () => {
-        const trace=Trace.union(
+        const trace = Trace.union(
             Trace.fromNode(rpcNode.with(valueMap(
                 {key: 'span_width_cat_px', val: int(10)},
                 {key: 'span_padding_cat_px', val: int(2)},
@@ -68,7 +68,7 @@ describe('renderers test', () => {
                     new RenderedTraceEdge(valueMap(), 140, 18, 140, 44),  // b->d
                     new RenderedTraceEdge(valueMap(), 240, 57, 240, 70),  // e->a
                 ]));
-        const gotRenderedTraceCategoryHierarchy=
+        const gotRenderedTraceCategoryHierarchy =
             renderCategoryHierarchyForHorizontalSpans(trace);
         expect(gotRenderedTraceCategoryHierarchy.widthPx).toEqual(15);
         expect(gotRenderedTraceCategoryHierarchy.heightPx).toEqual(75);
@@ -103,7 +103,7 @@ describe('renderers test', () => {
     });
 
     it('renders schedviz on a horizontal timeline', () => {
-        const rp=valueMap(
+        const rp = valueMap(
             {key: 'span_width_cat_px', val: int(10)},
             {key: 'span_padding_cat_px', val: int(2)},
             {key: 'category_header_cat_px', val: int(0)},
@@ -113,7 +113,7 @@ describe('renderers test', () => {
             {key: 'category_min_width_cat_px', val: int(0)},
             {key: 'category_base_width_temp_px', val: int(0)},
         );
-        const trace=Trace.union(
+        const trace = Trace.union(
             Trace.fromNode(schedvizRunningNode.with(rp)),
             Trace.fromNode(schedvizWaitingNode.with(rp)));
         expect(renderHorizontalTraceSpans(trace, 300))
@@ -135,7 +135,7 @@ describe('renderers test', () => {
                         26),
                 ],
                 []));
-        const gotRenderedTraceCategoryHierarchy=
+        const gotRenderedTraceCategoryHierarchy =
             renderCategoryHierarchyForHorizontalSpans(trace);
         expect(gotRenderedTraceCategoryHierarchy.widthPx).toEqual(10);
         expect(gotRenderedTraceCategoryHierarchy.heightPx).toEqual(26);

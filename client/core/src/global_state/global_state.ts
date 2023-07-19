@@ -22,7 +22,7 @@ import {ConfigurationError, Severity} from '../errors/errors.js';
 import {Value} from '../value/value.js';
 import {BehaviorSubject} from 'rxjs';
 
-const SOURCE='global_state';
+const SOURCE = 'global_state';
 
 /**
  * Contains globally-shared application state in a key/value mapping.
@@ -36,7 +36,7 @@ const SOURCE='global_state';
  */
 export class GlobalState extends BehaviorSubject<string[]> implements
   GlobalStateInterface {
-  private valuesByKey=new Map<string, Value>();
+  private valuesByKey = new Map<string, Value>();
 
   constructor() {
     super([]);
@@ -45,7 +45,7 @@ export class GlobalState extends BehaviorSubject<string[]> implements
 
   /** Clears the entire key/value map. */
   reset() {
-    this.valuesByKey=new Map<string, Value>();
+    this.valuesByKey = new Map<string, Value>();
   }
 
   /**
@@ -69,8 +69,8 @@ export class GlobalState extends BehaviorSubject<string[]> implements
    * mapping.
    */
   get(key: string): Value {
-    const storedVal=this.valuesByKey.get(key);
-    if (storedVal===undefined) {
+    const storedVal = this.valuesByKey.get(key);
+    if (storedVal === undefined) {
       throw new ConfigurationError(`Global state key '${key}' is not set`)
         .from(SOURCE)
         .at(Severity.FATAL);

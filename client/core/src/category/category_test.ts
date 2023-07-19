@@ -19,7 +19,7 @@ import {str, strs, valueMap} from '../value/test_value.js';
 
 describe('categories test', () => {
   it('handles category sets', () => {
-    const response=node(
+    const response = node(
       valueMap(),
       node(
         valueMap(),  // category definitions
@@ -55,11 +55,11 @@ describe('categories test', () => {
         {key: 'category_ids', val: strs('buses')},
       )),
     );
-    const cats=new Array<Category>();
+    const cats = new Array<Category>();
     for (const categoryDefinition of response.children[0].children) {
       cats.push(getDefinedCategory(categoryDefinition.properties)!);
     }
-    const catSet=new CategorySet(...cats);
+    const catSet = new CategorySet(...cats);
     expect(catSet.getTaggedCategories(response.children[1].properties)
       .map(cat => cat.id))
       .toEqual(['cars']);
@@ -71,7 +71,7 @@ describe('categories test', () => {
       .toEqual(['buses']);
   });
   it('handles nested categories', () => {
-    const response=node(
+    const response = node(
       valueMap(
         {key: 'category_defined_id', val: str('vehicles')},
         {key: 'category_display_name', val: str('Vehicles')},

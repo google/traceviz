@@ -18,12 +18,12 @@ import {PAYLOAD_KEYS} from '../payload/payload.js';
 import {Span, Subspan} from '../trace/trace.js';
 
 enum Key {
-  NODE_ID='trace_edge_node_id',
-  OFFSET='trace_edge_offset',
-  ENDPOINT_NODE_IDS='trace_edge_endpoint_node_ids',
+  NODE_ID = 'trace_edge_node_id',
+  OFFSET = 'trace_edge_offset',
+  ENDPOINT_NODE_IDS = 'trace_edge_endpoint_node_ids',
 }
 
-const PAYLOAD_TYPE='trace_edge_payload';
+const PAYLOAD_TYPE = 'trace_edge_payload';
 
 /** A trace edge node. */
 export class Node {
@@ -36,17 +36,17 @@ export class Node {
   readonly properties: ValueMap;
 
   constructor(readonly node: ResponseNode) {
-    this.offset=node.properties.expectDuration(Key.OFFSET);
-    this.nodeID=node.properties.expectString(Key.NODE_ID);
-    this.endpointNodeIDs=
+    this.offset = node.properties.expectDuration(Key.OFFSET);
+    this.nodeID = node.properties.expectString(Key.NODE_ID);
+    this.endpointNodeIDs =
       node.properties.expectStringList(Key.ENDPOINT_NODE_IDS);
-    this.properties=node.properties.without(
+    this.properties = node.properties.without(
       Key.NODE_ID, Key.OFFSET, Key.ENDPOINT_NODE_IDS, ...PAYLOAD_KEYS);
   }
 
   // Returns all traceedge Nodes defined in the provided Span or Subspan, in
   // definition order.
-  static fromSpan(span: Span|Subspan): Node[] {
+  static fromSpan(span: Span | Subspan): Node[] {
     if (span.payloads.has(PAYLOAD_TYPE)) {
       return span.payloads.get(PAYLOAD_TYPE)!.map(
         (node: ResponseNode) => new Node(node));

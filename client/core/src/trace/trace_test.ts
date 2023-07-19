@@ -293,7 +293,7 @@ describe('trace test', () => {
   });
 
   it('gets schedviz-like trace by merging two traces.', () => {
-    const trace=Trace.union(
+    const trace = Trace.union(
       Trace.fromNode(schedvizRunningNode),
       Trace.fromNode(schedvizWaitingNode));
     expect(prettyPrintTrace(trace)).toBe(`Trace:

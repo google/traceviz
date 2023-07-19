@@ -19,7 +19,7 @@
 import {Response, ResponseNode} from './response_interface.js';
 import {KV, ValueMap} from '../value/value_map.js';
 
-type Datum=[
+type Datum = [
   KV[],
   Datum[],
 ];
@@ -51,11 +51,11 @@ export interface Data {
 /**
  * Prepares a Response from the provided JSON object or JSON-encoded string.
  */
-export function fromObject(resp: string|Data): Response {
-  if (typeof resp==='string') {
-    resp=JSON.parse(resp) as Data;
+export function fromObject(resp: string | Data): Response {
+  if (typeof resp === 'string') {
+    resp = JSON.parse(resp) as Data;
   }
-  const m=new Map<string, ResponseNode>();
+  const m = new Map<string, ResponseNode>();
   for (const s of resp.DataSeries) {
     m.set(s.SeriesName, newJSONResponseNode(s.Root, resp.StringTable));
   }

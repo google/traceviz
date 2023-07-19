@@ -18,7 +18,7 @@ import {str, int, strs, valueMap} from '../value/test_value.js';
 
 describe('dot test', () => {
     it('generates expected simple dot and property mappings', () => {
-        const graph=new Graph(
+        const graph = new Graph(
             node(
                 // strict digraph {
                 valueMap(

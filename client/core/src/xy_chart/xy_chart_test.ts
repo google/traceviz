@@ -1,11 +1,11 @@
 import 'jasmine';
 
-import { node } from '../protocol/test_response.js';
-import { dbl, str, strs, ts, valueMap } from '../value/test_value.js';
-import { Coloring } from '../color/color.js';
-import { Duration } from '../duration/duration.js';
-import { Timestamp } from '../timestamp/timestamp.js';
-import { XYChart } from './xy_chart.js';
+import {node} from '../protocol/test_response.js';
+import {dbl, str, strs, ts, valueMap} from '../value/test_value.js';
+import {Coloring} from '../color/color.js';
+import {Duration} from '../duration/duration.js';
+import {Timestamp} from '../timestamp/timestamp.js';
+import {XYChart} from './xy_chart.js';
 
 function sec(sec: number): Timestamp {
   return new Timestamp(sec, 0);
@@ -46,8 +46,8 @@ describe('xy chart test', () => {
   it('gets xy chart', () => {
     const chart = new XYChart(node(
       valueMap(
-        { key: 'color_space_things', val: strs('blue') },
-        { key: 'color_space_stuff', val: strs('red') },
+        {key: 'color_space_things', val: strs('blue')},
+        {key: 'color_space_stuff', val: strs('red')},
       ),
       node(
         // axis definitions
@@ -55,18 +55,18 @@ describe('xy chart test', () => {
         node(
           // x axis
           valueMap(
-            { key: 'category_defined_id', val: str('x_axis') },
-            { key: 'category_display_name', val: str('time from start') },
-            { key: 'category_description', val: str('Time from start') },
-            { key: 'axis_type', val: str('timestamp') },
-            { key: 'axis_min', val: ts(sec(0)) },
-            { key: 'axis_max', val: ts(sec(100)) },
+            {key: 'category_defined_id', val: str('x_axis')},
+            {key: 'category_display_name', val: str('time from start')},
+            {key: 'category_description', val: str('Time from start')},
+            {key: 'axis_type', val: str('timestamp')},
+            {key: 'axis_min', val: ts(sec(0))},
+            {key: 'axis_max', val: ts(sec(100))},
           ),
         ),
         node(
           // y axis
           valueMap(
-            { key: 'category_defined_id', val: str('y_axis') },
+            {key: 'category_defined_id', val: str('y_axis')},
             {
               key: 'category_display_name',
               val: str('events per second')
@@ -75,55 +75,55 @@ describe('xy chart test', () => {
               key: 'category_description',
               val: str('Events per second')
             },
-            { key: 'axis_type', val: str('double') },
-            { key: 'axis_min', val: dbl(0) },
-            { key: 'axis_max', val: dbl(3) },
+            {key: 'axis_type', val: str('double')},
+            {key: 'axis_min', val: dbl(0)},
+            {key: 'axis_max', val: dbl(3)},
           ),
         ),
       ),
       node(
         // series definition
         valueMap(
-          { key: 'category_defined_id', val: str('things') },
-          { key: 'category_display_name', val: str('Remembered Things') },
-          { key: 'category_description', val: str('Things we remembered') },
-          { key: 'primary_color_space', val: str('color_space_things') },
-          { key: 'primary_color_space_value', val: dbl(1) },
+          {key: 'category_defined_id', val: str('things')},
+          {key: 'category_display_name', val: str('Remembered Things')},
+          {key: 'category_description', val: str('Things we remembered')},
+          {key: 'primary_color_space', val: str('color_space_things')},
+          {key: 'primary_color_space_value', val: dbl(1)},
         ),
         node(valueMap(
-          { key: 'x_axis', val: ts(sec(0)) },
-          { key: 'y_axis', val: dbl(3) },
-          { key: 'story', val: str('We started out so well...') },
+          {key: 'x_axis', val: ts(sec(0))},
+          {key: 'y_axis', val: dbl(3)},
+          {key: 'story', val: str('We started out so well...')},
         )),
         node(valueMap(
-          { key: 'x_axis', val: ts(sec(10)) },
-          { key: 'y_axis', val: dbl(2) },
+          {key: 'x_axis', val: ts(sec(10))},
+          {key: 'y_axis', val: dbl(2)},
         )),
         node(valueMap(
-          { key: 'x_axis', val: ts(sec(20)) },
-          { key: 'y_axis', val: dbl(1) },
+          {key: 'x_axis', val: ts(sec(20))},
+          {key: 'y_axis', val: dbl(1)},
         )),
       ),
       node(
         valueMap(
-          { key: 'category_defined_id', val: str('stuff') },
-          { key: 'category_display_name', val: str('Forgotten Stuff') },
-          { key: 'category_description', val: str('Stuff we forgot') },
-          { key: 'primary_color_space', val: str('color_space_stuff') },
-          { key: 'primary_color_space_value', val: dbl(1) },
+          {key: 'category_defined_id', val: str('stuff')},
+          {key: 'category_display_name', val: str('Forgotten Stuff')},
+          {key: 'category_description', val: str('Stuff we forgot')},
+          {key: 'primary_color_space', val: str('color_space_stuff')},
+          {key: 'primary_color_space_value', val: dbl(1)},
         ),
         node(valueMap(
-          { key: 'x_axis', val: ts(sec(80)) },
-          { key: 'y_axis', val: dbl(1) },
+          {key: 'x_axis', val: ts(sec(80))},
+          {key: 'y_axis', val: dbl(1)},
         )),
         node(valueMap(
-          { key: 'x_axis', val: ts(sec(90)) },
-          { key: 'y_axis', val: dbl(2) },
+          {key: 'x_axis', val: ts(sec(90))},
+          {key: 'y_axis', val: dbl(2)},
         )),
         node(valueMap(
-          { key: 'x_axis', val: ts(sec(100)) },
-          { key: 'y_axis', val: dbl(3) },
-          { key: 'story', val: str('But it all ended so badly...') },
+          {key: 'x_axis', val: ts(sec(100))},
+          {key: 'y_axis', val: dbl(3)},
+          {key: 'story', val: str('But it all ended so badly...')},
         )),
       ),
     ));

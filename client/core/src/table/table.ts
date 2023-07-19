@@ -23,27 +23,27 @@ import {EmptyValue, StringValue, Value} from '../value/value.js';
 import {Subject, EMPTY, distinctUntilChanged, takeUntil} from 'rxjs';
 import {ValueMap} from '../value/value_map.js';
 
-const SOURCE='table';
+const SOURCE = 'table';
 
 enum Keys {
-  CELL='table_cell',
-  FORMATTED_CELL='table_formatted_cell',
+  CELL = 'table_cell',
+  FORMATTED_CELL = 'table_formatted_cell',
 
-  ROW_HEIGHT_PX='table_row_height_px',
-  FONT_SIZE_PX='table_font_size_px',
+  ROW_HEIGHT_PX = 'table_row_height_px',
+  FONT_SIZE_PX = 'table_font_size_px',
 }
 
 /** Table rendering properties. */
 export class TableRenderProperties {
-  rowHeightPx=0;
-  fontSizePx=0;
+  rowHeightPx = 0;
+  fontSizePx = 0;
 
   constructor(vm: ValueMap) {
     if (vm.has(Keys.ROW_HEIGHT_PX)) {
-      this.rowHeightPx=vm.expectNumber(Keys.ROW_HEIGHT_PX);
+      this.rowHeightPx = vm.expectNumber(Keys.ROW_HEIGHT_PX);
     }
     if (vm.has(Keys.FONT_SIZE_PX)) {
-      this.fontSizePx=vm.expectNumber(Keys.FONT_SIZE_PX);
+      this.fontSizePx = vm.expectNumber(Keys.FONT_SIZE_PX);
     }
   }
 }
@@ -58,21 +58,21 @@ export interface Highlightable {
 export class Cell implements Highlightable {
   readonly properties: ValueMap;
   readonly payloadsByType: ReadonlyMap<string, ResponseNode[]>;
-  private readonly unsubscribe=new Subject<void>();
+  private readonly unsubscribe = new Subject<void>();
 
-  highlighted=false;
+  highlighted = false;
 
   constructor(
-    node: ResponseNode, readonly column: Header, matchFn: MatchFn|undefined,
+    node: ResponseNode, readonly column: Header, matchFn: MatchFn | undefined,
     onChange: () => void) {
-    this.properties=node.properties;
-    const c=children(node);
-    if (c.structural.length>0) {
+    this.properties = node.properties;
+    const c = children(node);
+    if (c.structural.length > 0) {
       throw new ConfigurationError(`cell node children may only be payloads`)
         .from(SOURCE)
         .at(Severity.ERROR);
     }
-    this.payloadsByType=c.payload;
+    this.payloadsByType = c.payload;
   }
 
   get value(): Value {
@@ -110,39 +110,39 @@ export class Row implements Highlightable {
   readonly properties: ValueMap;
   private readonly cellsByColumnID: ReadonlyMap<string, Cell>;
   readonly payloadsByType: ReadonlyMap<string, ResponseNode[]>;
-  private readonly unsubscribe=new Subject<void>();
+  private readonly unsubscribe = new Subject<void>();
 
-  highlighted=false;
+  highlighted = false;
 
   constructor(
-    node: ResponseNode, columns: Header[], rowMatchFn: MatchFn|undefined,
-    cellMatchFn: MatchFn|undefined, onChange: () => void) {
-    this.properties=node.properties;
-    const c=children(node);
-    this.payloadsByType=c.payload;
-    const cellsByColumnID=new Map<string, Cell>();
+    node: ResponseNode, columns: Header[], rowMatchFn: MatchFn | undefined,
+    cellMatchFn: MatchFn | undefined, onChange: () => void) {
+    this.properties = node.properties;
+    const c = children(node);
+    this.payloadsByType = c.payload;
+    const cellsByColumnID = new Map<string, Cell>();
     c.structural.forEach((child: ResponseNode) => {
-      const categorySet=new CategorySet(...columns.map(col => col.category));
-      const cats=categorySet.getTaggedCategories(child.properties);
-      if (cats.length===0) {
+      const categorySet = new CategorySet(...columns.map(col => col.category));
+      const cats = categorySet.getTaggedCategories(child.properties);
+      if (cats.length === 0) {
         return;
       }
-      if (cats.length>1) {
+      if (cats.length > 1) {
         throw new ConfigurationError(`Cells may only belong to one column`)
           .from(SOURCE)
           .at(Severity.ERROR);
       }
-      const column=columns.find(col => col.category===cats[0])!;
-      const cell=new Cell(child, column, cellMatchFn, onChange);
+      const column = columns.find(col => col.category === cats[0])!;
+      const cell = new Cell(child, column, cellMatchFn, onChange);
       cellsByColumnID.set(column.category.id, cell);
       return cell;
     });
-    this.cellsByColumnID=cellsByColumnID;
-    if (rowMatchFn!==undefined) {
+    this.cellsByColumnID = cellsByColumnID;
+    if (rowMatchFn !== undefined) {
       rowMatchFn(this.properties)
         .pipe(takeUntil(this.unsubscribe), distinctUntilChanged())
         .subscribe((highlighted) => {
-          this.highlighted=highlighted;
+          this.highlighted = highlighted;
           onChange();
         });
     }
@@ -156,7 +156,7 @@ export class Row implements Highlightable {
    */
   cells(columns: readonly Header[]): Cell[] {
     return columns.map((column: Header): Cell => {
-      const cell=this.cellsByColumnID.get(column.category.id);
+      const cell = this.cellsByColumnID.get(column.category.id);
       if (cell) {
         return cell;
       }
@@ -176,14 +176,14 @@ export class Header {
   readonly category: Category;
 
   constructor(node: ResponseNode) {
-    this.properties=node.properties;
-    const category=getDefinedCategory(this.properties);
+    this.properties = node.properties;
+    const category = getDefinedCategory(this.properties);
     if (!category) {
       throw new ConfigurationError(`Expected a column definition but got none!`)
         .from(SOURCE)
         .at(Severity.ERROR);
     }
-    this.category=category;
+    this.category = category;
   }
 }
 
@@ -206,29 +206,29 @@ export class Header {
 export class CanonicalTable {
   readonly renderProperties: TableRenderProperties;
   readonly coloring: Coloring;
-  private readonly initialColumnOrder=new Array<string>();
+  private readonly initialColumnOrder = new Array<string>();
   private readonly columnsByID: ReadonlyMap<string, Header>;
   private readonly rowNodes: ResponseNode[];
-  private readonly columnsList=new Array<Header>();
+  private readonly columnsList = new Array<Header>();
 
   constructor(
     private readonly node: ResponseNode,
-    private readonly rowMatchFn: MatchFn|undefined,
-    private readonly cellMatchFn: MatchFn|undefined,
+    private readonly rowMatchFn: MatchFn | undefined,
+    private readonly cellMatchFn: MatchFn | undefined,
     private readonly onChange: () => void) {
-    this.renderProperties=new TableRenderProperties(node.properties);
-    this.coloring=new Coloring(node.properties);
-    const columnsByID=new Map<string, Header>();
-    if (this.node.children.length>0) {
+    this.renderProperties = new TableRenderProperties(node.properties);
+    this.coloring = new Coloring(node.properties);
+    const columnsByID = new Map<string, Header>();
+    if (this.node.children.length > 0) {
       for (const columnNode of this.node.children[0].children) {
-        const col=new Header(columnNode);
+        const col = new Header(columnNode);
         columnsByID.set(col.category.id, col);
         this.initialColumnOrder.push(col.category.id);
         this.columnsList.push(col);
       }
     }
-    this.columnsByID=columnsByID;
-    this.rowNodes=this.node.children.slice(1);
+    this.columnsByID = columnsByID;
+    this.rowNodes = this.node.children.slice(1);
   }
 
   get rowCount(): number {
@@ -241,12 +241,12 @@ export class CanonicalTable {
    * are returned.
    */
   columns(...columnIDs: string[]): Header[] {
-    if (columnIDs.length===0) {
-      columnIDs=this.initialColumnOrder;
+    if (columnIDs.length === 0) {
+      columnIDs = this.initialColumnOrder;
     }
-    const ret=new Array<Header>();
+    const ret = new Array<Header>();
     for (const columnID of columnIDs) {
-      const col=this.columnsByID.get(columnID);
+      const col = this.columnsByID.get(columnID);
       if (!col) {
         throw new ConfigurationError(`unknown column ID ${columnID}`)
           .from(SOURCE)
@@ -258,7 +258,7 @@ export class CanonicalTable {
   }
 
   rowSlice(startIdx?: number, endIdx?: number): Row[] {
-    if (!!endIdx&&!!startIdx&&endIdx<startIdx) {
+    if (!!endIdx && !!startIdx && endIdx < startIdx) {
       throw new ConfigurationError(
         `slice range [${startIdx}, ${endIdx}] is invalid`)
         .from(SOURCE)

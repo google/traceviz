@@ -17,7 +17,7 @@
 
 import {Documenter, DocumenterType} from './documentation.js';
 
-const typeToString=new Map<DocumenterType, string>([
+const typeToString = new Map<DocumenterType, string>([
   [DocumenterType.UPDATE, 'Update'],
   [DocumenterType.PREDICATE, 'Predicate'],
   [DocumenterType.WATCH, 'Watch'],
@@ -32,13 +32,13 @@ const typeToString=new Map<DocumenterType, string>([
  * Returns a deterministic prettyprinted representation of the provided
  * Documenter, indented by the supplied indentation.
  */
-export function prettyPrintDocumenter(doc: Documenter, indent=''): string[] {
-  const msg=
-    (doc.overrideDocument==='')? doc.autoDocument:doc.overrideDocument;
-  const ret=[`${indent}${msg} (${typeToString.get(doc.documenterType)})`];
+export function prettyPrintDocumenter(doc: Documenter, indent = ''): string[] {
+  const msg =
+    (doc.overrideDocument === '') ? doc.autoDocument : doc.overrideDocument;
+  const ret = [`${indent}${msg} (${typeToString.get(doc.documenterType)})`];
   if (doc.documentChildren) {
     for (const child of doc.children) {
-      ret.push(...prettyPrintDocumenter(child, indent+'  '));
+      ret.push(...prettyPrintDocumenter(child, indent + '  '));
     }
   }
   return ret;

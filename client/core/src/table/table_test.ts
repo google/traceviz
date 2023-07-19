@@ -17,29 +17,29 @@ import {CanonicalTable, Cell, Header, Row} from './table.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 
 describe('columns test', () => {
-    const nameColumn=node(valueMap(
+    const nameColumn = node(valueMap(
         {key: 'category_defined_id', val: str('name')},
         {key: 'category_display_name', val: str('Name')}, {
         key: 'category_description',
         val: str('Give this name to order this scoop!')
     }));
 
-    const colorColumn=node(valueMap(
+    const colorColumn = node(valueMap(
         {key: 'category_defined_id', val: str('color')},
         {key: 'category_display_name', val: str('Color')},
         {key: 'category_description', val: str('How will you recognize it?')}));
 
-    const flavorColumn=node(valueMap(
+    const flavorColumn = node(valueMap(
         {key: 'category_defined_id', val: str('flavor')},
         {key: 'category_display_name', val: str('Flavor')},
         {key: 'category_description', val: str('What will it taste like?')}));
 
-    const labelColumn=node(valueMap(
+    const labelColumn = node(valueMap(
         {key: 'category_defined_id', val: str('label')},
         {key: 'category_display_name', val: str('Label')},
         {key: 'category_description', val: str('This ice cream\'s label')}));
 
-    const vanillaRow=node(
+    const vanillaRow = node(
         valueMap(),
         node(valueMap(
             {key: 'category_ids', val: strs('name')},
@@ -63,7 +63,7 @@ describe('columns test', () => {
         )),
     );
 
-    const chocolateRow=node(
+    const chocolateRow = node(
         valueMap(),
         node(valueMap(
             {key: 'category_ids', val: strs('name')},
@@ -89,7 +89,7 @@ describe('columns test', () => {
             {key: 'table_formatted_cell', val: str('$(name) ($(color))')})),
     );
 
-    const strawberryRow=node(
+    const strawberryRow = node(
         valueMap(),
         node(valueMap(
             {key: 'category_ids', val: strs('name')},
@@ -116,7 +116,7 @@ describe('columns test', () => {
     });
 
     it('gets render properties', () => {
-        const table=new CanonicalTable(
+        const table = new CanonicalTable(
             node(
                 valueMap(
                     {key: 'table_row_height_px', val: int(12)},
@@ -133,7 +133,7 @@ describe('columns test', () => {
     });
 
     it('gets rows and columns', () => {
-        const table=new CanonicalTable(
+        const table = new CanonicalTable(
             node(
                 valueMap(),
                 node(
@@ -150,7 +150,7 @@ describe('columns test', () => {
             'name', 'color', 'flavor', 'label'
         ]);
 
-        const cs=[
+        const cs = [
             new Header(nameColumn),
             new Header(colorColumn),
             new Header(flavorColumn),
@@ -161,7 +161,7 @@ describe('columns test', () => {
             new Row(chocolateRow, cs, undefined, undefined, () => { }),
             new Row(strawberryRow, cs, undefined, undefined, () => { })
         ]);
-        const thisRow=new Row(strawberryRow, cs, undefined, undefined, () => { });
+        const thisRow = new Row(strawberryRow, cs, undefined, undefined, () => { });
         expect(thisRow.cells(table.columns()).map((cell: Cell) => cell.value))
             .toEqual([
                 str('strawberry'), str('pink'), str('berrylicious'),
@@ -173,8 +173,8 @@ describe('columns test', () => {
         // Expect to find the row payload in vanilla.
         expect(table.rowSlice()
             .map(row => {
-                const infoBoxPayload=row.payloadsByType.get('info box');
-                if (infoBoxPayload===undefined) {
+                const infoBoxPayload = row.payloadsByType.get('info box');
+                if (infoBoxPayload === undefined) {
                     return [''];
                 }
                 return infoBoxPayload

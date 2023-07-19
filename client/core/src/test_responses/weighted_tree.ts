@@ -17,7 +17,7 @@ import {node} from '../protocol/test_response.js';
 /**
  * A response node containing a weighted tree, renderable as a flame chart.
  */
-export const weightedTreeNode=node(
+export const weightedTreeNode = node(
     valueMap({key: 'weighted_tree_frame_height_px', val: int(20)}),
     node(
         valueMap(

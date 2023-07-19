@@ -34,9 +34,9 @@ import {SeriesRequest} from '../protocol/request_interface.js';
  * is used by the DataQuery component to route data series responses to their
  * proper consumers.
  */
-let nextID=0;
+let nextID = 0;
 function getUniqueSeriesName(): string {
-  if (nextID>=Number.MAX_SAFE_INTEGER) {
+  if (nextID >= Number.MAX_SAFE_INTEGER) {
     // If we've generated 90 quadrillion unique names, we deserve a prize: this
     // error.
     throw new Error(`Too many series IDs generated.`);
@@ -58,13 +58,13 @@ function getUniqueSeriesName(): string {
  * Users of DataSeriesQuery must call its dispose method when done with it.
  */
 export class DataSeriesQuery {
-  readonly unsubscribe=new Subject<void>();
+  readonly unsubscribe = new Subject<void>();
   // loading emits true when the data series is being fetched, and emits false
   // when a response is handled.
-  readonly loading=new BehaviorSubject<boolean>(false);
+  readonly loading = new BehaviorSubject<boolean>(false);
   // response emits a root ResponseNode populated with the series query response
   // each time such a response is available.
-  readonly response=new Subject<ResponseNode>();
+  readonly response = new Subject<ResponseNode>();
   // This series' unique name, for routing.  Nothing should depend on this
   // member having any particular value, but it will be unique to each
   // DataSeriesQuery instance and will remain stable throughout its lifetime.
@@ -73,19 +73,19 @@ export class DataSeriesQuery {
   constructor(
     readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
     readonly parameters: ValueMap, fetch: Observable<boolean>) {
-    this.uniqueSeriesName=getUniqueSeriesName();
+    this.uniqueSeriesName = getUniqueSeriesName();
     fetch
       .pipe(
         distinctUntilChanged(),
         takeUntil(this.unsubscribe),
       )
       .subscribe((fetch) => {
-        fetch&&this.fetch();
+        fetch && this.fetch();
       });
   }
 
   private fetch() {
-    const req: SeriesRequest={
+    const req: SeriesRequest = {
       queryName: this.queryName.val,
       seriesName: this.uniqueSeriesName,
       parameters: this.parameters,

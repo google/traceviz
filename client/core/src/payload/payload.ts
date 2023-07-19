@@ -18,13 +18,13 @@
 import {ResponseNode} from '../protocol/response_interface.js';
 
 enum Key {
-  TYPE='payload_type',
+  TYPE = 'payload_type',
 }
 
 /**
  * The set of keys marking a payload.  May be used with ValueMap.without().
  */
-export const PAYLOAD_KEYS=[Key.TYPE];
+export const PAYLOAD_KEYS = [Key.TYPE];
 
 /** A response struct for the children() function. */
 export interface Children {
@@ -38,13 +38,13 @@ export interface Children {
  * payload type.
  */
 export function children(node: ResponseNode): Children {
-  const structural: ResponseNode[]=[];
-  const payload=new Map<string, ResponseNode[]>();
+  const structural: ResponseNode[] = [];
+  const payload = new Map<string, ResponseNode[]>();
   node.children.forEach((child) => {
     if (child.properties.has(Key.TYPE)) {
-      const payloadType=child.properties.expectString(Key.TYPE);
-      const children=payload.get(payloadType);
-      if (children===undefined) {
+      const payloadType = child.properties.expectString(Key.TYPE);
+      const children = payload.get(payloadType);
+      if (children === undefined) {
         payload.set(payloadType, [child]);
       } else {
         children.push(child);

@@ -27,7 +27,7 @@ function name(name: string): ValueMap {
 
 describe('tree test', () => {
   it('gets tree', () => {
-    const tree=new Tree(weightedTreeNode);
+    const tree = new Tree(weightedTreeNode);
     expect(tree).toEqual(jasmine.objectContaining({
       roots: [
         jasmine.objectContaining({
@@ -75,8 +75,8 @@ describe('tree test', () => {
   });
 
   it('renders a top-down tree', () => {
-    const tree=new Tree(weightedTreeNode);
-    const renderedNodes=tree.renderTopDownTree();
+    const tree = new Tree(weightedTreeNode);
+    const renderedNodes = tree.renderTopDownTree();
     renderedNodes.forEach((renderedNode) => {
       renderedNode.resize(100);
     });

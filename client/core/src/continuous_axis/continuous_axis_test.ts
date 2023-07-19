@@ -28,7 +28,7 @@ function d(nanos: number): Duration {
 
 describe('axis test', () => {
   it('defines timestamp axes and gets points', () => {
-    const axis=getAxis(valueMap(
+    const axis = getAxis(valueMap(
       {key: 'category_defined_id', val: str('x_axis')},
       {key: 'category_display_name', val: str('time from start')},
       {key: 'category_description', val: str('Time from start')},
@@ -37,7 +37,7 @@ describe('axis test', () => {
       {key: 'axis_max', val: ts(sec(100))},
     ));
     expect(axis).toBeInstanceOf(TimestampAxis);
-    const tsAxis=axis as TimestampAxis;
+    const tsAxis = axis as TimestampAxis;
     expect(tsAxis.contains(sec(50))).toBeTrue();
     expect(tsAxis.contains(sec(150))).toBeFalse();
     expect(tsAxis.pointValue(valueMap(
@@ -49,12 +49,12 @@ describe('axis test', () => {
         {key: 'missing field', val: ts(sec(50))},
       ));
     }).toThrow();
-    expect(tsAxis.atOffset(d(50*1E9))).toEqual(sec(50));
+    expect(tsAxis.atOffset(d(50 * 1E9))).toEqual(sec(50));
     expect(tsAxis.toDomainFraction(sec(25))).toEqual(.25);
   });
 
   it('defines duration axes and gets points', () => {
-    const axis=getAxis(valueMap(
+    const axis = getAxis(valueMap(
       {key: 'category_defined_id', val: str('x_axis')},
       {key: 'category_display_name', val: str('time from start')},
       {key: 'category_description', val: str('Time from start')},
@@ -63,7 +63,7 @@ describe('axis test', () => {
       {key: 'axis_max', val: dur(d(100))},
     ));
     expect(axis).toBeInstanceOf(DurationAxis);
-    const dAxis=axis as DurationAxis;
+    const dAxis = axis as DurationAxis;
     expect(dAxis.contains(d(50))).toBeTrue();
     expect(dAxis.contains(d(150))).toBeFalse();
     expect(dAxis.pointValue(valueMap(
@@ -79,7 +79,7 @@ describe('axis test', () => {
   });
 
   it('defines number axes and gets points', () => {
-    const axis=getAxis(valueMap(
+    const axis = getAxis(valueMap(
       {key: 'category_defined_id', val: str('y_axis')},
       {key: 'category_display_name', val: str('events per second')},
       {key: 'category_description', val: str('Events per second')},
@@ -88,7 +88,7 @@ describe('axis test', () => {
       {key: 'axis_max', val: dbl(100)},
     ));
     expect(axis).toBeInstanceOf(NumberAxis);
-    const dblAxis=axis as NumberAxis;
+    const dblAxis = axis as NumberAxis;
     expect(dblAxis.contains(50)).toBeTrue();
     expect(dblAxis.contains(150)).toBeFalse();
     expect(dblAxis.pointValue(valueMap(
@@ -105,7 +105,7 @@ describe('axis test', () => {
   });
 
   it('unions axes properly', () => {
-    const axis1=getAxis(valueMap(
+    const axis1 = getAxis(valueMap(
       {key: 'category_defined_id', val: str('x_axis')},
       {key: 'category_display_name', val: str('time from start')},
       {key: 'category_description', val: str('Time from start')},
@@ -113,7 +113,7 @@ describe('axis test', () => {
       {key: 'axis_min', val: ts(sec(50))},
       {key: 'axis_max', val: ts(sec(100))},
     ));
-    const axis2=getAxis(valueMap(
+    const axis2 = getAxis(valueMap(
       {key: 'category_defined_id', val: str('x_axis')},
       {key: 'category_display_name', val: str('time from start')},
       {key: 'category_description', val: str('Time from start')},
@@ -121,7 +121,7 @@ describe('axis test', () => {
       {key: 'axis_min', val: ts(sec(0))},
       {key: 'axis_max', val: ts(sec(150))},
     ));
-    const axis3=getAxis(valueMap(
+    const axis3 = getAxis(valueMap(
       {key: 'category_defined_id', val: str('x_axis')},
       {key: 'category_display_name', val: str('time from start')},
       {key: 'category_description', val: str('Time from start')},
@@ -130,9 +130,9 @@ describe('axis test', () => {
       {key: 'axis_max', val: dur(d(100))},
     ));
     expect(() => unionAxes(axis1, axis2, axis3)).toThrow();
-    const uAxis=unionAxes(axis1, axis2);
+    const uAxis = unionAxes(axis1, axis2);
     expect(uAxis).toBeInstanceOf(TimestampAxis);
-    const tsAxis=uAxis as TimestampAxis;
+    const tsAxis = uAxis as TimestampAxis;
     expect(tsAxis.min).toEqual(sec(0));
     expect(tsAxis.max).toEqual(sec(150));
   });

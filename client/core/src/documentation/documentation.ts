@@ -19,7 +19,7 @@
 /** Supported types of documenters. */
 export enum DocumenterType {
   /** Documents an update in response to some user action. */
-  UPDATE=0,
+  UPDATE = 0,
   /** Documents a predicate controlling some reaction. */
   PREDICATE,
   /** Documents a watch on a set of Values. */

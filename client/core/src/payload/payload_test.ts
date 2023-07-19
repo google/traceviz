@@ -18,7 +18,7 @@ import {int, str, valueMap} from '../value/test_value.js';
 
 describe('payload test', () => {
   it('extracts payloads and children', () => {
-    const n=node(
+    const n = node(
       valueMap(),
       node(valueMap(
         {key: 'index', val: int(1)},

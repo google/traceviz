@@ -24,7 +24,7 @@ export class TestResponseNode implements ResponseNode {
   }
 
   with(properties: ValueMap): ResponseNode {
-    this.internalProperties=
+    this.internalProperties =
       ValueMap.union(this.internalProperties, properties);
     return this;
   }
@@ -37,8 +37,8 @@ export class TestResponseNode implements ResponseNode {
 /** Returns a new TestResponseNode with the provided properties and children. */
 export function node(
   properties?: ValueMap, ...children: ResponseNode[]): TestResponseNode {
-  if (properties===undefined) {
-    properties=valueMap();
+  if (properties === undefined) {
+    properties = valueMap();
   }
   return new TestResponseNode(properties, [...children]);
 }
@@ -51,7 +51,7 @@ class TestResponse implements Response {
 /** Returns a new TestResponse with the provided series. */
 export function response(
   ...series: Array<{name: string, series: ResponseNode}>): Response {
-  const seriesByName=new Map<string, ResponseNode>();
+  const seriesByName = new Map<string, ResponseNode>();
   for (const dataSeries of series) {
     seriesByName.set(dataSeries.name, dataSeries.series);
   }

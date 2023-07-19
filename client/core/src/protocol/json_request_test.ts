@@ -21,7 +21,7 @@ import {Timestamp} from '../timestamp/timestamp.js';
 
 describe('json request test', () => {
   it('prepares a request', () => {
-    const request: Request={
+    const request: Request = {
       filters: valueMap(
         {key: 'str', val: str('hello')},
         {key: 'strs', val: strs('hello', 'goodbye')},
