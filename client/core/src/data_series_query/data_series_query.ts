@@ -16,7 +16,8 @@
  * request.
  */
 
-import {BehaviorSubject, distinctUntilChanged, Observable, Subject, takeUntil} from 'rxjs';
+import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {distinctUntilChanged, takeUntil} from 'rxjs/operators';
 import {StringValue} from '../value/value.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 import {DataSeriesFetcher} from './data_series_fetcher.js';

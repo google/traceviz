@@ -15,7 +15,8 @@
  * @fileoverview Defines a class mediating all TraceViz data series requests.
  */
 
-import {debounce, Subject, take, timer} from 'rxjs';
+import {Subject, timer} from 'rxjs';
+import {debounce, take} from 'rxjs/operators';
 import {Request, SeriesRequest} from '../protocol/request_interface.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';

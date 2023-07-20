@@ -11,6 +11,7 @@
         limitations under the License.
 */
 
+import 'jasmine';
 import {int, str, strs, valueMap} from '../value/test_value.js';
 import {node} from '../protocol/test_response.js';
 import {CanonicalTable, Cell, Header, Row} from './table.js';
