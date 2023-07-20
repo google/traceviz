@@ -38,7 +38,7 @@ export interface Category {
  * Returns the Category defined in the provided properties, or undefined if no
  * Category is defined there.
  */
-export function getDefinedCategory(properties: ValueMap): Category | undefined {
+export function getDefinedCategory(properties: ValueMap): Category|undefined {
   if (properties.has(CATEGORY_DEFINED_ID)) {
     return {
       id: properties.expectString(CATEGORY_DEFINED_ID),
@@ -70,9 +70,10 @@ export class CategorySet {
       const category = this.categoriesByID.get(categoryID);
       if (!category) {
         throw new ConfigurationError(
-          `tagged category '${categoryID}' is not defined in this CategorySet`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
+            `tagged category '${
+                categoryID}' is not defined in this CategorySet`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
       }
       ret.push(category);
     }
@@ -83,5 +84,5 @@ export class CategorySet {
 /** Returns true iff categories a and b are equal in all fields. */
 export function categoryEquals(a: Category, b: Category): boolean {
   return a.id === b.id && a.displayName === b.displayName &&
-    a.description === b.description;
+      a.description === b.description;
 }

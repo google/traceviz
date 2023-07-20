@@ -13,12 +13,13 @@
 
 import 'jasmine';
 
-import {Timestamp} from './timestamp.js';
 import {Duration} from '../duration/duration.js';
+
+import {Timestamp} from './timestamp.js';
 
 describe('timestamp test', () => {
   it('converts to a Date', () => {
-    const t = new Timestamp(123456789, 0); // Thu Nov 29 1973 21:33:09 GMT
+    const t = new Timestamp(123456789, 0);  // Thu Nov 29 1973 21:33:09 GMT
     expect(t.toDate()).toEqual(new Date(Date.UTC(1973, 10, 29, 21, 33, 9, 0)));
   });
 

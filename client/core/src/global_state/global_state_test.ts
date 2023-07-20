@@ -13,11 +13,13 @@
 
 import 'jasmine';
 
-import {GlobalState} from './global_state.js';
-import {str} from '../value/test_value.js';
-import {StringValue} from '../value/value.js';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
+
+import {str} from '../value/test_value.js';
+import {StringValue} from '../value/value.js';
+
+import {GlobalState} from './global_state.js';
 
 describe('global state test', () => {
   it('sets, gets, and complains as expected', () => {

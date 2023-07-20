@@ -13,11 +13,13 @@
 
 import 'jasmine';
 
-import {node} from '../protocol/test_response.js';
-import {Node} from './trace_edge.js';
-import {Timestamp} from '../timestamp/timestamp.js';
 import {Duration} from '../duration/duration.js';
-import {Trace, TraceCategory, Span, Subspan} from '../trace/trace.js';
+import {node} from '../protocol/test_response.js';
+import {Timestamp} from '../timestamp/timestamp.js';
+import {Span, Subspan, Trace, TraceCategory} from '../trace/trace.js';
+
+import {Node} from './trace_edge.js';
+
 import {dur, int, str, strs, ts, valueMap} from '../value/test_value.js';
 
 /** Returns a Timestamp at the specified seconds after epoch. */
@@ -31,7 +33,7 @@ export function d(sec: number): Duration {
 }
 
 function findAllEdges(
-  parent: Trace | TraceCategory | Span | Subspan, nodesByID: Map<string, Node>) {
+    parent: Trace|TraceCategory|Span|Subspan, nodesByID: Map<string, Node>) {
   if (parent instanceof Trace) {
     for (const category of parent.categories) {
       findAllEdges(category, nodesByID);
@@ -60,78 +62,72 @@ function findAllEdges(
 describe('trace edge test', () => {
   it('loads from trace', () => {
     const response = node(
-      valueMap(
-        {key: 'category_defined_id', val: str('x_axis')},
-        {key: 'category_display_name', val: str('time from start')},
-        {key: 'category_description', val: str('Time from start')},
-        {key: 'axis_type', val: str('timestamp')},
-        {key: 'axis_min', val: ts(sec(0))},
-        {key: 'axis_max', val: ts(sec(300))},
-      ),
-      node(
-        // rpc a category
         valueMap(
-          {key: 'trace_node_type', val: int(0)},
-          {key: 'category_defined_id', val: str('rpc a')},
-          {key: 'category_display_name', val: str('RPC a')},
-          {key: 'category_description', val: str('RPC a')},
-          {key: 'id', val: str('a')},
-        ),
-        node(
-          // rpc a span
-          valueMap(
-            {key: 'trace_node_type', val: int(1)},
-            {key: 'trace_offset', val: dur(d(0))},
-            {key: 'trace_duration', val: dur(d(100))},
-            {key: 'id', val: str('a:0')},
-          ),
-          // Traceedge node "A"
-          node(
-            valueMap(
-              {key: 'trace_node_type', val: int(3)},
-              {
-                key: 'payload_type',
-                val: str('trace_edge_payload')
-              },
-              {key: 'trace_edge_node_id', val: str('A')},
-              {key: 'trace_edge_offset', val: dur(d(100))},
-              {key: 'trace_edge_endpoint_node_ids', val: strs('B')},
+            {key: 'category_defined_id', val: str('x_axis')},
+            {key: 'category_display_name', val: str('time from start')},
+            {key: 'category_description', val: str('Time from start')},
+            {key: 'axis_type', val: str('timestamp')},
+            {key: 'axis_min', val: ts(sec(0))},
+            {key: 'axis_max', val: ts(sec(300))},
             ),
-          ),
-        ),
-      ),
-      node(
-        // rpc b category
-        valueMap(
-          {key: 'trace_node_type', val: int(0)},
-          {key: 'category_defined_id', val: str('rpc b')},
-          {key: 'category_display_name', val: str('RPC b')},
-          {key: 'category_description', val: str('RPC b')},
-          {key: 'id', val: str('b')},
-        ),
         node(
-          // rpc b span
-          valueMap(
-            {key: 'trace_node_type', val: int(1)},
-            {key: 'trace_offset', val: dur(d(100))},
-            {key: 'trace_duration', val: dur(d(300))},
-            {key: 'id', val: str('b:0')},
-          ),
-          // Traceedge node "A"
-          node(
+            // rpc a category
             valueMap(
-              {key: 'trace_node_type', val: int(3)},
-              {
-                key: 'payload_type',
-                val: str('trace_edge_payload')
-              },
-              {key: 'trace_edge_node_id', val: str('B')},
-              {key: 'trace_edge_offset', val: dur(d(100))},
-              {key: 'trace_edge_endpoint_node_ids', val: strs()},
+                {key: 'trace_node_type', val: int(0)},
+                {key: 'category_defined_id', val: str('rpc a')},
+                {key: 'category_display_name', val: str('RPC a')},
+                {key: 'category_description', val: str('RPC a')},
+                {key: 'id', val: str('a')},
+                ),
+            node(
+                // rpc a span
+                valueMap(
+                    {key: 'trace_node_type', val: int(1)},
+                    {key: 'trace_offset', val: dur(d(0))},
+                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'id', val: str('a:0')},
+                    ),
+                // Traceedge node "A"
+                node(
+                    valueMap(
+                        {key: 'trace_node_type', val: int(3)},
+                        {key: 'payload_type', val: str('trace_edge_payload')},
+                        {key: 'trace_edge_node_id', val: str('A')},
+                        {key: 'trace_edge_offset', val: dur(d(100))},
+                        {key: 'trace_edge_endpoint_node_ids', val: strs('B')},
+                        ),
+                    ),
+                ),
             ),
-          ),
-        ),
-      ),
+        node(
+            // rpc b category
+            valueMap(
+                {key: 'trace_node_type', val: int(0)},
+                {key: 'category_defined_id', val: str('rpc b')},
+                {key: 'category_display_name', val: str('RPC b')},
+                {key: 'category_description', val: str('RPC b')},
+                {key: 'id', val: str('b')},
+                ),
+            node(
+                // rpc b span
+                valueMap(
+                    {key: 'trace_node_type', val: int(1)},
+                    {key: 'trace_offset', val: dur(d(100))},
+                    {key: 'trace_duration', val: dur(d(300))},
+                    {key: 'id', val: str('b:0')},
+                    ),
+                // Traceedge node "A"
+                node(
+                    valueMap(
+                        {key: 'trace_node_type', val: int(3)},
+                        {key: 'payload_type', val: str('trace_edge_payload')},
+                        {key: 'trace_edge_node_id', val: str('B')},
+                        {key: 'trace_edge_offset', val: dur(d(100))},
+                        {key: 'trace_edge_endpoint_node_ids', val: strs()},
+                        ),
+                    ),
+                ),
+            ),
     );
     const trace = Trace.fromNode(response);
     const nodesByID = new Map<string, Node>();
@@ -140,22 +136,22 @@ describe('trace edge test', () => {
       [
         'a:0',
         new Node(node(valueMap(
-          {key: 'trace_node_type', val: int(3)},
-          {key: 'payload_type', val: str('trace_edge_payload')},
-          {key: 'trace_edge_node_id', val: str('A')},
-          {key: 'trace_edge_offset', val: dur(d(100))},
-          {key: 'trace_edge_endpoint_node_ids', val: strs('B')},
-        )))
+            {key: 'trace_node_type', val: int(3)},
+            {key: 'payload_type', val: str('trace_edge_payload')},
+            {key: 'trace_edge_node_id', val: str('A')},
+            {key: 'trace_edge_offset', val: dur(d(100))},
+            {key: 'trace_edge_endpoint_node_ids', val: strs('B')},
+            )))
       ],
       [
         'b:0',
         new Node(node(valueMap(
-          {key: 'trace_node_type', val: int(3)},
-          {key: 'payload_type', val: str('trace_edge_payload')},
-          {key: 'trace_edge_node_id', val: str('B')},
-          {key: 'trace_edge_offset', val: dur(d(100))},
-          {key: 'trace_edge_endpoint_node_ids', val: strs()},
-        )))
+            {key: 'trace_node_type', val: int(3)},
+            {key: 'payload_type', val: str('trace_edge_payload')},
+            {key: 'trace_edge_node_id', val: str('B')},
+            {key: 'trace_edge_offset', val: dur(d(100))},
+            {key: 'trace_edge_endpoint_node_ids', val: strs()},
+            )))
       ],
     ]));
   });

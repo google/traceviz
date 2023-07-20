@@ -11,18 +11,20 @@
     limitations under the License.
 */
 
-/** @fileoverview Tools for working with weighted tree data.  See
+/**
+ * @fileoverview Tools for working with weighted tree data.  See
  *  ../../../../server/go/weighted_tree/weighted_tree.go for more detail.
  */
 
-import {ResponseNode} from '../protocol/response_interface.js';
-import {ValueMap} from '../value/value_map.js';
-import {StringValue} from '../value/value.js';
+import * as d3 from 'd3';
+
 import {Coloring, Colors} from '../color/color.js';
 import {getLabel} from '../label/label.js';
 import {getSelfMagnitude, properties as magnitudeProperties} from '../magnitude/magnitude.js';
 import {children} from '../payload/payload.js';
-import * as d3 from 'd3';
+import {ResponseNode} from '../protocol/response_interface.js';
+import {StringValue} from '../value/value.js';
+import {ValueMap} from '../value/value_map.js';
 
 enum Keys {
   FRAME_HEIGHT_PX = 'weighted_tree_frame_height_px'
@@ -59,13 +61,13 @@ export class RenderedTreeNode {
   widthPx = 0;
 
   constructor(
-    coloring: Coloring, readonly properties: ValueMap,
-    private readonly xOffsetPct: number, private readonly widthPct: number,
-    readonly y0Px: number, readonly y1Px: number) {
+      coloring: Coloring, readonly properties: ValueMap,
+      private readonly xOffsetPct: number, private readonly widthPct: number,
+      readonly y0Px: number, readonly y1Px: number) {
     let tooltip = '';
     try {
       tooltip =
-        this.properties.format(this.properties.expectString(DETAIL_FORMAT));
+          this.properties.format(this.properties.expectString(DETAIL_FORMAT));
     } catch (err: unknown) {
     }
     this.properties = properties.with(['tooltip', new StringValue(tooltip)]);
@@ -74,15 +76,15 @@ export class RenderedTreeNode {
     this.colors = coloring.colors(this.properties);
     this.heightPx = y1Px - y0Px;
     this.fillColor =
-      (this.colors.primary) ? this.colors.primary : DEFAULT_PRIMARY_COLOR;
+        (this.colors.primary) ? this.colors.primary : DEFAULT_PRIMARY_COLOR;
     this.highlightedFillColor =
-      d3.color(this.fillColor)?.brighter(2).toString() || '';
+        d3.color(this.fillColor)?.brighter(2).toString() || '';
     this.borderColor = d3.color(this.fillColor)?.darker(2).toString() || '';
     this.highlightedBorderColor = this.fillColor;
     this.textColor =
-      (this.colors.stroke) ? this.colors.stroke : DEFAULT_STROKE_COLOR;
+        (this.colors.stroke) ? this.colors.stroke : DEFAULT_STROKE_COLOR;
     this.highlightedTextColor =
-      d3.color(this.textColor)?.darker(2).toString() || '';
+        d3.color(this.textColor)?.darker(2).toString() || '';
   }
 
   resize(treeWidthPx: number): RenderedTreeNode {
@@ -152,8 +154,8 @@ export class Tree {
   }
 
   private renderTopDownTreeNodes(
-    treeNodes: TreeNode[], horizontalOffsetPct: number,
-    verticalOffsetPx: number): RenderedTreeNode[] {
+      treeNodes: TreeNode[], horizontalOffsetPct: number,
+      verticalOffsetPx: number): RenderedTreeNode[] {
     if (treeNodes.length === 0) {
       return [];
     }
@@ -161,13 +163,13 @@ export class Tree {
     for (const treeNode of treeNodes) {
       const widthPct = treeNode.totalWeight / this.totalWeight;
       renderedNodes.push(
-        new RenderedTreeNode(
-          this.coloring, treeNode.properties, horizontalOffsetPct, widthPct,
-          verticalOffsetPx,
-          verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx),
-        ...this.renderTopDownTreeNodes(
-          treeNode.children, horizontalOffsetPct,
-          verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx),
+          new RenderedTreeNode(
+              this.coloring, treeNode.properties, horizontalOffsetPct, widthPct,
+              verticalOffsetPx,
+              verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx),
+          ...this.renderTopDownTreeNodes(
+              treeNode.children, horizontalOffsetPct,
+              verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx),
       );
       horizontalOffsetPct += widthPct;
     }

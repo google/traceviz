@@ -13,9 +13,11 @@
 
 import 'jasmine';
 
-import {DataSeriesFetcher} from './data_series_fetcher.js';
 import {SeriesRequest} from '../protocol/request_interface.js';
 import {ResponseNode} from '../protocol/response_interface.js';
+
+import {DataSeriesFetcher} from './data_series_fetcher.js';
+
 import {int, str, valueMap} from '../value/test_value.js';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {distinctUntilChanged, takeUntil} from 'rxjs/operators';
@@ -24,23 +26,23 @@ import {node} from '../protocol/test_response.js';
 
 class TestFetcher implements DataSeriesFetcher {
   // If specified, the series request we next want to see fetched.
-  wantReq: SeriesRequest | undefined;
+  wantReq: SeriesRequest|undefined;
   // The onResponse callback provided with the most recent fetchDataSeries
   // call.
-  onResponse: (resp: ResponseNode) => void = () => { };
+  onResponse: (resp: ResponseNode) => void = () => {};
 
   fetchDataSeries(req: SeriesRequest, onResponse: (resp: ResponseNode) => void):
-    void {
+      void {
     if (this.wantReq !== undefined) {
       expect(this.wantReq.queryName).toEqual(req.queryName);
       expect(this.wantReq.seriesName).toEqual(req.seriesName);
       expect(this.wantReq.parameters.entries())
-        .toEqual(req.parameters.entries());
+          .toEqual(req.parameters.entries());
     }
     this.onResponse = onResponse;
   }
 
-  cancelDataSeries(seriesName: string | undefined): void { }
+  cancelDataSeries(seriesName: string|undefined): void {}
 }
 
 describe('data series query test', () => {
@@ -49,7 +51,7 @@ describe('data series query test', () => {
   const param1 = int(1);
   const param2 = str('hello');
   const parameters =
-    valueMap({key: 'count', val: param1}, {key: 'greetings', val: param2});
+      valueMap({key: 'count', val: param1}, {key: 'greetings', val: param2});
   const fetch = new BehaviorSubject<boolean>(false);
   const dsq = new DataSeriesQuery(fdq, queryName, parameters, fetch);
   // An empty ResponseNode to send back.  Its contents are unimportant.
@@ -65,15 +67,15 @@ describe('data series query test', () => {
     // An empty ResponseNode to send back.  Its contents are unimportant.
     // Track the ups and downs of dsq.loading.
     dsq.loading.pipe(takeUntil(unsubscribe), distinctUntilChanged())
-      .subscribe((loading: boolean) => {
-        loadingHistory += loading ? 't' : 'f';
-      });
+        .subscribe((loading: boolean) => {
+          loadingHistory += loading ? 't' : 'f';
+        });
     // Also track the number of times response has updated, and its last update
     // value.
     dsq.response.pipe(takeUntil(unsubscribe))
-      .subscribe((response: ResponseNode) => {
-        responses.push(response);
-      });
+        .subscribe((response: ResponseNode) => {
+          responses.push(response);
+        });
     fdq.wantReq = {
       queryName: 'query',
       seriesName: dsq.uniqueSeriesName,

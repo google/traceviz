@@ -18,13 +18,13 @@
 
 import {ValueMap} from '../value/value_map.js';
 
-const STYLE_KEY_PREFIX = "style_";
+const STYLE_KEY_PREFIX = 'style_';
 
 /**
  * Fetches the named attribute from the provided ValueMap, or undefined if the
  * named attribute does not exist.
  */
-export function getStyle(attrName: string, vm: ValueMap): string | undefined {
+export function getStyle(attrName: string, vm: ValueMap): string|undefined {
   const key = STYLE_KEY_PREFIX + attrName;
   if (!vm.has(key)) {
     return;

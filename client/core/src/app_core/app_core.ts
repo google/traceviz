@@ -15,10 +15,11 @@
  * @fileoverview The global state of a TraceViz application.
  */
 
+import {ReplaySubject} from 'rxjs';
+
 import {DataQuery} from '../data_query/data_query.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {GlobalState} from '../global_state/global_state.js';
-import {ReplaySubject} from 'rxjs';
 
 const SOURCE = 'app_core';
 
@@ -68,10 +69,10 @@ export class AppCore {
   publish() {
     if (this.published) {
       const err =
-        new ConfigurationError(
-          `Only one AppCore may be defined, and it may only be published once.`)
-          .from(SOURCE)
-          .at(Severity.FATAL);
+          new ConfigurationError(
+              `Only one AppCore may be defined, and it may only be published once.`)
+              .from(SOURCE)
+              .at(Severity.FATAL);
       this.err(err);
       throw err;
     }

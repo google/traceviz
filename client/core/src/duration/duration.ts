@@ -19,7 +19,7 @@ const NANOS_PER_SECOND = 1000000000;
 
 /** A nanosecond-granularity duration. */
 export class Duration {
-  constructor(readonly nanos: number) { }
+  constructor(readonly nanos: number) {}
 
   add(duration: Duration): Duration {
     return new Duration(this.nanos + duration.nanos);

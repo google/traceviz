@@ -16,11 +16,11 @@
  * ../../../../server/go/xy_chart/xy_chart.go for more detail.
  */
 
-import {Category, getDefinedCategory, categoryProperties} from '../category/category.js';
+import {Category, categoryProperties, getDefinedCategory} from '../category/category.js';
+import {DurationAxis, getAxis, NumberAxis, TimestampAxis} from '../continuous_axis/continuous_axis.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 import {ValueMap} from '../value/value_map.js';
-import {DurationAxis, getAxis, NumberAxis, TimestampAxis} from '../continuous_axis/continuous_axis.js';
 
 const SOURCE = 'xy_chart';
 
@@ -43,8 +43,8 @@ export class Series {
     const cat = getDefinedCategory(node.properties);
     if (!cat) {
       throw new ConfigurationError(`each Series must define a category`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
     }
     this.category = cat;
     const points = new Array<Point>();
@@ -58,23 +58,24 @@ export class Series {
 
 /** An XY chart. */
 export class XYChart {
-  readonly xAxis: TimestampAxis | DurationAxis | NumberAxis;
-  readonly yAxis: TimestampAxis | DurationAxis | NumberAxis;
+  readonly xAxis: TimestampAxis|DurationAxis|NumberAxis;
+  readonly yAxis: TimestampAxis|DurationAxis|NumberAxis;
   readonly series: Series[];
   readonly properties: ValueMap;
 
   constructor(node: ResponseNode) {
     if (node.children.length < 1) {
       throw new ConfigurationError(`xy-chart defines no axes`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+          .from(SOURCE)
+          .at(Severity.ERROR);
     }
     const axisGroup = node.children[0];
     if (axisGroup.children.length !== 2) {
       throw new ConfigurationError(
-        `xy-chart defines ${axisGroup.children.length} axes; expected exactly 2`)
-        .from(SOURCE)
-        .at(Severity.ERROR);
+          `xy-chart defines ${
+              axisGroup.children.length} axes; expected exactly 2`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
     }
     this.xAxis = getAxis(axisGroup.children[0].properties);
     this.yAxis = getAxis(axisGroup.children[1].properties);

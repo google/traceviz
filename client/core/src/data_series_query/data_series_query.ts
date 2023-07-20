@@ -18,11 +18,13 @@
 
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 import {distinctUntilChanged, takeUntil} from 'rxjs/operators';
-import {StringValue} from '../value/value.js';
-import {ResponseNode} from '../protocol/response_interface.js';
-import {DataSeriesFetcher} from './data_series_fetcher.js';
-import {ValueMap} from '../value/value_map.js';
+
 import {SeriesRequest} from '../protocol/request_interface.js';
+import {ResponseNode} from '../protocol/response_interface.js';
+import {StringValue} from '../value/value.js';
+import {ValueMap} from '../value/value_map.js';
+
+import {DataSeriesFetcher} from './data_series_fetcher.js';
 
 /**
  * Each data series request includes a string series_name which the backend
@@ -72,17 +74,17 @@ export class DataSeriesQuery {
   readonly uniqueSeriesName: string;
 
   constructor(
-    readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
-    readonly parameters: ValueMap, fetch: Observable<boolean>) {
+      readonly dataQuery: DataSeriesFetcher, readonly queryName: StringValue,
+      readonly parameters: ValueMap, fetch: Observable<boolean>) {
     this.uniqueSeriesName = getUniqueSeriesName();
     fetch
-      .pipe(
-        distinctUntilChanged(),
-        takeUntil(this.unsubscribe),
-      )
-      .subscribe((fetch) => {
-        fetch && this.fetch();
-      });
+        .pipe(
+            distinctUntilChanged(),
+            takeUntil(this.unsubscribe),
+            )
+        .subscribe((fetch) => {
+          fetch && this.fetch();
+        });
   }
 
   private fetch() {
@@ -94,16 +96,16 @@ export class DataSeriesQuery {
     // Publish the fact that a query is pending.
     this.loading.next(true);
     this.dataQuery.fetchDataSeries(
-      req,
-      (resp: ResponseNode) => {
-        // Upon receiving the response, broadcast the response and publish
-        // the fact that no query is pending.
-        this.response.next(resp);
-        this.loading.next(false);
-      },
-      () => {
-        this.loading.next(false);
-      });
+        req,
+        (resp: ResponseNode) => {
+          // Upon receiving the response, broadcast the response and publish
+          // the fact that no query is pending.
+          this.response.next(resp);
+          this.loading.next(false);
+        },
+        () => {
+          this.loading.next(false);
+        });
   }
 
   dispose() {

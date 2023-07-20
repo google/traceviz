@@ -12,10 +12,10 @@
 */
 
 import {Duration} from '../duration/duration.js';
-import {ResponseNode} from '../protocol/response_interface.js';
-import {ValueMap} from '../value/value_map.js';
 import {PAYLOAD_KEYS} from '../payload/payload.js';
+import {ResponseNode} from '../protocol/response_interface.js';
 import {Span, Subspan} from '../trace/trace.js';
+import {ValueMap} from '../value/value_map.js';
 
 enum Key {
   NODE_ID = 'trace_edge_node_id',
@@ -39,17 +39,17 @@ export class Node {
     this.offset = node.properties.expectDuration(Key.OFFSET);
     this.nodeID = node.properties.expectString(Key.NODE_ID);
     this.endpointNodeIDs =
-      node.properties.expectStringList(Key.ENDPOINT_NODE_IDS);
+        node.properties.expectStringList(Key.ENDPOINT_NODE_IDS);
     this.properties = node.properties.without(
-      Key.NODE_ID, Key.OFFSET, Key.ENDPOINT_NODE_IDS, ...PAYLOAD_KEYS);
+        Key.NODE_ID, Key.OFFSET, Key.ENDPOINT_NODE_IDS, ...PAYLOAD_KEYS);
   }
 
   // Returns all traceedge Nodes defined in the provided Span or Subspan, in
   // definition order.
-  static fromSpan(span: Span | Subspan): Node[] {
+  static fromSpan(span: Span|Subspan): Node[] {
     if (span.payloads.has(PAYLOAD_TYPE)) {
       return span.payloads.get(PAYLOAD_TYPE)!.map(
-        (node: ResponseNode) => new Node(node));
+          (node: ResponseNode) => new Node(node));
     }
     return [];
   }

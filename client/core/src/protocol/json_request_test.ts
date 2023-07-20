@@ -23,22 +23,22 @@ describe('json request test', () => {
   it('prepares a request', () => {
     const request: Request = {
       filters: valueMap(
-        {key: 'str', val: str('hello')},
-        {key: 'strs', val: strs('hello', 'goodbye')},
-        {key: 'int', val: int(100)}, {key: 'ints', val: ints(50, 150, 250)},
-        {key: 'dbl', val: dbl(3.14159)},
-        {key: 'dur', val: dur(new Duration(150000000))},
-        {key: 'ts', val: ts(new Timestamp(500, 100))}),
-      seriesRequests: [{
-        queryName: 'q1',
-        seriesName: '1',
-        parameters: valueMap(
           {key: 'str', val: str('hello')},
           {key: 'strs', val: strs('hello', 'goodbye')},
           {key: 'int', val: int(100)}, {key: 'ints', val: ints(50, 150, 250)},
           {key: 'dbl', val: dbl(3.14159)},
           {key: 'dur', val: dur(new Duration(150000000))},
-          {key: 'ts', val: ts(new Timestamp(500, 100))})
+          {key: 'ts', val: ts(new Timestamp(500, 100))}),
+      seriesRequests: [{
+        queryName: 'q1',
+        seriesName: '1',
+        parameters: valueMap(
+            {key: 'str', val: str('hello')},
+            {key: 'strs', val: strs('hello', 'goodbye')},
+            {key: 'int', val: int(100)}, {key: 'ints', val: ints(50, 150, 250)},
+            {key: 'dbl', val: dbl(3.14159)},
+            {key: 'dur', val: dur(new Duration(150000000))},
+            {key: 'ts', val: ts(new Timestamp(500, 100))})
       }],
     };
 

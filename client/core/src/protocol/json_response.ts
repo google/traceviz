@@ -16,8 +16,9 @@
  * functions converting them to standard frontend Responses.
  */
 
-import {Response, ResponseNode} from './response_interface.js';
 import {KV, ValueMap} from '../value/value_map.js';
+
+import {Response, ResponseNode} from './response_interface.js';
 
 type Datum = [
   KV[],
@@ -51,7 +52,7 @@ export interface Data {
 /**
  * Prepares a Response from the provided JSON object or JSON-encoded string.
  */
-export function fromObject(resp: string | Data): Response {
+export function fromObject(resp: string|Data): Response {
   if (typeof resp === 'string') {
     resp = JSON.parse(resp) as Data;
   }

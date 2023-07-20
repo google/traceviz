@@ -13,8 +13,10 @@
 
 import 'jasmine';
 
-import {Action, And, Clear, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Toggle, Update, Watch, Changed} from './interactions.js';
 import {prettyPrintDocumenter} from '../documentation/test_documentation.js';
+
+import {Action, And, Changed, Clear, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Toggle, Update, Watch} from './interactions.js';
+
 import {int, intSet, str, strs, strSet, valueMap} from '../value/test_value.js';
 import {IntegerValue} from '../value/value.js';
 import {ValueMap} from '../value/value_map.js';
@@ -49,8 +51,8 @@ describe('interactions test', () => {
   it('sets local values', () => {
     const ids = strs('a', 'b');
     const vm = valueMap(
-      {key: 'ids', val: ids},
-      {key: 'other_ids', val: strs('c', 'd')},
+        {key: 'ids', val: ids},
+        {key: 'other_ids', val: strs('c', 'd')},
     );
     const set = new SetP(new LocalValue('ids'), new LocalValue('other_ids'));
     set.update(vm);
@@ -68,8 +70,8 @@ describe('interactions test', () => {
   it('toggles local values', () => {
     const ids = strSet('a', 'b');
     const vm = valueMap(
-      {key: 'ids', val: ids},
-      {key: 'other_ids', val: strSet('b', 'c')},
+        {key: 'ids', val: ids},
+        {key: 'other_ids', val: strSet('b', 'c')},
     );
     const tog = new Toggle(new LocalValue('ids'), new LocalValue('other_ids'));
     tog.update(vm);
@@ -89,8 +91,8 @@ describe('interactions test', () => {
   it('toggles-or-sets local values', () => {
     const id = int(3);
     const vm = valueMap(
-      {key: 'id', val: id},
-      {key: 'other_id', val: int(3)},
+        {key: 'id', val: id},
+        {key: 'other_id', val: int(3)},
     );
     const tog = new Toggle(new LocalValue('id'), new LocalValue('other_id'));
     tog.update(vm);
@@ -110,8 +112,8 @@ describe('interactions test', () => {
   it('extends local values', () => {
     const ids = strs('a', 'b');
     const vm = valueMap(
-      {key: 'ids', val: ids},
-      {key: 'other_ids', val: strs('c', 'd')},
+        {key: 'ids', val: ids},
+        {key: 'other_ids', val: strs('c', 'd')},
     );
     const ext = new Extend(new LocalValue('ids'), new LocalValue('other_ids'));
     ext.update(vm);
@@ -123,11 +125,11 @@ describe('interactions test', () => {
     const otherLabels = strs('a', 'b');
     const moreLabels = strs('c', 'd');
     const sie =
-      new SetIfEmpty(new FixedValue(labels), new FixedValue(otherLabels));
+        new SetIfEmpty(new FixedValue(labels), new FixedValue(otherLabels));
     sie.update();
     expect(labels.val).toEqual(['a', 'b']);
     const sie2 =
-      new SetIfEmpty(new FixedValue(labels), new FixedValue(moreLabels));
+        new SetIfEmpty(new FixedValue(labels), new FixedValue(moreLabels));
     sie2.update();
     expect(labels.val).toEqual(['a', 'b']);
   });
@@ -135,16 +137,16 @@ describe('interactions test', () => {
   it('sets-if-empty local values', () => {
     const ids = strs();
     const vm = valueMap(
-      {key: 'ids', val: ids},
-      {key: 'other_ids', val: strs('a', 'b')},
-      {key: 'more_ids', val: strs('c', 'd')},
+        {key: 'ids', val: ids},
+        {key: 'other_ids', val: strs('a', 'b')},
+        {key: 'more_ids', val: strs('c', 'd')},
     );
     const sie =
-      new SetIfEmpty(new LocalValue('ids'), new LocalValue('other_ids'));
+        new SetIfEmpty(new LocalValue('ids'), new LocalValue('other_ids'));
     sie.update(vm);
     expect(ids.val).toEqual(['a', 'b']);
     const sie2 =
-      new SetIfEmpty(new LocalValue('ids'), new LocalValue('more_ids'));
+        new SetIfEmpty(new LocalValue('ids'), new LocalValue('more_ids'));
     sie2.update(vm);
     expect(ids.val).toEqual(['a', 'b']);
   });
@@ -168,7 +170,7 @@ describe('interactions test', () => {
     ]);
     const weight = int(0);
     const vm = valueMap(
-      {key: 'weight', val: weight},
+        {key: 'weight', val: weight},
     );
 
     const tickerTape: string[] = [];
@@ -204,15 +206,15 @@ describe('interactions test', () => {
     const highlightedStartOffset = int(100);
     const highlightedEndOffset = int(200);
     const vm = valueMap(
-      {key: 'highlightedStartOffset', val: highlightedStartOffset},
-      {key: 'highlightedEndOffset', val: highlightedEndOffset},
+        {key: 'highlightedStartOffset', val: highlightedStartOffset},
+        {key: 'highlightedEndOffset', val: highlightedEndOffset},
     );
     const w = new Watch('highlight range', vm);
     const tickerTape: string[][] = [];
     const unsub = new Subject<void>();
     w.watch((vm: ValueMap) => {
       tickerTape.push(Array.from(vm.keys()).map(
-        (key) => `${key}: ${vm.get(key).toString()}`));
+          (key) => `${key}: ${vm.get(key).toString()}`));
     }, unsub);
     highlightedStartOffset.val = 50;
     expect(tickerTape).toEqual([
@@ -255,7 +257,7 @@ describe('interactions test', () => {
         super();
       }
 
-      override update(localState?: ValueMap | undefined) {
+      override update(localState?: ValueMap|undefined) {
         const val = this.vr.get(localState) as IntegerValue;
         val.val = val.val + 1;
       }
@@ -267,26 +269,26 @@ describe('interactions test', () => {
 
     // Provide an action with a
     const bumpWeightOnClick =
-      new Action('weight', 'click', [new Bump(weightRef)])
-        .withHelpText(
-          'Upon \'click\' on a \'weight\', bumps that \'weight\'.',
+        new Action('weight', 'click', [new Bump(weightRef)])
+            .withHelpText(
+                'Upon \'click\' on a \'weight\', bumps that \'weight\'.',
                 /* documentChildren= */ false);
 
     const start = int(3);
     const end = int(10);
     const interactions =
-      new Interactions()
-        .withAction(new Action('series', 'clear', [new Clear([labelRef])]))
-        .withAction(bumpWeightOnClick)
-        .withReaction(new Reaction(
-          'series', 'highlight', new Includes(labelsRef, labelRef)))
-        .withReaction(new Reaction('graph', 'show info', boundsChecker))
-        .withWatch(new Watch(
-          'highlight range',
-          valueMap(
-            {key: 'start', val: start},
-            {key: 'end', val: end},
-          )));
+        new Interactions()
+            .withAction(new Action('series', 'clear', [new Clear([labelRef])]))
+            .withAction(bumpWeightOnClick)
+            .withReaction(new Reaction(
+                'series', 'highlight', new Includes(labelsRef, labelRef)))
+            .withReaction(new Reaction('graph', 'show info', boundsChecker))
+            .withWatch(new Watch(
+                'highlight range',
+                valueMap(
+                    {key: 'start', val: start},
+                    {key: 'end', val: end},
+                    )));
 
     // Confirm watchAll invokes callbacks and relays thrown errors.
     {
@@ -294,22 +296,22 @@ describe('interactions test', () => {
       let invocationCount = 0;
       const unsub = new Subject<void>();
       interactions
-        .watchAll(
-          new Map([
-            [
-              'highlight range',
-              (vm) => {
-                invocationCount++;
-                if (vm.expectNumber('start') > vm.expectNumber('end')) {
-                  throw new Error('oops');
-                }
-              }
-            ],
-          ]),
-          unsub)
-        .subscribe((err) => {
-          errCount++;
-        });
+          .watchAll(
+              new Map([
+                [
+                  'highlight range',
+                  (vm) => {
+                    invocationCount++;
+                    if (vm.expectNumber('start') > vm.expectNumber('end')) {
+                      throw new Error('oops');
+                    }
+                  }
+                ],
+              ]),
+              unsub)
+          .subscribe((err) => {
+            errCount++;
+          });
       expect(errCount).toBe(0);
       expect(invocationCount).toBe(2);
       start.val = 5;
@@ -326,7 +328,7 @@ describe('interactions test', () => {
 
     // Confirm self-documentation
     expect(prettyPrintDocumenter(interactions).join('\n'))
-      .toEqual(`Interactions (Interactions)
+        .toEqual(`Interactions (Interactions)
   Upon 'clear' on 'series' (Action)
     clears [local value 'label'] (Update)
   Upon 'click' on a 'weight', bumps that 'weight'. (Action)
@@ -346,8 +348,8 @@ describe('interactions test', () => {
     const label = str('thing');
     const weight = int(0);
     const vm = valueMap(
-      {key: 'label', val: label},
-      {key: 'weight', val: weight},
+        {key: 'label', val: label},
+        {key: 'weight', val: weight},
     );
 
     const tickerTape: string[] = [];

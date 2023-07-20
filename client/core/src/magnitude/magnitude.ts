@@ -27,7 +27,7 @@ enum Keys {
 }
 
 /**
- * The set of property keys expected by this package. 
+ * The set of property keys expected by this package.
  */
 export const properties: string[] = [Keys.SELF_MAGNITUDE];
 

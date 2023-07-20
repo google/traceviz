@@ -16,8 +16,10 @@
  */
 
 import {Observable, ReplaySubject, Subject} from 'rxjs';
+
 import {Request} from '../protocol/request_interface.js';
 import {Response} from '../protocol/response_interface.js';
+
 import {DataFetcherInterface} from './data_fetcher_interface.js';
 
 /**

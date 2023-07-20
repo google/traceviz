@@ -34,7 +34,7 @@ const typeToString = new Map<DocumenterType, string>([
  */
 export function prettyPrintDocumenter(doc: Documenter, indent = ''): string[] {
   const msg =
-    (doc.overrideDocument === '') ? doc.autoDocument : doc.overrideDocument;
+      (doc.overrideDocument === '') ? doc.autoDocument : doc.overrideDocument;
   const ret = [`${indent}${msg} (${typeToString.get(doc.documenterType)})`];
   if (doc.documentChildren) {
     for (const child of doc.children) {

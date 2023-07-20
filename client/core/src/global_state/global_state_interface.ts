@@ -11,8 +11,9 @@
         limitations under the License.
 */
 
-import {Value} from '../value/value.js';
 import {Subject} from 'rxjs';
+
+import {Value} from '../value/value.js';
 
 /**
  * Extended by types that include the portion of the GlobalState API available

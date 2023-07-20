@@ -41,8 +41,8 @@ export class Timestamp {
 
   sub(other: Timestamp): Duration {
     return new Duration(
-      (this.seconds - other.seconds) * NANOS_PER_SECOND + this.nanos -
-      other.nanos);
+        (this.seconds - other.seconds) * NANOS_PER_SECOND + this.nanos -
+        other.nanos);
   }
 
   /**

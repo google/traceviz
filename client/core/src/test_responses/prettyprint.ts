@@ -16,20 +16,20 @@
  * response types.
  */
 
-import {ResponseNode} from '../protocol/response_interface.js';
-import {ValueMap} from '../value/value_map.js';
 import {Category} from '../category/category.js';
 import {DurationAxis, NumberAxis, TimestampAxis} from '../continuous_axis/continuous_axis.js';
 import {Duration} from '../duration/duration.js';
+import {ResponseNode} from '../protocol/response_interface.js';
 import {Timestamp} from '../timestamp/timestamp.js';
 import {Span, Subspan, Trace, TraceCategory} from '../trace/trace.js';
+import {ValueMap} from '../value/value_map.js';
 
 const INDENT = '  ';
 
 function prettyPrintProperties(
-  properties: ValueMap,
-  prefix: string = '',
-): string {
+    properties: ValueMap,
+    prefix: string = '',
+    ): string {
   if (properties.size === 0) {
     return ``;
   }
@@ -53,7 +53,8 @@ function prettyPrintNode(node: ResponseNode, prefix: string = ''): string {
 
 function prettyPrintSubspan(subspan: Subspan, prefix: string = ''): string {
   let ret = `${prefix}Subspan:
-${prefix}${INDENT}at ${subspan.offset.toString()} for ${subspan.duration.toString()}
+${prefix}${INDENT}at ${subspan.offset.toString()} for ${
+      subspan.duration.toString()}
 `;
   ret = ret + prettyPrintProperties(subspan.properties, prefix + INDENT);
   for (const [, payloads] of subspan.payloads) {
@@ -84,11 +85,12 @@ ${prefix}${INDENT}at ${span.offset.toString()} for ${span.duration.toString()}
 }
 
 function prettyPrintTraceCategory(
-  tracecat: TraceCategory, prefix: string = ''): string {
+    tracecat: TraceCategory, prefix: string = ''): string {
   let ret = `${prefix}Category ${prettyPrintCategory(tracecat.category)}:
 `;
   ret = ret +
-    `${prefix}${INDENT}span-height self:${tracecat.selfSpanHeight} total:${tracecat.totalSpanHeight}
+      `${prefix}${INDENT}span-height self:${tracecat.selfSpanHeight} total:${
+            tracecat.totalSpanHeight}
 ${prefix}${INDENT}cat-height ${tracecat.categoryHeight}
 `;
   ret = ret + prettyPrintProperties(tracecat.properties, prefix + INDENT);
@@ -107,12 +109,13 @@ export function prettyPrintCategory(category: Category): string {
 }
 
 /** Pretty-prints the provided axis for testing. */
-export function prettyPrintAxis(axis: TimestampAxis | DurationAxis |
-  NumberAxis): string {
+export function prettyPrintAxis(axis: TimestampAxis|DurationAxis|
+                                NumberAxis): string {
   const ret = `Axis ${prettyPrintCategory(axis.category)} `;
   if (axis.min instanceof Timestamp && axis.max instanceof Timestamp) {
     return ret +
-      `(domain ${axis.min.toDate().toString()}, ${axis.max.toDate().toString()})`;
+        `(domain ${axis.min.toDate().toString()}, ${
+               axis.max.toDate().toString()})`;
   }
   if (axis.min instanceof Duration && axis.max instanceof Duration) {
     return ret + `(domain ${axis.min.toString()}, ${axis.max.toString()})`;
