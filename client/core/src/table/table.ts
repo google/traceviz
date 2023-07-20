@@ -20,7 +20,8 @@ import {ResponseNode} from '../protocol/response_interface.js';
 import {Coloring} from '../color/color.js';
 import {MatchFn} from '../interactions/interactions.js';
 import {EmptyValue, StringValue, Value} from '../value/value.js';
-import {Subject, EMPTY, distinctUntilChanged, takeUntil} from 'rxjs';
+import {Subject, EMPTY, takeUntil} from 'rxjs';
+import {distinctUntilChanged} from 'rxjs/operators';
 import {ValueMap} from '../value/value_map.js';
 
 const SOURCE = 'table';
