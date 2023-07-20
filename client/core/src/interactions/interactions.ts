@@ -42,8 +42,8 @@ import {ConfigurationError, Severity} from '../errors/errors.js';
 import {EmptyValue, Value} from '../value/value.js';
 import {ValueMap} from '../value/value_map.js';
 import {ValueRef} from '../value/value_reference.js';
-import {combineLatest, distinctUntilChanged, EMPTY, merge, Observable, ReplaySubject, Subject} from 'rxjs';
-import {delay, map, mergeMap, takeUntil} from 'rxjs/operators';
+import {combineLatest, EMPTY, merge, Observable, ReplaySubject, Subject} from 'rxjs';
+import {delay, distinctUntilChanged, map, mergeMap, takeUntil} from 'rxjs/operators';
 
 const SOURCE = 'interactions';
 
