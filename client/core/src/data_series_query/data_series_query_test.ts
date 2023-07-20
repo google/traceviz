@@ -17,7 +17,8 @@ import {DataSeriesFetcher} from './data_series_fetcher.js';
 import {SeriesRequest} from '../protocol/request_interface.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 import {int, str, valueMap} from '../value/test_value.js';
-import {BehaviorSubject, Subject, distinctUntilChanged, takeUntil} from 'rxjs';
+import {BehaviorSubject, Subject} from 'rxjs';
+import {distinctUntilChanged, takeUntil} from 'rxjs/operators';
 import {DataSeriesQuery} from './data_series_query.js';
 import {node} from '../protocol/test_response.js';
 
