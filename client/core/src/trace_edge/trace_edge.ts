@@ -11,6 +11,12 @@
         limitations under the License.
 */
 
+/**
+ * @fileoverview Tools for working with trace edge data, as defined in
+ * .../traceviz/server/data_source/trace_edge.go.  See that file for more
+ * information about the format.
+ */
+
 import {Duration} from '../duration/duration.js';
 import {PAYLOAD_KEYS} from '../payload/payload.js';
 import {ResponseNode} from '../protocol/response_interface.js';

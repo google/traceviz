@@ -11,8 +11,6 @@
         limitations under the License.
 */
 
-import {ValueMap} from '../value/value_map.js';
-
 /**
  * @fileoverview Tools for working with labels included in ValueMaps.
  *
@@ -22,6 +20,8 @@ import {ValueMap} from '../value/value_map.js';
  *   * Keys.LABEL_FORMAT: a string specifying the label format.  Any properties
  *     referenced in the format string should exist.
  */
+
+import {ValueMap} from '../value/value_map.js';
 
 enum Keys {
   LABEL_FORMAT = 'label_format',
