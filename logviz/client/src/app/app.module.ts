@@ -1,27 +1,22 @@
-import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatCardModule } from '@angular/material/card';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { CoreModule } from 'traceviz/dist/ngx-traceviz-lib';
-import { DataTableModule } from 'traceviz/dist/ngx-traceviz-lib';
-import { AppComponent } from './app.component';
+import {HttpClientModule} from '@angular/common/http';
+import {NgModule} from '@angular/core';
+import {MatCardModule} from '@angular/material/card';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {BrowserModule} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {CoreModule} from 'traceviz-angular-core';
+import {DataTableModule} from 'traceviz-angular-data-table';
+
+import {AppComponent} from './app.component';
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
+  declarations: [AppComponent],
   imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    CoreModule,
-    DataTableModule,
-    HttpClientModule,
-    MatCardModule,
-    MatPaginatorModule
+    BrowserModule, BrowserAnimationsModule, CoreModule, DataTableModule,
+    HttpClientModule, MatCardModule, MatPaginatorModule
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

@@ -1,12 +1,12 @@
 {
-  "name": "client",
+  "name": "traceviz",
   "version": "0.0.0",
   "scripts": {
     "clean": "ng cache clean",
     "reset": "npm install rimraf && rimraf dist && rimraf package-lock.json && rimraf node_modules && npm run clean",
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build core && ng build hovercard && ng build data-table && ng build text-field && ng build update-values && ng build weighted-tree",
     "cb": "npm run clean && npm install && ng b",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -14,27 +14,25 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^15.2.0",
+    "@angular/cdk": "^15.2.9",
     "@angular/common": "^15.2.0",
     "@angular/compiler": "^15.2.0",
     "@angular/core": "^15.2.0",
     "@angular/forms": "^15.2.0",
-    "@angular/material": "^15.2.5",
+    "@angular/material": "^15.2.3",
     "@angular/platform-browser": "^15.2.0",
     "@angular/platform-browser-dynamic": "^15.2.0",
     "@angular/router": "^15.2.0",
+    "d3": "^7.8.4",
     "rimraf": "^5.0.1",
-    "rxjs": "~7.8.0",
-    "traceviz-angular-core": "file:../../client/angular/dist/traceviz-angular-core",
-    "traceviz-angular-data-table": "file:../../client/angular/dist/traceviz-angular-data-table",
-    "traceviz-client-core": "file:../../client/core",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "^15.0.0",
-    "@angular-devkit/build-angular": "^15.2.1",
+    "@angular-devkit/build-angular": "^15.2.4",
     "@angular/cli": "~15.2.1",
     "@angular/compiler-cli": "^15.2.0",
+    "@types/d3": "^7.4.0",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.5.0",
     "karma": "~6.4.0",
@@ -42,6 +40,13 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
+    "ng-packagr": "^15.2.2",
     "typescript": "~4.9.4"
+  },
+  "peerDependencies": {
+    "rxjs": "7.8.0",
+    "traceviz-angular-core": "file:dist/traceviz-angular-core",
+    "traceviz-angular-hovercard": "file:dist/traceviz-angular-hovercard",
+    "traceviz-client-core": "file:../core"
   }
 }

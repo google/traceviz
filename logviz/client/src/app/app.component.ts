@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
-
-import { AppCoreService } from 'traceviz/dist/ngx-traceviz-lib';
+import {Component} from '@angular/core';
+import {AppCoreService} from 'traceviz-angular-core';
 
 /** The application component of the LogViz client. */
 @Component({
@@ -9,6 +8,5 @@ import { AppCoreService } from 'traceviz/dist/ngx-traceviz-lib';
   styleUrls: ['app.component.css'],
 })
 export class AppComponent {
-  constructor(public appCoreService: AppCoreService) {
-  }
+  constructor(public appCoreService: AppCoreService) {}
 }
