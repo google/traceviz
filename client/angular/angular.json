@@ -102,6 +102,39 @@
         }
       }
     },
+    "error-message": {
+      "projectType": "library",
+      "root": "src/error-message",
+      "sourceRoot": "src/error-message",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "src/error-message/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "src/error-message/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "src/error-message/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "src/error-message/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
     "hovercard": {
       "projectType": "library",
       "root": "src/hovercard",

@@ -1,4 +1,7 @@
 <div class="app">
+  <!-- Show configuration errors in a snackbar at bottom. -->
+  <error-message></error-message>
+
   <app-core>
     <!--
       Define the global key-value mapping, with it initial values.  This global state provides
@@ -13,8 +16,24 @@
         </value>
         <!-- Filtered-in granularities.  Empty means 'unfiltered' -->
         <value key="filtered_source_files"><string-set></string-set></value>
+        <value key="filtered_timerange_start">
+          <timestamp></timestamp>
+        </value>
+        <value key="filtered_timerange_end">
+          <timestamp></timestamp>
+        </value>
         <!-- called-out source-file granularities.  Empty means 'none'. -->
         <value key="called_out_source_files"><string-set></string-set></value>
+        <value key="called_out_timestamp">
+          <timestamp></timestamp>
+        </value>
+        <!-- Search strings -->
+        <value key="source_file_search_regex">
+          <string></string>
+        </value>
+        <value key="raw_event_search_regex">
+          <string></string>
+        </value>
       </value-map>
     </global-state>
 
@@ -32,6 +51,8 @@
       <value-map>
         <value key="collection_name"><global-ref key="collection_name"></global-ref></value>
         <value key="filtered_source_files"><global-ref key="filtered_source_files"></global-ref></value>
+        <value key="start_timestamp"><global-ref key="filtered_timerange_start"></global-ref></value>
+        <value key="end_timestamp"><global-ref key="filtered_timerange_end"></global-ref></value>
       </value-map>
     </data-query>
   </app-core>
@@ -43,6 +64,16 @@
     -->
     <mat-card class="card">
       <mat-card-title>Log source file summary</mat-card-title>
+      <text-field class="regex-filter" label="Search for source files by regex">
+        <interactions>
+          <action type="update" target="text_field">
+            <set>
+              <global-ref key="source_file_search_regex"></global-ref>
+              <local-ref key="contents"></local-ref>
+            </set>
+          </action>
+        </interactions>
+      </text-field>
       <data-table class="vertical-fill">
         <interactions>
           <!-- Mousing into a row calls out that row's source file. -->
@@ -104,12 +135,20 @@
                     <string></string>
                   </equals>
                 </not>
-                <changed><global-ref key="collection_name"></global-ref></changed>
+                <or>
+                  <changed><global-ref key="collection_name"></global-ref></changed>
+                  <changed><global-ref key="filtered_timerange_start"></global-ref></changed>
+                  <changed><global-ref key="filtered_timerange_end"></global-ref></changed>
+                </or>
               </and>
             </reaction>
           </interactions>
 
-          <parameters><value-map></value-map></parameters>
+          <parameters><value-map>
+              <value key="search_regex">
+                <global-ref key="source_file_search_regex"></global-ref>
+              </value>
+            </value-map></parameters>
         </data-series>
 
         <!-- Include a material paginator. -->
@@ -123,8 +162,33 @@
     -->
     <mat-card class="card">
       <mat-card-title>Raw events</mat-card-title>
+      <text-field class="regex-filter" label="Search for event text by regex">
+        <interactions>
+          <action type="update" target="text_field">
+            <set>
+              <global-ref key="raw_event_search_regex"></global-ref>
+              <local-ref key="contents"></local-ref>
+            </set>
+          </action>
+        </interactions>
+      </text-field>
       <data-table class="vertical-fill">
         <interactions>
+          <!-- Mousing into a row calls out that row's timestamp. -->
+          <action target="row" type="mouseover">
+            <set>
+              <global-ref key="called_out_timestamp"></global-ref>
+              <local-ref key="timestamp"></local-ref>
+            </set>
+          </action>
+
+          <!-- Mousing out of a row clears the called-out timestamp. -->
+          <action target="row" type="mouseout">
+            <clear>
+              <global-ref key="called_out_timestamp"></global-ref>
+            </clear>
+          </action>
+
           <!-- A log entry should be highlighted if its source file is called out. -->
           <reaction target="row" type="highlight">
             <includes>
@@ -150,11 +214,19 @@
                 <or>
                   <changed><global-ref key="collection_name"></global-ref></changed>
                   <changed><global-ref key="filtered_source_files"></global-ref></changed>
+                  <changed><global-ref key="filtered_timerange_start"></global-ref></changed>
+                  <changed><global-ref key="filtered_timerange_end"></global-ref></changed>
                 </or>
               </and>
             </reaction>
           </interactions>
-          <parameters><value-map></value-map></parameters>
+          <parameters>
+            <value-map>
+              <value key="search_regex">
+                <global-ref key="raw_event_search_regex"></global-ref>
+              </value>
+            </value-map>
+          </parameters>
         </data-series>
 
         <!-- Include a material paginator. -->
@@ -165,7 +237,68 @@
 
   <mat-card class="band">
     <mat-card-title>Log messages over time</mat-card-title>
-    Add an overtime chart here!
+    <line-chart>
+      <interactions>
+        <!-- Brushing the chart area zooms in. -->
+        <action target="chart" type="brush">
+          <set>
+            <global-ref key="filtered_timerange_start"></global-ref>
+            <local-ref key="zoom_start"></local-ref>
+          </set>
+          <set>
+            <global-ref key="filtered_timerange_end"></global-ref>
+            <local-ref key="zoom_end"></local-ref>
+          </set>
+        </action>
+
+        <!-- A change to the called out timestamp updates the x-axis marker. -->
+        <watch type="update_x_axis_marker">
+          <value-map>
+            <value key="x_axis_marker_position">
+              <global-ref key="called_out_timestamp"></global-ref>
+            </value>
+          </value-map>
+        </watch>
+      </interactions>
+
+      <data-series>
+        <query>
+          <string>logs.timeseries</string>
+        </query>
+        <interactions>
+          <reaction target="data-series" type="fetch">
+            <and>
+              <not>
+                <equals>
+                  <global-ref key="collection_name"></global-ref>
+                  <string></string>
+                </equals>
+              </not>
+              <or>
+                <changed><global-ref key="collection_name"></global-ref></changed>
+                <changed><global-ref key="filtered_source_files"></global-ref></changed>
+                <changed><global-ref key="filtered_timerange_start"></global-ref></changed>
+                <changed><global-ref key="filtered_timerange_end"></global-ref></changed>
+              </or>
+            </and>
+          </reaction>
+        </interactions>
+        <parameters>
+          <value-map>
+            <value key="aggregate_by">
+              <string>level_name</string>
+            </value>
+            <value key="bin_count">
+              <int>1000</int>
+            </value>
+          </value-map>
+        </parameters>
+      </data-series>
+
+      <standard-continuous-x-axis id="chartBottom"></standard-continuous-x-axis>
+      <standard-continuous-y-axis id="chartLeft"></standard-continuous-y-axis>
+
+    </line-chart>
   </mat-card>
 
   <!--   <mat-card class="band">
