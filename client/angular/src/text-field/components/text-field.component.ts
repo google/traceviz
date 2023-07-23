@@ -109,12 +109,15 @@ export class TextFieldComponent implements AfterContentInit, OnDestroy {
       }
     });
 
-    const interactions = this.interactionsDirective?.get();
-    interactions?.checkForSupportedWatches([WatchType.UPDATE_CONTENTS]);
-    interactions?.checkForSupportedActions(
-        [[Target.TEXT_FIELD, ActionType.UPDATE]]);
-
     this.appCoreService.appCore.onPublish((appCore) => {
+      const interactions = this.interactionsDirective?.get();
+      try {
+        interactions?.checkForSupportedWatches([WatchType.UPDATE_CONTENTS]);
+        interactions?.checkForSupportedActions(
+            [[Target.TEXT_FIELD, ActionType.UPDATE]]);
+      } catch (err: unknown) {
+        appCore.err(err);
+      }
       interactions
           ?.watch(
               WatchType.UPDATE_CONTENTS,
@@ -153,6 +156,7 @@ export class TextFieldComponent implements AfterContentInit, OnDestroy {
   }
 
   private update(value: string) {
+    console.log(`updated with ${this.contents}`);
     this.interactionsDirective?.get().update(
         Target.TEXT_FIELD, ActionType.UPDATE,
         new ValueMap(new Map<string, Value>([

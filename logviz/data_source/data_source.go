@@ -29,8 +29,8 @@ import (
 	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
 	"github.com/google/traceviz/server/go/table"
 	"github.com/google/traceviz/server/go/util"
-	"github.com/hashicorp/golang-lru/simplelru"
 	xychart "github.com/google/traceviz/server/go/xy_chart"
+	"github.com/hashicorp/golang-lru/simplelru"
 )
 
 const (
@@ -45,7 +45,6 @@ const (
 	filteredSourceFilesKey = "filtered_source_files"
 	levelNameKey           = "level_name"
 	messageKey             = "message"
-	processNameKey         = "process_name"
 	searchRegexKey         = "search_regex"
 	sourceFileKey          = "source_file"
 	sourceLocCountKey      = "source_loc_count"
@@ -419,11 +418,10 @@ var (
 	eventCol = table.Column(category.New(eventFormatKey, "Raw Event", "Raw events, in temporal order"))
 )
 
-var eventFormatStr = fmt.Sprintf("[$(%s)] $(%s) ($(%s)) [$(%s)]: $(%s)",
+var eventFormatStr = fmt.Sprintf("[$(%s)] $(%s) ($(%s)): $(%s)",
 	levelNameKey,
 	timestampKey,
 	sourceLocNameKey,
-	processNameKey,
 	messageKey,
 )
 
