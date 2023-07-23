@@ -1,0 +1,28 @@
+<div #loadingDiv>
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</div>
+<ng-content select="help"></ng-content>
+<div class="content">
+  <div class="content" #componentDiv (window:resize)="resize()">
+    <div class="chart-grid">
+      <div #yAxis class="chart-grid-item">
+        <!-- y-axis -->
+        <ng-content select="[id=chartLeft]"></ng-content>
+      </div>
+      <div class="chart-grid-item">
+        <!-- chart area -->
+        <svg #svg>
+          <g class="chart-area"></g>
+          <g class="x-axis-marker"></g>
+        </svg>
+      </div>
+      <div class="chart-grid-item">
+        <!-- unused lower-left corner -->
+      </div>
+      <div #xAxis class="chart-grid-item">
+        <!-- x-axis -->
+        <ng-content select="[id=chartBottom]"></ng-content>
+      </div>
+    </div>
+  </div>
+</div>

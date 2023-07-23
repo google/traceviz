@@ -1,0 +1,49 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.highlighted {
+  background-color: PowderBlue;
+}
+
+.disable-text-selection {
+  user-select: none;
+}
+
+.table-datum {
+  overflow: hidden;
+  user-select: none;
+}
+
+.content {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.float {
+  position: absolute;
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+}
+
+.header-cell {
+  font-size: 75%;
+  text-align: left;
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: auto auto;
+}
+
+.chart-grid-item {
+}
+
+svg {
+  display: block;
+}
