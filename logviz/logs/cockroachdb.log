@@ -1,0 +1,494 @@
+I230430 22:24:15.050863 1 util/log/file_sync_buffer.go:238 ⋮ [config]   file created at: 2023/04/30 22:24:15
+I230430 22:24:15.050868 1 util/log/file_sync_buffer.go:238 ⋮ [config]   running on machine: ‹andrei-xps›
+I230430 22:24:15.050871 1 util/log/file_sync_buffer.go:238 ⋮ [config]   binary: CockroachDB CCL v23.1.0-alpha.8-dev-7d02e061759599a2b054ee06c71524443f77d20a (x86_64-pc-linux-gnu, built 2023/04/30 22:01:52, go1.19.4)
+I230430 22:24:15.050876 1 util/log/file_sync_buffer.go:238 ⋮ [config]   arguments: [‹/home/andrei/local/1/cockroach› ‹start› ‹--insecure› ‹--log› ‹file-defaults: {dir: '/home/andrei/local/1/logs', exit-on-error: false}› ‹--listen-addr=:26257› ‹--http-addr=:26258› ‹--join=127.0.0.1:26257› ‹--store› ‹path=/home/andrei/local/1/data,attrs=store1:node1:node1store1› ‹--cache=6%› ‹--locality=cloud=local,region=local,zone=local› ‹--max-sql-memory=6%›]
+I230430 22:24:15.050887 1 util/log/file_sync_buffer.go:238 ⋮ [config]   log format (utf8=✓): crdb-v2
+I230430 22:24:15.050890 1 util/log/file_sync_buffer.go:238 ⋮ [config]   line format: [IWEF]yymmdd hh:mm:ss.uuuuuu goid [chan@]file:line redactionmark \[tags\] [counter] msg
+I230430 22:24:15.050818 1 1@cli/log_flags.go:198 ⋮ [n?] 1  using explicit logging configuration:
+I230430 22:24:15.050818 1 1@cli/log_flags.go:198 ⋮ [n?] 1 +‹file-defaults: {dir: '/home/andrei/local/1/logs', exit-on-error: false}›
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2  ALL SECURITY CONTROLS HAVE BEEN DISABLED!
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2 +
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2 +This mode is intended for non-production testing only.
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2 +
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2 +In this mode:
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2 +- Your cluster is open to any client that can access ‹any of your IP addresses›.
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2 +- Intruders with access to your machine or network can observe client-server traffic.
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2 +- Intruders can log in without password and read or write any data in the cluster.
+W230430 22:24:15.050942 1 1@cli/start.go:1405 ⋮ [n?] 2 +- Intruders can consume all your server's resources and cause unavailability.
+I230430 22:24:15.050981 1 1@cli/start.go:1415 ⋮ [n?] 3  To start a secure server without mandating TLS for clients,
+I230430 22:24:15.050981 1 1@cli/start.go:1415 ⋮ [n?] 3 +consider --accept-sql-without-tls instead. For other options, see:
+I230430 22:24:15.050981 1 1@cli/start.go:1415 ⋮ [n?] 3 +
+I230430 22:24:15.050981 1 1@cli/start.go:1415 ⋮ [n?] 3 +- https://go.crdb.dev/issue-v/53404/v23.1
+I230430 22:24:15.050981 1 1@cli/start.go:1415 ⋮ [n?] 3 +- https://www.cockroachlabs.com/docs/v23.1/secure-a-cluster.html
+I230430 22:24:15.051202 1 server/status/recorder.go:733 ⋮ [n?] 4  ‹available memory from cgroups (8.0 EiB) is unsupported, using system memory 15 GiB instead:›
+I230430 22:24:15.051216 1 1@cli/start.go:1444 ⋮ [n?] 5  ‹CockroachDB CCL v23.1.0-alpha.8-dev-7d02e061759599a2b054ee06c71524443f77d20a (x86_64-pc-linux-gnu, built 2023/04/30 22:01:52, go1.19.4)›
+I230430 22:24:15.051740 1 server/status/recorder.go:733 ⋮ [n?] 6  ‹available memory from cgroups (8.0 EiB) is unsupported, using system memory 15 GiB instead:›
+I230430 22:24:15.051750 1 1@cli/start.go:580 ⋮ [n?] 7  soft memory limit of Go runtime is set to 2.1 GiB
+I230430 22:24:15.052031 1 server/status/recorder.go:733 ⋮ [T1,n?] 8  ‹available memory from cgroups (8.0 EiB) is unsupported, using system memory 15 GiB instead:›
+I230430 22:24:15.052042 1 server/config.go:657 ⋮ [T1,n?] 9  system total memory: 15 GiB
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10  server configuration:
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10 +‹max offset             500000000›
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10 +‹cache size             940 MiB›
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10 +‹SQL memory pool size   940 MiB›
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10 +‹scan interval          10m0s›
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10 +‹scan min idle time     10ms›
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10 +‹scan max idle time     1s›
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10 +‹event log enabled      true›
+I230430 22:24:15.052049 1 server/config.go:659 ⋮ [T1,n?] 10 +‹span configs enabled   true›
+I230430 22:24:15.052111 1 1@cli/start.go:1305 ⋮ [T1,n?] 11  using local environment variables:
+I230430 22:24:15.052111 1 1@cli/start.go:1305 ⋮ [T1,n?] 11 +COCKROACH_BACKGROUND_RESTART=1
+I230430 22:24:15.052111 1 1@cli/start.go:1305 ⋮ [T1,n?] 11 +COCKROACH_SKIP_ENABLING_DIAGNOSTIC_REPORTING=1
+I230430 22:24:15.052111 1 1@cli/start.go:1305 ⋮ [T1,n?] 11 +COCKROACH_TESTING_FORCE_RELEASE_BRANCH=true
+I230430 22:24:15.052111 1 1@cli/start.go:1305 ⋮ [T1,n?] 11 +GOTRACEBACK=crash
+I230430 22:24:15.052111 1 1@cli/start.go:1305 ⋮ [T1,n?] 11 +LANG=‹en_US.UTF-8›
+I230430 22:24:15.052111 1 1@cli/start.go:1305 ⋮ [T1,n?] 11 +TERM=‹xterm-256color›
+I230430 22:24:15.052123 1 1@cli/start.go:1312 ⋮ [T1,n?] 12  process identity: ‹uid 1000 euid 1000 gid 1000 egid 1000›
+W230430 22:24:15.052264 1 1@cli/start.go:1463 ⋮ [T1,n?] 13  could not initialize GEOS - spatial functions may not be available: geos: error during GEOS init: geos: cannot load GEOS from dir ‹"/usr/local/lib/cockroach"›: ‹geos error: /usr/local/lib/cockroach/libgeos.so: cannot open shared object file: No such file or directory›
+W230430 22:24:15.052264 1 1@cli/start.go:1463 ⋮ [T1,n?] 13 +HINT: ‹Ensure you have the spatial libraries installed as per the instructions in https://www.cockroachlabs.com/docs/v23.1/install-cockroachdb-linux›
+I230430 22:24:15.052311 1 1@cli/start.go:770 ⋮ [T1,n?] 14  starting cockroach node
+I230430 22:24:15.082340 85 server/config.go:856 ⋮ [T1,n?] 15  1 storage engine initialized
+I230430 22:24:15.082363 85 server/config.go:859 ⋮ [T1,n?] 16  Pebble cache size: 940 MiB
+I230430 22:24:15.082375 85 server/config.go:859 ⋮ [T1,n?] 17  store 0: max size 0 B, max open file limit 1043576
+I230430 22:24:15.082382 85 server/config.go:859 ⋮ [T1,n?] 18  store 0: {Encrypted:false ReadOnly:false FileStoreProperties:{path=‹/home/andrei/local/1/data›, fs=squashfs, blkdev=‹/dev/loop13›, mnt=‹/snap/skype/271› opts=‹ro,nodev,relatime,errors=continue,threads=single›}}
+I230430 22:24:15.083714 85 server/tracedumper/tracedumper.go:118 ⋮ [T1,n?] 19  writing job trace dumps to ‹/home/andrei/local/1/logs/inflight_trace_dump›
+I230430 22:24:15.147680 85 1@server/clock_monotonicity.go:65 ⋮ [T1,n?] 20  monitoring forward clock jumps based on server.clock.forward_jump_check_enabled
+W230430 22:24:15.149789 85 1@cli/start.go:1266 ⋮ [T1,n?] 21  Running a server without --sql-addr, with a combined RPC/SQL listener, is deprecated.
+W230430 22:24:15.149789 85 1@cli/start.go:1266 ⋮ [T1,n?] 21 +This feature will be removed in the next version of CockroachDB.
+I230430 22:24:15.149811 85 1@cli/start.go:1517 ⋮ [T1,n?] 22  initial startup completed.
+I230430 22:24:15.149811 85 1@cli/start.go:1517 ⋮ [T1,n?] 22 +Node will now attempt to join a running cluster, or wait for `cockroach init`.
+I230430 22:24:15.149811 85 1@cli/start.go:1517 ⋮ [T1,n?] 22 +Client connections will be accepted after this completes successfully.
+I230430 22:24:15.149811 85 1@cli/start.go:1517 ⋮ [T1,n?] 22 +Check the log file(s) for progress. 
+I230430 22:24:15.155361 85 server/init.go:200 ⋮ [T1,n?] 23  no stores initialized
+I230430 22:24:15.155380 85 server/init.go:201 ⋮ [T1,n?] 24  awaiting `cockroach init` or join with an already initialized node
+I230430 22:24:15.156036 234 server/init.go:375 ⋮ [T1,n?] 25  ‹127.0.0.1:26257› is itself waiting for init, will retry
+I230430 22:24:15.353780 85 server/init.go:265 ⋮ [T1,n?] 26  cluster ‹94d2b4ab-218b-41fa-a990-3ab531170133› has been created
+I230430 22:24:15.353807 85 server/init.go:266 ⋮ [T1,n?] 27  allocated node ID: n1 (for self)
+I230430 22:24:15.353818 85 server/init.go:267 ⋮ [T1,n?] 28  active cluster version: 23.1-6
+W230430 22:24:15.354050 85 2@gossip/gossip.go:1406 ⋮ [T1,n1] 29  no incoming or outgoing connections
+I230430 22:24:15.354074 237 1@server/server.go:1653 ⋮ [T1,n1] 30  connecting to gossip network to verify cluster ID ‹"94d2b4ab-218b-41fa-a990-3ab531170133"›
+I230430 22:24:15.354236 85 gossip/gossip.go:368 ⋮ [T1,n1] 31  NodeDescriptor set to ‹node_id:1 address:<network_field:"tcp" address_field:"andrei-xps:26257" > attrs:<> locality:<tiers:<key:"cloud" value:"local" > tiers:<key:"region" value:"local" > tiers:<key:"zone" value:"local" > > ServerVersion:<major_val:23 minor_val:1 patch:0 internal:6 > build_tag:"v23.1.0-alpha.8-dev-7d02e061759599a2b054ee06c71524443f77d20a" started_at:1682893455354235112 cluster_name:"" sql_address:<network_field:"tcp" address_field:"andrei-xps:26257" > http_address:<network_field:"tcp" address_field:"andrei-xps:26258" >›
+I230430 22:24:15.355060 297 gossip/client.go:124 ⋮ [T1,n1] 32  started gossip client to n0 (‹127.0.0.1:26257›)
+I230430 22:24:15.357749 297 gossip/client.go:129 ⋮ [T1,n1] 33  closing client to n1 (‹127.0.0.1:26257›): stopping outgoing client to n1 (‹127.0.0.1:26257›); loopback connection
+I230430 22:24:15.360420 85 server/node.go:517 ⋮ [T1,n1] 34  initialized store s1
+I230430 22:24:15.360459 85 kv/kvserver/stores.go:263 ⋮ [T1,n1] 35  read 0 node addresses from persistent storage
+I230430 22:24:15.360490 237 1@server/server.go:1656 ⋮ [T1,n1] 36  node connected via gossip
+I230430 22:24:15.361914 85 server/node.go:611 ⋮ [T1,n1] 37  started with engine type ‹2›
+I230430 22:24:15.361931 85 server/node.go:613 ⋮ [T1,n1] 38  started with attributes []
+I230430 22:24:15.362025 85 server/goroutinedumper/goroutinedumper.go:122 ⋮ [T1,n1] 39  writing goroutine dumps to ‹/home/andrei/local/1/logs/goroutine_dump›
+I230430 22:24:15.362076 85 server/profiler/heapprofiler.go:59 ⋮ [T1,n1] 40  writing go heap profiles to ‹/home/andrei/local/1/logs/heap_profiler› at least every 1h0m0s
+I230430 22:24:15.362088 85 server/profiler/cgoprofiler.go:63 ⋮ [T1,n1] 41  to enable jmalloc profiling: "export MALLOC_CONF=prof:true" or "ln -s prof:true /etc/malloc.conf"
+I230430 22:24:15.362097 85 server/profiler/statsprofiler.go:64 ⋮ [T1,n1] 42  writing memory stats to ‹/home/andrei/local/1/logs/heap_profiler› at last every 1h0m0s
+I230430 22:24:15.362327 85 server/profiler/activequeryprofiler.go:85 ⋮ [T1,n1] 43  writing go query profiles to ‹/home/andrei/local/1/logs/heap_profiler›
+I230430 22:24:15.362378 85 server/profiler/cpuprofiler.go:99 ⋮ [T1,n1] 44  writing cpu profile dumps to ‹/home/andrei/local/1/logs/pprof_dump›
+I230430 22:24:15.362446 85 1@server/server.go:1818 ⋮ [T1,n1] 45  starting http server at ‹[::]:26258› (use: ‹andrei-xps:26258›)
+I230430 22:24:15.362467 85 1@server/server.go:1826 ⋮ [T1,n1] 46  starting grpc/postgres server at ‹[::]:26257›
+I230430 22:24:15.362482 85 1@server/server.go:1827 ⋮ [T1,n1] 47  advertising CockroachDB node at ‹andrei-xps:26257›
+I230430 22:24:15.426314 467 kv/kvclient/rangefeed/rangefeedcache/watcher.go:335 ⋮ [T1,n1] 48  spanconfig-subscriber: established range feed cache
+I230430 22:24:15.426602 85 1@util/log/event_log.go:32 ⋮ [T1,n1] 49 ={"Timestamp":1682893455426598535,"EventType":"node_join","NodeID":1,"StartedAt":1682893455354235112,"LastUp":1682893455354235112}
+I230430 22:24:15.426669 470 kv/kvclient/rangefeed/rangefeedcache/watcher.go:335 ⋮ [T1,n1] 50  settings-watcher: established range feed cache
+I230430 22:24:15.436442 85 sql/sqlliveness/slinstance/slinstance.go:434 ⋮ [T1,n1] 51  starting SQL liveness instance
+I230430 22:24:15.445906 572 sql/sqlliveness/slstorage/slstorage.go:540 ⋮ [T1,n1] 52  inserted sqlliveness session 010180a4fc8a31bbce48659961d36e06ecef0c
+I230430 22:24:15.445929 572 sql/sqlliveness/slinstance/slinstance.go:258 ⋮ [T1,n1] 53  created new SQL liveness session 010180a4fc8a31bbce48659961d36e06ecef0c
+I230430 22:24:15.445948 85 sql/sqlinstance/instancestorage/instancestorage.go:342 ⋮ [T1,n1] 54  assigning instance id to rpc addr ‹andrei-xps:26257› and sql addr ‹andrei-xps:26257›
+I230430 22:24:15.456488 85 server/server_sql.go:1507 ⋮ [T1,n1] 55  bound sqlinstance: Instance{RegionPrefix: gA==, InstanceID: ‹1›, SQLAddr: ‹andrei-xps:26257›, RPCAddr: ‹andrei-xps:26257›, SessionID: 010180a4fc8a31bbce48659961d36e06ecef0c, Locality: ‹cloud=local,region=local,zone=local›, BinaryVersion: 23.1-6}
+I230430 22:24:15.456558 794 sql/sqlstats/persistedsqlstats/provider.go:167 ⋮ [T1,n1] 56  starting sql-stats-worker with initial delay: 9m7.580140682s
+I230430 22:24:15.456782 793 sql/temporary_schema.go:505 ⋮ [T1,n1] 57  running temporary object cleanup background job
+I230430 22:24:15.456769 85 upgrade/upgrademanager/manager.go:170 ⋮ [T1,n1] 58  running permanent upgrades up to version: 23.1-6
+I230430 22:24:15.456910 827 kv/kvclient/rangefeed/rangefeedcache/watcher.go:335 ⋮ [T1,n1] 59  system-config-cache: established range feed cache
+I230430 22:24:15.456942 524 kv/kvserver/replica_rangefeed.go:709 ⋮ [T1,n1,rangefeed=‹lease›,dest_n=1,dest_s=1,dest_r=7,s1,r7/1:‹/Table/{3-4}›] 60  RangeFeed closed timestamp is empty
+I230430 22:24:15.466339 793 sql/temporary_schema.go:555 ⋮ [T1,n1] 61  found 0 temporary schemas
+I230430 22:24:15.466358 793 sql/temporary_schema.go:558 ⋮ [T1,n1] 62  early exiting temporary schema cleaner as no temporary schemas were found
+I230430 22:24:15.466370 793 sql/temporary_schema.go:559 ⋮ [T1,n1] 63  completed temporary object cleanup job
+I230430 22:24:15.466377 793 sql/temporary_schema.go:640 ⋮ [T1,n1] 64  temporary object cleaner next scheduled to run at 2023-04-30 22:54:15.456540277 +0000 UTC m=+1800.489913482
+I230430 22:24:15.467824 826 jobs/registry.go:617 ⋮ [T1,n1] 65  active version is 23.1-6
+I230430 22:24:15.470124 85 upgrade/upgrademanager/manager.go:238 ⋮ [T1,n1] 66  the last permanent upgrade (v22.2-102) does not appear to have completed; attempting to run all upgrades
+I230430 22:24:15.470195 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 67  running permanent upgrade for version 0.0-2
+I230430 22:24:15.491719 826 spanconfig/spanconfigmanager/manager.go:144 ⋮ [T1,n1] 68  started auto span config reconciliation job
+I230430 22:24:15.491790 951 jobs/adopt.go:261 ⋮ [T1,n1] 69  job 861218588120809473: resuming execution
+I230430 22:24:15.496062 85 jobs/registry.go:617 ⋮ [T1,n1] 70  active version is 23.1-6
+I230430 22:24:15.505170 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 71  running ‹Upgrade to 0.0-2: "add users and roles"›
+I230430 22:24:15.505242 1061 jobs/adopt.go:261 ⋮ [T1,n1] 72  job 861218588164784129: resuming execution
+I230430 22:24:15.508834 923 jobs/registry.go:1586 ⋮ [T1,n1] 73  AUTO SPAN CONFIG RECONCILIATION job 861218588120809473: stepping through state running
+I230430 22:24:15.528464 1067 jobs/registry.go:1586 ⋮ [T1,n1] 74  MIGRATION job 861218588164784129: stepping through state running
+I230430 22:24:15.565591 1067 jobs/registry.go:1586 ⋮ [T1,n1] 75  MIGRATION job 861218588164784129: stepping through state succeeded
+I230430 22:24:15.569540 923 spanconfig/spanconfigsqlwatcher/sqlwatcher.go:246 ⋮ [T1,n1,job=‹AUTO SPAN CONFIG RECONCILIATION id=861218588120809473›] 76  established range feed over system.descriptors starting at time 1682893455.537120285,0
+I230430 22:24:15.569573 923 spanconfig/spanconfigsqlwatcher/sqlwatcher.go:305 ⋮ [T1,n1,job=‹AUTO SPAN CONFIG RECONCILIATION id=861218588120809473›] 77  established range feed over system.zones starting at time 1682893455.537120285,0
+I230430 22:24:15.569598 923 spanconfig/spanconfigsqlwatcher/sqlwatcher.go:401 ⋮ [T1,n1,job=‹AUTO SPAN CONFIG RECONCILIATION id=861218588120809473›] 78  established range feed over system.protected_ts_records starting at time 1682893455.537120285,0
+I230430 22:24:15.588890 85 jobs/wait.go:145 ⋮ [T1,n1] 79  waited for 1 [861218588164784129] queued jobs to complete 83.686416ms
+I230430 22:24:15.588965 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 80  running permanent upgrade for version 0.0-4
+I230430 22:24:15.598172 85 jobs/registry.go:617 ⋮ [T1,n1] 81  active version is 23.1-6
+I230430 22:24:15.606657 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 82  running ‹Upgrade to 0.0-4: "enable diagnostics reporting"›
+I230430 22:24:15.606706 1343 jobs/adopt.go:261 ⋮ [T1,n1] 83  job 861218588553969665: resuming execution
+I230430 22:24:15.624893 1366 jobs/registry.go:1586 ⋮ [T1,n1] 84  MIGRATION job 861218588553969665: stepping through state running
+I230430 22:24:15.639029 1366 jobs/registry.go:1586 ⋮ [T1,n1] 85  MIGRATION job 861218588553969665: stepping through state succeeded
+I230430 22:24:15.670832 85 jobs/wait.go:145 ⋮ [T1,n1] 86  waited for 1 [861218588553969665] queued jobs to complete 64.157155ms
+I230430 22:24:15.670903 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 87  running permanent upgrade for version 0.0-6
+I230430 22:24:15.680174 85 jobs/registry.go:617 ⋮ [T1,n1] 88  active version is 23.1-6
+I230430 22:24:15.688641 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 89  running ‹Upgrade to 0.0-6: "populate initial version cluster setting table entry"›
+I230430 22:24:15.688692 1510 jobs/adopt.go:261 ⋮ [T1,n1] 90  job 861218588822437889: resuming execution
+I230430 22:24:15.704710 1437 jobs/registry.go:1586 ⋮ [T1,n1] 91  MIGRATION job 861218588822437889: stepping through state running
+I230430 22:24:15.729518 1437 jobs/registry.go:1586 ⋮ [T1,n1] 92  MIGRATION job 861218588822437889: stepping through state succeeded
+I230430 22:24:15.749597 85 jobs/wait.go:145 ⋮ [T1,n1] 93  waited for 1 [861218588822437889] queued jobs to complete 60.938254ms
+I230430 22:24:15.749674 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 94  running permanent upgrade for version 0.0-8
+I230430 22:24:15.758967 85 jobs/registry.go:617 ⋮ [T1,n1] 95  active version is 23.1-6
+I230430 22:24:15.767347 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 96  running ‹Upgrade to 0.0-8: "initialize the cluster.secret setting"›
+I230430 22:24:15.767397 1546 jobs/adopt.go:261 ⋮ [T1,n1] 97  job 861218589080551425: resuming execution
+I230430 22:24:15.782945 1550 jobs/registry.go:1586 ⋮ [T1,n1] 98  MIGRATION job 861218589080551425: stepping through state running
+I230430 22:24:15.798732 1550 jobs/registry.go:1586 ⋮ [T1,n1] 99  MIGRATION job 861218589080551425: stepping through state succeeded
+I230430 22:24:15.821951 85 jobs/wait.go:145 ⋮ [T1,n1] 100  waited for 1 [861218589080551425] queued jobs to complete 54.583502ms
+I230430 22:24:15.822026 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 101  running permanent upgrade for version 0.0-10
+I230430 22:24:15.831256 85 jobs/registry.go:617 ⋮ [T1,n1] 102  active version is 23.1-6
+I230430 22:24:15.839809 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 103  running ‹Upgrade to 0.0-10: "update system.locations with default location data"›
+I230430 22:24:15.839859 1616 jobs/adopt.go:261 ⋮ [T1,n1] 104  job 861218589317660673: resuming execution
+I230430 22:24:15.858793 1682 jobs/registry.go:1586 ⋮ [T1,n1] 105  MIGRATION job 861218589317660673: stepping through state running
+I230430 22:24:15.886213 1682 jobs/registry.go:1586 ⋮ [T1,n1] 106  MIGRATION job 861218589317660673: stepping through state succeeded
+I230430 22:24:15.908303 85 jobs/wait.go:145 ⋮ [T1,n1] 107  waited for 1 [861218589317660673] queued jobs to complete 68.473771ms
+I230430 22:24:15.908387 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 108  running permanent upgrade for version 0.0-12
+I230430 22:24:15.918112 85 jobs/registry.go:617 ⋮ [T1,n1] 109  active version is 23.1-6
+I230430 22:24:15.924960 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 110  running ‹Upgrade to 0.0-12: "create default databases"›
+I230430 22:24:15.925013 1732 jobs/adopt.go:261 ⋮ [T1,n1] 111  job 861218589600645121: resuming execution
+I230430 22:24:15.943611 1711 jobs/registry.go:1586 ⋮ [T1,n1] 112  MIGRATION job 861218589600645121: stepping through state running
+I230430 22:24:15.956677 1737 sql/schemachanger/scbuild/build.go:55 ⋮ [T1,n1,job=‹MIGRATION id=861218589600645121›,upgrade=0.0-12,intExec=‹create-default-DB›] 113  building declarative schema change targets for CREATE DATABASE
+I230430 22:24:15.964772 1765 sql/schemachanger/scbuild/build.go:55 ⋮ [T1,n1,job=‹MIGRATION id=861218589600645121›,upgrade=0.0-12,intExec=‹create-default-DB›] 114  building declarative schema change targets for CREATE DATABASE
+I230430 22:24:15.975829 1711 jobs/registry.go:1586 ⋮ [T1,n1] 115  MIGRATION job 861218589600645121: stepping through state succeeded
+I230430 22:24:16.000729 85 jobs/wait.go:145 ⋮ [T1,n1] 116  waited for 1 [861218589600645121] queued jobs to complete 75.747805ms
+I230430 22:24:16.000806 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 117  running permanent upgrade for version 22.1-42
+I230430 22:24:16.010690 85 jobs/registry.go:617 ⋮ [T1,n1] 118  active version is 23.1-6
+I230430 22:24:16.017233 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 119  running ‹Upgrade to 22.1-42: "add default SQL schema telemetry schedule"›
+I230430 22:24:16.017285 1773 jobs/adopt.go:261 ⋮ [T1,n1] 120  job 861218589903486977: resuming execution
+I230430 22:24:16.035821 1776 jobs/registry.go:1586 ⋮ [T1,n1] 121  MIGRATION job 861218589903486977: stepping through state running
+I230430 22:24:16.049724 1776 jobs/registry.go:1586 ⋮ [T1,n1] 122  MIGRATION job 861218589903486977: stepping through state succeeded
+I230430 22:24:16.075318 85 jobs/wait.go:145 ⋮ [T1,n1] 123  waited for 1 [861218589903486977] queued jobs to complete 58.067289ms
+I230430 22:24:16.075393 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 124  running permanent upgrade for version 22.2-32
+I230430 22:24:16.085414 85 jobs/registry.go:617 ⋮ [T1,n1] 125  active version is 23.1-6
+I230430 22:24:16.093111 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 126  running ‹Upgrade to 22.2-32: "add tables and jobs to support persisting key visualizer samples"›
+I230430 22:24:16.093162 1885 jobs/adopt.go:261 ⋮ [T1,n1] 127  job 861218590147870721: resuming execution
+I230430 22:24:16.111023 1906 jobs/registry.go:1586 ⋮ [T1,n1] 128  MIGRATION job 861218590147870721: stepping through state running
+I230430 22:24:16.125238 1911 1@util/log/event_log.go:32 ⋮ [T1,n1,job=‹MIGRATION id=861218590147870721›,upgrade=22.2-32,intExec=‹set-SpanStatsTenantBoundariesTable-TTL›] 129 ={"Timestamp":1682893456121678996,"EventType":"set_zone_config","Statement":"ALTER TABLE ‹\"\"›.‹system›.‹span_stats_tenant_boundaries› CONFIGURE ZONE USING ‹\"gc.ttlseconds\"› = $1","Tag":"CONFIGURE ZONE","User":"root","DescriptorID":57,"ApplicationName":"$ internal-set-SpanStatsTenantBoundariesTable-TTL","PlaceholderValues":["‹3600›"],"Target":"‹TABLE system.public.span_stats_tenant_boundaries›","Options":["‹\"gc.ttlseconds\" = 3600›"]}
+I230430 22:24:16.132840 1906 jobs/registry.go:1586 ⋮ [T1,n1] 130  MIGRATION job 861218590147870721: stepping through state succeeded
+I230430 22:24:16.153698 85 jobs/wait.go:145 ⋮ [T1,n1] 131  waited for 1 [861218590147870721] queued jobs to complete 60.56695ms
+I230430 22:24:16.153775 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 132  running permanent upgrade for version 22.2-38
+I230430 22:24:16.163732 85 jobs/registry.go:617 ⋮ [T1,n1] 133  active version is 23.1-6
+I230430 22:24:16.170243 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 134  running ‹Upgrade to 22.2-38: "create jobs metrics polling job"›
+I230430 22:24:16.170295 1977 jobs/adopt.go:261 ⋮ [T1,n1] 135  job 861218590404739073: resuming execution
+I230430 22:24:16.188665 1982 jobs/registry.go:1586 ⋮ [T1,n1] 136  MIGRATION job 861218590404739073: stepping through state running
+I230430 22:24:16.207808 1982 jobs/registry.go:1586 ⋮ [T1,n1] 137  MIGRATION job 861218590404739073: stepping through state succeeded
+I230430 22:24:16.228421 85 jobs/wait.go:145 ⋮ [T1,n1] 138  waited for 1 [861218590404739073] queued jobs to complete 58.15707ms
+I230430 22:24:16.228497 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 139  running permanent upgrade for version 22.2-90
+I230430 22:24:16.242378 85 jobs/registry.go:617 ⋮ [T1,n1] 140  active version is 23.1-6
+I230430 22:24:16.250359 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 141  running ‹Upgrade to 22.2-90: "create auto config runner job"›
+I230430 22:24:16.250407 2044 jobs/adopt.go:261 ⋮ [T1,n1] 142  job 861218590649581569: resuming execution
+I230430 22:24:16.268067 1697 jobs/registry.go:1586 ⋮ [T1,n1] 143  MIGRATION job 861218590649581569: stepping through state running
+I230430 22:24:16.281123 1697 jobs/registry.go:617 ⋮ [T1,n1,job=‹MIGRATION id=861218590649581569›,upgrade=22.2-90] 144  active version is 23.1-6
+I230430 22:24:16.288908 2107 jobs/adopt.go:261 ⋮ [T1,n1,job=‹MIGRATION id=861218590649581569›,upgrade=22.2-90] 145  job 102: resuming execution
+I230430 22:24:16.291496 1697 jobs/registry.go:1586 ⋮ [T1,n1] 146  MIGRATION job 861218590649581569: stepping through state succeeded
+I230430 22:24:16.306967 2134 jobs/registry.go:1586 ⋮ [T1,n1] 147  AUTO CONFIG RUNNER job 102: stepping through state running
+I230430 22:24:16.315773 2134 server/autoconfig/auto_config.go:97 ⋮ [T1,n1,job=‹AUTO CONFIG RUNNER id=102›] 148  using provider with type acprovider.NoTaskProvider
+I230430 22:24:16.315800 2134 server/autoconfig/auto_config.go:74 ⋮ [T1,n1,job=‹AUTO CONFIG RUNNER id=102›] 149  waiting for environment activation...
+I230430 22:24:16.315808 2134 server/autoconfig/auto_config.go:74 ⋮ [T1,n1,job=‹AUTO CONFIG RUNNER id=102›] 150  waiting for environment activation...
+I230430 22:24:16.316494 85 jobs/wait.go:145 ⋮ [T1,n1] 151  waited for 1 [861218590649581569] queued jobs to complete 66.112063ms
+I230430 22:24:16.316582 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 152  running permanent upgrade for version 22.2-98
+I230430 22:24:16.334274 85 jobs/registry.go:617 ⋮ [T1,n1] 153  active version is 23.1-6
+I230430 22:24:16.341103 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 154  running ‹Upgrade to 22.2-98: "change TTL for SQL Stats system tables"›
+I230430 22:24:16.341143 2160 jobs/adopt.go:261 ⋮ [T1,n1] 155  job 861218590938202113: resuming execution
+I230430 22:24:16.354688 2227 gossip/client.go:124 ⋮ [T1,n1] 156  started gossip client to n0 (‹127.0.0.1:26257›)
+I230430 22:24:16.354997 2227 gossip/client.go:129 ⋮ [T1,n1] 157  closing client to n1 (‹127.0.0.1:26257›): stopping outgoing client to n1 (‹127.0.0.1:26257›); loopback connection
+I230430 22:24:16.355060 241 1@gossip/gossip.go:1420 ⋮ [T1,n1] 158  node has connected to cluster via gossip
+I230430 22:24:16.356453 241 kv/kvserver/stores.go:282 ⋮ [T1,n1] 159  wrote 0 node addresses to persistent storage
+I230430 22:24:16.359260 2142 jobs/registry.go:1586 ⋮ [T1,n1] 160  MIGRATION job 861218590938202113: stepping through state running
+I230430 22:24:16.376023 2238 1@util/log/event_log.go:32 ⋮ [T1,n1,job=‹MIGRATION id=861218590938202113›,upgrade=22.2-98,intExec=‹set-SQLStatsTables-TTL›] 161 ={"Timestamp":1682893456371073818,"EventType":"set_zone_config","Statement":"ALTER TABLE ‹\"\"›.‹system›.‹statement_statistics› CONFIGURE ZONE USING ‹\"gc.ttlseconds\"› = $1","Tag":"CONFIGURE ZONE","User":"root","DescriptorID":42,"ApplicationName":"$ internal-set-SQLStatsTables-TTL","PlaceholderValues":["‹3600›"],"Target":"‹TABLE system.public.statement_statistics›","Options":["‹\"gc.ttlseconds\" = 3600›"]}
+I230430 22:24:16.380057 1952 1@util/log/event_log.go:32 ⋮ [T1,n1,job=‹MIGRATION id=861218590938202113›,upgrade=22.2-98,intExec=‹set-SQLStatsTables-TTL›] 162 ={"Timestamp":1682893456376193168,"EventType":"set_zone_config","Statement":"ALTER TABLE ‹\"\"›.‹system›.‹transaction_statistics› CONFIGURE ZONE USING ‹\"gc.ttlseconds\"› = $1","Tag":"CONFIGURE ZONE","User":"root","DescriptorID":43,"ApplicationName":"$ internal-set-SQLStatsTables-TTL","PlaceholderValues":["‹3600›"],"Target":"‹TABLE system.public.transaction_statistics›","Options":["‹\"gc.ttlseconds\" = 3600›"]}
+I230430 22:24:16.383923 2324 1@util/log/event_log.go:32 ⋮ [T1,n1,job=‹MIGRATION id=861218590938202113›,upgrade=22.2-98,intExec=‹set-SQLStatsTables-TTL›] 163 ={"Timestamp":1682893456380211898,"EventType":"set_zone_config","Statement":"ALTER TABLE ‹\"\"›.‹system›.‹statement_activity› CONFIGURE ZONE USING ‹\"gc.ttlseconds\"› = $1","Tag":"CONFIGURE ZONE","User":"root","DescriptorID":60,"ApplicationName":"$ internal-set-SQLStatsTables-TTL","PlaceholderValues":["‹3600›"],"Target":"‹TABLE system.public.statement_activity›","Options":["‹\"gc.ttlseconds\" = 3600›"]}
+I230430 22:24:16.387658 2312 1@util/log/event_log.go:32 ⋮ [T1,n1,job=‹MIGRATION id=861218590938202113›,upgrade=22.2-98,intExec=‹set-SQLStatsTables-TTL›] 164 ={"Timestamp":1682893456384150887,"EventType":"set_zone_config","Statement":"ALTER TABLE ‹\"\"›.‹system›.‹transaction_activity› CONFIGURE ZONE USING ‹\"gc.ttlseconds\"› = $1","Tag":"CONFIGURE ZONE","User":"root","DescriptorID":61,"ApplicationName":"$ internal-set-SQLStatsTables-TTL","PlaceholderValues":["‹3600›"],"Target":"‹TABLE system.public.transaction_activity›","Options":["‹\"gc.ttlseconds\" = 3600›"]}
+I230430 22:24:16.391667 2142 jobs/registry.go:1586 ⋮ [T1,n1] 165  MIGRATION job 861218590938202113: stepping through state succeeded
+I230430 22:24:16.413132 85 jobs/wait.go:145 ⋮ [T1,n1] 166  waited for 1 [861218590938202113] queued jobs to complete 72.010421ms
+I230430 22:24:16.413209 85 upgrade/upgrademanager/manager.go:283 ⋮ [T1,n1] 167  running permanent upgrade for version 22.2-102
+I230430 22:24:16.423354 85 jobs/registry.go:617 ⋮ [T1,n1] 168  active version is 23.1-6
+I230430 22:24:16.431281 85 upgrade/upgrademanager/manager.go:742 ⋮ [T1,n1] 169  running ‹Upgrade to 22.2-102: "create sql activity updater job"›
+I230430 22:24:16.431322 2368 jobs/adopt.go:261 ⋮ [T1,n1] 170  job 861218591254839297: resuming execution
+I230430 22:24:16.450791 2252 jobs/registry.go:1586 ⋮ [T1,n1] 171  MIGRATION job 861218591254839297: stepping through state running
+I230430 22:24:16.471391 2252 jobs/registry.go:1586 ⋮ [T1,n1] 172  MIGRATION job 861218591254839297: stepping through state succeeded
+I230430 22:24:16.496854 85 jobs/wait.go:145 ⋮ [T1,n1] 173  waited for 1 [861218591254839297] queued jobs to complete 65.549432ms
+I230430 22:24:16.496880 85 server/server_sql.go:1615 ⋮ [T1,n1] 174  done ensuring all necessary startup migrations have run
+I230430 22:24:16.497016 2223 jobs/job_scheduler.go:407 ⋮ [T1,n1] 175  waiting 2m0s before scheduled jobs daemon start
+I230430 22:24:16.497309 2437 kv/kvclient/rangefeed/rangefeedcache/watcher.go:335 ⋮ [T1,n1] 176  tenant-settings-watcher: established range feed cache
+I230430 22:24:16.497662 2439 kv/kvclient/rangefeed/rangefeedcache/watcher.go:335 ⋮ [T1,n1] 177  tenant-capability-watcher: established range feed cache
+I230430 22:24:16.497915 2439 multitenant/tenantcapabilities/tenantcapabilitieswatcher/watcher.go:149 ⋮ [T1,n1] 178  received results of a full table scan for tenant capabilities
+I230430 22:24:16.499285 2435 server/auto_upgrade.go:78 ⋮ [T1,n1] 179  no need to upgrade, cluster already at the newest version
+I230430 22:24:16.501821 2225 sql/syntheticprivilegecache/cache.go:199 ⋮ [T1,n1] 180  warmed privileges for virtual tables in 4.764993ms
+I230430 22:24:16.525282 85 1@server/server_sql.go:1733 ⋮ [T1,n1] 181  serving sql connections
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182  node startup completed:
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +CockroachDB node starting at 2023-04-30 22:24:16.525321322 +0000 UTC m=+1.558694522 (took 1.5s)
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +build:               CCL v23.1.0-alpha.8-dev-7d02e061759599a2b054ee06c71524443f77d20a @ 2023/04/30 22:01:52 (go1.19.4)
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +webui:               ‹http://andrei-xps:26258›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +sql:                 ‹postgresql://root@andrei-xps:26257/defaultdb?sslmode=disable›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +sql (JDBC):          ‹jdbc:postgresql://andrei-xps:26257/defaultdb?sslmode=disable&user=root›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +RPC client flags:    ‹/home/andrei/local/1/cockroach <client cmd> --host=andrei-xps:26257 --insecure›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +logs:                ‹/home/andrei/local/1/logs›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +locality:            ‹cloud=local,region=local,zone=local›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +temp dir:            ‹/home/andrei/local/1/data/cockroach-temp68692412›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +external I/O path:   ‹/home/andrei/local/1/data/extern›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +store[0]:            ‹path=/home/andrei/local/1/data,attrs=node1:node1store1:store1›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +storage engine:      pebble
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +clusterID:           ‹94d2b4ab-218b-41fa-a990-3ab531170133›
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +status:              initialized new cluster
+I230430 22:24:16.525390 85 1@cli/start.go:1253 ⋮ [T1,n1] 182 +nodeID:              1
+I230430 22:24:16.532723 2448 util/log/event_log.go:32 ⋮ [T1,n1,client=127.0.0.1:33622,user=root] 183 ={"Timestamp":1682893456525834352,"EventType":"set_cluster_setting","Statement":"SET CLUSTER SETTING \"server.remote_debugging.mode\" = ‹'any'›","Tag":"SET CLUSTER SETTING","User":"root","ApplicationName":"$ cockroach sql","SettingName":"server.remote_debugging.mode","Value":"‹any›"}
+I230430 22:24:16.622856 2522 util/log/event_log.go:32 ⋮ [T1,n1,client=127.0.0.1:33636,user=root] 184 ={"Timestamp":1682893456620138400,"EventType":"set_cluster_setting","Statement":"SET CLUSTER SETTING \"cluster.organization\" = ‹'Cockroach Labs - Production Testing'›","Tag":"SET CLUSTER SETTING","User":"root","ApplicationName":"$ cockroach sql","SettingName":"cluster.organization","Value":"‹'Cockroach Labs - Production Testing'›"}
+I230430 22:24:16.625235 2522 util/log/event_log.go:32 ⋮ [T1,n1,client=127.0.0.1:33636,user=root] 185 ={"Timestamp":1682893456622995837,"EventType":"set_cluster_setting","Statement":"SET CLUSTER SETTING \"enterprise.license\" = ‹''›","Tag":"SET CLUSTER SETTING","User":"root","ApplicationName":"$ cockroach sql","SettingName":"enterprise.license"}
+I230430 22:24:16.920722 2547 kv/kvserver/liveness/liveness.go:617 ⋮ [T1,n1] 186  created liveness record for n2
+I230430 22:24:16.920747 2547 server/node.go:1971 ⋮ [T1,n1] 187  allocated IDs: n2, s2
+I230430 22:24:16.935309 131 kv/kvserver/stores.go:282 ⋮ [T1,n1] 188  wrote 1 node addresses to persistent storage
+I230430 22:24:17.211270 2853 kv/kvserver/liveness/liveness.go:617 ⋮ [T1,n1] 189  created liveness record for n3
+I230430 22:24:17.211291 2853 server/node.go:1971 ⋮ [T1,n1] 190  allocated IDs: n3, s3
+I230430 22:24:17.233711 131 kv/kvserver/stores.go:282 ⋮ [T1,n1] 191  wrote 2 node addresses to persistent storage
+I230430 22:24:17.573854 3244 kv/kvserver/liveness/liveness.go:617 ⋮ [T1,n1] 192  created liveness record for n4
+I230430 22:24:17.573867 3244 server/node.go:1971 ⋮ [T1,n1] 193  allocated IDs: n4, s4
+I230430 22:24:17.604922 131 kv/kvserver/stores.go:282 ⋮ [T1,n1] 194  wrote 3 node addresses to persistent storage
+W230430 22:24:17.608794 3426 kv/kvserver/intentresolver/intent_resolver.go:502 ⋮ [-] 195  failed to push during intent resolution: {<nil> 0 {‹0xc002b48758›} ‹index:0› 1682893457.608772702,0}
+I230430 22:24:20.551947 453 kv/kvserver/queue.go:1274 ⋮ [T1,n1,replicate] 196  purgatory is now empty
+I230430 22:24:24.202647 310 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r6/1:‹/Table/{0-3}›,raft] 197  removing replica r6/1
+I230430 22:24:24.330263 368 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r45/1:‹/Table/4{3-4}›,raft] 198  removing replica r45/1
+I230430 22:24:24.457039 373 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r63/1:‹/{Table/62-Max}›,raft] 199  removing replica r63/1
+I230430 22:24:24.655161 320 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r36/1:‹/Table/3{4-5}›,raft] 200  removing replica r36/1
+I230430 22:24:24.777354 328 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r37/1:‹/Table/3{5-6}›,raft] 201  removing replica r37/1
+I230430 22:24:24.897677 347 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r26/1:‹/Table/2{4-5}›,raft] 202  removing replica r26/1
+I230430 22:24:25.021965 335 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r7/1:‹/Table/{3-4}›,raft] 203  removing replica r7/1
+I230430 22:24:25.143892 338 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r43/1:‹/Table/4{1-2}›,raft] 204  removing replica r43/1
+I230430 22:24:25.258349 364 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r57/1:‹/Table/5{6-7}›,raft] 205  removing replica r57/1
+I230430 22:24:25.393492 311 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r60/1:‹/Table/{59-60}›,raft] 206  removing replica r60/1
+I230430 22:24:25.506133 371 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r21/1:‹/Table/{19-20}›,raft] 207  removing replica r21/1
+I230430 22:24:25.626383 363 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r39/1:‹/Table/3{7-8}›,raft] 208  removing replica r39/1
+I230430 22:24:25.746335 310 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r18/1:‹/Table/1{6-7}›,raft] 209  removing replica r18/1
+I230430 22:24:28.491761 314 kv/kvserver/store_remove_replica.go:151 ⋮ [T1,n1,s1,r48/1:‹/Table/4{6-7}›,raft] 210  removing replica r48/1
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211  
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +__level_____count____size___score______in__ingest(sz_cnt)____move(sz_cnt)___write(sz_cnt)____read___r-amp___w-amp
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +    WAL         6   9.1 M       -   9.0 M       -       -       -       -   9.1 M       -       -       -     1.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +      0         0     0 B    0.00     0 B     0 B       0     0 B       0     0 B       0     0 B       0     0.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +      1         0     0 B    0.00     0 B     0 B       0     0 B       0     0 B       0     0 B       0     0.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +      2         0     0 B    0.00     0 B     0 B       0     0 B       0     0 B       0     0 B       0     0.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +      3         0     0 B    0.00     0 B     0 B       0     0 B       0     0 B       0     0 B       0     0.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +      4         0     0 B    0.00     0 B     0 B       0     0 B       0     0 B       0     0 B       0     0.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +      5         0     0 B    0.00     0 B     0 B       0     0 B       0     0 B       0     0 B       0     0.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +      6         0     0 B       -     0 B     0 B       0     0 B       0     0 B       0     0 B       0     0.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +  total         0     0 B       -   9.1 M     0 B       0     0 B       0   9.1 M       0     0 B       0     1.0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +  flush         0                             0 B       0       0  (ingest = tables-ingested, move = ingested-as-flushable)
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +compact         0     0 B     0 B       0                          (size == estimated-debt, score = in-progress-bytes, in = num-in-progress)
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +  ctype         0       0       0       0       0       0       0  (default, delete, elision, move, read, rewrite, multi-level)
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 + memtbl         6    16 M
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +zmemtbl         0     0 B
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +   ztbl         0     0 B
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 + bcache         0     0 B    0.0%  (score == hit-rate)
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 + tcache         0     0 B    0.0%  (score == hit-rate)
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 +  snaps         0       -       0  (score == earliest seq num)
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 + titers         0
+I230430 22:24:35.362953 434 kv/kvserver/store.go:3178 ⋮ [T1,n1] 211 + filter         -       -    0.0%  (score == utility)
+I230430 22:24:38.410912 8316 kv/kvserver/replica_consistency.go:234 ⋮ [T1,n1,consistencyChecker,s1,r4/1:‹/System{/tsd-tse}›] 212  triggering stats recomputation to resolve delta of {ContainsEstimates:51288 LastUpdateNanos:1682893477675641373 IntentAge:0 GCBytesAge:0 LiveBytes:-192658 LiveCount:-8548 KeyBytes:-483290 KeyCount:-8548 ValBytes:290632 ValCount:-8548 IntentBytes:0 IntentCount:0 SeparatedIntentCount:0 RangeKeyCount:0 RangeKeyBytes:0 RangeValCount:0 RangeValBytes:0 SysBytes:0 SysCount:0 AbortSpanBytes:0}
+I230430 22:24:44.597032 825 jobs/adopt.go:112 ⋮ [T1,n1] 213  claimed 3 jobs
+I230430 22:24:44.608022 8650 jobs/adopt.go:261 ⋮ [T1,n1] 214  job 103: resuming execution
+I230430 22:24:44.608066 8649 jobs/adopt.go:261 ⋮ [T1,n1] 216  job 101: resuming execution
+I230430 22:24:44.608061 8648 jobs/adopt.go:261 ⋮ [T1,n1] 215  job 100: resuming execution
+I230430 22:24:44.623236 8741 jobs/registry.go:1586 ⋮ [T1,n1] 218  POLL JOBS STATS job 101: stepping through state running
+I230430 22:24:44.623224 8654 jobs/registry.go:1586 ⋮ [T1,n1] 217  AUTO UPDATE SQL ACTIVITY job 103: stepping through state running
+I230430 22:24:44.625587 8757 jobs/registry.go:1586 ⋮ [T1,n1] 219  KEY VISUALIZER job 100: stepping through state running
+I230430 22:24:44.643704 8654 sql/sql_activity_update_job.go:80 ⋮ [T1,n1,job=‹AUTO UPDATE SQL ACTIVITY id=103›] 220  starting sql stats activity flush job
+I230430 22:25:15.457622 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 221  automatically executing ‹"CREATE STATISTICS __auto__ FROM [47] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:15.460093 10738 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 222  active version is 23.1-6
+I230430 22:25:15.500456 10698 jobs/registry.go:1586 ⋮ [T1,n1] 223  AUTO CREATE STATS job 861218784739393537: stepping through state running
+I230430 22:25:15.591785 10698 jobs/registry.go:1586 ⋮ [T1,n1] 224  AUTO CREATE STATS job 861218784739393537: stepping through state succeeded
+I230430 22:25:15.614635 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 225  automatically executing ‹"CREATE STATISTICS __auto__ FROM [6] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:15.619477 10873 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 226  active version is 23.1-6
+I230430 22:25:15.652817 10765 jobs/registry.go:1586 ⋮ [T1,n1] 227  AUTO CREATE STATS job 861218785261682689: stepping through state running
+I230430 22:25:15.742875 10765 jobs/registry.go:1586 ⋮ [T1,n1] 228  AUTO CREATE STATS job 861218785261682689: stepping through state succeeded
+I230430 22:25:15.770072 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 229  automatically executing ‹"CREATE STATISTICS __auto__ FROM [7] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:15.771601 11037 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 230  active version is 23.1-6
+I230430 22:25:15.804764 10926 jobs/registry.go:1586 ⋮ [T1,n1] 231  AUTO CREATE STATS job 861218785760182273: stepping through state running
+I230430 22:25:15.878365 10926 jobs/registry.go:1586 ⋮ [T1,n1] 232  AUTO CREATE STATS job 861218785760182273: stepping through state succeeded
+I230430 22:25:15.901560 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 233  automatically executing ‹"CREATE STATISTICS __auto__ FROM [15] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+W230430 22:25:15.902605 8870 sql/stats/automatic_stats.go:819 ⋮ [T1,n1] 234  failed to create statistics on table 15: ‹create-stats›: cannot create statistics on system.jobs
+I230430 22:25:15.908018 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 235  automatically executing ‹"CREATE STATISTICS __auto__ FROM [24] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:15.909649 11079 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 236  active version is 23.1-6
+I230430 22:25:15.943306 10968 jobs/registry.go:1586 ⋮ [T1,n1] 237  AUTO CREATE STATS job 861218786212511745: stepping through state running
+I230430 22:25:16.045351 10968 jobs/registry.go:1586 ⋮ [T1,n1] 238  AUTO CREATE STATS job 861218786212511745: stepping through state succeeded
+I230430 22:25:16.073374 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 239  automatically executing ‹"CREATE STATISTICS __auto__ FROM [41] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:16.074885 11176 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 240  active version is 23.1-6
+I230430 22:25:16.110173 11136 jobs/registry.go:1586 ⋮ [T1,n1] 241  AUTO CREATE STATS job 861218786753970177: stepping through state running
+I230430 22:25:16.196710 11136 jobs/registry.go:1586 ⋮ [T1,n1] 242  AUTO CREATE STATS job 861218786753970177: stepping through state succeeded
+I230430 22:25:16.224790 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 243  automatically executing ‹"CREATE STATISTICS __auto__ FROM [55] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:16.226476 11295 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 244  active version is 23.1-6
+I230430 22:25:16.264164 11311 jobs/registry.go:1586 ⋮ [T1,n1] 245  AUTO CREATE STATS job 861218787250700289: stepping through state running
+I230430 22:25:16.356327 11311 jobs/registry.go:1586 ⋮ [T1,n1] 246  AUTO CREATE STATS job 861218787250700289: stepping through state succeeded
+I230430 22:25:16.376688 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 247  automatically executing ‹"CREATE STATISTICS __auto__ FROM [27] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:16.382662 11374 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 248  active version is 23.1-6
+I230430 22:25:16.418006 11215 jobs/registry.go:1586 ⋮ [T1,n1] 249  AUTO CREATE STATS job 861218787762438145: stepping through state running
+I230430 22:25:16.527755 11215 jobs/registry.go:1586 ⋮ [T1,n1] 250  AUTO CREATE STATS job 861218787762438145: stepping through state succeeded
+I230430 22:25:16.571283 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 251  automatically executing ‹"CREATE STATISTICS __auto__ FROM [33] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:16.572923 11541 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 252  active version is 23.1-6
+I230430 22:25:16.608247 11497 jobs/registry.go:1586 ⋮ [T1,n1] 253  AUTO CREATE STATS job 861218788385947649: stepping through state running
+I230430 22:25:16.702545 11497 jobs/registry.go:1586 ⋮ [T1,n1] 254  AUTO CREATE STATS job 861218788385947649: stepping through state succeeded
+I230430 22:25:16.729483 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 255  automatically executing ‹"CREATE STATISTICS __auto__ FROM [45] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:16.731138 11550 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 256  active version is 23.1-6
+I230430 22:25:16.765299 11653 jobs/registry.go:1586 ⋮ [T1,n1] 257  AUTO CREATE STATS job 861218788904370177: stepping through state running
+I230430 22:25:16.956852 11653 jobs/registry.go:1586 ⋮ [T1,n1] 258  AUTO CREATE STATS job 861218788904370177: stepping through state succeeded
+I230430 22:25:16.987772 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 259  automatically executing ‹"CREATE STATISTICS __auto__ FROM [48] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.017102 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 260  automatically executing ‹"CREATE STATISTICS __auto__ FROM [62] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.019552 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 261  automatically executing ‹"CREATE STATISTICS __auto__ FROM [4] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.021982 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 262  automatically executing ‹"CREATE STATISTICS __auto__ FROM [23] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.024138 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 263  automatically executing ‹"CREATE STATISTICS __auto__ FROM [28] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.026387 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 264  automatically executing ‹"CREATE STATISTICS __auto__ FROM [35] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.037917 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 265  automatically executing ‹"CREATE STATISTICS __auto__ FROM [59] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.047192 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 266  automatically executing ‹"CREATE STATISTICS __auto__ FROM [61] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.062322 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 267  automatically executing ‹"CREATE STATISTICS __auto__ FROM [40] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.064848 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 268  automatically executing ‹"CREATE STATISTICS __auto__ FROM [21] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.067062 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 269  automatically executing ‹"CREATE STATISTICS __auto__ FROM [26] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.073643 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 270  automatically executing ‹"CREATE STATISTICS __auto__ FROM [34] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.082466 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 271  automatically executing ‹"CREATE STATISTICS __auto__ FROM [46] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.091126 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 272  automatically executing ‹"CREATE STATISTICS __auto__ FROM [14] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.093478 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 273  automatically executing ‹"CREATE STATISTICS __auto__ FROM [25] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.095617 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 274  automatically executing ‹"CREATE STATISTICS __auto__ FROM [31] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.104584 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 275  automatically executing ‹"CREATE STATISTICS __auto__ FROM [36] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.113166 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 276  automatically executing ‹"CREATE STATISTICS __auto__ FROM [42] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.115981 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 277  automatically executing ‹"CREATE STATISTICS __auto__ FROM [51] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.118772 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 278  automatically executing ‹"CREATE STATISTICS __auto__ FROM [50] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.127015 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 279  automatically executing ‹"CREATE STATISTICS __auto__ FROM [54] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.135984 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 280  automatically executing ‹"CREATE STATISTICS __auto__ FROM [57] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.146292 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 281  automatically executing ‹"CREATE STATISTICS __auto__ FROM [60] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.148650 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 282  automatically executing ‹"CREATE STATISTICS __auto__ FROM [53] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.150912 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 283  automatically executing ‹"CREATE STATISTICS __auto__ FROM [3] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.159752 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 284  automatically executing ‹"CREATE STATISTICS __auto__ FROM [5] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.168062 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 285  automatically executing ‹"CREATE STATISTICS __auto__ FROM [52] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.178468 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 286  automatically executing ‹"CREATE STATISTICS __auto__ FROM [56] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.180780 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 287  automatically executing ‹"CREATE STATISTICS __auto__ FROM [12] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.182875 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 288  automatically executing ‹"CREATE STATISTICS __auto__ FROM [8] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.190206 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 289  automatically executing ‹"CREATE STATISTICS __auto__ FROM [13] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.198761 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 290  automatically executing ‹"CREATE STATISTICS __auto__ FROM [19] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.208172 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 291  automatically executing ‹"CREATE STATISTICS __auto__ FROM [30] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.225443 12058 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 292  active version is 23.1-6
+I230430 22:25:17.269951 12091 jobs/registry.go:1586 ⋮ [T1,n1] 293  AUTO CREATE STATS job 861218790524026881: stepping through state running
+I230430 22:25:17.377560 12091 jobs/registry.go:1586 ⋮ [T1,n1] 294  AUTO CREATE STATS job 861218790524026881: stepping through state succeeded
+I230430 22:25:17.401031 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 295  automatically executing ‹"CREATE STATISTICS __auto__ FROM [32] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.405775 12318 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 296  active version is 23.1-6
+I230430 22:25:17.442516 12364 jobs/registry.go:1586 ⋮ [T1,n1] 297  AUTO CREATE STATS job 861218791114964993: stepping through state running
+I230430 22:25:17.481992 12364 jobs/registry.go:1584 ⋮ [T1,n1] 298  AUTO CREATE STATS job 861218791114964993: stepping through state reverting with error: ‹another CREATE STATISTICS job is already running›
+I230430 22:25:17.481992 12364 jobs/registry.go:1584 ⋮ [T1,n1] 298 +(1) ‹another CREATE STATISTICS job is already running›
+I230430 22:25:17.481992 12364 jobs/registry.go:1584 ⋮ [T1,n1] 298 +Error types: (1) stats.concurrentCreateStatisticsError
+I230430 22:25:17.503826 12364 jobs/registry.go:1584 ⋮ [T1,n1] 299  AUTO CREATE STATS job 861218791114964993: stepping through state failed with error: ‹another CREATE STATISTICS job is already running›
+I230430 22:25:17.503826 12364 jobs/registry.go:1584 ⋮ [T1,n1] 299 +(1) ‹another CREATE STATISTICS job is already running›
+I230430 22:25:17.503826 12364 jobs/registry.go:1584 ⋮ [T1,n1] 299 +Error types: (1) stats.concurrentCreateStatisticsError
+E230430 22:25:17.543862 12364 jobs/adopt.go:479 ⋮ [T1,n1] 300  job 861218791114964993: adoption completed with error ‹another CREATE STATISTICS job is already running›
+I230430 22:25:17.566286 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 301  automatically executing ‹"CREATE STATISTICS __auto__ FROM [39] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.576255 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 302  automatically executing ‹"CREATE STATISTICS __auto__ FROM [43] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.585109 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 303  automatically executing ‹"CREATE STATISTICS __auto__ FROM [44] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:25:17.592940 8870 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 304  automatically executing ‹"CREATE STATISTICS __auto__ FROM [58] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:17.596350 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 305  automatically executing ‹"CREATE STATISTICS __auto__ FROM [5] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:17.598672 15892 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 306  active version is 23.1-6
+I230430 22:26:17.637175 15897 jobs/registry.go:1586 ⋮ [T1,n1] 307  AUTO CREATE STATS job 861218988355092481: stepping through state running
+I230430 22:26:17.730981 15897 jobs/registry.go:1586 ⋮ [T1,n1] 308  AUTO CREATE STATS job 861218988355092481: stepping through state succeeded
+I230430 22:26:17.752107 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 309  automatically executing ‹"CREATE STATISTICS __auto__ FROM [26] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:17.757034 16003 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 310  active version is 23.1-6
+I230430 22:26:17.793180 16021 jobs/registry.go:1586 ⋮ [T1,n1] 311  AUTO CREATE STATS job 861218988874006529: stepping through state running
+I230430 22:26:17.895620 16021 jobs/registry.go:1586 ⋮ [T1,n1] 312  AUTO CREATE STATS job 861218988874006529: stepping through state succeeded
+I230430 22:26:17.918070 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 313  automatically executing ‹"CREATE STATISTICS __auto__ FROM [59] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:17.923161 15807 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 314  active version is 23.1-6
+I230430 22:26:17.961063 15681 jobs/registry.go:1586 ⋮ [T1,n1] 315  AUTO CREATE STATS job 861218989418381313: stepping through state running
+I230430 22:26:18.074607 15681 jobs/registry.go:1586 ⋮ [T1,n1] 316  AUTO CREATE STATS job 861218989418381313: stepping through state succeeded
+I230430 22:26:18.095547 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 317  automatically executing ‹"CREATE STATISTICS __auto__ FROM [61] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:18.101386 15852 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 318  active version is 23.1-6
+I230430 22:26:18.137043 16179 jobs/registry.go:1586 ⋮ [T1,n1] 319  AUTO CREATE STATS job 861218990002241537: stepping through state running
+I230430 22:26:18.319103 16179 jobs/registry.go:1586 ⋮ [T1,n1] 320  AUTO CREATE STATS job 861218990002241537: stepping through state succeeded
+I230430 22:26:18.340841 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 321  automatically executing ‹"CREATE STATISTICS __auto__ FROM [40] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:18.345855 16293 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 322  active version is 23.1-6
+I230430 22:26:18.382511 16265 jobs/registry.go:1586 ⋮ [T1,n1] 323  AUTO CREATE STATS job 861218990803419137: stepping through state running
+I230430 22:26:18.498438 16265 jobs/registry.go:1586 ⋮ [T1,n1] 324  AUTO CREATE STATS job 861218990803419137: stepping through state succeeded
+I230430 22:26:18.523080 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 325  automatically executing ‹"CREATE STATISTICS __auto__ FROM [46] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:18.528004 16468 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 326  active version is 23.1-6
+I230430 22:26:18.563116 16457 jobs/registry.go:1586 ⋮ [T1,n1] 327  AUTO CREATE STATS job 861218991400255489: stepping through state running
+I230430 22:26:18.678431 16457 jobs/registry.go:1586 ⋮ [T1,n1] 328  AUTO CREATE STATS job 861218991400255489: stepping through state succeeded
+I230430 22:26:18.700070 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 329  automatically executing ‹"CREATE STATISTICS __auto__ FROM [14] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:18.706693 16442 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 330  active version is 23.1-6
+I230430 22:26:18.742763 16550 jobs/registry.go:1586 ⋮ [T1,n1] 331  AUTO CREATE STATS job 861218991985852417: stepping through state running
+I230430 22:26:18.831692 16550 jobs/registry.go:1586 ⋮ [T1,n1] 332  AUTO CREATE STATS job 861218991985852417: stepping through state succeeded
+I230430 22:26:18.852898 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 333  automatically executing ‹"CREATE STATISTICS __auto__ FROM [32] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:18.858441 16576 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 334  active version is 23.1-6
+I230430 22:26:18.895298 16587 jobs/registry.go:1586 ⋮ [T1,n1] 335  AUTO CREATE STATS job 861218992483041281: stepping through state running
+I230430 22:26:19.007831 16587 jobs/registry.go:1586 ⋮ [T1,n1] 336  AUTO CREATE STATS job 861218992483041281: stepping through state succeeded
+I230430 22:26:19.028482 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 337  automatically executing ‹"CREATE STATISTICS __auto__ FROM [4] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:19.033513 16728 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 338  active version is 23.1-6
+I230430 22:26:19.070577 16771 jobs/registry.go:1586 ⋮ [T1,n1] 339  AUTO CREATE STATS job 861218993056743425: stepping through state running
+I230430 22:26:19.170414 16771 jobs/registry.go:1586 ⋮ [T1,n1] 340  AUTO CREATE STATS job 861218993056743425: stepping through state succeeded
+I230430 22:26:19.196770 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 341  automatically executing ‹"CREATE STATISTICS __auto__ FROM [25] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:19.201749 16834 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 342  active version is 23.1-6
+I230430 22:26:19.237360 16841 jobs/registry.go:1586 ⋮ [T1,n1] 343  AUTO CREATE STATS job 861218993607999489: stepping through state running
+I230430 22:26:19.366447 16841 jobs/registry.go:1586 ⋮ [T1,n1] 344  AUTO CREATE STATS job 861218993607999489: stepping through state succeeded
+I230430 22:26:19.392646 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 345  automatically executing ‹"CREATE STATISTICS __auto__ FROM [44] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:19.398963 16942 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 346  active version is 23.1-6
+I230430 22:26:19.434453 16878 jobs/registry.go:1586 ⋮ [T1,n1] 347  AUTO CREATE STATS job 861218994254249985: stepping through state running
+I230430 22:26:19.550741 16878 jobs/registry.go:1586 ⋮ [T1,n1] 348  AUTO CREATE STATS job 861218994254249985: stepping through state succeeded
+I230430 22:26:19.577667 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 349  automatically executing ‹"CREATE STATISTICS __auto__ FROM [34] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:19.582771 16960 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 350  active version is 23.1-6
+I230430 22:26:19.621448 17039 jobs/registry.go:1586 ⋮ [T1,n1] 351  AUTO CREATE STATS job 861218994856591361: stepping through state running
+I230430 22:26:19.713068 17039 jobs/registry.go:1586 ⋮ [T1,n1] 352  AUTO CREATE STATS job 861218994856591361: stepping through state succeeded
+I230430 22:26:19.738708 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 353  automatically executing ‹"CREATE STATISTICS __auto__ FROM [8] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:19.742926 17225 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 354  active version is 23.1-6
+I230430 22:26:19.782570 17175 jobs/registry.go:1586 ⋮ [T1,n1] 355  AUTO CREATE STATS job 861218995381338113: stepping through state running
+I230430 22:26:19.892382 17175 jobs/registry.go:1586 ⋮ [T1,n1] 356  AUTO CREATE STATS job 861218995381338113: stepping through state succeeded
+I230430 22:26:19.916967 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 357  automatically executing ‹"CREATE STATISTICS __auto__ FROM [39] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:19.924250 16765 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 358  active version is 23.1-6
+I230430 22:26:19.960778 16769 jobs/registry.go:1586 ⋮ [T1,n1] 359  AUTO CREATE STATS job 861218995975553025: stepping through state running
+I230430 22:26:20.054903 16769 jobs/registry.go:1586 ⋮ [T1,n1] 360  AUTO CREATE STATS job 861218995975553025: stepping through state succeeded
+I230430 22:26:20.074954 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 361  automatically executing ‹"CREATE STATISTICS __auto__ FROM [57] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:20.080235 17065 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 362  active version is 23.1-6
+I230430 22:26:20.116720 17071 jobs/registry.go:1586 ⋮ [T1,n1] 363  AUTO CREATE STATS job 861218996486668289: stepping through state running
+I230430 22:26:20.189113 17071 jobs/registry.go:1586 ⋮ [T1,n1] 364  AUTO CREATE STATS job 861218996486668289: stepping through state succeeded
+I230430 22:26:20.211846 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 365  automatically executing ‹"CREATE STATISTICS __auto__ FROM [58] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:20.217260 17505 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 366  active version is 23.1-6
+I230430 22:26:20.252880 17525 jobs/registry.go:1586 ⋮ [T1,n1] 367  AUTO CREATE STATS job 861218996935655425: stepping through state running
+I230430 22:26:20.364591 17525 jobs/registry.go:1586 ⋮ [T1,n1] 368  AUTO CREATE STATS job 861218996935655425: stepping through state succeeded
+I230430 22:26:20.386560 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 369  automatically executing ‹"CREATE STATISTICS __auto__ FROM [19] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:20.393456 17634 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 370  active version is 23.1-6
+I230430 22:26:20.430376 17640 jobs/registry.go:1586 ⋮ [T1,n1] 371  AUTO CREATE STATS job 861218997513027585: stepping through state running
+I230430 22:26:20.541868 17640 jobs/registry.go:1586 ⋮ [T1,n1] 372  AUTO CREATE STATS job 861218997513027585: stepping through state succeeded
+I230430 22:26:20.562930 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 373  automatically executing ‹"CREATE STATISTICS __auto__ FROM [53] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:20.567148 17599 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 374  active version is 23.1-6
+I230430 22:26:20.602431 17262 jobs/registry.go:1586 ⋮ [T1,n1] 375  AUTO CREATE STATS job 861218998082174977: stepping through state running
+I230430 22:26:20.711186 17262 jobs/registry.go:1586 ⋮ [T1,n1] 376  AUTO CREATE STATS job 861218998082174977: stepping through state succeeded
+I230430 22:26:20.736164 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 377  automatically executing ‹"CREATE STATISTICS __auto__ FROM [28] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:20.741442 17827 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 378  active version is 23.1-6
+I230430 22:26:20.779672 17292 jobs/registry.go:1586 ⋮ [T1,n1] 379  AUTO CREATE STATS job 861218998653157377: stepping through state running
+I230430 22:26:20.865566 17292 jobs/registry.go:1586 ⋮ [T1,n1] 380  AUTO CREATE STATS job 861218998653157377: stepping through state succeeded
+I230430 22:26:20.887486 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 381  automatically executing ‹"CREATE STATISTICS __auto__ FROM [35] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:20.892546 17880 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 382  active version is 23.1-6
+I230430 22:26:20.933488 17854 jobs/registry.go:1586 ⋮ [T1,n1] 383  AUTO CREATE STATS job 861218999148445697: stepping through state running
+I230430 22:26:21.041482 17854 jobs/registry.go:1586 ⋮ [T1,n1] 384  AUTO CREATE STATS job 861218999148445697: stepping through state succeeded
+I230430 22:26:21.067043 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 385  automatically executing ‹"CREATE STATISTICS __auto__ FROM [3] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:21.072529 17988 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 386  active version is 23.1-6
+I230430 22:26:21.109543 17937 jobs/registry.go:1586 ⋮ [T1,n1] 387  AUTO CREATE STATS job 861218999738171393: stepping through state running
+I230430 22:26:21.191852 17937 jobs/registry.go:1586 ⋮ [T1,n1] 388  AUTO CREATE STATS job 861218999738171393: stepping through state succeeded
+I230430 22:26:21.214695 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 389  automatically executing ‹"CREATE STATISTICS __auto__ FROM [36] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:21.220311 18045 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 390  active version is 23.1-6
+I230430 22:26:21.256525 18100 jobs/registry.go:1586 ⋮ [T1,n1] 391  AUTO CREATE STATS job 861219000222482433: stepping through state running
+I230430 22:26:21.359949 18100 jobs/registry.go:1586 ⋮ [T1,n1] 392  AUTO CREATE STATS job 861219000222482433: stepping through state succeeded
+I230430 22:26:21.382056 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 393  automatically executing ‹"CREATE STATISTICS __auto__ FROM [54] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:21.387350 18187 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 394  active version is 23.1-6
+I230430 22:26:21.423816 18139 jobs/registry.go:1586 ⋮ [T1,n1] 395  AUTO CREATE STATS job 861219000769839105: stepping through state running
+I230430 22:26:21.503363 18139 jobs/registry.go:1586 ⋮ [T1,n1] 396  AUTO CREATE STATS job 861219000769839105: stepping through state succeeded
+I230430 22:26:21.524172 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 397  automatically executing ‹"CREATE STATISTICS __auto__ FROM [52] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:21.529273 18276 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 398  active version is 23.1-6
+I230430 22:26:21.566310 18282 jobs/registry.go:1586 ⋮ [T1,n1] 399  AUTO CREATE STATS job 861219001234882561: stepping through state running
+I230430 22:26:21.676479 18282 jobs/registry.go:1586 ⋮ [T1,n1] 400  AUTO CREATE STATS job 861219001234882561: stepping through state succeeded
+I230430 22:26:21.697998 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 401  automatically executing ‹"CREATE STATISTICS __auto__ FROM [23] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:21.705083 18355 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 402  active version is 23.1-6
+I230430 22:26:21.738800 18317 jobs/registry.go:1586 ⋮ [T1,n1] 403  AUTO CREATE STATS job 861219001810911233: stepping through state running
+I230430 22:26:21.844530 18317 jobs/registry.go:1586 ⋮ [T1,n1] 404  AUTO CREATE STATS job 861219001810911233: stepping through state succeeded
+I230430 22:26:21.865824 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 405  automatically executing ‹"CREATE STATISTICS __auto__ FROM [21] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:21.872220 18396 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 406  active version is 23.1-6
+I230430 22:26:21.908149 18453 jobs/registry.go:1586 ⋮ [T1,n1] 407  AUTO CREATE STATS job 861219002358628353: stepping through state running
+I230430 22:26:21.998559 18453 jobs/registry.go:1586 ⋮ [T1,n1] 408  AUTO CREATE STATS job 861219002358628353: stepping through state succeeded
+I230430 22:26:22.019805 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 409  automatically executing ‹"CREATE STATISTICS __auto__ FROM [12] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:22.025065 18224 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 410  active version is 23.1-6
+I230430 22:26:22.064037 18578 jobs/registry.go:1586 ⋮ [T1,n1] 411  AUTO CREATE STATS job 861219002859487233: stepping through state running
+I230430 22:26:22.170558 18578 jobs/registry.go:1586 ⋮ [T1,n1] 412  AUTO CREATE STATS job 861219002859487233: stepping through state succeeded
+I230430 22:26:22.191085 14839 sql/stats/automatic_stats.go:833 ⋮ [T1,n1] 413  automatically executing ‹"CREATE STATISTICS __auto__ FROM [43] WITH OPTIONS THROTTLING 0.9 AS OF SYSTEM TIME '-30s'"›
+I230430 22:26:22.198120 18605 jobs/registry.go:617 ⋮ [T1,n1,intExec=‹create-stats›] 414  active version is 23.1-6
+I230430 22:26:22.235379 18608 jobs/registry.go:1586 ⋮ [T1,n1] 415  AUTO CREATE STATS job 861219003426504705: stepping through state running
+I230430 22:26:22.437321 18608 jobs/registry.go:1586 ⋮ [T1,n1] 416  AUTO CREATE STATS job 861219003426504705: stepping through state succeeded

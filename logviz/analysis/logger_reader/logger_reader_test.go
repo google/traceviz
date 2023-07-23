@@ -14,6 +14,8 @@
 package loggerreader
 
 import (
+	"bufio"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,13 +27,11 @@ import (
 func TestLogReader(t *testing.T) {
 	for _, test := range []struct {
 		description string
-		log         []string
+		log         string
 		wantEntries []*logtrace.Entry
 	}{{
 		description: "reads simple log",
-		log: []string{
-			"2023/01/02 03:04:05.000006 hello.cc:7: [I] Hello there",
-		},
+		log:         "2023/01/02 03:04:05.000006 hello.cc:7: [I] Hello there",
 		wantEntries: []*logtrace.Entry{
 			logtrace.NewEntry().
 				In(&logtrace.Log{
@@ -52,10 +52,9 @@ func TestLogReader(t *testing.T) {
 		},
 	}, {
 		description: "multiline log",
-		log: []string{
-			"2023/01/02 03:04:05.000006 /foo/bar/hello.cc:7: [I] Hello there",
-			"I'm glad you're here!",
-		},
+		log: `
+2023/01/02 03:04:05.000006 /foo/bar/hello.cc:7: [I] Hello there
+I'm glad you're here!`,
 		wantEntries: []*logtrace.Entry{
 			logtrace.NewEntry().
 				In(&logtrace.Log{
@@ -76,14 +75,10 @@ func TestLogReader(t *testing.T) {
 		},
 	}} {
 		t.Run(test.description, func(t *testing.T) {
-			logCh := make(chan string)
-			go func() {
-				for _, line := range test.log {
-					logCh <- line
-				}
-				close(logCh)
-			}()
-			reader := New("test", DefaultLineParser(), logCh)
+			// Ignore empty lines; they're useful for writing the test cases
+			// comfortably.
+			log := strings.TrimSpace(test.log)
+			reader := New("test", ReaderCloser{Reader: bufio.NewReader(strings.NewReader(log))}, NewSimpleLogParser())
 			entryCh, err := reader.Entries(logtrace.NewAssetCache())
 			if err != nil {
 				t.Fatalf("Failed to fetch entries: %s", err)

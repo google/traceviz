@@ -14,6 +14,7 @@
 package datasource
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"strings"
@@ -50,14 +51,7 @@ const (
 )
 
 func testLogReader(collectionName, log string) *loggerreader.TextLogReader {
-	logCh := make(chan string)
-	go func() {
-		for _, line := range strings.Split(log, "\n") {
-			logCh <- line
-		}
-		close(logCh)
-	}()
-	return loggerreader.New(collectionName, loggerreader.DefaultLineParser(), logCh)
+	return loggerreader.New(collectionName, loggerreader.ReaderCloser{Reader: bufio.NewReader(strings.NewReader(log))}, loggerreader.NewSimpleLogParser())
 }
 
 type testLogTraceFetcher struct{}
