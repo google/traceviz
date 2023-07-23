@@ -6,8 +6,8 @@
     "reset": "npm install rimraf && rimraf dist && rimraf package-lock.json && rimraf node_modules && npm run clean",
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build core && ng build hovercard && ng build data-table && ng build text-field && ng build update-values && ng build weighted-tree",
-    "cb": "npm run clean && npm install && ng b",
+    "build": "ng build core && ng build hovercard && ng build data-table && ng build line-chart && ng build text-field && ng build update-values && ng build weighted-tree",
+    "cb": "npm run clean && npm install && npm run build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

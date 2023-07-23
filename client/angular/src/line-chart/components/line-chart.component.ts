@@ -33,11 +33,10 @@
 
 import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, OnDestroy, ViewChild} from '@angular/core';
 import * as d3 from 'd3';
-import {axisValue, Coloring, ContinuousXAxis, ContinuousYAxis, DataSeriesQuery, Interactions, Timestamp, DoubleValue, TimestampValue, Value, ValueMap, scaleFromAxis, xAxisRenderSettings, yAxisRenderSettings, oint, Series, XYChart as XYChartData} from 'traceviz-client-core';
-import {AppCoreService, DataSeriesDirective, InteractionsDirective} from 'traceviz-angular-core';
-import {ConfigurationError, Severity} from 'google3/third_party/traceviz/client/core/src/errors/errors';
 import {Subject} from 'rxjs';
 import {debounceTime, takeUntil} from 'rxjs/operators';
+import {AppCoreService, DataSeriesDirective, InteractionsDirective} from 'traceviz-angular-core';
+import {axisValue, Coloring, ConfigurationError, ContinuousXAxis, ContinuousYAxis, DataSeriesQuery, DoubleValue, Interactions, Point, scaleFromAxis, Series, Severity, Timestamp, TimestampValue, Value, ValueMap, xAxisRenderSettings, XYChart as XYChartData, yAxisRenderSettings} from 'traceviz-client-core';
 
 const SOURCE = 'line_chart';
 
