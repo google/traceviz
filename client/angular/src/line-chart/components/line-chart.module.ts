@@ -17,7 +17,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {BrowserModule} from '@angular/platform-browser';
 import {CoreModule} from 'traceviz-angular-core';
 
-import {LineChart} from './line_chart';
+import {LineChart} from './line-chart.component';
 
 @NgModule({
   declarations: [

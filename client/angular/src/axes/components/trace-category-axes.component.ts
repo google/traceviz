@@ -17,8 +17,8 @@
 
 import {AfterContentInit, Component, ContentChild, ElementRef, forwardRef, Input, ViewChild} from '@angular/core';
 import * as d3 from 'd3';
-import {AppCoreService, InteractionsDirective} from 'traceviz-client-core';
-import {getLabel, Coloring, RenderedTraceCategory, RenderedTraceCategoryHierarchy} from 'traceviz-client-core';
+import {AppCoreService, InteractionsDirective} from 'traceviz-angular-core';
+import {Coloring, getLabel, RenderedTraceCategory, RenderedTraceCategoryHierarchy} from 'traceviz-client-core';
 
 enum Keys {
   DETAIL_FORMAT = 'detail_format',
@@ -128,18 +128,30 @@ export class RectangularTraceCategoryHierarchyYAxis extends
             .attr('width', (rc: RenderedTraceCategory) => rc.width)
             .attr('height', (rc: RenderedTraceCategory) => rc.height)
             .on('mouseover',
-                (rc: RenderedTraceCategory, i: number,
-                 n: ArrayLike<SVGSVGElement>) => {
+                (event: any, rc: RenderedTraceCategory) => {
+                  // (rc: RenderedTraceCategory, i: number,
+                  //  n: ArrayLike<SVGSVGElement>) => {
+                  const n = nodes.nodes();
+                  const i = n.indexOf(event.target);
                   d3.select(n[i]).select('rect').attr('stroke', 'lime');
                   this.handleCategoryMouseover(rc);
                 })
             .on('mouseout',
-                (rc: RenderedTraceCategory, i: number,
-                 n: ArrayLike<SVGSVGElement>) => {
-                  rc = rc;
+                (event: any, rc: RenderedTraceCategory) => {
+                  // (rc: RenderedTraceCategory, i: number,
+                  //  n: ArrayLike<SVGSVGElement>) => {
+                  const n = nodes.nodes();
+                  const i = n.indexOf(event.target);
                   d3.select(n[i]).select('rect').attr('stroke', 'none');
                   this.handleCategoryMouseout(rc);
                 })
+            // pre-d3 v6 version:
+            // (rc: RenderedTraceCategory, i: number,
+            //      n: ArrayLike<SVGSVGElement>) => {
+            //       rc = rc;
+            //       d3.select(n[i]).select('rect').attr('stroke', 'none');
+            //       this.handleCategoryMouseout(rc);
+            //     })
             .on('click', (rc: RenderedTraceCategory) => {
               try {
                 this.interactions?.get().update(

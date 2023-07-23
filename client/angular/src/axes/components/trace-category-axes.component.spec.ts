@@ -11,48 +11,54 @@
         limitations under the License.
 */
 
-import 'jasmine';
-
-import {int, valueMap, rpcNode, Trace, renderCategoryHierarchyForHorizontalSpans} from 'google3/third_party/traceviz/client/core/src/value/test_value';
-import {HttpClientModule} from '@angular/common/http';
-import {BrowserModule} from '@angular/platform-browser';
-import {CoreModule} from 'traceviz-angular-core';
+import {int, valueMap, rpcNode, Trace, renderCategoryHierarchyForHorizontalSpans} from 'traceviz-client-core';
 import {AxesModule} from './axes.module';
-import {RectangularTraceCategoryHierarchyYAxis} from './trace_category_axes';
+import {RectangularTraceCategoryHierarchyYAxis} from './trace-category-axes.component';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Component, ViewChild} from '@angular/core';
+
+const traceData = rpcNode.with(valueMap(
+    {key: 'span_width_cat_px', val: int(10)},
+    {key: 'span_padding_cat_px', val: int(1)},
+    {key: 'category_header_cat_px', val: int(0)},
+    {key: 'category_handle_temp_px', val: int(0)},
+    {key: 'category_padding_cat_px', val: int(2)},
+    {key: 'category_margin_temp_px', val: int(5)},
+    {key: 'category_min_width_cat_px', val: int(20)},
+    {key: 'category_base_width_temp_px', val: int(100)},
+    ));
+
+@Component({
+  template: `
+  <rectangular-trace-category-hierarchy-y-axis>
+  </rectangular-trace-category-hierarchy-y-axis>`
+})
+class TraceAxesTestComponent {
+  @ViewChild(RectangularTraceCategoryHierarchyYAxis)
+  traceCatYAxis!: RectangularTraceCategoryHierarchyYAxis;
+}
 
 describe('x axis test', () => {
-  beforeEach(() => {
-    setupModule({
-      imports: [
-        AxesModule,
-        BrowserModule,
-        HttpClientModule,
-        CoreModule,
-      ],
+  let fixture: ComponentFixture<TraceAxesTestComponent>;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      declarations: [TraceAxesTestComponent],
+      imports: [AxesModule],
     });
+    fixture = TestBed.createComponent(TraceAxesTestComponent);
   });
 
   it('shows rectangular trace category y-axis', () => {
-    bootstrapTemplate<RectangularTraceCategoryHierarchyYAxis>(`
-      <rectangular-trace-category-hierarchy-y-axis>
-      </rectangular-trace-category-hierarchy-y-axis>`);
+    fixture.detectChanges();
+    const tac = fixture.componentInstance;
     const trace = Trace.union(
-        Trace.fromNode(rpcNode.with(valueMap(
-            {key: 'span_width_cat_px', val: int(10)},
-            {key: 'span_padding_cat_px', val: int(1)},
-            {key: 'category_header_cat_px', val: int(0)},
-            {key: 'category_handle_temp_px', val: int(0)},
-            {key: 'category_padding_cat_px', val: int(2)},
-            {key: 'category_margin_temp_px', val: int(5)},
-            {key: 'category_min_width_cat_px', val: int(20)},
-            {key: 'category_base_width_temp_px', val: int(100)},
-            ))),
+        Trace.fromNode(traceData),
     );
-    const yac = getDebugEl('rectangular-trace-category-hierarchy-y-axis')
-                    .componentInstance;
+    const yac = tac.traceCatYAxis;
     const rcs = renderCategoryHierarchyForHorizontalSpans(trace);
     yac.render(rcs);
-    flush();
+
     const rects: SVGRectElement[] =
         Array.from(yac.svg.nativeElement.querySelectorAll('svg'));
     const rectDimensions = rects.map(rect => {

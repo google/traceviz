@@ -3,6 +3,39 @@
   "version": 1,
   "newProjectRoot": "src",
   "projects": {
+    "axes": {
+      "projectType": "library",
+      "root": "src/axes",
+      "sourceRoot": "src/axes",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "src/axes/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "src/axes/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "src/axes/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "src/axes/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
     "core": {
       "projectType": "library",
       "root": "src/core",

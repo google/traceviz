@@ -57,23 +57,29 @@ export class ContinuousAxisRenderSettings {
 
 /**
  * Returns the x-axis ContinuousAxisRenderSettings defined in the provided
- * properties.   
+ * properties.
  */
-export function xAxisRenderSettings(properties: ValueMap): ContinuousAxisRenderSettings {
+export function xAxisRenderSettings(properties: ValueMap):
+    ContinuousAxisRenderSettings {
   const ret = new ContinuousAxisRenderSettings();
-  ret.axisMarkersDepthPx = properties.expectNumber(Keys.X_AXIS_RENDER_MARKERS_HEIGHT_PX);
-  ret.axisLabelDepthPx = properties.expectNumber(Keys.X_AXIS_RENDER_LABEL_HEIGHT_PX);
+  ret.axisMarkersDepthPx =
+      properties.expectNumber(Keys.X_AXIS_RENDER_MARKERS_HEIGHT_PX);
+  ret.axisLabelDepthPx =
+      properties.expectNumber(Keys.X_AXIS_RENDER_LABEL_HEIGHT_PX);
   return ret;
 }
 
 /**
  * Returns the y-axis ContinuousAxisRenderSettings defined in the provided
- * properties.   
+ * properties.
  */
-export function yAxisRenderSettings(properties: ValueMap): ContinuousAxisRenderSettings {
+export function yAxisRenderSettings(properties: ValueMap):
+    ContinuousAxisRenderSettings {
   const ret = new ContinuousAxisRenderSettings();
-  ret.axisMarkersDepthPx = properties.expectNumber(Keys.Y_AXIS_RENDER_MARKERS_WIDTH_PX);
-  ret.axisLabelDepthPx = properties.expectNumber(Keys.Y_AXIS_RENDER_LABEL_WIDTH_PX);
+  ret.axisMarkersDepthPx =
+      properties.expectNumber(Keys.Y_AXIS_RENDER_MARKERS_WIDTH_PX);
+  ret.axisLabelDepthPx =
+      properties.expectNumber(Keys.Y_AXIS_RENDER_LABEL_WIDTH_PX);
   return ret;
 }
 /**
@@ -144,7 +150,7 @@ export abstract class ContinuousYAxis {
 })
 export class StandardContinuousYAxis extends ContinuousYAxis {
   @ViewChild('svg', {static: true}) svg!: ElementRef;
-   override render(
+  override render(
       axis: TimestampAxis|DurationAxis|NumberAxis, heightPx: number,
       renderSettings: ContinuousAxisRenderSettings) {
     const yAxisArea = d3.select(this.svg.nativeElement);

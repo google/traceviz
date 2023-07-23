@@ -11,18 +11,13 @@
         limitations under the License.
 */
 
-import 'jasmine';
-
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {AppCoreService, CoreModule, TestCoreModule} from 'traceviz-angular-core';
-import {GLOBAL_TEST_DATA_FETCHER, node, Timestamp, dbl, int, str, strs, ts, valueMap, ResponseNode, StringValue, TimestampValue} from 'google3/third_party/traceviz/client/core/src/protocol/test_response';
-import {LineChart} from './line-chart.directive';
+import {GLOBAL_TEST_DATA_FETCHER, node, Timestamp, dbl, int, str, strs, ts, valueMap, ResponseNode, StringValue, TimestampValue} from 'traceviz-client-core';
+import {LineChart} from './line-chart.component';
 import {LineChartModule} from './line-chart.module';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {initAngularTestEnvironment} from 'google3/javascript/angular2/testing/init';
-
-initAngularTestEnvironment();
 
 function sec(sec: number): Timestamp {
   return new Timestamp(sec, 0);
@@ -142,7 +137,7 @@ const xyChartData = node(
         <watch type="update_x_axis_marker">
           <value-map>
             <value key="x_axis_marker_position">
-              <global-ref key="x_axis_marker"></global-ref>              
+              <global-ref key="x_axis_marker"></global-ref>
             </value>
           </value-map>
         </watch>
@@ -167,9 +162,7 @@ describe('line chart test', () => {
         .configureTestingModule({
           declarations: [LineChartTestComponent],
           imports: [
-            CoreModule,
-            LineChartModule,
-             NoopAnimationsModule
+            CoreModule, TestCoreModule, LineChartModule, NoopAnimationsModule
           ],
           providers: [{provide: AppCoreService, useValue: appCoreService}]
         })
@@ -189,7 +182,8 @@ describe('line chart test', () => {
     GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
       series: new Map<string, ResponseNode>([
         [
-          lc.lineChart.dataSeries!.dataSeriesQuery.uniqueSeriesName, xyChartData
+          lc.lineChart.dataSeries!.dataSeriesQuery!.uniqueSeriesName,
+          xyChartData
         ],
       ]),
     });
