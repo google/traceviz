@@ -91,12 +91,12 @@ func New(assetRoot, collectionRoot string, cap int) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	ds, err := datasource.New(cf)
+	ds, err := datasource.New(10, cf)
 	if err != nil {
 		return nil, err
 	}
 	qd, err := querydispatcher.New(ds)
-	if err != nil {
+	if err != nil { 
 		return nil, err
 	}
 	assetHandler := handlers.NewAssetHandler()

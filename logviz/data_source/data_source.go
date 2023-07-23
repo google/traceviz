@@ -18,18 +18,18 @@ import (
 	"context"
 	"fmt"
 	"hash/fnv"
-	"log"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
 
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
-	"github.com/google/traceviz/logviz/logger"
 	"github.com/google/traceviz/server/go/category"
 	"github.com/google/traceviz/server/go/color"
 	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
 	"github.com/google/traceviz/server/go/table"
 	"github.com/google/traceviz/server/go/util"
+	"github.com/hashicorp/golang-lru/simplelru"
 	xychart "github.com/google/traceviz/server/go/xy_chart"
 )
 
@@ -45,6 +45,8 @@ const (
 	filteredSourceFilesKey = "filtered_source_files"
 	levelNameKey           = "level_name"
 	messageKey             = "message"
+	processNameKey         = "process_name"
+	searchRegexKey         = "search_regex"
 	sourceFileKey          = "source_file"
 	sourceLocCountKey      = "source_loc_count"
 	sourceLocNameKey       = "source_loc_name"
@@ -159,14 +161,21 @@ func NewCollection(lt *logtrace.LogTrace) *Collection {
 // DataSource implements querydispatcher.dataSource for logs data.  It caches
 // the most recently used logs.
 type DataSource struct {
+	// An LRU cache holding the most recently-accessed logs.
+	lru *simplelru.LRU
 	// A log fetcher used to fetch uncached logs.
 	fetcher LogTraceFetcher
 }
 
 // New returns a new DataSource with the specified cache capacity, and using
 // the provided log fetcher.
-func New(fetcher LogTraceFetcher) (*DataSource, error) {
+func New(cap int, fetcher LogTraceFetcher) (*DataSource, error) {
+	lru, err := simplelru.NewLRU(cap /*no onEvict policy*/, nil)
+	if err != nil {
+		return nil, err
+	}
 	return &DataSource{
+		lru:     lru,
 		fetcher: fetcher,
 	}, nil
 }
@@ -185,10 +194,19 @@ func (ds *DataSource) SupportedDataSeriesQueries() []string {
 // present there.  If it isn't already in the LRU, it is fetched and added to
 // the LRU before being returned.
 func (ds *DataSource) fetchCollection(ctx context.Context, collectionName string) (*Collection, error) {
+	collIf, ok := ds.lru.Get(collectionName)
+	if ok {
+		coll, ok := collIf.(*Collection)
+		if !ok {
+			return nil, fmt.Errorf("fetched collection didn't contain a LogTrace")
+		}
+		return coll, nil
+	}
 	coll, err := ds.fetcher.Fetch(ctx, collectionName)
 	if err != nil {
 		return nil, err
 	}
+	ds.lru.Add(collectionName, coll)
 	return coll, nil
 }
 
@@ -217,10 +235,8 @@ func (ds *DataSource) HandleDataSeriesRequests(ctx context.Context, globalFilter
 	// Fetch the collection, from the cache if it's there.
 	coll, err := ds.fetchCollection(ctx, collectionName)
 	if err != nil {
-		log.Printf(logger.Error("Failed to fetch collection: %s", err))
 		return err
 	}
-	log.Printf(logger.Info("Loaded collection %s", collectionName))
 	// Build the queryFilters, just once, for all DataSeriesRequests.
 	qf, err := filterFromGlobalFilters(coll.lt, globalFilters)
 	if err != nil {
@@ -299,7 +315,8 @@ func (sfd *sourceFileData) row(levels []*levelInfo) []table.CellUpdate {
 }
 
 var (
-	highlightColor = "rgb(127, 127, 127)"
+	highlightColor = "rgb(127, 127, 255)"
+
 	renderSettings = &table.RenderSettings{
 		RowHeightPx: 20,
 		FontSizePx:  14,
@@ -307,10 +324,19 @@ var (
 )
 
 func handleSourceFileTableQuery(coll *Collection, qf *queryFilters, tableDb util.DataBuilder, reqOpts map[string]*util.V) error {
-	for key := range reqOpts {
-		switch key {
-		default:
-			return fmt.Errorf("unsupported option '%s'", key)
+	var err error
+	searchRegexStr := ""
+	if searchRegexVal, ok := reqOpts[searchRegexKey]; ok {
+		searchRegexStr, err = util.ExpectStringValue(searchRegexVal)
+		if err != nil {
+			return err
+		}
+	}
+	var searchRegex *regexp.Regexp
+	if searchRegexStr != "" {
+		searchRegex, err = regexp.Compile(searchRegexStr)
+		if err != nil {
+			return err
 		}
 	}
 	cols := []*table.ColumnUpdate{
@@ -361,6 +387,11 @@ func handleSourceFileTableQuery(coll *Collection, qf *queryFilters, tableDb util
 	}
 	// For each entry, update its corresponding *sourceFileData.
 	if err := coll.lt.ForEachEntry(func(entry *logtrace.Entry) error {
+		if searchRegex != nil {
+			if !searchRegex.MatchString(entry.SourceLocation.SourceFile.DisplayName()) {
+				return nil
+			}
+		}
 		data := getSourceFileData(entry.SourceLocation.SourceFile)
 		data.lines[entry.SourceLocation.Line] = struct{}{}
 		data.entries = data.entries + 1
@@ -388,18 +419,19 @@ var (
 	eventCol = table.Column(category.New(eventFormatKey, "Raw Event", "Raw events, in temporal order"))
 )
 
-var eventFormatStr = fmt.Sprintf("[$(%s)] $(%s) ($(%s)): $(%s)",
+var eventFormatStr = fmt.Sprintf("[$(%s)] $(%s) ($(%s)) [$(%s)]: $(%s)",
 	levelNameKey,
 	timestampKey,
 	sourceLocNameKey,
+	processNameKey,
 	messageKey,
 )
 
 var (
-	fatalColorSpace   = "fatal"
-	errorColorSpace   = "error"
-	warningColorSpace = "warning"
-	infoColorSpace    = "info"
+	fatalColorSpace   = "fatal_color"
+	errorColorSpace   = "error_color"
+	warningColorSpace = "warning_color"
+	infoColorSpace    = "info_color"
 )
 
 var colorSpacesByLevelWeight = map[int]*color.Space{
@@ -410,10 +442,19 @@ var colorSpacesByLevelWeight = map[int]*color.Space{
 }
 
 func handleRawEntriesQuery(coll *Collection, qf *queryFilters, tableDb util.DataBuilder, reqOpts map[string]*util.V) error {
-	for key := range reqOpts {
-		switch key {
-		default:
-			return fmt.Errorf("unsupported option '%s'", key)
+	var err error
+	searchRegexStr := ""
+	if searchRegexVal, ok := reqOpts[searchRegexKey]; ok {
+		searchRegexStr, err = util.ExpectStringValue(searchRegexVal)
+		if err != nil {
+			return err
+		}
+	}
+	var searchRegex *regexp.Regexp
+	if searchRegexStr != "" {
+		searchRegex, err = regexp.Compile(searchRegexStr)
+		if err != nil {
+			return err
 		}
 	}
 	t := table.New(tableDb, renderSettings, eventCol)
@@ -422,6 +463,11 @@ func handleRawEntriesQuery(coll *Collection, qf *queryFilters, tableDb util.Data
 	}
 	// Aggregate across all filtered-in log entries.
 	if err := coll.lt.ForEachEntry(func(entry *logtrace.Entry) error {
+		if searchRegex != nil {
+			if !searchRegex.MatchString(strings.Join(entry.Message, "\n")) {
+				return nil
+			}
+		}
 		coloring := colorSpacesByLevelWeight[entry.Level.Weight]
 		var primaryColor util.PropertyUpdate
 		if coloring != nil {
