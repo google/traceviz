@@ -1,22 +1,29 @@
 .table-cell {
-    overflow: hidden;
-    user-select: none;
+  overflow: hidden;
+  user-select: none;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%
 }
 
 .content {
-    flex: 1;
-    white-space: nowrap;
+  flex: 1;
+  white-space: nowrap;
 }
 
 .table {
-    width: 100%;
+  width: 100%;
 }
 
 .header-cell {
-    font-size: 75%;
-    text-align: left;
+  font-size: 75%;
+  text-align: left;
 }
 
 .paginator-holder {
-    flex-basis: 56px;
+  flex-basis: 56px;
 }

@@ -1,48 +1,59 @@
 /* The app consumes the entire viewport, and flows its content downwards. */
 .app {
-    display: flex;
-    flex-direction: column;
-    height: 90vh;
-  }
-  
-  /* A 'band' is a ribbon the width of the app. */
-  .band {
-    margin: 1px;
-    overflow-y: scroll;
-  }
-  
-  /* A 'cardrow' is a thick ribbon the width of the app, which flows its content
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* A 'band' is a ribbon the width of the app.
+.band {
+  overflow-y: scroll;
+} */
+
+/* A 'cardrow' is a thick ribbon the width of the app, which flows its content
    * horizontally.
    */
-  .cardrow {
-    flex: 1 1 0;
-    display: flex;
-    flex-direction: row;
-  }
-  
-  /* A 'card' is a horizontal segment of a 'cardband' the height of that band,
+.cardrow {
+  overflow-y: none;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: row;
+}
+
+/* A 'cardrow' is a thick ribbon the width of the app, which flows its content
+   * horizontally.
+   */
+.double-cardrow {
+  overflow-y: none;
+  flex: 2 1 0;
+  display: flex;
+  flex-direction: row;
+}
+
+/* A 'card' is a horizontal segment of a 'cardband' the height of that band,
    * which flows its content downwards.
    */
-  .card {
-    overflow-x: scroll;
-    flex: 1 1 0; /* Each card gets an equal share of the width. */
-    margin: 1px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-  
-  .vertical-fill {
-    padding: 16px 16px 0;
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
-  }
-  
-  .regex-filter {
-    align-self: flex-end;
-  }
-  
-  * {
-    font-family: Roboto, sans-serif !important;
-  }
+.card {
+  overflow-x: scroll;
+  flex: 1 1 0;
+  /* Each card gets an equal share of the width. */
+  /* margin: 1px; */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.vertical-fill {
+  /* padding: 16px 16px 0; */
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+.regex-filter {
+  align-self: flex-end;
+}
+
+* {
+  font-family: Roboto, sans-serif !important;
+}

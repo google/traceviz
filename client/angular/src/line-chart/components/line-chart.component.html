@@ -1,8 +1,8 @@
-<div #loadingDiv>
-  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-</div>
-<ng-content select="help"></ng-content>
-<div class="content">
+<div class="container">
+  <div #loadingDiv>
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+  <ng-content select="help"></ng-content>
   <div class="content" #componentDiv (window:resize)="resize()">
     <div class="chart-grid">
       <div #yAxis class="chart-grid-item">

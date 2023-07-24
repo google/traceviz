@@ -57,7 +57,7 @@
     </data-query>
   </app-core>
 
-  <div class="cardrow">
+  <div class="double-cardrow">
     <!--
       A table showing summaries per source file. Selects source files on
       mouseover, and filters them on click (multiselect with shift-click)
@@ -153,7 +153,7 @@
         </data-series>
 
         <!-- Include a material paginator. -->
-        <mat-paginator pageSize="25" showFirstLastButtons></mat-paginator>
+        <mat-paginator showFirstLastButtons></mat-paginator>
       </data-table>
     </mat-card>
 
@@ -232,76 +232,78 @@
         </data-series>
 
         <!-- Include a material paginator. -->
-        <mat-paginator pageSize="25" showFirstLastButtons></mat-paginator>
+        <mat-paginator showFirstLastButtons></mat-paginator>
       </data-table>
     </mat-card>
   </div>
 
-  <mat-card class="band">
-    <mat-card-title>Log messages over time</mat-card-title>
-    <line-chart>
-      <interactions>
-        <!-- Brushing the chart area zooms in. -->
-        <action target="chart" type="brush">
-          <set>
-            <global-ref key="filtered_timerange_start"></global-ref>
-            <local-ref key="zoom_start"></local-ref>
-          </set>
-          <set>
-            <global-ref key="filtered_timerange_end"></global-ref>
-            <local-ref key="zoom_end"></local-ref>
-          </set>
-        </action>
-
-        <!-- A change to the called out timestamp updates the x-axis marker. -->
-        <watch type="update_x_axis_marker">
-          <value-map>
-            <value key="x_axis_marker_position">
-              <global-ref key="called_out_timestamp"></global-ref>
-            </value>
-          </value-map>
-        </watch>
-      </interactions>
-
-      <data-series>
-        <query>
-          <string>logs.timeseries</string>
-        </query>
+  <div class="cardrow">
+    <mat-card class="card">
+      <mat-card-title>Log messages over time</mat-card-title>
+      <line-chart class="vertical-fill">
         <interactions>
-          <reaction target="data-series" type="fetch">
-            <and>
-              <not>
-                <equals>
-                  <global-ref key="collection_name"></global-ref>
-                  <string></string>
-                </equals>
-              </not>
-              <or>
-                <changed><global-ref key="collection_name"></global-ref></changed>
-                <changed><global-ref key="filtered_source_files"></global-ref></changed>
-                <changed><global-ref key="filtered_timerange_start"></global-ref></changed>
-                <changed><global-ref key="filtered_timerange_end"></global-ref></changed>
-              </or>
-            </and>
-          </reaction>
+          <!-- Brushing the chart area zooms in. -->
+          <action target="chart" type="brush">
+            <set>
+              <global-ref key="filtered_timerange_start"></global-ref>
+              <local-ref key="zoom_start"></local-ref>
+            </set>
+            <set>
+              <global-ref key="filtered_timerange_end"></global-ref>
+              <local-ref key="zoom_end"></local-ref>
+            </set>
+          </action>
+
+          <!-- A change to the called out timestamp updates the x-axis marker. -->
+          <watch type="update_x_axis_marker">
+            <value-map>
+              <value key="x_axis_marker_position">
+                <global-ref key="called_out_timestamp"></global-ref>
+              </value>
+            </value-map>
+          </watch>
         </interactions>
-        <parameters>
-          <value-map>
-            <value key="aggregate_by">
-              <string>level_name</string>
-            </value>
-            <value key="bin_count">
-              <int>1000</int>
-            </value>
-          </value-map>
-        </parameters>
-      </data-series>
 
-      <standard-continuous-x-axis id="chartBottom"></standard-continuous-x-axis>
-      <standard-continuous-y-axis id="chartLeft"></standard-continuous-y-axis>
+        <data-series>
+          <query>
+            <string>logs.timeseries</string>
+          </query>
+          <interactions>
+            <reaction target="data-series" type="fetch">
+              <and>
+                <not>
+                  <equals>
+                    <global-ref key="collection_name"></global-ref>
+                    <string></string>
+                  </equals>
+                </not>
+                <or>
+                  <changed><global-ref key="collection_name"></global-ref></changed>
+                  <changed><global-ref key="filtered_source_files"></global-ref></changed>
+                  <changed><global-ref key="filtered_timerange_start"></global-ref></changed>
+                  <changed><global-ref key="filtered_timerange_end"></global-ref></changed>
+                </or>
+              </and>
+            </reaction>
+          </interactions>
+          <parameters>
+            <value-map>
+              <value key="aggregate_by">
+                <string>level_name</string>
+              </value>
+              <value key="bin_count">
+                <int>1000</int>
+              </value>
+            </value-map>
+          </parameters>
+        </data-series>
 
-    </line-chart>
-  </mat-card>
+        <standard-continuous-x-axis id="chartBottom"></standard-continuous-x-axis>
+        <standard-continuous-y-axis id="chartLeft"></standard-continuous-y-axis>
+
+      </line-chart>
+    </mat-card>
+  </div>
 
   <!--   <mat-card class="band">
     <mat-card-title>Global State Monitor</mat-card-title>
