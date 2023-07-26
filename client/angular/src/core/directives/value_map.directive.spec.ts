@@ -19,7 +19,7 @@ import {AppCoreService} from '../services/app_core.service';
 
 import {AppCoreDirective} from './app_core.directive';
 import {CoreModule} from './core.module';
-import {TestCoreModule} from './test_core.module';
+import {TestCoreModule} from '../test_directives/test_core.module';
 import {ValueMapDirective} from './value_map.directive';
 
 @Component({
@@ -63,12 +63,11 @@ describe('value map directive test', () => {
         provide: AppCoreService,
         useValue: appCoreService,
       }]
-    })
+    });
     fixture = TestBed.createComponent(ValueMapTestComponent);
   });
 
   it('handles value map', () => {
-    fixture.detectChanges();
     fixture.detectChanges();
     const tc = fixture.componentInstance;
     const localVm = valueMap(

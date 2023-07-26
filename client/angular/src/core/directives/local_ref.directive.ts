@@ -16,9 +16,7 @@
  */
 
 import { Directive, forwardRef, Input } from '@angular/core';
-import { ConfigurationError, Severity } from 'traceviz-client-core';
-import { Value } from 'traceviz-client-core';
-import { ValueMap } from 'traceviz-client-core';
+import { ConfigurationError, Severity, Value, ValueMap } from 'traceviz-client-core';
 import { ValueDirective } from './value.directive';
 
 const SOURCE = 'local_ref.directive';
@@ -27,18 +25,18 @@ const SOURCE = 'local_ref.directive';
 @Directive({
   selector: 'local-ref',
   providers: [
-    { provide: ValueDirective, useExisting: forwardRef(() => LocalRefDirective) }
+    {provide: ValueDirective, useExisting: forwardRef(() => LocalRefDirective)}
   ],
 })
 export class LocalRefDirective extends ValueDirective {
-  @Input() key: string = '';
+  @Input() key = '';
 
-  get(localState: ValueMap | undefined): Value | undefined {
+  get(localState: ValueMap|undefined): Value|undefined {
     if (localState == null) {
       throw new ConfigurationError(
-        `Can't look up local reference with no local ValueMap`)
-        .at(Severity.FATAL)
-        .from(SOURCE);
+          `Can't look up local reference with no local ValueMap`)
+          .at(Severity.FATAL)
+          .from(SOURCE);
     }
     if (!localState.has(this.key)) {
       return undefined;

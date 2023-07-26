@@ -20,7 +20,7 @@ import {AppCoreService} from '../services/app_core.service';
 import {AppCoreDirective} from './app_core.directive';
 import {CoreModule} from './core.module';
 import {GlobalRefDirective} from './global_ref.directive';
-import {TestCoreModule} from './test_core.module';
+import {TestCoreModule} from '../test_directives/test_core.module';
 
 @Component({
   template: `

@@ -33,13 +33,12 @@ class LocalTestComponent {
 
 describe('local value directives test', () => {
   let fixture: ComponentFixture<LocalTestComponent>;
-  const appCoreService = new AppCoreService();
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [LocalTestComponent],
       imports: [CoreModule],
-    })
+    });
     fixture = TestBed.createComponent(LocalTestComponent);
   });
 

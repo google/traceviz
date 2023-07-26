@@ -16,15 +16,11 @@
  * in TraceViz templates.
  */
 
-
 import { AfterContentInit, ContentChildren, Directive, ElementRef, forwardRef, QueryList } from '@angular/core';
 import { Duration, DurationValue } from 'traceviz-client-core';
-import { Timestamp } from 'traceviz-client-core';
+import { Timestamp, ValueMap } from 'traceviz-client-core';
 import { DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value } from 'traceviz-client-core';
-import { ValueMap } from 'traceviz-client-core';
 import { ValueDirective } from './value.directive';
-
-const SOURCE = 'value.directives';
 
 /** An EmptyValue literal in a TraceViz template. */
 @Directive({
@@ -58,7 +54,7 @@ export class EmptyLiteralDirective extends ValueDirective {
 })
 export class StringLiteralDirective extends ValueDirective implements
   AfterContentInit {
-  val: string = '';
+  val = '';
 
   constructor(readonly elementRef?: ElementRef) {
     super();

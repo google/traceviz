@@ -16,13 +16,13 @@ import { NgModule } from '@angular/core';
 import { TestDataQueryDirective } from './test_data_query.directive';
 
 @NgModule({
-    declarations: [
-        TestDataQueryDirective,
-    ],
-    imports: [],
-    exports: [
-        TestDataQueryDirective,
-    ],
+  declarations: [
+    TestDataQueryDirective,
+  ],
+  imports: [],
+  exports: [
+    TestDataQueryDirective,
+  ],
 })
 export class TestCoreModule {
 }

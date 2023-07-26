@@ -19,18 +19,13 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable, OperatorFunction, throwError} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
-import {ConfigurationError, DataFetcherInterface, fromObject, Request, Response, ResponseNode, Severity, toObject} from 'traceviz-client-core';
+import {ConfigurationError, DataFetcherInterface, fromObject, Request, Response, toObject} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 
-const SOURCE = 'http_data_fetcher';
-
-const emptyResponse: Response = {
-  series: new Map<string, ResponseNode>([])
-};
-
 /**
- * Returns an rxjs operator mapping json responses to Response.
+ * Returns an rxjs operator that maps json-encoded Data protos to
+ * ProtoResponses.
  */
 function mapToResponse(): OperatorFunction<string, Response> {
   return (source: Observable<string>) => source.pipe(map((value) => {
@@ -43,7 +38,7 @@ const DATA_QUERY_NAME = '/GetData';
 const DATA_REQUEST_PARAM_NAME = 'req';
 
 /**
- * A data fetcher implementation that fetches data via HTTP requests.
+ * HttpDataFetcher is a DataFetcher that fetches data via HTTP requests.
  */
 @Injectable({providedIn: 'root'})
 export class HttpDataFetcher implements DataFetcherInterface {
@@ -52,18 +47,19 @@ export class HttpDataFetcher implements DataFetcherInterface {
       private readonly appCoreService: AppCoreService) {}
 
   fetch(req: Request): Observable<Response> {
-    const reqStr: string = JSON.stringify(toObject(req));
+    const reqstr: string = JSON.stringify(toObject(req));
     return this.http
         .get<string>(DATA_QUERY_NAME, {
-          params: new HttpParams().set(DATA_REQUEST_PARAM_NAME, reqStr),
+          params: new HttpParams().set(DATA_REQUEST_PARAM_NAME, reqstr),
         })
         .pipe(
             mapToResponse(),
             catchError(err => {
               this.appCoreService.appCore.err(
-                  new ConfigurationError(err.error).from(SOURCE).at(
-                      Severity.FATAL));
-              return throwError(() => err);
+                  // TODO(hamster) Create more types of errors than just
+                  // configuration errors.
+                  new ConfigurationError(err.error));
+              return throwError(err);
             }),
         );
   }

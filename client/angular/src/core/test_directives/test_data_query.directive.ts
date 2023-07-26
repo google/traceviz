@@ -20,10 +20,8 @@ import {GLOBAL_TEST_DATA_FETCHER, ValueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 
-import {DataQueryDirectiveBase} from './data_query.directive';
-import {GlobalStateDirective} from './global_state.directive';
-
-const SOURCE = 'test_data_query.directive';
+import {DataQueryDirectiveBase} from '../directives/data_query.directive';
+import {GlobalStateDirective} from '../directives/global_state.directive';
 
 /**
  * A data query for use in tests.  It forces the debounce interval to 0,
@@ -40,28 +38,25 @@ const SOURCE = 'test_data_query.directive';
 })
 export class TestDataQueryDirective extends DataQueryDirectiveBase implements
     AfterContentInit {
-  @Input() debounceMs: number = 50;
+  @Input() debounceMs = 50;
   @ContentChild(GlobalStateDirective)
   filtersDir: GlobalStateDirective|undefined;
-
   constructor(appCoreService: AppCoreService) {
     super(appCoreService, GLOBAL_TEST_DATA_FETCHER);
     this.debounceMs = 0;
     // Clear out any previous test data fetcher state.
     GLOBAL_TEST_DATA_FETCHER.reset();
   }
-
   override filters(): ValueMap {
     if (this.filtersDir === undefined) {
       return new ValueMap();
     }
-    let filters = this.filtersDir.values?.getValueMap();
+    const filters = this.filtersDir.values?.getValueMap();
     if (filters === undefined) {
       return new ValueMap();
     }
     return filters;
   }
-
   ngAfterContentInit(): void {
     this.appCoreService.appCore.onPublish((appCore) => {
       this.init(appCore);

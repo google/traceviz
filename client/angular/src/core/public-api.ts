@@ -19,5 +19,5 @@ export * from './directives/value.directive';
  * Test exports.
  * TODO() Break these out as package.json exports.
  */
-export * from './directives/test_core.module';
+export * from './test_directives/test_core.module';
 export * from './directives/test_data_query.directive';

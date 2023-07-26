@@ -22,7 +22,7 @@ import {AppCoreService} from '../services/app_core.service';
 
 import {ValueDirective} from './value.directive';
 
-const SOURCE = 'global_ref.directives';
+const SOURCE = 'global_ref.directive';
 
 /** A reference, by key, to a global Value. */
 @Directive({
@@ -33,7 +33,7 @@ const SOURCE = 'global_ref.directives';
 })
 export class GlobalRefDirective extends ValueDirective implements
     AfterContentInit {
-  @Input() key: string = '';
+  @Input() key = '';
   private val: Value|undefined;
 
   constructor(private readonly appCoreService: AppCoreService) {
@@ -43,7 +43,7 @@ export class GlobalRefDirective extends ValueDirective implements
   ngAfterContentInit() {
     const key = this.key;
     this.appCoreService.appCore.onPublish((appCore: AppCore) => {
-      this.val = appCore.globalState.get(this.key);
+      this.val = appCore.globalState.get(key);
     });
   }
 

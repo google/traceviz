@@ -18,8 +18,7 @@
 
 import { ContentChild, ContentChildren, Directive, Input, QueryList } from '@angular/core';
 import { ValueDirective } from './value.directive';
-import { ConfigurationError, Severity, Value, KeyedValueRef, ValueRefMap } from 'traceviz-client-core';
-import { ValueMap } from 'traceviz-client-core';
+import { ConfigurationError, Severity, Value, KeyedValueRef, ValueMap, ValueRefMap } from 'traceviz-client-core';
 
 const SOURCE = 'value_map.directives';
 
@@ -29,48 +28,49 @@ const SOURCE = 'value_map.directives';
  * literal, or the referenced Value for local and global refs.
  * It may specify a string key, for example for building a value map.
  */
-@Directive({ selector: 'value' })
+@Directive({selector: 'value'})
 export class ValueWrapperDirective implements KeyedValueRef {
-    // If specified, a key to associate with this Value.
-    @Input() key: string = '';
+  // If specified, a key to associate with this Value.
+  @Input() key = '';
 
-    @ContentChild(ValueDirective) val: ValueDirective | undefined;
+  @ContentChild(ValueDirective) val: ValueDirective|undefined;
 
-    private checkVal() {
-        if (!this.val) {
-            throw new ConfigurationError(
-                `<value> does not define a valid ValueDirective for key '${this.key}'`)
-                .at(Severity.FATAL)
-                .from(SOURCE);
-        }
+  private checkVal() {
+    if (!this.val) {
+      throw new ConfigurationError(
+          `<value> does not define a valid ValueDirective for key '${
+              this.key}'`)
+          .at(Severity.FATAL)
+          .from(SOURCE);
     }
+  }
 
-    label(): string {
-        this.checkVal();
-        return this.val!.label();
-    }
+  label(): string {
+    this.checkVal();
+    return this.val!.label();
+  }
 
-    get(localState: ValueMap | undefined): Value | undefined {
-        this.checkVal();
-        return this.val!.get(localState);
-    }
+  get(localState: ValueMap|undefined): Value|undefined {
+    this.checkVal();
+    return this.val!.get(localState);
+  }
 }
 
 /** A mapping from string keys to Values. */
-@Directive({ selector: 'value-map' })
+@Directive({selector: 'value-map'})
 export class ValueMapDirective {
-    @ContentChildren(ValueWrapperDirective)
-    valueWrappers = new QueryList<ValueWrapperDirective>();
+  @ContentChildren(ValueWrapperDirective)
+  valueWrappers = new QueryList<ValueWrapperDirective>();
 
-    getValueRefMap(): ValueRefMap {
-        return new ValueRefMap(Array.from(this.valueWrappers));
-    }
+  getValueRefMap(): ValueRefMap {
+    return new ValueRefMap(Array.from(this.valueWrappers));
+  }
 
-    getValueMap(localState?: ValueMap | undefined): ValueMap {
-        const vm = this.getValueRefMap().get(localState);
-        if (vm === undefined) {
-            return new ValueMap();
-        }
-        return vm;
+  getValueMap(localState?: ValueMap|undefined): ValueMap {
+    const vm = this.getValueRefMap().get(localState);
+    if (vm === undefined) {
+      return new ValueMap();
     }
+    return vm;
+  }
 }

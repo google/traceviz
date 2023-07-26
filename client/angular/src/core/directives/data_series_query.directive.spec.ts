@@ -18,8 +18,8 @@ import {GLOBAL_TEST_DATA_FETCHER, IntegerValue, Request, ResponseNode, str, Stri
 import {AppCoreService} from '../services/app_core.service';
 
 import {CoreModule} from './core.module';
-import {DataSeriesQueryDirective} from './data_series_query.directive';
-import {TestCoreModule} from './test_core.module';
+import {DataSeriesDirective} from './data_series_query.directive';
+import {TestCoreModule} from '../test_directives/test_core.module';
 
 @Component({
   template: `
@@ -60,8 +60,7 @@ import {TestCoreModule} from './test_core.module';
 `
 })
 class DataSeriesQueryTestComponent {
-  @ViewChild(DataSeriesQueryDirective)
-  dataSeriesQueryDir!: DataSeriesQueryDirective;
+  @ViewChild(DataSeriesDirective) dataSeriesQueryDir!: DataSeriesDirective;
 }
 
 describe('data series directive test', () => {
@@ -79,7 +78,7 @@ describe('data series directive test', () => {
         provide: AppCoreService,
         useValue: appCoreService,
       }]
-    })
+    });
     fixture = TestBed.createComponent(DataSeriesQueryTestComponent);
   });
 
@@ -89,16 +88,18 @@ describe('data series directive test', () => {
     const appCore = appCoreService.appCore;
     const dataSeriesQuery = tc.dataSeriesQueryDir.dataSeriesQuery;
     expect(dataSeriesQuery).toBeDefined();
-    var requests: Request[] = [];
+    const requests: Request[] = [];
     GLOBAL_TEST_DATA_FETCHER.requestChannel.subscribe((request) => {
       requests.push(request);
     });
-    var series: ResponseNode[] = [];
+    const series: ResponseNode[] = [];
     dataSeriesQuery?.response.subscribe((responseNode) => {
       series.push(responseNode);
     });
     let loading = false;
-    dataSeriesQuery?.loading.subscribe((isLoading) => loading = isLoading);
+    dataSeriesQuery?.loading.subscribe((isLoading) => {
+      loading = isLoading;
+    });
 
     expect(requests.length).toBe(0);
     expect(series.length).toBe(0);

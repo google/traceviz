@@ -16,8 +16,7 @@
  */
 
 import {AfterContentInit, ContentChild, Directive, forwardRef, Input} from '@angular/core';
-import {AppCore, ConfigurationError, Severity, ValueMap} from 'traceviz-client-core';
-import {DataFetcherInterface} from 'traceviz-client-core/src/data_query/data_fetcher_interface';
+import {AppCore, ConfigurationError, DataFetcherInterface, Severity, ValueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 
@@ -60,7 +59,7 @@ export class DataQueryDirective extends DataQueryDirectiveBase implements
   // after an initial series request, then will issue that request and any
   // others that arrived in that interval.  This allows the TraceViz backend
   // to handle multiple requests at once, and to reuse intermediate results.
-  @Input() debounceMs: number = 50;
+  @Input() debounceMs = 50;
   // The set of filters sent to the backend with each query.  Carefully
   // selecting these values allows the backend to precompute expensive
   // intermediate results once per data query, then reuse those results in

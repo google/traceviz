@@ -13,111 +13,557 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {IntegerValue, Interactions} from 'traceviz-client-core';
+import {IntegerValue, DurationValue,Duration,int,str, DoubleValue, prettyPrintDocumenter, StringValue, StringSetValue, Timestamp,TimestampValue ts, valueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 
 import {AppCoreDirective} from './app_core.directive';
 import {CoreModule} from './core.module';
 import {InteractionsDirective} from './interactions.directive';
-import {TestCoreModule} from './test_core.module';
+import {TestCoreModule} from '../test_directives/test_core.module';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   template: `
   <app-core>
     <global-state>
       <value-map>
-        <value key="counter"><int>0</int></value>
+        <value key="filtered_text"><string></string></value>
+        <value key="text_2"><string></string></value>
+        <value key="called_out_num"><int></int></value>
       </value-map>
     </global-state>
     <test-data-query></test-data-query>
   </app-core>
   <interactions>
-    <action target="counter" type="reset">
-        <clear><global-ref key="counter"></global-ref></clear>
+    <action target="item" type="click">
+      <toggle>
+        <global-ref key="filtered_text"></global-ref>
+        <local-ref key="text"></local-ref>
+      </toggle>
+      <set>
+        <global-ref key="called_out_num"></global-ref>
+        <local-ref key="num"></local-ref>
+      </set>
+      <set>
+        <global-ref key="text_2"></global-ref>
+        <string>thing 2</string>
+      </set>
     </action>
-    <reaction target="counter" type="bold">
-      <or>
-        <and>
-          <greater-than>
-            <global-ref key="counter"></global-ref>
-            <int>5</int>
-          </greater-than>
-          <less-than>
-            <global-ref key="counter"></global-ref>
-            <int>10</int>
-          </less-than>
-          <not>
-            <equals>
-              <global-ref key="counter"></global-ref>
-              <int>7</int>
-            </equals>
-          </not>
-        </and>
-        <includes>
-          <int-set><int>12</int></int-set>
-          <global-ref key="counter"></global-ref>
-        </includes>
-      </or>
-    </reaction>
-  </interactions>
-`
+    <action target="item" type="clear">
+      <clear>
+        <global-ref key="filtered_text"></global-ref>
+      </clear>
+    </action>
+  </interactions>`
 })
-class InteractionsTestComponent {
-  @ViewChild(AppCoreDirective) appCoreDir!: AppCoreDirective;
-  @ViewChild(InteractionsDirective) interactionsDir!: InteractionsDirective;
+class ActionTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
 }
 
-describe('interactions directive test', () => {
-  let fixture: ComponentFixture<InteractionsTestComponent>;
+describe('actions test', () => {
+  let fixture: ComponentFixture<ActionTestComponent>;
   const appCoreService = new AppCoreService();
+  let filteredText: StringValue;
+  let text2: StringValue;
+  let calledOutNum: IntegerValue;
 
-  beforeEach(() => {
+  beforeAll(() => {
     TestBed.configureTestingModule({
-      declarations: [InteractionsTestComponent],
+      declarations: [ActionTestComponent],
       imports: [CoreModule, TestCoreModule],
       providers: [{
         provide: AppCoreService,
         useValue: appCoreService,
       }]
-    })
-    fixture = TestBed.createComponent(InteractionsTestComponent);
+    });
+    fixture = TestBed.createComponent(ActionTestComponent);
+    fixture.detectChanges();
+    filteredText =
+        appCoreService.appCore.globalState.get('filtered_text') as StringValue;
+    text2 = appCoreService.appCore.globalState.get('text_2') as StringValue;
+    calledOutNum = appCoreService.appCore.globalState.get('called_out_num') as
+        IntegerValue;
   });
 
-  it('handles interactions', () => {
-    fixture.detectChanges();
-    const tc = fixture.componentInstance;
-    let interactions: Interactions|undefined;
-    expect(() => {
-      interactions = tc.interactionsDir.get();
-    }).not.toThrow();
-    const counter = tc.appCoreDir.appCoreService.appCore.globalState.get(
-                        'counter') as IntegerValue;
-    const bolded: string[] = [];
-    interactions!.match('counter', 'bold')().subscribe((bold: boolean) => {
-      bolded.push(`bold: ${bold} at ${counter.val}`);
+  beforeEach(() => {
+    filteredText.val = '';
+    text2.val = '';
+    calledOutNum.val = 0;
+  });
+
+  it('updates multiple values on event', () => {
+    const itc = fixture.componentInstance;
+    const localValues = valueMap(
+        {key: 'text', val: str('thing one')},
+        {key: 'num', val: int(10)},
+    );
+    itc.ints.get().update('item', 'click', localValues);
+    expect(filteredText.val).toEqual('thing one');
+    expect(text2.val).toEqual('thing 2');
+    expect(calledOutNum.val).toEqual(10);
+  });
+
+  it('does not update a missing key', () => {
+    const itc = fixture.componentInstance;
+    const localValues = valueMap(
+        {key: 'num', val: int(10)},
+    );
+    itc.ints.get().update('item', 'click', localValues);
+    expect(filteredText.val).toEqual('');
+    expect(calledOutNum.val).toEqual(10);
+  });
+
+  it('clears on event', () => {
+    const itc = fixture.componentInstance;
+    const localValues = valueMap(
+        {key: 'text', val: str('thing one')},
+        {key: 'num', val: int(10)},
+    );
+    itc.ints.get().update('item', 'click', localValues);
+    expect(filteredText.val).toEqual('thing one');
+    expect(calledOutNum.val).toEqual(10);
+    itc.ints.get().update('item', 'clear', localValues);
+    expect(filteredText.val).toEqual('');
+  });
+});
+
+@Component({
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="mode"><string></string></value>
+        <value key="selected_names"><string-set></string-set></value>
+        <value key="called_out_num"><int>0</int></value>
+        <value key="hover_time"><timestamp></timestamp></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <reaction target="item" type="highlight">
+      <and>
+        <equals>
+          <global-ref key="mode"></global-ref>
+          <string>select</string>
+        </equals>
+        <or>
+          <includes>
+            <global-ref key="selected_names"></global-ref>
+            <local-ref key="name"></local-ref>
+          </includes>
+          <includes>
+            <global-ref key="called_out_num"></global-ref>
+            <local-ref key="num"></local-ref>
+          </includes>
+          <and>
+            <not>
+              <less-than>
+                <global-ref key="hover_time"></global-ref>
+                <local-ref key="start"></local-ref>
+              </less-than>
+            </not>
+            <not>
+              <greater-than>
+                <global-ref key="hover_time"></global-ref>
+                <local-ref key="end"></local-ref>
+              </greater-than>
+            </not>
+          </and>
+        </or>
+      </and>
+    </reaction>
+  </interactions>`
+})
+class ReactionTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('reactions test', () => {
+  let fixture: ComponentFixture<ReactionTestComponent>;
+  const appCoreService = new AppCoreService();
+  let mode: StringValue;
+  let selectedNames: StringSetValue;
+  let calledOutNum: IntegerValue;
+  let hoverTime: TimestampValue;
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [ReactionTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
     });
-    const bump = () => {
-      counter.val = counter.val + 1;
-    };
-    // Bump the counter 12 times, to 12.
-    for (let i = 0; i < 12; i++) {
-      bump();
+    fixture = TestBed.createComponent(ReactionTestComponent);
+    fixture.detectChanges();
+    mode = appCoreService.appCore.globalState.get('mode') as StringValue;
+    selectedNames = appCoreService.appCore.globalState.get('selected_names') as
+        StringSetValue;
+    calledOutNum = appCoreService.appCore.globalState.get('called_out_num') as
+        IntegerValue;
+    hoverTime =
+        appCoreService.appCore.globalState.get('hover_time') as TimestampValue;
+  });
+
+  beforeEach(() => {
+    mode.val = 'select';
+    selectedNames.val = new Set<string>();
+    calledOutNum.val = 1;
+    hoverTime.val = new Timestamp(0, 0);
+  });
+
+  it('reacts', () => {
+    const itc = fixture.componentInstance;
+    const unsubscribe = new Subject<void>();
+    const highlighted = new Set<number>();
+    [valueMap(
+         {key: 'name', val: str('thing1')}, {key: 'num', val: int(1)},
+         {key: 'start', val: ts(new Timestamp(100, 0))},
+         {key: 'end', val: ts(new Timestamp(200, 0))}),
+     valueMap(
+         {key: 'name', val: str('thing2')}, {key: 'num', val: int(2)},
+         {key: 'start', val: ts(new Timestamp(200, 0))},
+         {key: 'end', val: ts(new Timestamp(300, 0))}),
+     valueMap(
+         {key: 'name', val: str('thing3')}, {key: 'num', val: int(3)},
+         {key: 'start', val: ts(new Timestamp(1000, 0))},
+         {key: 'end', val: ts(new Timestamp(2000, 2000))})]
+        .forEach((localValues, id) => {
+          itc.ints.get()
+              .match('item', 'highlight')(localValues)
+              .pipe(
+                  takeUntil(unsubscribe),
+                  )
+              .subscribe((match) => {
+                if (match) {
+                  highlighted.add(id);
+                } else {
+                  highlighted.delete(id);
+                }
+              });
+        });
+    expect(highlighted).toEqual(new Set([0]));
+    hoverTime.val = new Timestamp(1500, 0);
+    expect(highlighted).toEqual(new Set([0, 2]));
+    hoverTime.val = new Timestamp(2100, 0);
+    calledOutNum.val = 2;
+    expect(highlighted).toEqual(new Set([1]));
+    selectedNames.val = new Set(['thing1']);
+    expect(highlighted).toEqual(new Set([0, 1]));
+    mode.val = 'edit';
+    expect(highlighted).toEqual(new Set([]));
+
+    unsubscribe.next();
+    unsubscribe.complete();
+  });
+});
+
+@Component({
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="a"><string></string></value>
+        <value key="tick"><int>0</int></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <reaction target="item" type="highlight">
+      <changed>
+        <global-ref key="a"></global-ref>
+      </changed>
+    </reaction>
+  </interactions>`
+})
+class ChangedTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('changed test', () => {
+  let fixture: ComponentFixture<ChangedTestComponent>;
+  const appCoreService = new AppCoreService();
+  let a: StringValue;
+  let tick: IntegerValue;
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [ChangedTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    });
+    fixture = TestBed.createComponent(ChangedTestComponent);
+    fixture.detectChanges();
+    a = appCoreService.appCore.globalState.get('a') as StringValue;
+    tick = appCoreService.appCore.globalState.get('tick') as IntegerValue;
+  });
+
+  beforeEach(() => {
+    a.val = 'a';
+  });
+
+  it('observesChanges', () => {
+    const itc = fixture.componentInstance;
+    const matchFn = itc.ints.get().match('item', 'highlight');
+    const changes: string[] = [];
+    expect(matchFn).toBeDefined();
+    if (!matchFn) {
+      return;
     }
-    expect(counter.val).toEqual(12);
-    // Perform the 'reset' interaction, resetting counter to 0.
-    interactions!.update('counter', 'reset');
-    expect(counter.val).toEqual(0);
-    // Expect to start unbolded, go bolded at 6, unbold at 7,
-    // bold at 8, unbold at 10 bold at 12, and unbold for 0.
-    expect(bolded).toEqual([
-      'bold: false at 0',
-      'bold: true at 6',
-      'bold: false at 7',
-      'bold: true at 8',
-      'bold: false at 10',
-      'bold: true at 12',
-      'bold: false at 0',
+    matchFn(valueMap()).subscribe((changed: boolean) => {
+      changes.push(`${changed ? '+' : '-'}@${tick.val}`);
+    });
+    [() => {
+      a.val = 'a';  // same value, so no change.
+    },
+     () => {
+       a.val = 'z';  // new value at index 2.
+     },
+     () => {}]
+        .forEach((action) => {
+          tick.val++;
+          action();
+        });
+
+    expect(changes).toEqual([
+      '+@0',
+      '-@0',
+      '+@2',
+      '-@2',
     ]);
+  });
+});
+
+@Component({
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="offset_marker"><dur></dur></value>
+        <value key="min_extent"><dbl></dbl></value>
+        <value key="max_extent"><dbl></dbl></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <watch type="show_offset_marker">
+      <value-map>
+        <value key="offset_marker">
+          <global-ref key="offset_marker"></global-ref>
+        </value>
+      </value-map>
+    </watch>
+    <watch type="show_range">
+      <value-map>
+        <value key="min_extent">
+          <global-ref key="min_extent"></global-ref>
+        </value>
+        <value key="max_extent">
+          <global-ref key="max_extent"></global-ref>
+        </value>
+      </value-map>
+    </watch>
+  </interactions>`
+})
+class WatchTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('watch test', () => {
+  let fixture: ComponentFixture<WatchTestComponent>;
+  const appCoreService = new AppCoreService();
+  let offsetMarker: DurationValue;
+  let minExtent: DoubleValue;
+  let maxExtent: DoubleValue;
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [WatchTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    });
+    fixture = TestBed.createComponent(WatchTestComponent);
+    fixture.detectChanges();
+    offsetMarker = appCoreService.appCore.globalState.get('offset_marker') as
+        DurationValue;
+    minExtent =
+        appCoreService.appCore.globalState.get('min_extent') as DoubleValue;
+    maxExtent =
+        appCoreService.appCore.globalState.get('max_extent') as DoubleValue;
+  });
+
+  beforeEach(() => {
+    offsetMarker.val = new Duration(0);
+    minExtent.val = 0;
+    maxExtent.val = 100;
+  });
+
+  it('watches', () => {
+    const unsubscribe = new Subject<void>();
+    const itc = fixture.componentInstance;
+    let offsetPoint = new Duration(0);
+    let rangeMin = 0;
+    let rangeMax = 0;
+    itc.ints.get().watch('show_offset_marker', (vm) => {
+      offsetPoint = vm.expectDuration('offset_marker');
+    }, unsubscribe);
+    itc.ints.get().watch('show_range', (vm) => {
+      rangeMin = vm.expectNumber('min_extent');
+      rangeMax = vm.expectNumber('max_extent');
+    }, unsubscribe);
+    offsetMarker.val = new Duration(100);
+    expect(offsetPoint).toEqual(new Duration(100));
+
+    expect(rangeMin).toEqual(0);
+    expect(rangeMax).toEqual(100);
+    minExtent.val = 50;
+    expect(rangeMin).toEqual(50);
+  });
+});
+
+@Component({
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="filtered_text"><string></string></value>
+        <value key="text_2"><string></string></value>
+        <value key="called_out_num"><int></int></value>
+        <value key="selected_names"><string-set></string-set></value>
+        <value key="hover_time"><timestamp></timestamp></value>
+        <value key="offset_marker"><dur></dur></value>
+        <value key="min_extent"><dbl></dbl></value>
+        <value key="max_extent"><dbl></dbl></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <action target="item" type="click">
+      <toggle>
+        <global-ref key="filtered_text"></global-ref>
+        <local-ref key="text"></local-ref>
+      </toggle>
+      <set>
+        <global-ref key="called_out_num"></global-ref>
+        <local-ref key="num"></local-ref>
+      </set>
+    </action>
+    <action target="item" type="clear">
+      <clear>
+        <global-ref key="filtered_text"></global-ref>
+      </clear>
+    </action>
+    <action target="item" type="set">
+      <set>
+        <global-ref key="text_2"></global-ref>
+        <string>set value</string>
+      </set>
+    </action>
+    <reaction target="item" type="highlight">
+      <or>
+        <includes>
+          <global-ref key="selected_names"></global-ref>
+          <local-ref key="name"></local-ref>
+        </includes>
+        <includes>
+          <global-ref key="called_out_num"></global-ref>
+          <local-ref key="num"></local-ref>
+        </includes>
+        <and>
+          <not>
+            <less-than>
+              <global-ref key="hover_time"></global-ref>
+              <local-ref key="start"></local-ref>
+            </less-than>
+          </not>
+          <not>
+            <greater-than>
+              <global-ref key="hover_time"></global-ref>
+              <local-ref key="end"></local-ref>
+            </greater-than>
+          </not>
+        </and>
+      </or>
+    </reaction>
+    <watch type="show_offset_marker">
+      <value-map>
+        <value key="offset_marker">
+          <global-ref key="offset_marker"></global-ref>
+        </value>
+      </value-map>
+    </watch>
+    <watch type="show_range">
+      <value-map>
+        <value key="min_extent">
+          <global-ref key="min_extent"></global-ref>
+        </value>
+        <value key="max_extent">
+          <global-ref key="max_extent"></global-ref>
+        </value>
+      </value-map>
+    </watch>
+  </interactions>`
+})
+class DocTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('self-documentation test', () => {
+  let fixture: ComponentFixture<DocTestComponent>;
+  const appCoreService = new AppCoreService();
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [DocTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    });
+    fixture = TestBed.createComponent(DocTestComponent);
+    fixture.detectChanges();
+  });
+
+  it('documents itself', () => {
+    const itc = fixture.componentInstance;
+    expect(prettyPrintDocumenter(itc.ints.get()).join('\n'))
+        .toEqual(`Interactions (Interactions)
+  Upon 'click' on 'item' (Action)
+    toggles global string 'filtered_text' from local value 'text'. (Update)
+    sets global integer 'called_out_num' from local value 'num'. (Update)
+  Upon 'clear' on 'item' (Action)
+    clears [global string 'filtered_text'] (Update)
+  Upon 'set' on 'item' (Action)
+    sets global string 'text_2' from literal 'set value'. (Update)
+  Performs 'highlight' on 'item' (Reaction)
+    OR (Predicate)
+      when global string set 'selected_names' includes local value 'name' (Predicate)
+      when global integer 'called_out_num' includes local value 'num' (Predicate)
+      AND (Predicate)
+        NOT (Predicate)
+          when global timestamp 'hover_time' < local value 'start' (Predicate)
+        NOT (Predicate)
+          when global timestamp 'hover_time' > local value 'end' (Predicate)
+  Trigger 'show_offset_marker' on changes to arguments (Watch)
+  Trigger 'show_range' on changes to arguments (Watch)`);
   });
 });
