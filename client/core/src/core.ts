@@ -18,10 +18,12 @@ export * from './continuous_axis/continuous_axis.js';
 export * from './data_query/data_query.js';
 export * from './data_query/data_fetcher_interface.js';
 export * from './data_series_query/data_series_query.js';
+export * from './documentation/documentation.js';
 export * from './duration/duration.js';
 export * from './errors/errors.js';
 export * from './global_state/global_state.js';
 export * from './global_state/global_state_interface.js';
+export * from './hash_encoding/hash_encoding.js';
 export * from './interactions/interactions.js';
 export * from './label/label.js';
 export * from './magnitude/magnitude.js';
@@ -31,13 +33,9 @@ export * from './protocol/request_interface.js';
 export * from './protocol/response_interface.js';
 export * from './style/style.js';
 export * from './table/table.js';
-export * from './test_responses/prettyprint.js';
-export * from './test_responses/traces.js';
-export * from './test_responses/weighted_tree.js';
 export * from './timestamp/timestamp.js';
 export * from './trace/trace.js';
 export * from './trace/renderers.js';
-export * from './value/test_value.js';
 export * from './value/value.js';
 export * from './value/value_map.js';
 export * from './value/value_reference.js';
@@ -49,5 +47,10 @@ export * from './xy_chart/xy_chart.js';
  * TODO() Break these out as package.json exports, and figure out how to
  *        import those into the Angular library.
  */
+export * from './documentation/test_documentation.js';
 export * from './data_query/test_data_fetcher.js';
 export * from './protocol/test_response.js';
+export * from './test_responses/prettyprint.js';
+export * from './test_responses/traces.js';
+export * from './test_responses/weighted_tree.js';
+export * from './value/test_value.js';

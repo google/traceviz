@@ -1,4 +1,4 @@
-package loggerreader
+package logreader
 
 import (
 	"bufio"

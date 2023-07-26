@@ -93,10 +93,10 @@
 
           <!-- Clicking a row sets the filtered-in source file set to that row's source file. -->
           <action target="row" type="click">
-            <toggle-or-set>
+            <set-or-clear>
               <global-ref key="filtered_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
-            </toggle-or-set>
+            </set-or-clear>
           </action>
 
           <!-- Shift-clicking a row adds that row's source file to the filtered-in set -->

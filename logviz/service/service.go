@@ -17,15 +17,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path"
 
+	logreader "github.com/google/traceviz/logviz/analysis/log_reader"
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
-	loggerreader "github.com/google/traceviz/logviz/analysis/logger_reader"
 	datasource "github.com/google/traceviz/logviz/data_source"
-	"github.com/google/traceviz/logviz/logger"
 	"github.com/google/traceviz/server/go/handlers"
 	querydispatcher "github.com/google/traceviz/server/go/query_dispatcher"
 	"github.com/hashicorp/golang-lru/simplelru"
@@ -61,13 +59,13 @@ func (cf *collectionFetcher) Fetch(ctx context.Context, collectionName string) (
 		return nil, err
 	}
 	// The TextLogReader takes ownership of the file.
-	lr := loggerreader.New(
+	lr := logreader.New(
 		collectionName,
-		loggerreader.ReaderCloser{
+		logreader.ReaderCloser{
 			Reader: bufio.NewReader(file),
 			Closer: file,
 		},
-		&loggerreader.CockroachDBLogParser{},
+		&logreader.CockroachDBLogParser{},
 	)
 	lt, err := logtrace.NewLogTrace(lr)
 	if err != nil {
@@ -93,14 +91,11 @@ func New(assetRoot, collectionRoot string, cap int) (*Service, error) {
 		return nil, err
 	}
 	qd, err := querydispatcher.New(ds)
-	if err != nil { 
+	if err != nil {
 		return nil, err
 	}
 	assetHandler := handlers.NewAssetHandler()
 	addFileAsset := func(resourceName, resourceType, filename string) {
-		log.Printf(logger.Info("Serving asset '%s' at '%s'",
-			path.Join(assetRoot, filename),
-			resourceName))
 		assetHandler.With(
 			resourceName,
 			handlers.NewFileAsset(
@@ -114,6 +109,7 @@ func New(assetRoot, collectionRoot string, cap int) (*Service, error) {
 	addFileAsset("main.js", "application/javascript", "main.js")
 	addFileAsset("polyfills.js", "application/javascript", "polyfills.js")
 	addFileAsset("runtime.js", "application/javascript", "runtime.js")
+	addFileAsset("/favicon.ico", "image/x-icon", "favicon.ico")
 	return &Service{
 		queryHandler: handlers.NewQueryHandler(qd),
 		assetHandler: assetHandler,

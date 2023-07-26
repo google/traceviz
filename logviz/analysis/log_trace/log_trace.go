@@ -2,11 +2,8 @@ package logtrace
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"time"
-
-	"github.com/google/traceviz/logviz/logger"
 )
 
 // LogTrace provides a programmatic interface for trace analysis of Logs data.
@@ -52,12 +49,10 @@ func NewLogTrace(lrs ...LogReader) (*LogTrace, error) {
 	for _, lr := range lrs {
 		entryCh, err := lr.Entries(ac)
 		if err != nil {
-			log.Print(logger.Error("failed to create logtracer data source: %s", err))
 			return nil, fmt.Errorf("failed to create logtracer data source: %s", err)
 		}
 		for item := range entryCh {
 			if item.Err != nil {
-				log.Printf(logger.Error("failure fetching log Entries: %s", item.Err))
 				return nil, fmt.Errorf("failure fetching log Entries: %s", item.Err)
 			}
 			lt.Logs[item.Entry.Log] = item.Entry.Log.Identifier()
@@ -72,7 +67,6 @@ func NewLogTrace(lrs ...LogReader) (*LogTrace, error) {
 		}
 	}
 	if len(lt.Entries) == 0 {
-		log.Print(logger.Error("log trace has no Entries"))
 		return nil, fmt.Errorf("log trace has no Entries")
 	}
 	// Order Entries by timestamp ascending.

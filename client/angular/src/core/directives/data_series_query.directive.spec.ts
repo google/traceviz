@@ -16,10 +16,10 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GLOBAL_TEST_DATA_FETCHER, IntegerValue, Request, ResponseNode, str, StringValue, valueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
+import {TestCoreModule} from '../test_directives/test_core.module';
 
 import {CoreModule} from './core.module';
-import {DataSeriesDirective} from './data_series_query.directive';
-import {TestCoreModule} from '../test_directives/test_core.module';
+import {DataSeriesQueryDirective} from './data_series_query.directive';
 
 @Component({
   template: `
@@ -60,7 +60,8 @@ import {TestCoreModule} from '../test_directives/test_core.module';
 `
 })
 class DataSeriesQueryTestComponent {
-  @ViewChild(DataSeriesDirective) dataSeriesQueryDir!: DataSeriesDirective;
+  @ViewChild(DataSeriesQueryDirective)
+  dataSeriesQueryDir!: DataSeriesQueryDirective;
 }
 
 describe('data series directive test', () => {

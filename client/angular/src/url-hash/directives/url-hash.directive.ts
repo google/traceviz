@@ -18,10 +18,10 @@
  */
 
 import {AfterContentInit, ContentChild, Directive, HostListener, Inject, InjectionToken, OnDestroy} from '@angular/core';
-import {AppCoreService, StringLiteralListDirective, ValueMapDirective} from 'traceviz-angular-core';
-import {ConfigurationError, Severity, ExportedKeyValueMap, ValueMap, compress, decompress, unserializeHashFragment, serializeHashFragment} from 'traceviz-client-core';
 import {merge, Subject} from 'rxjs';
 import {debounceTime, takeUntil} from 'rxjs/operators';
+import {AppCoreService, StringLiteralListDirective, ValueMapDirective} from 'traceviz-angular-core';
+import {compress, ConfigurationError, decompress, ExportedKeyValueMap, serializeHashFragment, Severity, unserializeHashFragment, ValueMap} from 'traceviz-client-core';
 
 /** Injection token for the window object, allowing it to be mocked in tests. */
 export const WINDOW =
@@ -103,7 +103,7 @@ export class UrlHashDirective implements AfterContentInit, OnDestroy {
 
   updateURL() {
     let replaceState = true;
-    const hash = parseHashFragment(this.window.location.hash);
+    const hash = unserializeHashFragment(this.window.location.hash);
     let decodedStateJSON: ExportedKeyValueMap|undefined;
     let compressedState: string|undefined;
     const unencodedState: {[k: string]: string} = {};

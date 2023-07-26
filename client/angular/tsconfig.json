@@ -22,6 +22,9 @@
         "node_modules/rxjs/*"
       ]
     },
+    "types": [
+      "node"
+    ],
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
@@ -40,5 +43,5 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
 }

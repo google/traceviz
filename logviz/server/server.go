@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/traceviz/logviz/logger"
 	"github.com/google/traceviz/logviz/service"
 )
 
@@ -21,7 +20,7 @@ func main() {
 
 	service, err := service.New(*resourceRoot, *logRoot, 10)
 	if err != nil {
-		log.Fatalf(logger.Fatal("Failed to create LogViz service: %s", err))
+		log.Fatalf("Failed to create LogViz service: %s", err)
 	}
 
 	mux := http.DefaultServeMux

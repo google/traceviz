@@ -11,7 +11,7 @@
 	limitations under the License.
 */
 
-package loggerreader
+package logreader
 
 import (
 	"bufio"

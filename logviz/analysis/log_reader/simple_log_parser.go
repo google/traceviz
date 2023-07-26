@@ -1,15 +1,15 @@
-package loggerreader
+package logreader
 
 import (
 	"bufio"
 	"fmt"
-	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
-	"github.com/google/traceviz/logviz/logger"
 	"io"
 	"log"
 	"regexp"
 	"strconv"
 	"time"
+
+	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
 )
 
 // simpleLogParser parses simple log message for the use of tests. See
@@ -87,7 +87,6 @@ func (slp *simpleLogParser) ReadLogEntry() (logtrace.Entry, error) {
 		if firstLine == nil {
 			firstLine = curMatches
 			if len(firstLine) != 12 {
-				log.Print(logger.Error("can't parse log line '%s'", line))
 				return logtrace.Entry{}, fmt.Errorf("can't parse log line '%s'", line)
 			}
 		} else {
@@ -114,43 +113,36 @@ func (slp *simpleLogParser) ReadLogEntry() (logtrace.Entry, error) {
 
 	year, err := strconv.Atoi(firstLine[1])
 	if err != nil {
-		log.Printf(logger.Error("failed to parse year `%s` as int", firstLine[1]))
 		return logtrace.Entry{}, fmt.Errorf("failed to parse year `%s` as int", firstLine[1])
 	}
 
 	month, err := strconv.Atoi(firstLine[2])
 	if err != nil {
-		log.Printf(logger.Error("failed to parse month `%s` as int", firstLine[2]))
 		return logtrace.Entry{}, fmt.Errorf("failed to parse month `%s` as int", firstLine[2])
 	}
 
 	day, err := strconv.Atoi(firstLine[3])
 	if err != nil {
-		log.Print(logger.Error("failed to parse day `%s` as int", firstLine[3]))
 		return logtrace.Entry{}, fmt.Errorf("failed to parse day `%s` as int", firstLine[3])
 	}
 
 	hour, err := strconv.Atoi(firstLine[4])
 	if err != nil {
-		log.Print(logger.Error("failed to parse hour `%s` as int", firstLine[4]))
 		return logtrace.Entry{}, fmt.Errorf("failed to parse hour `%s` as int", firstLine[4])
 	}
 
 	minute, err := strconv.Atoi(firstLine[5])
 	if err != nil {
-		log.Print(logger.Error("failed to parse minute `%s` as int", firstLine[5]))
 		return logtrace.Entry{}, fmt.Errorf("failed to parse minute `%s` as int", firstLine[5])
 	}
 
 	second, err := strconv.Atoi(firstLine[6])
 	if err != nil {
-		log.Print(logger.Error("failed to parse seconds `%s` as int", firstLine[6]))
 		return logtrace.Entry{}, fmt.Errorf("failed to parse seconds `%s` as int", firstLine[6])
 	}
 
 	usec, err := strconv.Atoi(firstLine[7])
 	if err != nil {
-		log.Print(logger.Error("failed to parse usec `%s` as int", firstLine[7]))
 		return logtrace.Entry{}, fmt.Errorf("failed to parse usec `%s` as int", firstLine[7])
 	}
 
@@ -160,14 +152,12 @@ func (slp *simpleLogParser) ReadLogEntry() (logtrace.Entry, error) {
 	e.At(t)
 	lineNumber, err := strconv.Atoi(firstLine[9])
 	if err != nil {
-		log.Print(logger.Error("failed to parse line number `%s` as int", firstLine[9]))
 		return logtrace.Entry{}, fmt.Errorf("failed to parse line number `%s` as int", firstLine[9])
 	}
 	e.From(slp.ac.SourceLocation(firstLine[8], lineNumber))
 	lev, ok := defaultLevels[firstLine[10]]
 
 	if !ok {
-		log.Printf(logger.Error("unrecognized level '%s'", firstLine[1]))
 		return logtrace.Entry{}, fmt.Errorf("unrecognized level '%s'", firstLine[1])
 	}
 	e.WithLevel(slp.ac.Level(lev.weight, lev.label))

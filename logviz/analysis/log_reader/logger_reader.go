@@ -11,24 +11,21 @@
 	limitations under the License.
 */
 
-// Package loggerreader provides a logtrace.LogReader implementation for logger
+// Package logreader provides a logtrace.LogReader implementation for logger
 // output.
 //
 // This is not a serious log parsing package.  Its own internal logging is
 // goofy and over-the-top to generate interesting logs for logviz to visualize.
-// Consider
-package loggerreader
+package logreader
 
 import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"time"
 
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
-	"github.com/google/traceviz/logviz/logger"
 )
 
 // TextLogReader converts a textual log (represented as a bufio.Reader)
@@ -114,7 +111,6 @@ func (tlr *TextLogReader) Entries(ac *logtrace.AssetCache) (<-chan *logtrace.Ite
 			entry, err := tlr.parser.ReadLogEntry()
 			if err != nil {
 				if err != io.EOF {
-					log.Print(logger.Error("failed to parse log line: %s", err))
 					entries <- &logtrace.Item{
 						Err: fmt.Errorf("failed to parse log line: %s", err),
 					}

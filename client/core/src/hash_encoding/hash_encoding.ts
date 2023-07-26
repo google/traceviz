@@ -17,8 +17,8 @@
  * in a URL-encodeable way.
  */
 
+import {Buffer} from 'buffer';
 import {deflate, inflate} from 'pako';
-import {TextDecoder, TextEncoder} from 'util';
 
 /**
  * Stringifies the provided object, deflates it, and encodes the deflated string

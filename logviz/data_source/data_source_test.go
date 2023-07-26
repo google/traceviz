@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
+	logreader "github.com/google/traceviz/logviz/analysis/log_reader"
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
-	loggerreader "github.com/google/traceviz/logviz/analysis/logger_reader"
 	"github.com/google/traceviz/server/go/category"
 	"github.com/google/traceviz/server/go/color"
 	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
@@ -50,8 +50,8 @@ const (
 2023/01/01 00:35:00.000000 c.cc:30: [F] Failure`
 )
 
-func testLogReader(collectionName, log string) *loggerreader.TextLogReader {
-	return loggerreader.New(collectionName, loggerreader.ReaderCloser{Reader: bufio.NewReader(strings.NewReader(log))}, loggerreader.NewSimpleLogParser())
+func testLogReader(collectionName, log string) *logreader.TextLogReader {
+	return logreader.New(collectionName, logreader.ReaderCloser{Reader: bufio.NewReader(strings.NewReader(log))}, logreader.NewSimpleLogParser())
 }
 
 type testLogTraceFetcher struct{}
@@ -75,7 +75,7 @@ func (tlf *testLogTraceFetcher) Fetch(ctx context.Context, collectionName string
 	return &Collection{
 		lt: lt,
 	}, nil
-	}
+}
 
 func TestQueries(t *testing.T) {
 	fatalCol := table.Column(category.New("level_0", "Fatal", "The number of distinct log entries associated with this source file at log level `Fatal`"))

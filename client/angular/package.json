@@ -6,7 +6,7 @@
     "reset": "npm install rimraf && rimraf dist && rimraf package-lock.json && rimraf node_modules && npm run clean",
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build core && ng build hovercard && ng build axes && ng build data-table && ng build line-chart && ng build text-field && ng build update-values && ng build weighted-tree",
+    "build": "ng build core && ng build hovercard && ng build axes && ng build data-table && ng build error-message && ng build line-chart && ng build text-field && ng build update-values && ng build url-hash && ng build weighted-tree",
     "cb": "npm run clean && npm install && npm run build",
     "watch": "ng build --watch --configuration development",
     "testall": "ng test"
@@ -24,8 +24,10 @@
     "@angular/platform-browser-dynamic": "^15.2.0",
     "@angular/router": "^15.2.0",
     "d3": "^7.8.4",
+    "pako": "^2.1.0",
     "rimraf": "^5.0.1",
     "tslib": "^2.3.0",
+    "util": "^0.12.5",
     "zone.js": "~0.12.0"
   },
   "devDependencies": {
@@ -34,6 +36,8 @@
     "@angular/compiler-cli": "^15.2.0",
     "@types/d3": "^7.4.0",
     "@types/jasmine": "~4.3.0",
+    "@types/node": "^18.14.1",
+    "@types/pako": "^2.0.0",
     "jasmine-core": "~4.5.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.1.0",
@@ -45,9 +49,9 @@
   },
   "peerDependencies": {
     "rxjs": "7.8.0",
+    "traceviz-angular-axes": "file:dist/traceviz-angular-axes",
     "traceviz-angular-core": "file:dist/traceviz-angular-core",
     "traceviz-angular-hovercard": "file:dist/traceviz-angular-hovercard",
-    "traceviz-angular-axes": "file:dist/traceviz-angular-axes",
     "traceviz-client-core": "file:../core"
   }
 }
