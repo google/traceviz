@@ -32,6 +32,7 @@
     "traceviz-angular-hovercard": "file:../../client/angular/dist/traceviz-angular-hovercard",
     "traceviz-angular-line-chart": "file:../../client/angular/dist/traceviz-angular-line-chart",
     "traceviz-angular-text-field": "file:../../client/angular/dist/traceviz-angular-text-field",
+    "traceviz-angular-url-hash": "file:../../client/angular/dist/traceviz-angular-url-hash",
     "traceviz-client-core": "file:../../client/core",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"

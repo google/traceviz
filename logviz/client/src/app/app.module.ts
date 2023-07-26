@@ -11,6 +11,7 @@ import {ErrorMessageModule} from 'traceviz-angular-error-message';
 import {HovercardModule} from 'traceviz-angular-hovercard';
 import {LineChartModule} from 'traceviz-angular-line-chart';
 import {TextFieldModule} from 'traceviz-angular-text-field';
+import {UrlHashModule} from 'traceviz-angular-url-hash';
 
 import {AppComponent} from './app.component';
 
@@ -29,6 +30,7 @@ import {AppComponent} from './app.component';
     MatCardModule,
     MatPaginatorModule,
     TextFieldModule,
+    UrlHashModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
