@@ -95,7 +95,7 @@ func TestQueries(t *testing.T) {
 				collectionNameKey: util.StringValue("log1"),
 			},
 			SeriesRequests: []*util.DataSeriesRequest{
-				&util.DataSeriesRequest{
+				{
 					QueryName: aggregateSourceFilesTableQuery,
 				},
 			},
@@ -131,7 +131,7 @@ func TestQueries(t *testing.T) {
 				collectionNameKey: util.StringValue("both"),
 			},
 			SeriesRequests: []*util.DataSeriesRequest{
-				&util.DataSeriesRequest{
+				{
 					QueryName: aggregateSourceFilesTableQuery,
 				},
 			},
@@ -181,7 +181,7 @@ func TestQueries(t *testing.T) {
 				filteredSourceFilesKey: util.StringsValue("a.cc"),
 			},
 			SeriesRequests: []*util.DataSeriesRequest{
-				&util.DataSeriesRequest{
+				{
 					QueryName: aggregateSourceFilesTableQuery,
 				},
 			},
@@ -227,7 +227,7 @@ func TestQueries(t *testing.T) {
 				collectionNameKey: util.StringValue("log1"),
 			},
 			SeriesRequests: []*util.DataSeriesRequest{
-				&util.DataSeriesRequest{
+				{
 					QueryName: rawEntriesQuery,
 					Options:   map[string]*util.V{},
 				},
@@ -296,7 +296,7 @@ func TestQueries(t *testing.T) {
 				collectionNameKey: util.StringValue("both"),
 			},
 			SeriesRequests: []*util.DataSeriesRequest{
-				&util.DataSeriesRequest{
+				{
 					QueryName: timeseriesQuery,
 					Options: map[string]*util.V{
 						aggregateByKey: util.StringValue(levelNameKey),
@@ -402,6 +402,22 @@ func TestQueries(t *testing.T) {
 				0,
 			)
 		},
+		// }, {
+		// 	description: "trace, cockroachdb logs",
+		// 	req: &util.DataRequest{
+		// 		GlobalFilters: map[string]*util.V{
+		// 			collectionNameKey: util.StringValue("both"),
+		// 		},
+		// 		SeriesRequests: []*util.DataSeriesRequest{
+		// 			{
+		// 				QueryName: traceQuery,
+		// 				Options: map[string]*util.V{
+		// 				},
+		// 			},
+		// 		},
+		// 	},
+		// 	wantSeries: func(series util.DataBuilder) {
+		// 	},
 	}} {
 		t.Run(test.description, func(t *testing.T) {
 			ds, err := New(10, &testLogTraceFetcher{})
