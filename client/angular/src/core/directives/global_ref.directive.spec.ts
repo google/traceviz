@@ -15,12 +15,12 @@ import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {StringValue} from 'traceviz-client-core';
 
+import {CoreModule} from '../core.module';
 import {AppCoreService} from '../services/app_core.service';
+import {TestCoreModule} from '../test_core.module';
 
 import {AppCoreDirective} from './app_core.directive';
-import {CoreModule} from './core.module';
 import {GlobalRefDirective} from './global_ref.directive';
-import {TestCoreModule} from '../test_directives/test_core.module';
 
 @Component({
   template: `

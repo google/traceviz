@@ -15,10 +15,10 @@ import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GLOBAL_TEST_DATA_FETCHER, IntegerValue, Request, ResponseNode, str, StringValue, valueMap} from 'traceviz-client-core';
 
+import {CoreModule} from '../core.module';
 import {AppCoreService} from '../services/app_core.service';
-import {TestCoreModule} from '../test_directives/test_core.module';
+import {TestCoreModule} from '../test_core.module';
 
-import {CoreModule} from './core.module';
 import {DataSeriesQueryDirective} from './data_series_query.directive';
 
 @Component({

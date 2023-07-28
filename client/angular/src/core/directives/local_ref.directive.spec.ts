@@ -15,10 +15,10 @@ import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {str, StringValue, valueMap} from 'traceviz-client-core';
 
+import {CoreModule} from '../core.module';
 import {AppCoreService} from '../services/app_core.service';
 
 import {AppCoreDirective} from './app_core.directive';
-import {CoreModule} from './core.module';
 import {LocalRefDirective} from './local_ref.directive';
 
 @Component({

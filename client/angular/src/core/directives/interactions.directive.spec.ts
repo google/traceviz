@@ -18,9 +18,9 @@ import {IntegerValue, DurationValue, Duration, int, str, DoubleValue, StringValu
 import {AppCoreService} from '../services/app_core.service';
 
 import {AppCoreDirective} from './app_core.directive';
-import {CoreModule} from './core.module';
+import {CoreModule} from '../core.module';
 import {InteractionsDirective} from './interactions.directive';
-import {TestCoreModule} from '../test_directives/test_core.module';
+import {TestCoreModule} from '../test_core.module';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 

@@ -15,11 +15,11 @@ import {Component, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {str, ValueMap, valueMap} from 'traceviz-client-core';
 
+import {CoreModule} from '../core.module';
 import {AppCoreService} from '../services/app_core.service';
+import {TestCoreModule} from '../test_core.module';
 
 import {AppCoreDirective} from './app_core.directive';
-import {CoreModule} from './core.module';
-import {TestCoreModule} from '../test_directives/test_core.module';
 import {ValueMapDirective} from './value_map.directive';
 
 @Component({

@@ -71,21 +71,21 @@
     },
     "data-table": {
       "projectType": "library",
-      "root": "src/data-table",
-      "sourceRoot": "src/data-table",
+      "root": "src/data_table",
+      "sourceRoot": "src/data_table",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "src/data-table/ng-package.json"
+            "project": "src/data_table/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "src/data-table/tsconfig.lib.prod.json"
+              "tsConfig": "src/data_table/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "src/data-table/tsconfig.lib.json"
+              "tsConfig": "src/data_table/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "development"
@@ -93,7 +93,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "src/data-table/tsconfig.spec.json",
+            "tsConfig": "src/data_table/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
@@ -104,21 +104,21 @@
     },
     "error-message": {
       "projectType": "library",
-      "root": "src/error-message",
-      "sourceRoot": "src/error-message",
+      "root": "src/error_message",
+      "sourceRoot": "src/error_message",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "src/error-message/ng-package.json"
+            "project": "src/error_message/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "src/error-message/tsconfig.lib.prod.json"
+              "tsConfig": "src/error_message/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "src/error-message/tsconfig.lib.json"
+              "tsConfig": "src/error_message/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "development"
@@ -126,7 +126,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "src/error-message/tsconfig.spec.json",
+            "tsConfig": "src/error_message/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
@@ -170,21 +170,21 @@
     },
     "line-chart": {
       "projectType": "library",
-      "root": "src/line-chart",
-      "sourceRoot": "src/line-chart",
+      "root": "src/line_chart",
+      "sourceRoot": "src/line_chart",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "src/line-chart/ng-package.json"
+            "project": "src/line_chart/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "src/line-chart/tsconfig.lib.prod.json"
+              "tsConfig": "src/line_chart/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "src/line-chart/tsconfig.lib.json"
+              "tsConfig": "src/line_chart/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "development"
@@ -192,7 +192,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "src/line-chart/tsconfig.spec.json",
+            "tsConfig": "src/line_chart/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
@@ -203,21 +203,21 @@
     },
     "text-field": {
       "projectType": "library",
-      "root": "src/text-field",
-      "sourceRoot": "src/text-field",
+      "root": "src/text_field",
+      "sourceRoot": "src/text_field",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "src/text-field/ng-package.json"
+            "project": "src/text_field/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "src/text-field/tsconfig.lib.prod.json"
+              "tsConfig": "src/text_field/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "src/text-field/tsconfig.lib.json"
+              "tsConfig": "src/text_field/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "development"
@@ -225,7 +225,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "src/text-field/tsconfig.spec.json",
+            "tsConfig": "src/text_field/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
@@ -236,21 +236,21 @@
     },
     "update-values": {
       "projectType": "library",
-      "root": "src/update-values",
-      "sourceRoot": "src/update-values",
+      "root": "src/update_values",
+      "sourceRoot": "src/update_values",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "src/update-values/ng-package.json"
+            "project": "src/update_values/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "src/update-values/tsconfig.lib.prod.json"
+              "tsConfig": "src/update_values/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "src/update-values/tsconfig.lib.json"
+              "tsConfig": "src/update_values/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "development"
@@ -258,7 +258,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "src/update-values/tsconfig.spec.json",
+            "tsConfig": "src/update_values/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
@@ -269,21 +269,21 @@
     },
     "url-hash": {
       "projectType": "library",
-      "root": "src/url-hash",
-      "sourceRoot": "src/url-hash",
+      "root": "src/url_hash",
+      "sourceRoot": "src/url_hash",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "src/url-hash/ng-package.json"
+            "project": "src/url_hash/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "src/url-hash/tsconfig.lib.prod.json"
+              "tsConfig": "src/url_hash/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "src/url-hash/tsconfig.lib.json"
+              "tsConfig": "src/url_hash/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "development"
@@ -291,7 +291,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "src/url-hash/tsconfig.spec.json",
+            "tsConfig": "src/url_hash/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
@@ -302,21 +302,21 @@
     },
     "weighted-tree": {
       "projectType": "library",
-      "root": "src/weighted-tree",
-      "sourceRoot": "src/weighted-tree",
+      "root": "src/weighted_tree",
+      "sourceRoot": "src/weighted_tree",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "src/weighted-tree/ng-package.json"
+            "project": "src/weighted_tree/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "src/weighted-tree/tsconfig.lib.prod.json"
+              "tsConfig": "src/weighted_tree/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "src/weighted-tree/tsconfig.lib.json"
+              "tsConfig": "src/weighted_tree/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "development"
@@ -324,7 +324,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "src/weighted-tree/tsconfig.spec.json",
+            "tsConfig": "src/weighted_tree/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"

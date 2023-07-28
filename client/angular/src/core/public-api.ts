@@ -4,7 +4,7 @@
 
 export * from './services/app_core.service';
 export * from './directives/app_core.directive';
-export * from './directives/core.module';
+export * from './core.module';
 export * from './directives/data_query.directive';
 export * from './directives/data_series_query.directive';
 export * from './directives/global_ref.directive';
@@ -19,5 +19,5 @@ export * from './directives/value.directive';
  * Test exports.
  * TODO() Break these out as package.json exports.
  */
-export * from './test_directives/test_core.module';
+export * from './test_core.module';
 export * from './test_directives/test_data_query.directive';

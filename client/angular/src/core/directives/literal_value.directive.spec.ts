@@ -11,12 +11,13 @@
         limitations under the License.
 */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, ViewChild } from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {DoubleValue, Duration, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, Timestamp, TimestampValue} from 'traceviz-client-core';
 
-import { DblLiteralDirective, DurationLiteralDirective, IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, TimestampLiteralDirective } from './literal_value.directive';
-import { StringValue, StringListValue, StringSetValue, IntegerValue, IntegerListValue, IntegerSetValue, DoubleValue, DurationValue, Duration, TimestampValue, Timestamp } from 'traceviz-client-core';
-import { CoreModule } from './core.module';
+import {CoreModule} from '../core.module';
+
+import {DblLiteralDirective, DurationLiteralDirective, IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, TimestampLiteralDirective} from './literal_value.directive';
 
 @Component({
   template: `

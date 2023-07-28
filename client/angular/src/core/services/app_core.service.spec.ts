@@ -1,9 +1,11 @@
 import {Component, ViewChild} from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AppCoreDirective } from '../directives/app_core.directive';
-import {CoreModule} from '../directives/core.module';
-import {TestCoreModule} from '../test_directives/test_core.module';
-import { AppCoreService } from './app_core.service';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+
+import {CoreModule} from '../core.module';
+import {AppCoreDirective} from '../directives/app_core.directive';
+import {TestCoreModule} from '../test_core.module';
+
+import {AppCoreService} from './app_core.service';
 
 @Component({
   template: `
