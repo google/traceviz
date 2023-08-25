@@ -16,11 +16,10 @@
 */
 
 import {AfterContentInit, ContentChild, ContentChildren, Directive, forwardRef, OnDestroy, QueryList} from '@angular/core';
-import {AppCoreService, DataSeriesDirective} from 'traceviz-angular-core';
-import {DataSeriesQuery} from 'google3/third_party/traceviz/client/core/src/data_series_query/data_series_query';
-import {Trace} from 'traceviz-client-core';
 import {BehaviorSubject, combineLatest, ReplaySubject, Subject} from 'rxjs';
 import {map, takeUntil} from 'rxjs/operators';
+import {AppCoreService, DataSeriesQueryDirective} from 'traceviz-angular-core';
+import {DataSeriesQuery, Trace} from 'traceviz-client-core';
 
 /**
  * A directive producing a trace and a 'loading' status.  Trace visualization
@@ -47,7 +46,8 @@ export abstract class TraceProvider {
 })
 export class TraceDirective extends TraceProvider implements AfterContentInit,
                                                              OnDestroy {
-  @ContentChild(DataSeriesDirective) dataSeries: DataSeriesDirective|undefined;
+  @ContentChild(DataSeriesQueryDirective)
+  dataSeries: DataSeriesQueryDirective|undefined;
 
   trace = new ReplaySubject<Trace>();
   loading = new BehaviorSubject<boolean>(false);
@@ -74,7 +74,7 @@ export class TraceDirective extends TraceProvider implements AfterContentInit,
       this.dataSeriesQuery?.response.pipe(takeUntil(this.unsubscribe))
           .subscribe((response) => {
             try {
-            this.trace.next(Trace.fromNode(response));
+              this.trace.next(Trace.fromNode(response));
             } catch (err: unknown) {
               appCore.err(err);
             }

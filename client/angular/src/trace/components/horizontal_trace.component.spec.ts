@@ -1,13 +1,13 @@
-import 'jasmine';
-
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-
-import {AppCoreService, CoreModule, TestCoreModule} from 'traceviz-angular-core';
-import {HorizontalTraceComponent} from './horizontal_trace.component';
-import {TraceModule} from '../trace.module';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {GLOBAL_TEST_DATA_FETCHER, StringValue, TimestampValue, Duration, Timestamp, ResponseNode, node, ts, dur, int, str, strs, valueMap} from 'google3/third_party/traceviz/client/core/src/data_query/test_data_fetcher';
+import {AppCoreService, CoreModule, TestCoreModule} from 'traceviz-angular-core';
+
+import {TraceModule} from '../trace.module';
+
+import {HorizontalTraceComponent} from './horizontal_trace.component';
+
+import {GLOBAL_TEST_DATA_FETCHER, StringValue, TimestampValue, Duration, Timestamp, ResponseNode, node, ts, dur, int, str, strs, valueMap} from 'traceviz-client-core';
 
 function sec(sec: number): Timestamp {
   return new Timestamp(sec, 0);
@@ -209,7 +209,10 @@ describe('horizontal trace test', () => {
         .configureTestingModule({
           declarations: [TraceTestComponent],
           imports: [
-            CoreModule, TestCoreModule, TraceModule, NoopAnimationsModule,
+            CoreModule,
+            TestCoreModule,
+            TraceModule,
+            NoopAnimationsModule,
           ],
           providers: [{provide: AppCoreService, useValue: appCoreService}]
         })

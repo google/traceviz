@@ -15,12 +15,13 @@
 
 import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, Component, ContentChild, ElementRef, HostListener, Input, OnDestroy, ViewChild} from '@angular/core';
 import * as d3 from 'd3';  // from //third_party/javascript/typings/d3:bundle
-import {ContinuousXAxis, scaleFromAxis, xAxisRenderSettings, TraceCategoryHierarchyYAxis} from 'traceviz-angular-axes';
-import {AppCoreService, InteractionsDirective} from 'traceviz-angular-core';
-import {TraceProvider} from '../directives/trace_provider.directive';
-import {Trace, TimestampValue, Value, ValueMap, Coloring, ConfigurationError, Severity, getLabel, Timestamp, renderCategoryHierarchyForHorizontalSpans, RenderedTraceCategoryHierarchy, RenderedTraceEdge, RenderedTraceSpan, RenderedTraceSpans, renderHorizontalTraceSpans} from 'traceviz-client-core';
 import {Subject} from 'rxjs';
 import {debounceTime, takeUntil} from 'rxjs/operators';
+import {ContinuousXAxis, scaleFromAxis, TraceCategoryHierarchyYAxis, xAxisRenderSettings} from 'traceviz-angular-axes';
+import {AppCoreService, InteractionsDirective} from 'traceviz-angular-core';
+import {Coloring, ConfigurationError, getLabel, renderCategoryHierarchyForHorizontalSpans, RenderedTraceCategoryHierarchy, RenderedTraceEdge, RenderedTraceSpan, RenderedTraceSpans, renderHorizontalTraceSpans, Severity, Timestamp, TimestampValue, Trace, Value, ValueMap} from 'traceviz-client-core';
+
+import {TraceProvider} from '../directives/trace_provider.directive';
 
 const SOURCE = 'trace_component';
 
@@ -319,17 +320,12 @@ export class HorizontalTraceComponent implements AfterContentInit,
                 (rs: RenderedTraceSpan) => rs.width === 0 ? 1 : rs.width)
             .attr('height', (rs: RenderedTraceSpan) => rs.height)
             .on('mouseover',
-                (rs: RenderedTraceSpan, i: number,
-                 n: ArrayLike<SVGSVGElement>) => {
-                  d3.select(n[i]).select('rect').attr('stroke', 'lime');
-                  this.handleSpanMouseover(rs);
+                (event: any, d: RenderedTraceSpan) => {
+                  this.handleSpanMouseover(d);
                 })
             .on('mouseout',
-                (rs: RenderedTraceSpan, i: number,
-                 n: ArrayLike<SVGSVGElement>) => {
-                  rs = rs;
-                  d3.select(n[i]).select('rect').attr('stroke', 'none');
-                  this.handleSpanMouseout(rs);
+                (event: any, d: RenderedTraceSpan) => {
+                  this.handleSpanMouseout(d);
                 })
             .on('click', (rs: RenderedTraceSpan) => {
               try {
@@ -416,8 +412,8 @@ export class HorizontalTraceComponent implements AfterContentInit,
     const brush =
         d3.brushX()
             .extent([[0, 0], [ht.chartWidthPx, heightPx]])
-            .on('end', () => {
-              ht.brush(d3.event.selection, () => {
+            .on('end', (event: any) => {
+              ht.brush(event.selection, () => {
                 chartArea.select<SVGGElement>('.brush').call(brush.move, null);
               });
             });
