@@ -50,6 +50,13 @@ export class GlobalState extends BehaviorSubject<string[]> implements
   }
 
   /**
+   * Returns an iterable through all set keys.
+   */
+  keys(): IterableIterator<string> {
+    return this.valuesByKey.keys();
+  }
+
+  /**
    * Sets the specified key to the specified value in the global state mapping.
    * It is an error to call set() on a key already present in the global
    * mapping.

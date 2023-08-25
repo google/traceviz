@@ -11,22 +11,17 @@
         limitations under the License.
 */
 
-import 'jasmine';
-
 import {Component, Input, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {initAngularTestEnvironment} from 'google3/javascript/angular2/testing/init';
 import {GLOBAL_TEST_DATA_FETCHER, ResponseNode, StringValue, Trace, Duration, str, dur, int, valueMap, prettyPrintTrace, node} from 'traceviz-client-core';
-import { AppCoreService, CoreModule, TestCoreModule } from 'traceviz-angular-core';
+import {AppCoreService, CoreModule, TestCoreModule} from 'traceviz-angular-core';
 import {TraceModule} from '../trace.module';
 import {UnionTracesDirective} from './trace_provider.directive';
 
 function d(sec: number): Duration {
   return new Duration(sec * 1E9);
 }
-
-initAngularTestEnvironment();
 
 function buildTrace(layer: number): ResponseNode {
   return node(
@@ -61,25 +56,24 @@ function buildTrace(layer: number): ResponseNode {
     <app-core>
       <global-state>
         <value-map>
-          <value *ngFor="let layerName of layerNames"
-            [key]="'trace_name_'+layerName"><string></string></value>
+          <value key="trace_name_a"><string></string></value>
         </value-map>
       </global-state>
       <test-data-query>
       </test-data-query>
     </app-core>
     <union-traces>
-      <trace *ngFor="let layerName of layerNames">
+      <trace>
         <data-series>
           <query><value><string>foo</string></value></query>
           <interactions>
             <reaction type="fetch" target="data-series">
               <and>
                 <not><equals>
-                  <global-ref [key]="'trace_name_'+layerName"></global-ref>
+                  <global-ref key="trace_name_a"></global-ref>
                   <string></string>
                 </equals></not>
-                <changed><global-ref [key]="'trace_name_'+layerName"></global-ref></changed>
+                <changed><global-ref key="trace_name_a"></global-ref></changed>
               </and>
             </reaction>
           </interactions>
@@ -88,13 +82,13 @@ function buildTrace(layer: number): ResponseNode {
       </trace>
     </union-traces>`
 })
-class TraceTestComponent {
+class SingleTraceProviderTestComponent {
   @Input() layerNames: string[] = [];
   @ViewChild(UnionTracesDirective) unionedTrace!: UnionTracesDirective;
 }
 
-describe('trace data test', () => {
-  let fixture: ComponentFixture<TraceTestComponent>;
+describe('single trace data test', () => {
+  let fixture: ComponentFixture<SingleTraceProviderTestComponent>;
   const appCoreService = new AppCoreService();
   appCoreService.appCore.configurationErrors.subscribe((err) => {
     fail(err);
@@ -104,15 +98,17 @@ describe('trace data test', () => {
     appCoreService.appCore.reset();
     await TestBed
         .configureTestingModule({
-          declarations: [TraceTestComponent],
+          declarations: [SingleTraceProviderTestComponent],
           imports: [
-            CoreModule, TestCoreModule, TraceModule,
-            NoopAnimationsModule
+            CoreModule,
+            TestCoreModule,
+            TraceModule,
+            NoopAnimationsModule,
           ],
           providers: [{provide: AppCoreService, useValue: appCoreService}]
         })
         .compileComponents();
-    fixture = TestBed.createComponent(TraceTestComponent);
+    fixture = TestBed.createComponent(SingleTraceProviderTestComponent);
     await fixture.whenStable();
   });
 
@@ -121,7 +117,6 @@ describe('trace data test', () => {
     fixture.componentInstance.layerNames = ['a'];
     fixture.detectChanges();
     const t = fixture.componentInstance;
-    // const traces = Array.from(t.unionedTrace.layers);
     const collectionName =
         appCoreService.appCore.globalState.get('trace_name_a') as StringValue;
     t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames) => {
@@ -146,13 +141,92 @@ describe('trace data test', () => {
       at 0ns for 0ns
 `]);
   });
+});
+
+
+@Component({
+  template: `
+    <app-core>
+      <global-state>
+        <value-map>
+        <value key="trace_name_a"><string></string></value>
+        <value key="trace_name_b"><string></string></value>
+        </value-map>
+      </global-state>
+      <test-data-query>
+      </test-data-query>
+    </app-core>
+    <union-traces>
+    <trace>
+        <data-series>
+          <query><value><string>foo</string></value></query>
+          <interactions>
+            <reaction type="fetch" target="data-series">
+              <and>
+                <not><equals>
+                  <global-ref key="trace_name_a"></global-ref>
+                  <string></string>
+                </equals></not>
+                <changed><global-ref key="trace_name_a"></global-ref></changed>
+              </and>
+            </reaction>
+          </interactions>
+          <parameters></parameters>
+        </data-series>
+      </trace>
+      <trace>
+        <data-series>
+          <query><value><string>foo</string></value></query>
+          <interactions>
+            <reaction type="fetch" target="data-series">
+              <and>
+                <not><equals>
+                  <global-ref key="trace_name_b"></global-ref>
+                  <string></string>
+                </equals></not>
+                <changed><global-ref key="trace_name_b"></global-ref></changed>
+              </and>
+            </reaction>
+          </interactions>
+          <parameters></parameters>
+        </data-series>
+      </trace>    </union-traces>`
+})
+class DoubleTraceProviderTestComponent {
+  @Input() layerNames: string[] = [];
+  @ViewChild(UnionTracesDirective) unionedTrace!: UnionTracesDirective;
+}
+
+describe('double trace data test', () => {
+  let fixture: ComponentFixture<DoubleTraceProviderTestComponent>;
+  const appCoreService = new AppCoreService();
+  appCoreService.appCore.configurationErrors.subscribe((err) => {
+    fail(err);
+  });
+
+  beforeEach(async () => {
+    appCoreService.appCore.reset();
+    await TestBed
+        .configureTestingModule({
+          declarations: [DoubleTraceProviderTestComponent],
+          imports: [
+            CoreModule,
+            TestCoreModule,
+            TraceModule,
+            NoopAnimationsModule,
+          ],
+          providers: [{provide: AppCoreService, useValue: appCoreService}]
+        })
+        .compileComponents();
+    fixture = TestBed.createComponent(DoubleTraceProviderTestComponent);
+    await fixture.whenStable();
+  });
 
   it('unions layer properly', () => {
     GLOBAL_TEST_DATA_FETCHER.reset();
     fixture.componentInstance.layerNames = ['a', 'b'];
     fixture.detectChanges();
     const t = fixture.componentInstance;
-    // const traces = Array.from(t.unionedTrace.layers);
     const collectionAName =
         appCoreService.appCore.globalState.get('trace_name_a') as StringValue;
     const collectionBName =
