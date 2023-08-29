@@ -1,3 +1,16 @@
+/*
+    Copyright 2023 Google Inc.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        https://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
 import 'jasmine';
 
 import {Coloring} from '../color/color.js';
@@ -12,7 +25,7 @@ function sec(sec: number): Timestamp {
   return new Timestamp(sec, 0);
 }
 
-function prettyPrintPointValue(val: Timestamp|Duration|number): string {
+function prettyPrintPointValue<T>(val: T): string {
   if (val instanceof Timestamp) {
     return val.toDate().toString();
   }
@@ -38,8 +51,10 @@ function prettyPrint(chart: XYChart): string {
         cols.primary})`);
     for (const point of series.points) {
       ret.push(`    (${
-          prettyPrintPointValue(chart.xAxis.pointValue(point.properties))}, ${
-          prettyPrintPointValue(chart.yAxis.pointValue(point.properties))})`);
+          prettyPrintPointValue(
+              chart.xAxis.value(point.properties, 'x_axis'))}, ${
+          prettyPrintPointValue(
+              chart.yAxis.value(point.properties, 'y_axis'))})`);
       if (point.properties.has('story')) {
         ret.push(`      -> "${point.properties.expectString('story')}"`);
       }
@@ -50,7 +65,7 @@ function prettyPrint(chart: XYChart): string {
 
 describe('xy chart test', () => {
   it('gets xy chart', () => {
-    const chart = new XYChart(node(
+    const chart = XYChart.fromNode(node(
         valueMap(
             {key: 'color_space_things', val: strs('blue')},
             {key: 'color_space_stuff', val: strs('red')},

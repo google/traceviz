@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Tools for working with two-dimensional series data.  See
+ * ../../../../server/go/xy_chart/xy_chart.go for more detail.
+ */
+
 /*
     Copyright 2023 Google Inc.
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,13 +16,8 @@
     limitations under the License.
 */
 
-/**
- * @fileoverview Tools for working with two-dimensional series data.  See
- * ../../../../server/go/xy_chart/xy_chart.go for more detail.
- */
-
 import {Category, categoryProperties, getDefinedCategory} from '../category/category.js';
-import {DurationAxis, getAxis, NumberAxis, TimestampAxis} from '../continuous_axis/continuous_axis.js';
+import {Axis, getAxis} from '../continuous_axis/continuous_axis.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 import {ValueMap} from '../value/value_map.js';
@@ -58,12 +58,20 @@ export class Series {
 
 /** An XY chart. */
 export class XYChart {
-  readonly xAxis: TimestampAxis|DurationAxis|NumberAxis;
-  readonly yAxis: TimestampAxis|DurationAxis|NumberAxis;
   readonly series: Series[];
   readonly properties: ValueMap;
 
-  constructor(node: ResponseNode) {
+  constructor(
+      readonly xAxis: Axis<unknown>, readonly yAxis: Axis<unknown>,
+      node: ResponseNode) {
+    this.series = new Array<Series>();
+    for (const child of node.children.slice(1)) {
+      this.series.push(new Series(child));
+    }
+    this.properties = node.properties;
+  }
+
+  static fromNode(node: ResponseNode): XYChart {
     if (node.children.length < 1) {
       throw new ConfigurationError(`xy-chart defines no axes`)
           .from(SOURCE)
@@ -77,13 +85,8 @@ export class XYChart {
           .from(SOURCE)
           .at(Severity.ERROR);
     }
-    this.xAxis = getAxis(axisGroup.children[0].properties);
-    this.yAxis = getAxis(axisGroup.children[1].properties);
-    const series = new Array<Series>();
-    for (const child of node.children.slice(1)) {
-      series.push(new Series(child));
-    }
-    this.series = series;
-    this.properties = node.properties;
+    const xAxis = getAxis(axisGroup.children[0].properties);
+    const yAxis = getAxis(axisGroup.children[1].properties);
+    return new XYChart(xAxis, yAxis, node);
   }
 }
