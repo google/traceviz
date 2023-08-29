@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
 	"github.com/google/traceviz/server/go/category"
@@ -76,7 +77,7 @@ var (
 )
 
 type categoryer interface {
-	Category(category *category.Category, properties ...util.PropertyUpdate) *trace.Category
+	Category(category *category.Category, properties ...util.PropertyUpdate) *trace.Category[time.Time]
 }
 
 func handleTraceQuery(coll *Collection, qf *queryFilters, series util.DataBuilder, reqOpts map[string]*util.V) error {
@@ -95,7 +96,7 @@ func handleTraceQuery(coll *Collection, qf *queryFilters, series util.DataBuilde
 	}
 	startTimestamp := root.entries[0].Time
 	endTimestamp := root.entries[len(root.entries)-1].Time
-	t := trace.New(
+	t := trace.New[time.Time](
 		series,
 		continuousaxis.NewTimestampAxis(
 			category.New("x_axis", "Time", "Time from start of log"),
@@ -112,11 +113,11 @@ func handleTraceQuery(coll *Collection, qf *queryFilters, series util.DataBuilde
 		childCat := parent.Category(
 			category.New(node.pathFragment, node.pathFragment, node.pathFragment),
 		)
-		childSpan := childCat.Span(0, endTimestamp.Sub(startTimestamp))
+		childSpan := childCat.Span(startTimestamp, endTimestamp)
 		for _, entry := range node.entries {
 			childSpan.Subspan(
-				entry.Time.Sub(startTimestamp),
-				0,
+				entry.Time,
+				entry.Time,
 				colorSpacesByLevelWeight[entry.Level.Weight].PrimaryColor(1),
 			)
 		}

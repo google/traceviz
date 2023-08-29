@@ -9,15 +9,16 @@
         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
         See the License to the specific language governing permissions and
         limitations under the License.
-*/ 
+*/
 
 import 'jasmine';
 
+import {sec} from '../test_responses/prettyprint.js';
 import {dur, int, str, ts, valueMap} from '../value/test_value.js';
 import {node} from '../protocol/test_response.js';
 import {prettyPrintTrace} from '../test_responses/prettyprint.js';
 import {Trace} from './trace.js';
-import {sec, d, schedvizRunningNode, schedvizWaitingNode, userInstrumentationNode, embeddedNode, rpcNode} from '../test_responses/traces.js';
+import {d, schedvizRunningNode, schedvizWaitingNode, userInstrumentationNode, embeddedNode, rpcNode} from '../test_responses/traces.js';
 
 describe('trace test', () => {
   it('merges fixed time-base traces properly', () => {
@@ -329,8 +330,7 @@ describe('trace test', () => {
   });
 
   it('gets RPC trace', () => {
-    expect(prettyPrintTrace(Trace.fromNode(rpcNode)))
-        .toBe(`Trace:
+    expect(prettyPrintTrace(Trace.fromNode(rpcNode))).toBe(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain 0ns, 5.000m)
   Category rpc a 'RPC a' (RPC a):
     span-height self:1 total:6
@@ -441,8 +441,7 @@ describe('trace test', () => {
   });
 
   it('gets trace with embedded data', () => {
-    expect(prettyPrintTrace(Trace.fromNode(embeddedNode)))
-        .toBe(`Trace:
+    expect(prettyPrintTrace(Trace.fromNode(embeddedNode))).toBe(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain 0ns, 8.333m)
   Category pid 100 'PID 100' (PID 100):
     span-height self:1 total:4

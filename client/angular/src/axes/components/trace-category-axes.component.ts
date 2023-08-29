@@ -30,7 +30,8 @@ const supportedActions = new Array<[string, string]>(
  * axis.
  */
 export abstract class TraceCategoryHierarchyYAxis {
-  abstract render(renderedCategories: RenderedTraceCategoryHierarchy<unknown>): void;
+  abstract render(renderedCategories: RenderedTraceCategoryHierarchy<unknown>):
+      void;
 }
 
 /**
@@ -123,15 +124,16 @@ export class RectangularTraceCategoryHierarchyYAxis extends
             .attr('width', (rc: RenderedTraceCategory<unknown>) => rc.width)
             .attr('height', (rc: RenderedTraceCategory<unknown>) => rc.height)
             .on('mouseover',
-                (rc: RenderedTraceCategory<unknown>, i: number,
-                 n: ArrayLike<SVGSVGElement>) => {
+                (event: any, rc: RenderedTraceCategory<unknown>) => {
+                  const n = nodes.nodes();
+                  const i = n.indexOf(event.target);
                   d3.select(n[i]).select('rect').attr('stroke', 'lime');
                   this.handleCategoryMouseover(rc);
                 })
             .on('mouseout',
-                (rc: RenderedTraceCategory<unknown>, i: number,
-                 n: ArrayLike<SVGSVGElement>) => {
-                  rc = rc;
+                (event: any, rc: RenderedTraceCategory<unknown>) => {
+                  const n = nodes.nodes();
+                  const i = n.indexOf(event.target);
                   d3.select(n[i]).select('rect').attr('stroke', 'none');
                   this.handleCategoryMouseout(rc);
                 })
@@ -188,7 +190,8 @@ export class RectangularTraceCategoryHierarchyYAxis extends
               .attr('x', (rc: RenderedTraceCategory<unknown>) => rc.x0Px)
               .attr('y', (rc: RenderedTraceCategory<unknown>) => rc.y0Px)
               .attr('width', (rc: RenderedTraceCategory<unknown>) => rc.width)
-              .attr('height', (rc: RenderedTraceCategory<unknown>) => rc.height);
+              .attr(
+                  'height', (rc: RenderedTraceCategory<unknown>) => rc.height);
         });
     nodes.call(
         // tslint:disable-next-line:no-any
@@ -236,7 +239,9 @@ export class RectangularTraceCategoryHierarchyYAxis extends
                   'fill',
                   (rc: RenderedTraceCategory<unknown>) =>
                       coloring.colors(rc.properties).stroke)
-              .text((rc: RenderedTraceCategory<unknown>) => getLabel(rc.properties));
+              .text(
+                  (rc: RenderedTraceCategory<unknown>) =>
+                      getLabel(rc.properties));
         });
   }
 }

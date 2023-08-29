@@ -13,7 +13,8 @@
 
 import 'jasmine';
 
-import {rpcNode, schedvizRunningNode, schedvizWaitingNode, sec, d} from '../test_responses/traces.js';
+import {sec} from '../test_responses/prettyprint.js';
+import {d, rpcNode, schedvizRunningNode, schedvizWaitingNode} from '../test_responses/traces.js';
 import {Timestamp} from '../timestamp/timestamp.js';
 import {Trace} from '../trace/trace.js';
 
@@ -175,47 +176,52 @@ describe('renderers test', () => {
             [
               new RenderedTraceSpan(
                   valueMap(
-                    {key: 'pid', val: int(100)},
+                      {key: 'pid', val: int(100)},
                       {key: 'trace_start', val: dur(d(0))},
                       {key: 'trace_end', val: dur(d(100))},
-                    ), 0, 3, 100, 13),
+                      ),
+                  0, 3, 100, 13),
               new RenderedTraceSpan(
                   valueMap(
-                    {key: 'pid', val: int(200)},
+                      {key: 'pid', val: int(200)},
                       {key: 'trace_start', val: dur(d(100))},
                       {key: 'trace_end', val: dur(d(150))},
-                    ), 100, 3, 150, 13),
+                      ),
+                  100, 3, 150, 13),
               new RenderedTraceSpan(
                   valueMap(
-                    {key: 'pid', val: int(100)},
+                      {key: 'pid', val: int(100)},
                       {key: 'trace_start', val: dur(d(150))},
                       {key: 'trace_end', val: dur(d(300))},
-                    ), 150, 3, 300, 13),
+                      ),
+                  150, 3, 300, 13),
               new RenderedTraceSpan(
-                valueMap(
+                  valueMap(
                       {key: 'trace_start', val: dur(d(0))},
                       {key: 'trace_end', val: dur(d(100))},
-                ),
-                 0, 16, 100, 26),
+                      ),
+                  0, 16, 100, 26),
               new RenderedTraceSpan(
                   valueMap(
-                    {key: 'pids', val: ints(100)},
+                      {key: 'pids', val: ints(100)},
                       {key: 'trace_start', val: dur(d(100))},
                       {key: 'trace_end', val: dur(d(150))},
-                    ), 100, 16, 150, 26),
+                      ),
+                  100, 16, 150, 26),
               new RenderedTraceSpan(
                   valueMap(
-                    {key: 'pids', val: ints(200)},
+                      {key: 'pids', val: ints(200)},
                       {key: 'trace_start', val: dur(d(150))},
                       {key: 'trace_end', val: dur(d(200))},
-                    ), 150, 16, 200, 26),
+                      ),
+                  150, 16, 200, 26),
               new RenderedTraceSpan(
                   valueMap(
-                    {key: 'pids', val: ints(100, 300)},
+                      {key: 'pids', val: ints(100, 300)},
                       {key: 'trace_start', val: dur(d(200))},
                       {key: 'trace_end', val: dur(d(300))},
-                    ), 200, 16, 300,
-                  26),
+                      ),
+                  200, 16, 300, 26),
             ],
             []));
     const gotRenderedTraceCategoryHierarchy =

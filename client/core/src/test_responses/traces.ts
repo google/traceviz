@@ -13,13 +13,8 @@
 
 import {ts, dur, int, ints, str, strs, valueMap} from '../value/test_value.js';
 import {node} from '../protocol/test_response.js';
-import {Timestamp} from '../timestamp/timestamp.js';
+import {sec} from './prettyprint.js';
 import {Duration} from '../duration/duration.js';
-
-/** Returns a Timestamp at the specified seconds after epoch. */
-export function sec(sec: number): Timestamp {
-  return new Timestamp(sec, 0);
-}
 
 /** Returns a Duration of the specified seconds. */
 export function d(sec: number): Duration {
