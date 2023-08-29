@@ -17,7 +17,6 @@
 package continuousaxis
 
 import (
-	"errors"
 	"math"
 	"time"
 
@@ -69,148 +68,95 @@ func (y YAxisRenderSettings) Apply() util.PropertyUpdate {
 }
 
 // Axis is implemented by types that can act as axes.
-type Axis interface {
-	Define() util.PropertyUpdate
-	Value(v any) util.PropertyUpdate
+type Axis[T float64 | time.Duration | time.Time] struct {
+	axisType string
+	cat      *category.Category
+	Value    func(key string, v T) util.PropertyUpdate
+	min, max T
 }
 
-// TimestampAxis describes a temporal domain with a known starting point.
-type TimestampAxis struct {
-	cat      *category.Category
-	min, max time.Time
+func newAxis[T float64 | time.Duration | time.Time](
+	axisType string,
+	cat *category.Category,
+	valueFn func(key string, v T) util.PropertyUpdate,
+	min, max T) *Axis[T] {
+	return &Axis[T]{
+		axisType: axisType,
+		cat:      cat,
+		Value:    valueFn,
+		min:      min,
+		max:      max,
+	}
+}
+
+// Define annotates with a definition of the receiver.
+func (a *Axis[T]) Define() util.PropertyUpdate {
+	return util.Chain(
+		a.cat.Define(),
+		util.StringProperty(axisTypeKey, a.axisType),
+		a.Value(axisMinKey, a.min),
+		a.Value(axisMaxKey, a.max),
+	)
+}
+
+// CategoryID returns the category ID of the receiving Axis.
+func (a *Axis[T]) CategoryID() string {
+	return a.cat.ID()
 }
 
 // NewTimestampAxis returns a new TimestampAxis with the specified category.
 // If the optional extents are provided, the axis' minimum and maximum extents
 // will be initialized to the lowest and highest of those extents.
-func NewTimestampAxis(cat *category.Category, extents ...time.Time) *TimestampAxis {
-	ret := &TimestampAxis{
-		cat: cat,
-	}
+func NewTimestampAxis(cat *category.Category, extents ...time.Time) *Axis[time.Time] {
+	var min, max time.Time
 	for _, extent := range extents {
-		if ret.min.IsZero() || ret.min.After(extent) {
-			ret.min = extent
+		if min.IsZero() || min.After(extent) {
+			min = extent
 		}
-		if ret.max.IsZero() || ret.max.Before(extent) {
-			ret.max = extent
+		if max.IsZero() || max.Before(extent) {
+			max = extent
 		}
 	}
-	return ret
-}
-
-// Define annotates with a definition of the receiver.
-func (ta *TimestampAxis) Define() util.PropertyUpdate {
-	return util.Chain(
-		ta.cat.Define(),
-		util.StringProperty(axisTypeKey, timestampAxisType),
-		util.TimestampProperty(axisMinKey, ta.min),
-		util.TimestampProperty(axisMaxKey, ta.max),
-	)
-}
-
-// Value returns a TraceViz Value for the provided value along the axis.
-// The provided value must be a time.Time.
-func (ta *TimestampAxis) Value(v any) util.PropertyUpdate {
-	switch val := v.(type) {
-	case time.Time:
-		return util.TimestampProperty(ta.cat.ID(), val)
-	default:
-		return util.ErrorProperty(errors.New("axis expected Timestamp value"))
-	}
-}
-
-// Offset returns the specified time's offset from the axis minimum.
-func (ta *TimestampAxis) Offset(t time.Time) time.Duration {
-	return t.Sub(ta.min)
-}
-
-// DurationAxis describes a temporal domain with an unknown starting point.
-type DurationAxis struct {
-	cat      *category.Category
-	duration time.Duration
+	return newAxis[time.Time](
+		timestampAxisType, cat,
+		func(key string, v time.Time) util.PropertyUpdate {
+			return util.TimestampProperty(key, v)
+		}, min, max)
 }
 
 // NewDurationAxis returns a new DurationAxis with the specified category.
 // If the optional extents are provided, the axis' minimum and maximum extents
 // will be initialized to the lowest and highest of those extents.
-func NewDurationAxis(cat *category.Category, extents ...time.Duration) *DurationAxis {
-	ret := &DurationAxis{
-		cat: cat,
-	}
+func NewDurationAxis(cat *category.Category, extents ...time.Duration) *Axis[time.Duration] {
+	var max time.Duration
 	for _, extent := range extents {
-		if extent > ret.duration {
-			ret.duration = extent
+		if extent > max {
+			max = extent
 		}
 	}
-	return ret
-}
-
-// Define annotates with a definition of the receiver.
-func (da *DurationAxis) Define() util.PropertyUpdate {
-	return util.Chain(
-		da.cat.Define(),
-		util.StringProperty(axisTypeKey, durationAxisType),
-		util.DurationProperty(axisMinKey, 0),
-		util.DurationProperty(axisMaxKey, da.duration),
-	)
-}
-
-// Value returns a TraceViz Value for the provided value along the axis.
-// The provided value must be a time.Time.
-func (da *DurationAxis) Value(v any) util.PropertyUpdate {
-	switch val := v.(type) {
-	case time.Duration:
-		return util.DurationProperty(da.cat.ID(), val)
-	default:
-		return util.ErrorProperty(errors.New("axis expected Duration value"))
-	}
-}
-
-// DoubleAxis describes a numeric domain.
-type DoubleAxis struct {
-	cat      *category.Category
-	min, max float64
+	return newAxis[time.Duration](
+		durationAxisType, cat,
+		func(key string, v time.Duration) util.PropertyUpdate {
+			return util.DurationProperty(key, v)
+		}, 0, max)
 }
 
 // NewDoubleAxis returns a new DoubleAxis with the specified category.
 // If the optional extents are provided, the axis' minimum and maximum extents
 // will be initialized to the lowest and highest of those extents.
-func NewDoubleAxis(cat *category.Category, extents ...float64) *DoubleAxis {
-	ret := &DoubleAxis{
-		cat: cat,
-		min: math.MaxFloat64,
-		max: -math.MaxFloat64,
-	}
+func NewDoubleAxis(cat *category.Category, extents ...float64) *Axis[float64] {
+	var min, max float64 = math.MaxFloat64, -math.MaxFloat64
 	for _, extent := range extents {
-		if ret.min > extent {
-			ret.min = extent
+		if min > extent {
+			min = extent
 		}
-		if ret.max < extent {
-			ret.max = extent
+		if max < extent {
+			max = extent
 		}
 	}
-	return ret
-}
-
-// Define annotates with a definition of the receiver.
-func (da *DoubleAxis) Define() util.PropertyUpdate {
-	return util.Chain(
-		da.cat.Define(),
-		util.StringProperty(axisTypeKey, doubleAxisType),
-		util.DoubleProperty(axisMinKey, da.min),
-		util.DoubleProperty(axisMaxKey, da.max),
-	)
-}
-
-// Value returns a TraceViz Value for the provided value along the axis.
-// The provided value must be a float64 or an int.
-func (da *DoubleAxis) Value(v any) util.PropertyUpdate {
-	switch val := v.(type) {
-	case float64:
-		return util.DoubleProperty(da.cat.ID(), val)
-	case int:
-		return util.DoubleProperty(da.cat.ID(), float64(val))
-	default:
-		return util.ErrorProperty(errors.New("axis expected float64 value"))
-	}
+	return newAxis[float64](
+		doubleAxisType, cat,
+		func(key string, v float64) util.PropertyUpdate {
+			return util.DoubleProperty(key, v)
+		}, min, max)
 }

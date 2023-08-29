@@ -17,6 +17,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/traceviz/server/go/category"
+	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
 	"github.com/google/traceviz/server/go/payload"
 	testutil "github.com/google/traceviz/server/go/test_util"
 	"github.com/google/traceviz/server/go/util"
@@ -36,6 +38,8 @@ func (tp *testPayloader) Payload() util.DataBuilder {
 	return tp.db.Child()
 }
 
+var cat = category.New("x_axis", "Trace time", "Time from start of trace")
+
 func TestTraceEdges(t *testing.T) {
 	for _, test := range []struct {
 		description    string
@@ -45,7 +49,9 @@ func TestTraceEdges(t *testing.T) {
 		description: "A->B",
 		buildTraceEdge: func(db util.DataBuilder) {
 			tp := newTestPayloader(db)
-			New(tp, 50*time.Second, "A", "B").With(
+			New(
+				continuousaxis.NewDurationAxis(cat, 300*time.Nanosecond),
+				tp, 50*time.Second, "A", "B").With(
 				util.StringProperty("label", "Howdy partner I'm A"),
 			)
 		},
@@ -53,7 +59,7 @@ func TestTraceEdges(t *testing.T) {
 			db.Child().With(
 				util.StringProperty(payload.TypeKey, PayloadType),
 				util.StringProperty(nodeIDKey, "A"),
-				util.DurationProperty(offsetKey, 50*time.Second),
+				util.DurationProperty(startKey, 50*time.Second),
 				util.StringsProperty(endpointNodeIDsKey, "B"),
 				util.StringProperty("label", "Howdy partner I'm A"),
 			)

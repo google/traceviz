@@ -13,16 +13,16 @@
 
 import 'jasmine';
 
-import {rpcNode, schedvizRunningNode, schedvizWaitingNode} from '../test_responses/traces.js';
+import {rpcNode, schedvizRunningNode, schedvizWaitingNode, sec, d} from '../test_responses/traces.js';
 import {Timestamp} from '../timestamp/timestamp.js';
 import {Trace} from '../trace/trace.js';
 
-import {str, ts, int, ints, valueMap} from '../value/test_value.js';
+import {dur, str, ts, int, ints, valueMap} from '../value/test_value.js';
 
 import {renderCategoryHierarchyForHorizontalSpans, RenderedTraceEdge, RenderedTraceSpan, RenderedTraceSpans, renderHorizontalTraceSpans} from './renderers.js';
 
 describe('renderers test', () => {
-  it('renders dapper on a horizontal timeline', () => {
+  it('renders rpc trace on a horizontal timeline', () => {
     const trace = Trace.union(
         Trace.fromNode(rpcNode.with(valueMap(
             {key: 'span_width_cat_px', val: int(10)},
@@ -40,33 +40,87 @@ describe('renderers test', () => {
             [
               // rpc a span
               new RenderedTraceSpan(
-                  valueMap({key: 'rpc', val: str('a')}), 0, 0, 300, 10),
+                  valueMap(
+                      {key: 'rpc', val: str('a')},
+                      {key: 'trace_start', val: ts(sec(0))},
+                      {key: 'trace_end', val: ts(sec(300))},
+                      ),
+                  0, 0, 300, 10),
               // rpc b span
               new RenderedTraceSpan(
-                  valueMap({key: 'rpc', val: str('b')}), 0, 13, 180, 23),
+                  valueMap(
+                      {key: 'rpc', val: str('b')},
+                      {key: 'trace_start', val: ts(sec(0))},
+                      {key: 'trace_end', val: ts(sec(180))},
+                      ),
+                  0, 13, 180, 23),
               // rpc c span
               new RenderedTraceSpan(
-                  valueMap({key: 'rpc', val: str('c')}), 20, 26, 120, 36),
+                  valueMap(
+                      {key: 'rpc', val: str('c')},
+                      {key: 'trace_start', val: ts(sec(20))},
+                      {key: 'trace_end', val: ts(sec(120))},
+                      ),
+                  20, 26, 120, 36),
               // rpc d span
               new RenderedTraceSpan(
-                  valueMap({key: 'rpc', val: str('d')}), 140, 39, 160, 49),
+                  valueMap(
+                      {key: 'rpc', val: str('d')},
+                      {key: 'trace_start', val: ts(sec(140))},
+                      {key: 'trace_end', val: ts(sec(160))},
+                      ),
+                  140, 39, 160, 49),
               // rpc e span
               new RenderedTraceSpan(
-                  valueMap({key: 'rpc', val: str('e')}), 220, 52, 280, 62),
+                  valueMap(
+                      {key: 'rpc', val: str('e')},
+                      {key: 'trace_start', val: ts(sec(220))},
+                      {key: 'trace_end', val: ts(sec(280))},
+                      ),
+                  220, 52, 280, 62),
               // rpc a span
               new RenderedTraceSpan(
-                  valueMap({key: 'rpc', val: str('a')}), 240, 65, 250, 75),
+                  valueMap(
+                      {key: 'rpc', val: str('a')},
+                      {key: 'trace_start', val: ts(sec(240))},
+                      {key: 'trace_end', val: ts(sec(250))},
+                      ),
+                  240, 65, 250, 75),
               // rpc a subspan
               new RenderedTraceSpan(
-                  valueMap({key: 'state', val: str('local')}), 240, 65, 250,
-                  75),
+                  valueMap(
+                      {key: 'state', val: str('local')},
+                      {key: 'trace_start', val: ts(sec(240))},
+                      {key: 'trace_end', val: ts(sec(250))},
+                      ),
+                  240, 65, 250, 75),
             ],
             [
-              new RenderedTraceEdge(valueMap(), 0, 5, 0, 18),       // a->b
-              new RenderedTraceEdge(valueMap(), 220, 5, 220, 57),   // a->e
-              new RenderedTraceEdge(valueMap(), 20, 18, 20, 31),    // b->c
-              new RenderedTraceEdge(valueMap(), 140, 18, 140, 44),  // b->d
-              new RenderedTraceEdge(valueMap(), 240, 57, 240, 70),  // e->a
+              new RenderedTraceEdge(
+                  valueMap(
+                      {key: 'trace_edge_start', val: ts(sec(0))},
+                      ),
+                  0, 5, 0, 18),  // a->b
+              new RenderedTraceEdge(
+                  valueMap(
+                      {key: 'trace_edge_start', val: ts(sec(220))},
+                      ),
+                  220, 5, 220, 57),  // a->e
+              new RenderedTraceEdge(
+                  valueMap(
+                      {key: 'trace_edge_start', val: ts(sec(20))},
+                      ),
+                  20, 18, 20, 31),  // b->c
+              new RenderedTraceEdge(
+                  valueMap(
+                      {key: 'trace_edge_start', val: ts(sec(140))},
+                      ),
+                  140, 18, 140, 44),  // b->d
+              new RenderedTraceEdge(
+                  valueMap(
+                      {key: 'trace_edge_start', val: ts(sec(240))},
+                      ),
+                  240, 57, 240, 70),  // e->a
             ]));
     const gotRenderedTraceCategoryHierarchy =
         renderCategoryHierarchyForHorizontalSpans(trace);
@@ -120,18 +174,47 @@ describe('renderers test', () => {
         .toEqual(new RenderedTraceSpans(
             [
               new RenderedTraceSpan(
-                  valueMap({key: 'pid', val: int(100)}), 0, 3, 100, 13),
+                  valueMap(
+                    {key: 'pid', val: int(100)},
+                      {key: 'trace_start', val: dur(d(0))},
+                      {key: 'trace_end', val: dur(d(100))},
+                    ), 0, 3, 100, 13),
               new RenderedTraceSpan(
-                  valueMap({key: 'pid', val: int(200)}), 100, 3, 150, 13),
+                  valueMap(
+                    {key: 'pid', val: int(200)},
+                      {key: 'trace_start', val: dur(d(100))},
+                      {key: 'trace_end', val: dur(d(150))},
+                    ), 100, 3, 150, 13),
               new RenderedTraceSpan(
-                  valueMap({key: 'pid', val: int(100)}), 150, 3, 300, 13),
-              new RenderedTraceSpan(valueMap(), 0, 16, 100, 26),
+                  valueMap(
+                    {key: 'pid', val: int(100)},
+                      {key: 'trace_start', val: dur(d(150))},
+                      {key: 'trace_end', val: dur(d(300))},
+                    ), 150, 3, 300, 13),
               new RenderedTraceSpan(
-                  valueMap({key: 'pids', val: ints(100)}), 100, 16, 150, 26),
+                valueMap(
+                      {key: 'trace_start', val: dur(d(0))},
+                      {key: 'trace_end', val: dur(d(100))},
+                ),
+                 0, 16, 100, 26),
               new RenderedTraceSpan(
-                  valueMap({key: 'pids', val: ints(200)}), 150, 16, 200, 26),
+                  valueMap(
+                    {key: 'pids', val: ints(100)},
+                      {key: 'trace_start', val: dur(d(100))},
+                      {key: 'trace_end', val: dur(d(150))},
+                    ), 100, 16, 150, 26),
               new RenderedTraceSpan(
-                  valueMap({key: 'pids', val: ints(100, 300)}), 200, 16, 300,
+                  valueMap(
+                    {key: 'pids', val: ints(200)},
+                      {key: 'trace_start', val: dur(d(150))},
+                      {key: 'trace_end', val: dur(d(200))},
+                    ), 150, 16, 200, 26),
+              new RenderedTraceSpan(
+                  valueMap(
+                    {key: 'pids', val: ints(100, 300)},
+                      {key: 'trace_start', val: dur(d(200))},
+                      {key: 'trace_end', val: dur(d(300))},
+                    ), 200, 16, 300,
                   26),
             ],
             []));

@@ -1,7 +1,3 @@
-/**
- * @fileoverview Directives for defining trace layers and unioned traces.
- */
-
 /*
         Copyright 2023 Google Inc.
         Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +26,7 @@ export abstract class TraceProvider {
   /** An observable emitting true when trace data is being fetched. */
   abstract loading: BehaviorSubject<boolean>;
   /** An observable emitting fetched Trace data when it becomes available. */
-  abstract trace: ReplaySubject<Trace>;
+  abstract trace: ReplaySubject<Trace<unknown>>;
   /**
    * The unique data series names of all data series under this provider.  For
    * testing only.
@@ -46,10 +42,9 @@ export abstract class TraceProvider {
 })
 export class TraceDirective extends TraceProvider implements AfterContentInit,
                                                              OnDestroy {
-  @ContentChild(DataSeriesQueryDirective)
-  dataSeries: DataSeriesQueryDirective|undefined;
+  @ContentChild(DataSeriesQueryDirective) dataSeries: DataSeriesQueryDirective|undefined;
 
-  trace = new ReplaySubject<Trace>();
+  trace = new ReplaySubject<Trace<unknown>>();
   loading = new BehaviorSubject<boolean>(false);
   uniqueSeriesNames = new ReplaySubject<string[]>();
   readonly unsubscribe = new Subject<void>();
@@ -105,7 +100,7 @@ export class UnionTracesDirective extends TraceProvider implements
   private readonly changesUnsubscribe = new Subject<void>();
   @ContentChildren(TraceDirective) layers = new QueryList<TraceDirective>();
 
-  trace = new ReplaySubject<Trace>();
+  trace = new ReplaySubject<Trace<unknown>>();
   loading = new BehaviorSubject<boolean>(false);
   uniqueSeriesNames = new ReplaySubject<string[]>();
 
@@ -126,7 +121,7 @@ export class UnionTracesDirective extends TraceProvider implements
     this.layersUnsubscribe.complete();
     this.layersUnsubscribe = new Subject<void>();
     const loading = new Array<BehaviorSubject<boolean>>();
-    const traces = new Array<ReplaySubject<Trace>>();
+    const traces = new Array<ReplaySubject<Trace<unknown>>>();
     const uniqueSeriesNames = new Array<ReplaySubject<string[]>>();
     for (const layer of this.layers) {
       loading.push(layer.loading);
@@ -143,16 +138,18 @@ export class UnionTracesDirective extends TraceProvider implements
           this.loading.next(loading);
         });
     combineLatest(traces)
-        .pipe(takeUntil(this.layersUnsubscribe), map((vals: Trace[]) => {
-                let t: Trace|undefined;
-                try {
-                  t = Trace.union(...vals);
-                } catch (err: unknown) {
-                  this.appCoreService.appCore.err(err);
-                }
-                return t;
-              }))
-        .subscribe((t: Trace|undefined) => {
+        .pipe(
+            takeUntil(this.layersUnsubscribe),
+            map((vals: Array<Trace<unknown>>) => {
+              let t: Trace<unknown>|undefined;
+              try {
+                t = Trace.union(...vals);
+              } catch (err: unknown) {
+                this.appCoreService.appCore.err(err);
+              }
+              return t;
+            }))
+        .subscribe((t: Trace<unknown>|undefined) => {
           if (t !== undefined) {
             this.trace.next(t);
           }

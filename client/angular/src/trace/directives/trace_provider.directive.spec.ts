@@ -43,8 +43,8 @@ function buildTrace(layer: number): ResponseNode {
           node(
               valueMap(
                   {key: 'trace_node_type', val: int(1)},
-                  {key: 'trace_offset', val: dur(d(layer * 10))},
-                  {key: 'trace_duration', val: dur(d(layer * 10))},
+                  {key: 'trace_start', val: dur(d(layer * 10))},
+                  {key: 'trace_end', val: dur(d(layer * 20))},
                   ),
               ),
           ),
@@ -56,24 +56,25 @@ function buildTrace(layer: number): ResponseNode {
     <app-core>
       <global-state>
         <value-map>
-          <value key="trace_name_a"><string></string></value>
+          <value *ngFor="let layerName of layerNames"
+            [key]="'trace_name_'+layerName"><string></string></value>
         </value-map>
       </global-state>
       <test-data-query>
       </test-data-query>
     </app-core>
     <union-traces>
-      <trace>
+      <trace *ngFor="let layerName of layerNames">
         <data-series>
           <query><value><string>foo</string></value></query>
           <interactions>
             <reaction type="fetch" target="data-series">
               <and>
                 <not><equals>
-                  <global-ref key="trace_name_a"></global-ref>
+                  <global-ref [key]="'trace_name_'+layerName"></global-ref>
                   <string></string>
                 </equals></not>
-                <changed><global-ref key="trace_name_a"></global-ref></changed>
+                <changed><global-ref [key]="'trace_name_'+layerName"></global-ref></changed>
               </and>
             </reaction>
           </interactions>
@@ -82,13 +83,13 @@ function buildTrace(layer: number): ResponseNode {
       </trace>
     </union-traces>`
 })
-class SingleTraceProviderTestComponent {
+class TraceTestComponent {
   @Input() layerNames: string[] = [];
   @ViewChild(UnionTracesDirective) unionedTrace!: UnionTracesDirective;
 }
 
-describe('single trace data test', () => {
-  let fixture: ComponentFixture<SingleTraceProviderTestComponent>;
+describe('trace data test', () => {
+  let fixture: ComponentFixture<TraceTestComponent>;
   const appCoreService = new AppCoreService();
   appCoreService.appCore.configurationErrors.subscribe((err) => {
     fail(err);
@@ -98,17 +99,15 @@ describe('single trace data test', () => {
     appCoreService.appCore.reset();
     await TestBed
         .configureTestingModule({
-          declarations: [SingleTraceProviderTestComponent],
+          declarations: [TraceTestComponent],
           imports: [
-            CoreModule,
-            TestCoreModule,
-            TraceModule,
-            NoopAnimationsModule,
+            CoreModule, TestCoreModule, TraceModule,
+            NoopAnimationsModule
           ],
           providers: [{provide: AppCoreService, useValue: appCoreService}]
         })
         .compileComponents();
-    fixture = TestBed.createComponent(SingleTraceProviderTestComponent);
+    fixture = TestBed.createComponent(TraceTestComponent);
     await fixture.whenStable();
   });
 
@@ -119,7 +118,7 @@ describe('single trace data test', () => {
     const t = fixture.componentInstance;
     const collectionName =
         appCoreService.appCore.globalState.get('trace_name_a') as StringValue;
-    t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames) => {
+    t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames: string[]) => {
       GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
         series: new Map<string, ResponseNode>(
             uniqueSeriesNames.map((seriesName: string, idx: number) => {
@@ -128,8 +127,8 @@ describe('single trace data test', () => {
       });
     });
     collectionName.val = 'coll';
-    const traces = new Array<Trace>();
-    t.unionedTrace.trace.subscribe((trace: Trace) => {
+    const traces = new Array<Trace<unknown>>();
+    t.unionedTrace.trace.subscribe((trace: Trace<unknown>) => {
       traces.push(trace);
     });
     expect(traces.map(trace => prettyPrintTrace(trace))).toEqual([`Trace:
@@ -138,88 +137,8 @@ describe('single trace data test', () => {
     span-height self:1 total:1
     cat-height 1
     Span (height 1):
-      at 0ns for 0ns
+      0ns to 0ns
 `]);
-  });
-});
-
-
-@Component({
-  template: `
-    <app-core>
-      <global-state>
-        <value-map>
-        <value key="trace_name_a"><string></string></value>
-        <value key="trace_name_b"><string></string></value>
-        </value-map>
-      </global-state>
-      <test-data-query>
-      </test-data-query>
-    </app-core>
-    <union-traces>
-    <trace>
-        <data-series>
-          <query><value><string>foo</string></value></query>
-          <interactions>
-            <reaction type="fetch" target="data-series">
-              <and>
-                <not><equals>
-                  <global-ref key="trace_name_a"></global-ref>
-                  <string></string>
-                </equals></not>
-                <changed><global-ref key="trace_name_a"></global-ref></changed>
-              </and>
-            </reaction>
-          </interactions>
-          <parameters></parameters>
-        </data-series>
-      </trace>
-      <trace>
-        <data-series>
-          <query><value><string>foo</string></value></query>
-          <interactions>
-            <reaction type="fetch" target="data-series">
-              <and>
-                <not><equals>
-                  <global-ref key="trace_name_b"></global-ref>
-                  <string></string>
-                </equals></not>
-                <changed><global-ref key="trace_name_b"></global-ref></changed>
-              </and>
-            </reaction>
-          </interactions>
-          <parameters></parameters>
-        </data-series>
-      </trace>    </union-traces>`
-})
-class DoubleTraceProviderTestComponent {
-  @Input() layerNames: string[] = [];
-  @ViewChild(UnionTracesDirective) unionedTrace!: UnionTracesDirective;
-}
-
-describe('double trace data test', () => {
-  let fixture: ComponentFixture<DoubleTraceProviderTestComponent>;
-  const appCoreService = new AppCoreService();
-  appCoreService.appCore.configurationErrors.subscribe((err) => {
-    fail(err);
-  });
-
-  beforeEach(async () => {
-    appCoreService.appCore.reset();
-    await TestBed
-        .configureTestingModule({
-          declarations: [DoubleTraceProviderTestComponent],
-          imports: [
-            CoreModule,
-            TestCoreModule,
-            TraceModule,
-            NoopAnimationsModule,
-          ],
-          providers: [{provide: AppCoreService, useValue: appCoreService}]
-        })
-        .compileComponents();
-    fixture = TestBed.createComponent(DoubleTraceProviderTestComponent);
-    await fixture.whenStable();
   });
 
   it('unions layer properly', () => {
@@ -231,7 +150,7 @@ describe('double trace data test', () => {
         appCoreService.appCore.globalState.get('trace_name_a') as StringValue;
     const collectionBName =
         appCoreService.appCore.globalState.get('trace_name_b') as StringValue;
-    t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames) => {
+    t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames: string[]) => {
       GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
         series: new Map<string, ResponseNode>(
             uniqueSeriesNames.map((seriesName: string, idx: number) => {
@@ -239,8 +158,8 @@ describe('double trace data test', () => {
             })),
       });
     });
-    const traces = new Array<Trace>();
-    t.unionedTrace.trace.subscribe((trace: Trace) => {
+    const traces = new Array<Trace<unknown>>();
+    t.unionedTrace.trace.subscribe((trace: Trace<unknown>) => {
       traces.push(trace);
     });
     collectionAName.val = 'coll';
@@ -253,12 +172,12 @@ describe('double trace data test', () => {
     span-height self:1 total:1
     cat-height 1
     Span (height 1):
-      at 0ns for 0ns
+      0ns to 0ns
   Category cat 1 'Cat. 1' (Category 1):
     span-height self:1 total:1
     cat-height 1
     Span (height 1):
-      at 10.000s for 10.000s
+      10.000s to 20.000s
 `]);
   });
 });

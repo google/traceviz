@@ -29,6 +29,16 @@ var (
 	now = time.Now()
 )
 
+var zt time.Time
+
+func ts(offset int) time.Time {
+	return zt.Add(time.Duration(offset))
+}
+
+func ns(dur int) time.Duration {
+	return time.Duration(dur) * time.Nanosecond
+}
+
 func TestTraceData(t *testing.T) {
 	var (
 		cpu0Category    = category.New("cpu0", "CPU 0", "CPU 0")
@@ -80,17 +90,17 @@ func TestTraceData(t *testing.T) {
 		// |- Waiting | [         ][100][200][200,300]
 		description: "non-nested trace",
 		buildTrace: func(db util.DataBuilder) {
-			trace := New(db, continuousaxis.NewDurationAxis(cat, 300*time.Nanosecond), &RenderSettings{})
+			trace := New(db, continuousaxis.NewDurationAxis(cat, ns(300)), &RenderSettings{})
 			cpu0 := trace.Category(cpu0Category)
 			cpu0Running := cpu0.Category(runningCategory)
-			cpu0Running.Span(0, 100).With(pid(100))
-			cpu0Running.Span(100, 50).With(pid(200))
-			cpu0Running.Span(150, 150).With(pid(100))
+			cpu0Running.Span(ns(0), ns(100)).With(pid(100))
+			cpu0Running.Span(ns(100), ns(150)).With(pid(200))
+			cpu0Running.Span(ns(150), ns(300)).With(pid(100))
 			cpu0Waiting := cpu0.Category(waitingCategory)
-			cpu0Waiting.Span(0, 100).With(pids())
-			cpu0Waiting.Span(100, 50).With(pids(100))
-			cpu0Waiting.Span(150, 50).With(pids(200))
-			cpu0Waiting.Span(200, 100).With(pids(200, 300))
+			cpu0Waiting.Span(ns(0), ns(100)).With(pids())
+			cpu0Waiting.Span(ns(100), ns(150)).With(pids(100))
+			cpu0Waiting.Span(ns(150), ns(200)).With(pids(200))
+			cpu0Waiting.Span(ns(200), ns(300)).With(pids(200, 300))
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			db.With(
@@ -112,41 +122,41 @@ func TestTraceData(t *testing.T) {
 			).Child().With( // CPU 0, PID 100 running 0-100
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
 				pid(100),
-				util.DurationProperty(offsetKey, 0),
-				util.DurationProperty(durationKey, 100),
+				util.DurationProperty(startKey, ns(0)),
+				util.DurationProperty(endKey, ns(100)),
 			).AndChild().With( // cpu 0, PID 200 running 100-150
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
 				pid(200),
-				util.DurationProperty(offsetKey, 100),
-				util.DurationProperty(durationKey, 50),
+				util.DurationProperty(startKey, ns(100)),
+				util.DurationProperty(endKey, ns(150)),
 			).AndChild().With( // cpu 0, PID 100 running 150-300
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
 				pid(100),
-				util.DurationProperty(offsetKey, 150),
-				util.DurationProperty(durationKey, 150),
+				util.DurationProperty(startKey, ns(150)),
+				util.DurationProperty(endKey, ns(300)),
 			).Parent().AndChild().With( // cpu0/waiting
 				util.IntegerProperty(nodeTypeKey, int64(categoryNodeType)),
 				waitingCategory.Define(),
 			).Child().With( // CPU 0, no pids waiting 0-100
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
 				pids(),
-				util.DurationProperty(offsetKey, 0),
-				util.DurationProperty(durationKey, 100),
+				util.DurationProperty(startKey, ns(0)),
+				util.DurationProperty(endKey, ns(100)),
 			).AndChild().With( // CPU 0, pid 100 waiting 100-150
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
 				pids(100),
-				util.DurationProperty(offsetKey, 100),
-				util.DurationProperty(durationKey, 50),
+				util.DurationProperty(startKey, ns(100)),
+				util.DurationProperty(endKey, ns(150)),
 			).AndChild().With( // CPU 0, pid 200 waiting 150-200
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
 				pids(200),
-				util.DurationProperty(offsetKey, 150),
-				util.DurationProperty(durationKey, 50),
+				util.DurationProperty(startKey, ns(150)),
+				util.DurationProperty(endKey, ns(200)),
 			).AndChild().With( // CPU 0, pids 100 and 300 waiting 200-300
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
 				pids(200, 300),
-				util.DurationProperty(offsetKey, 200),
-				util.DurationProperty(durationKey, 100),
+				util.DurationProperty(startKey, ns(200)),
+				util.DurationProperty(endKey, ns(300)),
 			)
 		},
 	}, {
@@ -165,18 +175,18 @@ func TestTraceData(t *testing.T) {
 		buildTrace: func(db util.DataBuilder) {
 			trace := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(300)), &RenderSettings{})
 			aCat := trace.Category(rpcACategory)
-			aCat.Span(0, 300).With(rpc("a"))
+			aCat.Span(ts(0), ts(300)).With(rpc("a"))
 			bCat := aCat.Category(rpcABCategory)
-			bCat.Span(0, 180).With(rpc("b"))
+			bCat.Span(ts(0), ts(180)).With(rpc("b"))
 			cCat := bCat.Category(rpcABCCategory)
-			cCat.Span(20, 100).With(rpc("c"))
+			cCat.Span(ts(20), ts(120)).With(rpc("c"))
 			dCat := bCat.Category(rpcABDCategory)
-			dCat.Span(140, 20).With(rpc("d"))
+			dCat.Span(ts(140), ts(160)).With(rpc("d"))
 			eCat := aCat.Category(rpcAECategory)
-			eCat.Span(220, 60).With(rpc("e"))
+			eCat.Span(ts(220), ts(280)).With(rpc("e"))
 			fCat := eCat.Category(rpcAEFCategory)
-			fCat.Span(240, 10).With(rpc("f")).
-				Subspan(240, 10, util.StringProperty("state", "local"))
+			fCat.Span(ts(240), ts(250)).With(rpc("f")).
+				Subspan(ts(240), ts(250), util.StringProperty("state", "local"))
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			aCat := db.With( // rpc a category
@@ -188,8 +198,8 @@ func TestTraceData(t *testing.T) {
 			)
 			aCat.Child().With( // rpc a
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 0),
-				util.DurationProperty(durationKey, 300),
+				util.TimestampProperty(startKey, ts(0)),
+				util.TimestampProperty(endKey, ts(300)),
 				rpc("a"),
 			)
 			bCat := aCat.Child().With( // rpc a/b category
@@ -198,8 +208,8 @@ func TestTraceData(t *testing.T) {
 			)
 			bCat.Child().With( // rpc b
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 0),
-				util.DurationProperty(durationKey, 180),
+				util.TimestampProperty(startKey, ts(0)),
+				util.TimestampProperty(endKey, ts(180)),
 				rpc("b"),
 			)
 			bCat.Child().With( // rpc a/b/c category
@@ -207,8 +217,8 @@ func TestTraceData(t *testing.T) {
 				rpcABCCategory.Define(),
 			).Child().With( // rpc c
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 20),
-				util.DurationProperty(durationKey, 100),
+				util.TimestampProperty(startKey, ts(20)),
+				util.TimestampProperty(endKey, ts(120)),
 				rpc("c"),
 			)
 			bCat.Child().With( // rpc a/b/d category
@@ -216,8 +226,8 @@ func TestTraceData(t *testing.T) {
 				rpcABDCategory.Define(),
 			).Child().With( // rpc d
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 140),
-				util.DurationProperty(durationKey, 20),
+				util.TimestampProperty(startKey, ts(140)),
+				util.TimestampProperty(endKey, ts(160)),
 				rpc("d"),
 			)
 			eCat := aCat.Child().With( // rpc a/e category
@@ -226,8 +236,8 @@ func TestTraceData(t *testing.T) {
 			)
 			eCat.Child().With( // rpc e
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 220),
-				util.DurationProperty(durationKey, 60),
+				util.TimestampProperty(startKey, ts(220)),
+				util.TimestampProperty(endKey, ts(280)),
 				rpc("e"),
 			)
 			eCat.Child().With( // rpc a/e/f category
@@ -235,13 +245,13 @@ func TestTraceData(t *testing.T) {
 				rpcAEFCategory.Define(),
 			).Child().With( // rpc f
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 240),
-				util.DurationProperty(durationKey, 10),
+				util.TimestampProperty(startKey, ts(240)),
+				util.TimestampProperty(endKey, ts(250)),
 				rpc("f"),
 			).Child().With( // f 'local' subspan
 				util.IntegerProperty(nodeTypeKey, int64(subspanNodeType)),
-				util.DurationProperty(offsetKey, 240),
-				util.DurationProperty(durationKey, 10),
+				util.TimestampProperty(startKey, ts(240)),
+				util.TimestampProperty(endKey, ts(250)),
 				util.StringProperty("state", "local"),
 			)
 		},
@@ -257,30 +267,30 @@ func TestTraceData(t *testing.T) {
 			pid100 := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(200)), &RenderSettings{}).
 				Category(pidCat(100), pid(100))
 			foo0 := pid100.
-				Span(0, 90).
+				Span(ts(0), ts(90)).
 				With(fun("foo"))
 			foo0.
-				Span(10, 30).
+				Span(ts(10), ts(40)).
 				With(fun("bar")).
-				Span(15, 10).
+				Span(ts(15), ts(25)).
 				With(fun("baz"))
 			foo0.
-				Span(50, 30).
+				Span(ts(50), ts(80)).
 				With(fun("bar")).
-				Span(55, 10).
+				Span(ts(55), ts(65)).
 				With(fun("baz"))
 			foo1 := pid100.
-				Span(100, 90).
+				Span(ts(100), ts(190)).
 				With(fun("foo"))
 			foo1.
-				Span(110, 30).
+				Span(ts(110), ts(140)).
 				With(fun("bar")).
-				Span(115, 10).
+				Span(ts(115), ts(125)).
 				With(fun("baz"))
 			foo1.
-				Span(150, 30).
+				Span(ts(150), ts(180)).
 				With(fun("bar")).
-				Span(155, 10).
+				Span(ts(155), ts(165)).
 				With(fun("baz"))
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {
@@ -294,58 +304,58 @@ func TestTraceData(t *testing.T) {
 			)
 			foo0 := pid100.Child().With( // first foo
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 0),
-				util.DurationProperty(durationKey, 90),
+				util.TimestampProperty(startKey, ts(0)),
+				util.TimestampProperty(endKey, ts(90)),
 				fun("foo"),
 			)
 			foo0.Child().With( // first bar
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 10),
-				util.DurationProperty(durationKey, 30),
+				util.TimestampProperty(startKey, ts(10)),
+				util.TimestampProperty(endKey, ts(40)),
 				fun("bar"),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 15),
-				util.DurationProperty(durationKey, 10),
+				util.TimestampProperty(startKey, ts(15)),
+				util.TimestampProperty(endKey, ts(25)),
 				fun("baz"),
 			)
 			foo0.Child().With( // second bar
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 50),
-				util.DurationProperty(durationKey, 30),
+				util.TimestampProperty(startKey, ts(50)),
+				util.TimestampProperty(endKey, ts(80)),
 				fun("bar"),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 55),
-				util.DurationProperty(durationKey, 10),
+				util.TimestampProperty(startKey, ts(55)),
+				util.TimestampProperty(endKey, ts(65)),
 				fun("baz"),
 			)
 			foo1 := pid100.Child().With( // second foo
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 100),
-				util.DurationProperty(durationKey, 90),
+				util.TimestampProperty(startKey, ts(100)),
+				util.TimestampProperty(endKey, ts(190)),
 				fun("foo"),
 			)
 			foo1.Child().With( // third bar
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 110),
-				util.DurationProperty(durationKey, 30),
+				util.TimestampProperty(startKey, ts(110)),
+				util.TimestampProperty(endKey, ts(140)),
 				fun("bar"),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 115),
-				util.DurationProperty(durationKey, 10),
+				util.TimestampProperty(startKey, ts(115)),
+				util.TimestampProperty(endKey, ts(125)),
 				fun("baz"),
 			)
 			foo1.Child().With( // fourth bar
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 150),
-				util.DurationProperty(durationKey, 30),
+				util.TimestampProperty(startKey, ts(150)),
+				util.TimestampProperty(endKey, ts(180)),
 				fun("bar"),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 155),
-				util.DurationProperty(durationKey, 10),
+				util.TimestampProperty(startKey, ts(155)),
+				util.TimestampProperty(endKey, ts(165)),
 				fun("baz"),
 			)
 		},
@@ -362,18 +372,18 @@ func TestTraceData(t *testing.T) {
 		buildTrace: func(db util.DataBuilder) {
 			task100 := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(500)), &RenderSettings{}).
 				Category(pidCat(100))
-			payload.New(task100.Span(0, 500), "thumbnail").With(
+			payload.New(task100.Span(ts(0), ts(500)), "thumbnail").With(
 				util.IntegersProperty("normalized_cpu_time", 1, 1, 2, 1, 1),
 			)
 			tid110 := task100.Category(pidCat(110))
-			tid110.Span(0, 100)
-			tid110.Span(200, 100)
-			tid110.Span(400, 100)
+			tid110.Span(ts(0), ts(100))
+			tid110.Span(ts(200), ts(300))
+			tid110.Span(ts(400), ts(500))
 			tid120 := task100.Category(pidCat(120))
-			tid120.Span(100, 100)
-			tid120.Span(300, 100)
+			tid120.Span(ts(100), ts(200))
+			tid120.Span(ts(300), ts(400))
 			tid130 := task100.Category(pidCat(130))
-			tid130.Span(200, 100)
+			tid130.Span(ts(200), ts(300))
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			task100 := db.With(
@@ -385,8 +395,8 @@ func TestTraceData(t *testing.T) {
 			)
 			task100.Child().With( // Task-level span
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 0),
-				util.DurationProperty(durationKey, 500),
+				util.TimestampProperty(startKey, ts(0)),
+				util.TimestampProperty(endKey, ts(500)),
 			).Child().With( // Binned payload data
 				util.StringProperty(payload.TypeKey, "thumbnail"),
 				util.IntegersProperty("normalized_cpu_time", 1, 1, 2, 1, 1),
@@ -396,36 +406,36 @@ func TestTraceData(t *testing.T) {
 				pidCat(110).Define(),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 0),
-				util.DurationProperty(durationKey, 100),
+				util.TimestampProperty(startKey, ts(0)),
+				util.TimestampProperty(endKey, ts(100)),
 			).AndChild().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 200),
-				util.DurationProperty(durationKey, 100),
+				util.TimestampProperty(startKey, ts(200)),
+				util.TimestampProperty(endKey, ts(300)),
 			).AndChild().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 400),
-				util.DurationProperty(durationKey, 100),
+				util.TimestampProperty(startKey, ts(400)),
+				util.TimestampProperty(endKey, ts(500)),
 			)
 			task100.Child().With( // TID 120 category
 				util.IntegerProperty(nodeTypeKey, int64(categoryNodeType)),
 				pidCat(120).Define(),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 100),
-				util.DurationProperty(durationKey, 100),
+				util.TimestampProperty(startKey, ts(100)),
+				util.TimestampProperty(endKey, ts(200)),
 			).AndChild().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 300),
-				util.DurationProperty(durationKey, 100),
+				util.TimestampProperty(startKey, ts(300)),
+				util.TimestampProperty(endKey, ts(400)),
 			)
 			task100.Child().With( // TID 130 category
 				util.IntegerProperty(nodeTypeKey, int64(categoryNodeType)),
 				pidCat(130).Define(),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(spanNodeType)),
-				util.DurationProperty(offsetKey, 200),
-				util.DurationProperty(durationKey, 100),
+				util.TimestampProperty(startKey, ts(200)),
+				util.TimestampProperty(endKey, ts(300)),
 			)
 		},
 	}} {

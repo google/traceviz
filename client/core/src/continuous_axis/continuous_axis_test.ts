@@ -17,7 +17,7 @@ import {Duration} from '../duration/duration.js';
 import {Timestamp} from '../timestamp/timestamp.js';
 import {dbl, dur, str, ts, valueMap} from '../value/test_value.js';
 
-import {DurationAxis, getAxis, NumberAxis, TimestampAxis, unionAxes} from './continuous_axis.js';
+import {Axis, getAxis} from './continuous_axis.js';
 
 function sec(sec: number): Timestamp {
   return new Timestamp(sec, 0);
@@ -36,22 +36,19 @@ describe('axis test', () => {
         {key: 'axis_type', val: str('timestamp')},
         {key: 'axis_min', val: ts(sec(0))},
         {key: 'axis_max', val: ts(sec(100))},
-        ));
-    expect(axis).toBeInstanceOf(TimestampAxis);
-    const tsAxis = axis as TimestampAxis;
-    expect(tsAxis.contains(sec(50))).toBeTrue();
-    expect(tsAxis.contains(sec(150))).toBeFalse();
-    expect(tsAxis.pointValue(valueMap(
+        )) as Axis<Timestamp>;
+    expect(axis.contains(sec(50))).toBeTrue();
+    expect(axis.contains(sec(150))).toBeFalse();
+    expect(axis.value(valueMap(
                {key: 'x_axis', val: ts(sec(50))},
-               )))
+               ), 'x_axis'))
         .toEqual(sec(50));
     expect(() => {
-      tsAxis.pointValue(valueMap(
+      axis.value(valueMap(
           {key: 'missing field', val: ts(sec(50))},
-          ));
+          ), 'x_axis');
     }).toThrow();
-    expect(tsAxis.atOffset(d(50 * 1E9))).toEqual(sec(50));
-    expect(tsAxis.toDomainFraction(sec(25))).toEqual(.25);
+    expect(axis.toDomainFraction(sec(25))).toEqual(.25);
   });
 
   it('defines duration axes and gets points', () => {
@@ -62,21 +59,19 @@ describe('axis test', () => {
         {key: 'axis_type', val: str('duration')},
         {key: 'axis_min', val: dur(d(0))},
         {key: 'axis_max', val: dur(d(100))},
-        ));
-    expect(axis).toBeInstanceOf(DurationAxis);
-    const dAxis = axis as DurationAxis;
-    expect(dAxis.contains(d(50))).toBeTrue();
-    expect(dAxis.contains(d(150))).toBeFalse();
-    expect(dAxis.pointValue(valueMap(
+        )) as Axis<Duration>;
+    expect(axis.contains(d(50))).toBeTrue();
+    expect(axis.contains(d(150))).toBeFalse();
+    expect(axis.value(valueMap(
                {key: 'x_axis', val: dur(d(50))},
-               )))
+               ), 'x_axis'))
         .toEqual(d(50));
     expect(() => {
-      dAxis.pointValue(valueMap(
+      axis.value(valueMap(
           {key: 'missing field', val: dur(d(50))},
-          ));
+          ), 'x_axis');
     }).toThrow();
-    expect(dAxis.toDomainFraction(d(25))).toEqual(.25);
+    expect(axis.toDomainFraction(d(25))).toEqual(.25);
   });
 
   it('defines number axes and gets points', () => {
@@ -87,22 +82,20 @@ describe('axis test', () => {
         {key: 'axis_type', val: str('double')},
         {key: 'axis_min', val: dbl(0)},
         {key: 'axis_max', val: dbl(100)},
-        ));
-    expect(axis).toBeInstanceOf(NumberAxis);
-    const dblAxis = axis as NumberAxis;
-    expect(dblAxis.contains(50)).toBeTrue();
-    expect(dblAxis.contains(150)).toBeFalse();
-    expect(dblAxis.pointValue(valueMap(
+        )) as Axis<number>;
+    expect(axis.contains(50)).toBeTrue();
+    expect(axis.contains(150)).toBeFalse();
+    expect(axis.value(valueMap(
                {key: 'y_axis', val: dbl(50)},
-               )))
+               ), 'y_axis'))
         .toEqual(50);
     expect(() => {
-      dblAxis.pointValue(valueMap(
+      axis.value(valueMap(
           {key: 'missing field', val: dbl(50)},
-          ));
+          ), 'y_axis');
     }).toThrow();
-    expect(dblAxis.toDomainFraction(25)).toEqual(.25);
-    expect(dblAxis.toDomainFraction(125)).toEqual(1.25);
+    expect(axis.toDomainFraction(25)).toEqual(.25);
+    expect(axis.toDomainFraction(125)).toEqual(1.25);
   });
 
   it('unions axes properly', () => {
@@ -111,7 +104,7 @@ describe('axis test', () => {
         {key: 'category_display_name', val: str('time from start')},
         {key: 'category_description', val: str('Time from start')},
         {key: 'axis_type', val: str('timestamp')},
-        {key: 'axis_min', val: ts(sec(50))},
+        {key: 'axis_min', val: ts(sec(0))},
         {key: 'axis_max', val: ts(sec(100))},
         ));
     const axis2 = getAxis(valueMap(
@@ -119,7 +112,7 @@ describe('axis test', () => {
         {key: 'category_display_name', val: str('time from start')},
         {key: 'category_description', val: str('Time from start')},
         {key: 'axis_type', val: str('timestamp')},
-        {key: 'axis_min', val: ts(sec(0))},
+        {key: 'axis_min', val: ts(sec(50))},
         {key: 'axis_max', val: ts(sec(150))},
         ));
     const axis3 = getAxis(valueMap(
@@ -130,11 +123,9 @@ describe('axis test', () => {
         {key: 'axis_min', val: dur(d(0))},
         {key: 'axis_max', val: dur(d(100))},
         ));
-    expect(() => unionAxes(axis1, axis2, axis3)).toThrow();
-    const uAxis = unionAxes(axis1, axis2);
-    expect(uAxis).toBeInstanceOf(TimestampAxis);
-    const tsAxis = uAxis as TimestampAxis;
-    expect(tsAxis.min).toEqual(sec(0));
-    expect(tsAxis.max).toEqual(sec(150));
+    expect(() => axis1.union(axis3)).toThrow();
+    const uAxis = axis1.union(axis2);
+    expect(uAxis.min).toEqual(sec(0));
+    expect(uAxis.max).toEqual(sec(150));
   });
 });

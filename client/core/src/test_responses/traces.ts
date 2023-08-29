@@ -58,8 +58,8 @@ export const schedvizRunningNode = node(
                 // CPU 0, PID 100 running 0-100
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(0))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: dur(d(0))},
+                    {key: 'trace_end', val: dur(d(100))},
                     {key: 'pid', val: int(100)},
                     ),
                 ),
@@ -67,8 +67,8 @@ export const schedvizRunningNode = node(
                 // CPU 0, PID 200 running 100-150
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(100))},
-                    {key: 'trace_duration', val: dur(d(50))},
+                    {key: 'trace_start', val: dur(d(100))},
+                    {key: 'trace_end', val: dur(d(150))},
                     {key: 'pid', val: int(200)},
                     ),
                 ),
@@ -76,8 +76,8 @@ export const schedvizRunningNode = node(
                 // CPU 0, PID 100 running 150-300
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(150))},
-                    {key: 'trace_duration', val: dur(d(150))},
+                    {key: 'trace_start', val: dur(d(150))},
+                    {key: 'trace_end', val: dur(d(300))},
                     {key: 'pid', val: int(100)},
                     ),
                 ),
@@ -117,16 +117,16 @@ export const schedvizWaitingNode = node(
                 // CPU 0, no pids waiting 0-100
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(0))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: dur(d(0))},
+                    {key: 'trace_end', val: dur(d(100))},
                     ),
                 ),
             node(
                 // CPU 0, pid 100 waiting 100-150
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(100))},
-                    {key: 'trace_duration', val: dur(d(50))},
+                    {key: 'trace_start', val: dur(d(100))},
+                    {key: 'trace_end', val: dur(d(150))},
                     {key: 'pids', val: ints(100)},
                     ),
                 ),
@@ -134,8 +134,8 @@ export const schedvizWaitingNode = node(
                 // CPU 0, pid 200 waiting 150-200
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(150))},
-                    {key: 'trace_duration', val: dur(d(50))},
+                    {key: 'trace_start', val: dur(d(150))},
+                    {key: 'trace_end', val: dur(d(200))},
                     {key: 'pids', val: ints(200)},
                     ),
                 ),
@@ -143,8 +143,8 @@ export const schedvizWaitingNode = node(
                 // CPU 0, pids 100 and 300 waiting 200-300
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(200))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: dur(d(200))},
+                    {key: 'trace_end', val: dur(d(300))},
                     {key: 'pids', val: ints(100, 300)},
                     ),
                 ),
@@ -177,15 +177,15 @@ export const rpcNode = node(
             // rpc a span
             valueMap(
                 {key: 'trace_node_type', val: int(1)},
-                {key: 'trace_offset', val: dur(d(0))},
-                {key: 'trace_duration', val: dur(d(300))},
+                {key: 'trace_start', val: ts(sec(0))},
+                {key: 'trace_end', val: ts(sec(300))},
                 {key: 'rpc', val: str('a')},
                 ),
             node(
                 valueMap(
                     {key: 'payload_type', val: str('trace_edge_payload')},
                     {key: 'trace_edge_node_id', val: str('a->a/b')},
-                    {key: 'trace_edge_offset', val: dur(d(0))},
+                    {key: 'trace_edge_start', val: ts(sec(0))},
                     {key: 'trace_edge_endpoint_node_ids', val: strs('a/b')},
                     ),
                 ),
@@ -193,7 +193,7 @@ export const rpcNode = node(
                 valueMap(
                     {key: 'payload_type', val: str('trace_edge_payload')},
                     {key: 'trace_edge_node_id', val: str('a->a/e')},
-                    {key: 'trace_edge_offset', val: dur(d(220))},
+                    {key: 'trace_edge_start', val: ts(sec(220))},
                     {key: 'trace_edge_endpoint_node_ids', val: strs('a/e')},
                     ),
                 ),
@@ -211,15 +211,15 @@ export const rpcNode = node(
                 // rpc b span
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(0))},
-                    {key: 'trace_duration', val: dur(d(180))},
+                    {key: 'trace_start', val: ts(sec(0))},
+                    {key: 'trace_end', val: ts(sec(180))},
                     {key: 'rpc', val: str('b')},
                     ),
                 node(
                     valueMap(
                         {key: 'payload_type', val: str('trace_edge_payload')},
                         {key: 'trace_edge_node_id', val: str('a/b')},
-                        {key: 'trace_edge_offset', val: dur(d(0))},
+                        {key: 'trace_edge_start', val: ts(sec(0))},
                         {key: 'trace_edge_endpoint_node_ids', val: strs()},
                         ),
                     ),
@@ -227,7 +227,7 @@ export const rpcNode = node(
                     valueMap(
                         {key: 'payload_type', val: str('trace_edge_payload')},
                         {key: 'trace_edge_node_id', val: str('a/b->a/b/c')},
-                        {key: 'trace_edge_offset', val: dur(d(20))},
+                        {key: 'trace_edge_start', val: ts(sec(20))},
                         {
                           key: 'trace_edge_endpoint_node_ids',
                           val: strs('a/b/c')
@@ -238,7 +238,7 @@ export const rpcNode = node(
                     valueMap(
                         {key: 'payload_type', val: str('trace_edge_payload')},
                         {key: 'trace_edge_node_id', val: str('a/b->a/b/d')},
-                        {key: 'trace_edge_offset', val: dur(d(140))},
+                        {key: 'trace_edge_start', val: ts(sec(140))},
                         {
                           key: 'trace_edge_endpoint_node_ids',
                           val: strs('a/b/d')
@@ -259,8 +259,8 @@ export const rpcNode = node(
                     // rpc c span
                     valueMap(
                         {key: 'trace_node_type', val: int(1)},
-                        {key: 'trace_offset', val: dur(d(20))},
-                        {key: 'trace_duration', val: dur(d(100))},
+                        {key: 'trace_start', val: ts(sec(20))},
+                        {key: 'trace_end', val: ts(sec(120))},
                         {key: 'rpc', val: str('c')},
                         ),
                     node(
@@ -270,7 +270,7 @@ export const rpcNode = node(
                               val: str('trace_edge_payload')
                             },
                             {key: 'trace_edge_node_id', val: str('a/b/c')},
-                            {key: 'trace_edge_offset', val: dur(d(20))},
+                            {key: 'trace_edge_start', val: ts(sec(20))},
                             {key: 'trace_edge_endpoint_node_ids', val: strs()},
                             ),
                         ),
@@ -289,8 +289,8 @@ export const rpcNode = node(
                     // rpc d span
                     valueMap(
                         {key: 'trace_node_type', val: int(1)},
-                        {key: 'trace_offset', val: dur(d(140))},
-                        {key: 'trace_duration', val: dur(d(20))},
+                        {key: 'trace_start', val: ts(sec(140))},
+                        {key: 'trace_end', val: ts(sec(160))},
                         {key: 'rpc', val: str('d')},
                         ),
                     node(
@@ -300,7 +300,7 @@ export const rpcNode = node(
                               val: str('trace_edge_payload')
                             },
                             {key: 'trace_edge_node_id', val: str('a/b/d')},
-                            {key: 'trace_edge_offset', val: dur(d(140))},
+                            {key: 'trace_edge_start', val: ts(sec(140))},
                             {key: 'trace_edge_endpoint_node_ids', val: strs()},
                             ),
                         ),
@@ -320,15 +320,15 @@ export const rpcNode = node(
                 // rpc e span
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(220))},
-                    {key: 'trace_duration', val: dur(d(60))},
+                    {key: 'trace_start', val: ts(sec(220))},
+                    {key: 'trace_end', val: ts(sec(280))},
                     {key: 'rpc', val: str('e')},
                     ),
                 node(
                     valueMap(
                         {key: 'payload_type', val: str('trace_edge_payload')},
                         {key: 'trace_edge_node_id', val: str('a/e')},
-                        {key: 'trace_edge_offset', val: dur(d(220))},
+                        {key: 'trace_edge_start', val: ts(sec(220))},
                         {key: 'trace_edge_endpoint_node_ids', val: strs()},
                         ),
                     ),
@@ -336,7 +336,7 @@ export const rpcNode = node(
                     valueMap(
                         {key: 'payload_type', val: str('trace_edge_payload')},
                         {key: 'trace_edge_node_id', val: str('a/e->a/e/a')},
-                        {key: 'trace_edge_offset', val: dur(d(240))},
+                        {key: 'trace_edge_start', val: ts(sec(240))},
                         {
                           key: 'trace_edge_endpoint_node_ids',
                           val: strs('a/e/a')
@@ -357,8 +357,8 @@ export const rpcNode = node(
                     // rpc a span
                     valueMap(
                         {key: 'trace_node_type', val: int(1)},
-                        {key: 'trace_offset', val: dur(d(240))},
-                        {key: 'trace_duration', val: dur(d(10))},
+                        {key: 'trace_start', val: ts(sec(240))},
+                        {key: 'trace_end', val: ts(sec(250))},
                         {key: 'rpc', val: str('a')},
                         ),
                     node(
@@ -368,7 +368,7 @@ export const rpcNode = node(
                               val: str('trace_edge_payload')
                             },
                             {key: 'trace_edge_node_id', val: str('a/e/a')},
-                            {key: 'trace_edge_offset', val: dur(d(240))},
+                            {key: 'trace_edge_start', val: ts(sec(240))},
                             {key: 'trace_edge_endpoint_node_ids', val: strs()},
                             ),
                         ),
@@ -376,8 +376,8 @@ export const rpcNode = node(
                         // rpc f subspan
                         valueMap(
                             {key: 'trace_node_type', val: int(2)},
-                            {key: 'trace_offset', val: dur(d(240))},
-                            {key: 'trace_duration', val: dur(d(10))},
+                            {key: 'trace_start', val: ts(sec(240))},
+                            {key: 'trace_end', val: ts(sec(250))},
                             {key: 'state', val: str('local')},
                             ),
                         ),
@@ -412,24 +412,24 @@ export const userInstrumentationNode = node(
             // first foo span
             valueMap(
                 {key: 'trace_node_type', val: int(1)},
-                {key: 'trace_offset', val: dur(d(0))},
-                {key: 'trace_duration', val: dur(d(90))},
+                {key: 'trace_start', val: ts(sec(0))},
+                {key: 'trace_end', val: ts(sec(90))},
                 {key: 'function', val: str('foo')},
                 ),
             node(
                 // first bar span
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(10))},
-                    {key: 'trace_duration', val: dur(d(30))},
+                    {key: 'trace_start', val: ts(sec(10))},
+                    {key: 'trace_end', val: ts(sec(40))},
                     {key: 'function', val: str('bar')},
                     ),
                 node(
                     // first baz span
                     valueMap(
                         {key: 'trace_node_type', val: int(1)},
-                        {key: 'trace_offset', val: dur(d(15))},
-                        {key: 'trace_duration', val: dur(d(10))},
+                        {key: 'trace_start', val: ts(sec(15))},
+                        {key: 'trace_end', val: ts(sec(25))},
                         {key: 'function', val: str('baz')},
                         ),
                     ),
@@ -438,16 +438,16 @@ export const userInstrumentationNode = node(
                 // second bar span
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(50))},
-                    {key: 'trace_duration', val: dur(d(30))},
+                    {key: 'trace_start', val: ts(sec(50))},
+                    {key: 'trace_end', val: ts(sec(80))},
                     {key: 'function', val: str('bar')},
                     ),
                 node(
                     // second baz span
                     valueMap(
                         {key: 'trace_node_type', val: int(1)},
-                        {key: 'trace_offset', val: dur(d(55))},
-                        {key: 'trace_duration', val: dur(d(10))},
+                        {key: 'trace_start', val: ts(sec(55))},
+                        {key: 'trace_end', val: ts(sec(65))},
                         {key: 'function', val: str('baz')},
                         ),
                     ),
@@ -457,24 +457,24 @@ export const userInstrumentationNode = node(
             // second foo span
             valueMap(
                 {key: 'trace_node_type', val: int(1)},
-                {key: 'trace_offset', val: dur(d(100))},
-                {key: 'trace_duration', val: dur(d(90))},
+                {key: 'trace_start', val: ts(sec(100))},
+                {key: 'trace_end', val: ts(sec(190))},
                 {key: 'function', val: str('foo')},
                 ),
             node(
                 // third bar span
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(110))},
-                    {key: 'trace_duration', val: dur(d(30))},
+                    {key: 'trace_start', val: ts(sec(110))},
+                    {key: 'trace_end', val: ts(sec(140))},
                     {key: 'function', val: str('bar')},
                     ),
                 node(
                     // third baz span
                     valueMap(
                         {key: 'trace_node_type', val: int(1)},
-                        {key: 'trace_offset', val: dur(d(115))},
-                        {key: 'trace_duration', val: dur(d(10))},
+                        {key: 'trace_start', val: ts(sec(115))},
+                        {key: 'trace_end', val: ts(sec(125))},
                         {key: 'function', val: str('baz')},
                         ),
                     ),
@@ -483,16 +483,16 @@ export const userInstrumentationNode = node(
                 // fourth bar span
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(150))},
-                    {key: 'trace_duration', val: dur(d(30))},
+                    {key: 'trace_start', val: ts(sec(150))},
+                    {key: 'trace_end', val: ts(sec(180))},
                     {key: 'function', val: str('bar')},
                     ),
                 node(
                     // fourth baz span
                     valueMap(
                         {key: 'trace_node_type', val: int(1)},
-                        {key: 'trace_offset', val: dur(d(155))},
-                        {key: 'trace_duration', val: dur(d(10))},
+                        {key: 'trace_start', val: ts(sec(155))},
+                        {key: 'trace_end', val: ts(sec(165))},
                         {key: 'function', val: str('baz')},
                         ),
                     ),
@@ -526,8 +526,8 @@ export const embeddedNode = node(
             // PID 100 span
             valueMap(
                 {key: 'trace_node_type', val: int(1)},
-                {key: 'trace_offset', val: dur(d(0))},
-                {key: 'trace_duration', val: dur(d(500))},
+                {key: 'trace_start', val: ts(sec(0))},
+                {key: 'trace_end', val: ts(sec(500))},
                 ),
             node(
                 // embedded binned data series in payload
@@ -548,22 +548,22 @@ export const embeddedNode = node(
             node(
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(0))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: ts(sec(0))},
+                    {key: 'trace_end', val: ts(sec(100))},
                     ),
                 ),
             node(
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(200))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: ts(sec(200))},
+                    {key: 'trace_end', val: ts(sec(300))},
                     ),
                 ),
             node(
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(400))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: ts(sec(400))},
+                    {key: 'trace_end', val: ts(sec(500))},
                     ),
                 ),
             ),
@@ -578,15 +578,15 @@ export const embeddedNode = node(
             node(
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(100))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: ts(sec(100))},
+                    {key: 'trace_end', val: ts(sec(200))},
                     ),
                 ),
             node(
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(300))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: ts(sec(300))},
+                    {key: 'trace_end', val: ts(sec(400))},
                     ),
                 ),
             ),
@@ -601,8 +601,8 @@ export const embeddedNode = node(
             node(
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(200))},
-                    {key: 'trace_duration', val: dur(d(100))},
+                    {key: 'trace_start', val: ts(sec(200))},
+                    {key: 'trace_end', val: ts(sec(300))},
                     ),
                 ),
             ),

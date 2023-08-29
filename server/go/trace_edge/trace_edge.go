@@ -33,13 +33,14 @@ package traceedge
 import (
 	"time"
 
+	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
 	"github.com/google/traceviz/server/go/payload"
 	"github.com/google/traceviz/server/go/util"
 )
 
 const (
 	nodeIDKey          = "trace_edge_node_id"
-	offsetKey          = "trace_edge_offset"
+	startKey           = "trace_edge_start"
 	endpointNodeIDsKey = "trace_edge_endpoint_node_ids"
 
 	// PayloadType defines the payload type for trace edge nodes.
@@ -47,24 +48,24 @@ const (
 )
 
 // Node defines an endpoint in a trace edge graph.
-type Node struct {
+type Node[T float64 | time.Duration | time.Time] struct {
 	db util.DataBuilder
 }
 
 // New produces a new Node in the provided DataBuilder, with the provided
 // offset, ID, and endpoint node IDs.
-func New(parent payload.Payloader, offset time.Duration, id string, edgeEndpointNodeIDs ...string) *Node {
-	return &Node{
+func New[T float64 | time.Duration | time.Time](axis *continuousaxis.Axis[T], parent payload.Payloader, start T, id string, edgeEndpointNodeIDs ...string) *Node[T] {
+	return &Node[T]{
 		db: payload.New(parent, PayloadType).With(
 			util.StringProperty(nodeIDKey, id),
-			util.DurationProperty(offsetKey, offset),
+			axis.Value(startKey, start),
 			util.StringsProperty(endpointNodeIDsKey, edgeEndpointNodeIDs...),
 		),
 	}
 }
 
 // With annotates the receiver with the provided updates.
-func (n *Node) With(updates ...util.PropertyUpdate) *Node {
+func (n *Node[T]) With(updates ...util.PropertyUpdate) *Node[T] {
 	n.db.With(updates...)
 	return n
 }

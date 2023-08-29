@@ -1,16 +1,3 @@
-/*
-        Copyright 2023 Google Inc.
-        Licensed under the Apache License, Version 2.0 (the "License");
-        you may not use this file except in compliance with the License.
-        You may obtain a copy of the License at
-                https://www.apache.org/licenses/LICENSE-2.0
-        Unless required by applicable law or agreed to in writing, software
-        distributed under the License is distributed on an "AS IS" BASIS,
-        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License for the specific language governing permissions and
-        limitations under the License.
-*/
-
 /**
  * @fileoverview A component visualizing two dimensional data (specifically,
  * XYChart data) as a line chart.  The X and Y axis domains may be defined as
@@ -31,13 +18,13 @@
  * the x-domain where a callout marker should be drawn.
  */
 
-import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, OnDestroy, ViewChild} from '@angular/core';
+import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, Input, OnDestroy, ViewChild} from '@angular/core';
 import * as d3 from 'd3';
 import {Subject} from 'rxjs';
 import {debounceTime, takeUntil} from 'rxjs/operators';
 import {axisValue, ContinuousXAxis, ContinuousYAxis, scaleFromAxis, xAxisRenderSettings, yAxisRenderSettings} from 'traceviz-angular-axes';
-import {AppCoreService, DataSeriesQueryDirective, InteractionsDirective} from 'traceviz-angular-core';
-import {Coloring, ConfigurationError, DataSeriesQuery, DoubleValue, Interactions, Point, Series, Severity, Timestamp, TimestampValue, Value, ValueMap, XYChart as XYChartData} from 'traceviz-client-core';
+import {AppCoreService, DataSeriesDirective, InteractionsDirective} from 'traceviz-angular-core';
+import {AppCore, Coloring, ConfigurationError, DataSeriesQuery, DoubleValue, Interactions, Point, ResponseNode, Series, Severity, Timestamp, TimestampValue, Value, ValueMap, XYChart as XYChartData} from 'traceviz-client-core';
 
 const SOURCE = 'line_chart';
 
@@ -66,8 +53,7 @@ const supportedWatches = [WATCH_TYPE_UPDATE_X_AXIS_MARKER];
   styleUrls: ['line_chart.component.css'],
 })
 export class LineChart implements AfterContentInit, AfterViewInit, OnDestroy {
-  @ContentChild(DataSeriesQueryDirective)
-  dataSeries: DataSeriesQueryDirective|undefined;
+  @ContentChild(DataSeriesDirective) dataSeries: DataSeriesDirective|undefined;
   @ContentChild(InteractionsDirective, {descendants: false})
   interactionsDir: InteractionsDirective|undefined;
   @ContentChild(ContinuousXAxis) continuousXAxis: ContinuousXAxis|undefined;
@@ -78,6 +64,8 @@ export class LineChart implements AfterContentInit, AfterViewInit, OnDestroy {
   @ViewChild('xAxis') xAxisElement!: ElementRef;
   @ViewChild('yAxisDiv') yAxisElement!: ElementRef;
   @ViewChild('loadingDiv', {static: true}) loadingDiv!: ElementRef;
+
+  @Input() svgMargin = 4;
 
   loading = false;
   readonly redrawDebouncer = new Subject<void>();
@@ -93,10 +81,11 @@ export class LineChart implements AfterContentInit, AfterViewInit, OnDestroy {
       readonly ref: ChangeDetectorRef) {}
 
   ngAfterContentInit() {
-    this.appCoreService.appCore.onPublish((appCore) => {
+    this.appCoreService.appCore.onPublish((appCore: AppCore) => {
       this.interactions = this.interactionsDir?.get();
       try {
         this.interactions?.checkForSupportedActions(supportedActions);
+        this.interactions?.checkForSupportedReactions([]);
         this.interactions?.checkForSupportedWatches(supportedWatches);
         this.dataSeriesQuery = this.dataSeries?.dataSeriesQuery;
       } catch (err: unknown) {
@@ -104,7 +93,7 @@ export class LineChart implements AfterContentInit, AfterViewInit, OnDestroy {
       }
       // Publish loading status.
       this.dataSeriesQuery?.loading.pipe(takeUntil(this.unsubscribe))
-          .subscribe((loading) => {
+          .subscribe((loading: boolean) => {
             this.loading = loading;
             if (this.loadingDiv !== undefined) {
               this.loadingDiv.nativeElement.style.display =
@@ -114,9 +103,9 @@ export class LineChart implements AfterContentInit, AfterViewInit, OnDestroy {
             this.ref.detectChanges();
           });
       this.dataSeriesQuery?.response.pipe(takeUntil(this.unsubscribe))
-          .subscribe((response) => {
+          .subscribe((response: ResponseNode) => {
             try {
-              this.chartData = new XYChartData(response);
+              this.chartData = XYChartData.fromNode(response);
             } catch (err: unknown) {
               appCore.err(err);
             }
@@ -204,8 +193,10 @@ export class LineChart implements AfterContentInit, AfterViewInit, OnDestroy {
     if (this.continuousYAxis) {
       this.continuousYAxis.render(yAxisData, chartHeightPx, leftAxisSettings);
     }
-    const yScale = scaleFromAxis(yAxisData, chartHeightPx, 0);
-    const xScale = scaleFromAxis(xAxisData, 0, chartWidthPx);
+    const yScale = scaleFromAxis(
+        yAxisData, chartHeightPx - this.svgMargin, this.svgMargin);
+    const xScale =
+        scaleFromAxis(xAxisData, this.svgMargin, chartWidthPx - this.svgMargin);
     const svg = d3.select(this.svg.nativeElement);
     svg.attr('width', chartWidthPx)
         .attr('height', chartHeightPx)
@@ -250,52 +241,54 @@ export class LineChart implements AfterContentInit, AfterViewInit, OnDestroy {
         .attr('d', (s: Series) => {
           return d3.line<Point>()
               .curve(d3.curveLinear)
-              .x((p: Point) =>
-                     xScale(axisValue(xAxisData.pointValue(p.properties))))
-              .y((p: Point) => yScale(
-                     axisValue(yAxisData.pointValue(p.properties))))(s.points);
+              .x((p: Point) => xScale(axisValue(
+                     xAxisData.value(p.properties, xAxisData.category.id))))
+              .y((p: Point) => yScale(axisValue(yAxisData.value(
+                     p.properties, yAxisData.category.id))))(s.points);
         });
     // Handle x-axis zooming.
     const lc = this;
     const brush =
-        d3.brushX()
-            .extent([[0, 0], [chartWidthPx, chartHeightPx]])
-            .on('end', (event) => {
-              const extent = event.selection;
-              let minValue: Value|undefined;
-              let maxValue: Value|undefined;
-              if (!extent) {
-                minValue = new TimestampValue(new Timestamp(0, 0));
-                maxValue = new TimestampValue(new Timestamp(0, 0));
-              } else {
-                const zoomDomainMin = xScale.invert(extent[0]);
-                const zoomDomainMax = xScale.invert(extent[1]);
-                if (zoomDomainMin instanceof Date &&
-                    zoomDomainMax instanceof Date) {
-                  minValue =
-                      new TimestampValue(Timestamp.fromDate(zoomDomainMin));
-                  maxValue =
-                      new TimestampValue(Timestamp.fromDate(zoomDomainMax));
-                } else if (
-                    (typeof zoomDomainMin === 'number') &&
-                    (typeof zoomDomainMax === 'number')) {
-                  minValue = new DoubleValue(zoomDomainMin);
-                  maxValue = new DoubleValue(zoomDomainMax);
-                }
+        d3.brushX().extent([[0, 0], [chartWidthPx, chartHeightPx]]).on('end', () => {
+          try {
+            const extent = d3.event.selection;
+            let minValue: Value|undefined;
+            let maxValue: Value|undefined;
+            if (!extent) {
+              minValue = new TimestampValue(new Timestamp(0, 0));
+              maxValue = new TimestampValue(new Timestamp(0, 0));
+            } else {
+              const zoomDomainMin = xScale.invert(extent[0]);
+              const zoomDomainMax = xScale.invert(extent[1]);
+              if (zoomDomainMin instanceof Date &&
+                  zoomDomainMax instanceof Date) {
+                minValue =
+                    new TimestampValue(Timestamp.fromDate(zoomDomainMin));
+                maxValue =
+                    new TimestampValue(Timestamp.fromDate(zoomDomainMax));
+              } else if (
+                  (typeof zoomDomainMin === 'number') &&
+                  (typeof zoomDomainMax === 'number')) {
+                minValue = new DoubleValue(zoomDomainMin);
+                maxValue = new DoubleValue(zoomDomainMax);
               }
-              if (!minValue || !maxValue) {
-                throw new ConfigurationError(
-                    `x-axis extents should either both be numbers, or both be Timestamps`)
-                    .from(SOURCE)
-                    .at(Severity.ERROR);
-              }
-              lc.interactions?.update(
-                  // Reset the zoomed range
-                  CHART, ACTION_BRUSH, new ValueMap(new Map([
-                    [ZOOM_START_KEY, minValue],
-                    [ZOOM_END_KEY, maxValue],
-                  ])));
-            });
+            }
+            if (!minValue || !maxValue) {
+              throw new ConfigurationError(
+                  `x-axis extents should either both be numbers, or both be Timestamps`)
+                  .from(SOURCE)
+                  .at(Severity.ERROR);
+            }
+            lc.interactions?.update(
+                // Reset the zoomed range
+                CHART, ACTION_BRUSH, new ValueMap(new Map([
+                  [ZOOM_START_KEY, minValue],
+                  [ZOOM_END_KEY, maxValue],
+                ])));
+          } catch (err: unknown) {
+            this.appCoreService.appCore.err(err);
+          }
+        });
     svg.select('.chart-area').append('g').attr('class', 'brush').call(brush);
   }
 }

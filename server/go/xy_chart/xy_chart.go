@@ -72,21 +72,24 @@
 package xychart
 
 import (
+	"time"
+
 	"github.com/google/traceviz/server/go/category"
 	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
 	"github.com/google/traceviz/server/go/util"
 )
 
 // XYChart represents an xy-chart embedded in a TraceViz response.
-type XYChart struct {
-	xAxis, yAxis continuousaxis.Axis
-	db           util.DataBuilder
+type XYChart[X float64 | time.Duration | time.Time, Y float64 | time.Duration | time.Time] struct {
+	xAxis *continuousaxis.Axis[X]
+	yAxis *continuousaxis.Axis[Y]
+	db    util.DataBuilder
 }
 
 // New constructs a new xy chart.  The returned close function should be
 // invoked when no more data may be added to the chart.
-func New(db util.DataBuilder, xAxis, yAxis continuousaxis.Axis, properties ...util.PropertyUpdate) *XYChart {
-	ret := &XYChart{
+func New[X float64 | time.Duration | time.Time, Y float64 | time.Duration | time.Time](db util.DataBuilder, xAxis *continuousaxis.Axis[X], yAxis *continuousaxis.Axis[Y], properties ...util.PropertyUpdate) *XYChart[X, Y] {
+	ret := &XYChart[X, Y]{
 		xAxis: xAxis,
 		yAxis: yAxis,
 		db: db.With(
@@ -100,7 +103,7 @@ func New(db util.DataBuilder, xAxis, yAxis continuousaxis.Axis, properties ...ut
 }
 
 // With annotates the receiving xy-chart with the provided properties.
-func (xyc *XYChart) With(properties ...util.PropertyUpdate) *XYChart {
+func (xyc *XYChart[X, Y]) With(properties ...util.PropertyUpdate) *XYChart[X, Y] {
 	xyc.db.With(properties...)
 	return xyc
 }
@@ -108,32 +111,32 @@ func (xyc *XYChart) With(properties ...util.PropertyUpdate) *XYChart {
 // AddSeries defines a series within the receiving XYChart, tagged with the
 // specified Category.  It returns a Series that can accept points with
 // AddPoint.
-func (xyc *XYChart) AddSeries(category *category.Category, properties ...util.PropertyUpdate) *Series {
+func (xyc *XYChart[X, Y]) AddSeries(category *category.Category, properties ...util.PropertyUpdate) *Series[X, Y] {
 	db := xyc.db.Child().With(category.Define()).With(properties...)
-	return &Series{
+	return &Series[X, Y]{
 		xyc: xyc,
 		db:  db,
 	}
 }
 
 // Series helps define a series within a XYChart.
-type Series struct {
-	xyc *XYChart
+type Series[X float64 | time.Duration | time.Time, Y float64 | time.Duration | time.Time] struct {
+	xyc *XYChart[X, Y]
 	db  util.DataBuilder
 }
 
 // With annotates the receiving Series with the provided properties.
-func (s *Series) With(properties ...util.PropertyUpdate) *Series {
+func (s *Series[X, Y]) With(properties ...util.PropertyUpdate) *Series[X, Y] {
 	s.db.With(properties...)
 	return s
 }
 
 // WithPoint adds a data point to the receiving Series, with the
 // specified x and y values and arbitrary other properties.
-func (s *Series) WithPoint(x, y interface{}, properties ...util.PropertyUpdate) *Series {
+func (s *Series[X, Y]) WithPoint(x X, y Y, properties ...util.PropertyUpdate) *Series[X, Y] {
 	s.db.Child().With(
-		s.xyc.xAxis.Value(x),
-		s.xyc.yAxis.Value(y),
+		s.xyc.xAxis.Value(s.xyc.xAxis.CategoryID(), x),
+		s.xyc.yAxis.Value(s.xyc.yAxis.CategoryID(), y),
 	).With(properties...)
 	return s
 }

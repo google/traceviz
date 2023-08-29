@@ -1,16 +1,3 @@
-/*
-    Copyright 2023 Google Inc.
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-        https://www.apache.org/licenses/LICENSE-2.0
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
-
 /**
  * @fileoverview Tools for working with trace data.  See
  * ../../../../server/go/trace/trace.go for more detail.
@@ -25,20 +12,31 @@
  * are not unioned, even if they're identical.
  */
 
+/*
+    Copyright 2023 Google Inc.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        https://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
 import {Category, categoryEquals, categoryProperties, getDefinedCategory} from '../category/category.js';
-import {axisProperties, DurationAxis, getAxis, TimestampAxis, unionAxes} from '../continuous_axis/continuous_axis.js';
-import {Duration} from '../duration/duration.js';
+import {Axis, axisProperties, getAxis} from '../continuous_axis/continuous_axis.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {children} from '../payload/payload.js';
 import {ResponseNode} from '../protocol/response_interface.js';
-import {Timestamp} from '../timestamp/timestamp.js';
 import {ValueMap} from '../value/value_map.js';
 
 const SOURCE = 'trace';
 
-enum Keys {
-  OFFSET = 'trace_offset',
-  DURATION = 'trace_duration',
+enum Key {
+  START = 'trace_start',
+  END = 'trace_end',
   NODE_TYPE = 'trace_node_type',
   PAYLOAD_TYPE = 'trace_payload',
 
@@ -52,6 +50,11 @@ enum Keys {
   CATEGORY_MIN_WIDTH_CAT_PX = 'category_min_width_cat_px',
   CATEGORY_BASE_WIDTH_TEMP_PX = 'category_base_width_temp_px',
 }
+
+/** The key of the start value of a trace span or subspan. */
+export const startKey = Key.START;
+/** The key of the start value of a trace span or subspan. */
+export const endKey = Key.END;
 
 /**
  * A collection of settings for rendering traces.  A trace is rendered on a
@@ -102,37 +105,28 @@ enum NodeType {
 }
 
 /** A category awaiting unioning. */
-interface UnioningCategory {
+interface UnioningCategory<T> {
   // A TraceCategory to be merged.
-  traceCategory: TraceCategory;
-  // An adjustment to be added to all offsets within the Category.
-  offsetAdjustment: Duration;
+  traceCategory: TraceCategory<T>;
 }
 
 /** A trace object embedded in a ResponseNode. */
-export class Trace {
+export class Trace<T> {
   private constructor(
-      readonly properties: ValueMap, readonly categories: TraceCategory[],
-      readonly axis: TimestampAxis|DurationAxis) {}
+      readonly properties: ValueMap,
+      readonly categories: Array<TraceCategory<T>>, readonly axis: Axis<T>) {}
 
-  // Constructs a new Trace from a provided ResponseNode.
-  static fromNode(node: ResponseNode): Trace {
-    const axis = getAxis(node.properties);
-    if (!((axis instanceof TimestampAxis || axis instanceof DurationAxis))) {
-      throw new ConfigurationError(`trace axis must be timestamp or duration`)
-          .from(SOURCE)
-          .at(Severity.ERROR);
-    }
-    const categories = new Array<TraceCategory>();
+  private static buildTrace<T>(axis: Axis<T>, node: ResponseNode): Trace<T> {
+    const categories = new Array<TraceCategory<T>>();
     for (const child of node.children) {
-      switch (child.properties.expectNumber(Keys.NODE_TYPE)) {
+      switch (child.properties.expectNumber(Key.NODE_TYPE)) {
         case NodeType.CATEGORY:
-          categories.push(TraceCategory.fromNode(child));
+          categories.push(TraceCategory.fromNode(axis, child));
           break;
         default:
-          throw new ConfigurationError(`unsupported node type ${
-                                           child.properties.expectNumber(
-                                               Keys.NODE_TYPE)} as Trace child`)
+          throw new ConfigurationError(
+              `unsupported node type ${
+                  child.properties.expectNumber(Key.NODE_TYPE)} as Trace child`)
               .from(SOURCE)
               .at(Severity.ERROR);
       }
@@ -140,80 +134,86 @@ export class Trace {
     return new Trace(node.properties, categories, axis);
   }
 
-  // Unions multiple traces into one.
-  static union(...traces: Trace[]): Trace {
-    if (traces.length === 1) {
-      return traces[0];
-    }
-    const categoryIDs = new Array<string>();
-    const categoriesByID = new Map<string, UnioningCategory[]>();
-    const axis = unionAxes(...(traces.map(trace => trace.axis)));
-    if (!((axis instanceof TimestampAxis || axis instanceof DurationAxis))) {
-      throw new ConfigurationError(`trace axis must be timestamp or duration`)
+  // Constructs a new Trace from a provided ResponseNode.
+  static fromNode(node: ResponseNode): Trace<unknown> {
+    return Trace.buildTrace(getAxis(node.properties), node);
+  }
+
+  private merge(other: Trace<unknown>): Trace<T> {
+    if (this.axis.type !== other.axis.type) {
+      throw new ConfigurationError(`can't union traces of different types`)
           .from(SOURCE)
           .at(Severity.ERROR);
     }
-    const unionedBasis = axis.min;
+    const traces = [this, other as Trace<T>];
+    const categoryIDs = new Array<string>();
+    const categoriesByID = new Map<string, Array<UnioningCategory<T>>>();
+    const unionedAxis = this.axis.union(other.axis);
     const props: ValueMap[] = [];
     for (const trace of traces) {
       props.push(trace.properties.without(...axisProperties));
-      let offsetAdjustment: Duration|undefined;
-      if (unionedBasis instanceof Timestamp &&
-          trace.axis.min instanceof Timestamp) {
-        offsetAdjustment = trace.axis.min.sub(unionedBasis);
-      }
-      if (unionedBasis instanceof Duration &&
-          trace.axis.min instanceof Duration) {
-        offsetAdjustment = trace.axis.min.sub(unionedBasis);
-      }
-      if (offsetAdjustment === undefined) {
-        throw new Error(`failed to compute trace axis offset adjustment`);
-      }
       for (const otherCategory of trace.categories) {
         const categories = categoriesByID.get(otherCategory.category.id);
         if (categories === undefined) {
           categoryIDs.push(otherCategory.category.id);
           categoriesByID.set(otherCategory.category.id, [{
                                traceCategory: otherCategory,
-                               offsetAdjustment,
                              }]);
         } else {
           categories.push({
             traceCategory: otherCategory,
-            offsetAdjustment,
           });
         }
       }
     }
-    const categories: TraceCategory[] = [];
+    const categories: Array<TraceCategory<T>> = [];
     for (const categoryID of categoryIDs) {
-      categories.push(TraceCategory.union(...categoriesByID.get(categoryID)!));
+      categories.push(
+          TraceCategory.union(unionedAxis, ...categoriesByID.get(categoryID)!));
     }
-    return new Trace(ValueMap.union(...props), categories, axis);
+    return new Trace(ValueMap.union(...props), categories, unionedAxis);
+  }
+
+  // Unions multiple traces into one.
+  static union(...traces: Array<Trace<unknown>>): Trace<unknown> {
+    if (traces.length <= 0) {
+      throw new ConfigurationError(
+          `Trace.union requires at least one trace argument`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+    }
+    if (traces.length === 1) {
+      return traces[0];
+    }
+    let ret = traces[0];
+    for (const trace of traces.slice(1)) {
+      ret = ret.merge(trace);
+    }
+    return ret;
   }
 
   renderSettings(): RenderSettings {
     return {
-      spanWidthCatPx: this.properties.expectNumber(Keys.SPAN_WIDTH_CAT_PX),
+      spanWidthCatPx: this.properties.expectNumber(Key.SPAN_WIDTH_CAT_PX),
       categoryHeaderCatPx:
-          this.properties.expectNumber(Keys.CATEGORY_HEADER_CAT_PX),
+          this.properties.expectNumber(Key.CATEGORY_HEADER_CAT_PX),
       categoryHandleTempPx:
-          this.properties.expectNumber(Keys.CATEGORY_HANDLE_TEMP_PX),
+          this.properties.expectNumber(Key.CATEGORY_HANDLE_TEMP_PX),
       categoryPaddingCatPx:
-          this.properties.expectNumber(Keys.CATEGORY_PADDING_CAT_PX),
+          this.properties.expectNumber(Key.CATEGORY_PADDING_CAT_PX),
       categoryMarginTempPx:
-          this.properties.expectNumber(Keys.CATEGORY_MARGIN_TEMP_PX),
+          this.properties.expectNumber(Key.CATEGORY_MARGIN_TEMP_PX),
       categoryMinWidthCatPx:
-          this.properties.expectNumber(Keys.CATEGORY_MIN_WIDTH_CAT_PX),
-      spanPaddingCatPx: this.properties.expectNumber(Keys.SPAN_PADDING_CAT_PX),
+          this.properties.expectNumber(Key.CATEGORY_MIN_WIDTH_CAT_PX),
+      spanPaddingCatPx: this.properties.expectNumber(Key.SPAN_PADDING_CAT_PX),
       categoryBaseWidthTempPx:
-          this.properties.expectNumber(Keys.CATEGORY_BASE_WIDTH_TEMP_PX),
+          this.properties.expectNumber(Key.CATEGORY_BASE_WIDTH_TEMP_PX),
     };
   }
 }
 
 /** A trace category under a Trace or another TraceCategory. */
-export class TraceCategory {
+export class TraceCategory<T> {
   // The greatest height, in units of spans, of all spans directly under this
   // category.
   readonly selfSpanHeight: number;
@@ -225,8 +225,9 @@ export class TraceCategory {
   readonly categoryHeight: number;
 
   private constructor(
-      readonly category: Category, readonly categories: TraceCategory[],
-      readonly spans: Span[], readonly properties: ValueMap) {
+      readonly axis: Axis<T>, readonly category: Category,
+      readonly categories: Array<TraceCategory<T>>,
+      readonly spans: Array<Span<T>>, readonly properties: ValueMap) {
     this.selfSpanHeight = 0;
     for (const span of this.spans) {
       if (span.height > this.selfSpanHeight) {
@@ -245,10 +246,10 @@ export class TraceCategory {
   }
 
   // Constructs a new TraceCategory from a provided ResponseNode.
-  static fromNode(node: ResponseNode): TraceCategory {
+  static fromNode<T>(axis: Axis<T>, node: ResponseNode): TraceCategory<T> {
     const properties = node.properties.without(
         ...categoryProperties,
-        Keys.NODE_TYPE,
+        Key.NODE_TYPE,
     );
     const cat = getDefinedCategory(node.properties);
     if (!cat) {
@@ -256,39 +257,39 @@ export class TraceCategory {
           .from(SOURCE)
           .at(Severity.ERROR);
     }
-    const subcats = new Array<TraceCategory>();
-    const spans = new Array<Span>();
+    const subcats = new Array<TraceCategory<T>>();
+    const spans: Array<Span<T>> = [];
     for (const child of node.children) {
-      switch (child.properties.expectNumber(Keys.NODE_TYPE)) {
+      switch (child.properties.expectNumber(Key.NODE_TYPE)) {
         case NodeType.CATEGORY:
-          subcats.push(TraceCategory.fromNode(child));
+          subcats.push(TraceCategory.fromNode(axis, child));
           break;
         case NodeType.SPAN:
-          spans.push(Span.fromNode(child));
+          spans.push(new Span(axis, child));
           break;
         default:
           throw new ConfigurationError(
               `unsupported node type ${
                   child.properties.expectNumber(
-                      Keys.NODE_TYPE)} as TraceCategory child`)
+                      Key.NODE_TYPE)} as TraceCategory child`)
               .from(SOURCE)
               .at(Severity.ERROR);
       }
     }
-    return new TraceCategory(cat, subcats, spans, properties);
+    return new TraceCategory(axis, cat, subcats, spans, properties);
   }
 
   // Unions multiple Categories into one.
-  static union(...cats: UnioningCategory[]): TraceCategory {
-    const spans = new Array<Span>();
+  static union<T>(axis: Axis<T>, ...cats: Array<UnioningCategory<T>>):
+      TraceCategory<T> {
+    const spans: Array<Span<T>> = [];
     const subcategoryIDs = new Array<string>();
-    const subcategoriesByID = new Map<string, UnioningCategory[]>();
+    const subcategoriesByID = new Map<string, Array<UnioningCategory<T>>>();
     let category: Category|undefined;
     let properties: ValueMap|undefined;
 
     for (const cat of cats) {
       const traceCategory = cat.traceCategory;
-      const offsetAdjustment = cat.offsetAdjustment;
       if (category === undefined) {
         category = traceCategory.category;
       } else {
@@ -304,20 +305,17 @@ export class TraceCategory {
       } else {
         properties = ValueMap.union(properties, traceCategory.properties);
       }
-      spans.push(...(traceCategory.spans.map(
-          span => span.withOffsetAdjustment(offsetAdjustment))));
+      spans.push(...traceCategory.spans);
       for (const subcategory of traceCategory.categories) {
         const subcategories = subcategoriesByID.get(subcategory.category.id);
         if (subcategories === undefined) {
           subcategoryIDs.push(subcategory.category.id);
           subcategoriesByID.set(subcategory.category.id, [{
                                   traceCategory: subcategory,
-                                  offsetAdjustment,
                                 }]);
         } else {
           subcategories.push({
             traceCategory: subcategory,
-            offsetAdjustment,
           });
         }
       }
@@ -326,105 +324,77 @@ export class TraceCategory {
       throw new Error(
           `TraceCategory.union() requires at least one well-formed argument`);
     }
-    const subcategories: TraceCategory[] = [];
+    const subcategories: Array<TraceCategory<T>> = [];
     for (const subcategoryID of subcategoryIDs) {
       subcategories.push(
-          TraceCategory.union(...subcategoriesByID.get(subcategoryID)!));
+          TraceCategory.union(axis, ...subcategoriesByID.get(subcategoryID)!));
     }
-    return new TraceCategory(category, subcategories, spans, properties);
+    return new TraceCategory(axis, category, subcategories, spans, properties);
   }
 }
 
 /** A trace span under a TraceCategory or another Span. */
-export class Span {
-  private constructor(
-      // This Span's start offset and duration.
-      readonly offset: Duration, readonly duration: Duration,
-      // This Span's child Spans and Subspans
-      readonly children: Span[], readonly subspans: Subspan[],
-      // A mapping from payload type to list of payloads of that type, in
-      // definition order.
-      readonly payloads: ReadonlyMap<string, ResponseNode[]>,
-      // This Span's properties.
-      readonly properties: ValueMap,
-      // The distance, in spans, to this span's deepest descendant.
-      readonly height: number) {}
+export class Span<T> {
+  // This Span's child Spans and Subspans
+  readonly children: Array<Span<T>>;
+  readonly subspans: Array<Subspan<T>>;
+  // A mapping from payload type to list of payloads of that type, in
+  // definition order.
+  readonly payloads: ReadonlyMap<string, ResponseNode[]>;
+  // This Span's properties.
+  readonly properties: ValueMap;
+  // The distance, in spans, to this span's deepest descendant.
+  readonly height: number;
 
-  withOffsetAdjustment(offsetAdjustment: Duration): Span {
-    return new Span(
-        this.offset.add(offsetAdjustment), this.duration,
-        this.children.map(
-            child => child.withOffsetAdjustment(offsetAdjustment)),
-        this.subspans.map(
-            subspan => subspan.withOffsetAdjustment(offsetAdjustment)),
-        this.payloads, this.properties, this.height);
-  }
-
-  // Constructs a new Span from a provided ResponseNode.
-  static fromNode(node: ResponseNode): Span {
-    const properties =
-        node.properties.without(Keys.NODE_TYPE, Keys.OFFSET, Keys.DURATION);
-    const offset = node.properties.expectDuration(Keys.OFFSET);
-    const duration = (node.properties.has(Keys.DURATION)) ?
-        node.properties.expectDuration(Keys.DURATION) :
-        new Duration(0);
+  constructor(readonly axis: Axis<T>, node: ResponseNode) {
     const c = children(node);
-    const subspans = new Array<Subspan>();
-    const spans = new Array<Span>();
+    this.subspans = [];
+    this.children = [];
     for (const child of c.structural) {
-      switch (child.properties.expectNumber(Keys.NODE_TYPE)) {
+      switch (child.properties.expectNumber(Key.NODE_TYPE)) {
         case NodeType.SPAN:
-          spans.push(Span.fromNode(child));
+          this.children.push(new Span(this.axis, child));
           break;
         case NodeType.SUBSPAN:
-          subspans.push(Subspan.fromNode(child));
+          this.subspans.push(new Subspan(this.axis, child));
           break;
         default:
           throw new ConfigurationError(
               `unsupported node type ${
-                  child.properties.expectNumber(Keys.NODE_TYPE)} as Span child`)
+                  child.properties.expectNumber(Key.NODE_TYPE)} as Span child`)
               .from(SOURCE)
               .at(Severity.ERROR);
       }
     }
     let greatestChildHeight = 0;
-    for (const child of spans) {
+    for (const child of this.children) {
       if (child.height > greatestChildHeight) {
         greatestChildHeight = child.height;
       }
     }
-    const height = greatestChildHeight + 1;
-    const childSpans = spans;
-    return new Span(
-        offset, duration, childSpans, subspans, c.payload, properties, height);
+    this.payloads = c.payload;
+    this.properties = node.properties.without(Key.NODE_TYPE);
+    this.height = greatestChildHeight + 1;
+  }
+
+  start(): T {
+    return this.axis.value(this.properties, Key.START);
+  }
+
+  end(): T {
+    return this.axis.value(this.properties, Key.END);
   }
 }
 
 /** A trace subspan under a Span. */
-export class Subspan {
-  private constructor(
-      // This Span's start offset and duration.
-      readonly offset: Duration, readonly duration: Duration,
-      // A mapping from payload type to list of payloads of that type, in
-      // definition order.
-      readonly payloads: ReadonlyMap<string, ResponseNode[]>,
-      // This Span's properties.
-      readonly properties: ValueMap) {}
+export class Subspan<T> {
+  // A mapping from payload type to list of payloads of that type, in
+  // definition order.
+  readonly payloads: ReadonlyMap<string, ResponseNode[]>;
+  // This Span's properties.
+  readonly properties: ValueMap;
 
-  withOffsetAdjustment(offsetAdjustment: Duration): Subspan {
-    return new Subspan(
-        this.offset.add(offsetAdjustment), this.duration, this.payloads,
-        this.properties);
-  }
-
-  // Constructs a new Subspan from a provided ResponseNode.
-  static fromNode(node: ResponseNode): Subspan {
-    const properties =
-        node.properties.without(Keys.NODE_TYPE, Keys.OFFSET, Keys.DURATION);
-    const offset = node.properties.expectDuration(Keys.OFFSET);
-    const duration = (node.properties.has(Keys.DURATION)) ?
-        node.properties.expectDuration(Keys.DURATION) :
-        new Duration(0);
+  constructor(readonly axis: Axis<T>, node: ResponseNode) {
     const c = children(node);
     if (c.structural.length > 0) {
       throw new ConfigurationError(
@@ -432,6 +402,15 @@ export class Subspan {
           .from(SOURCE)
           .at(Severity.ERROR);
     }
-    return new Subspan(offset, duration, c.payload, properties);
+    this.payloads = c.payload;
+    this.properties = node.properties.without(Key.NODE_TYPE);
+  }
+
+  start(): T {
+    return this.axis.value(this.properties, Key.START);
+  }
+
+  end(): T {
+    return this.axis.value(this.properties, Key.END);
   }
 }

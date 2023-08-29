@@ -13,9 +13,8 @@
 
 // Package trace provides structural helpers for defining trace data.  Given
 // a dedicated tableRoot *util.DataBuilder representing the root node of the
-// trace, and which must not be used for any other purpose, and either a
-// timestamp or duration-based axis, a new trace may be
-// created via
+// trace, and which must not be used for any other purpose, and a float64-,
+// timestamp- or duration-based axis, a new trace may be created via
 //
 //	trace := New(tableRoot, axis)
 //
@@ -49,16 +48,16 @@
 //	cat.With(properties...)
 //
 // The fundamental unit of trace visualization is the Span.  A Trace Span
-// exists in exactly one Category, has an offset and a duration, and its
-// temporal extent lies entirely within its parent trace's (indeed, a trace's
-// temporal extent is generally the spanning interval of all its spans).  A
-// span may be created under `cat *trace.Category` via
+// exists in exactly one Category, has start and end point, and its temporal
+// extent lies entirely within its parent trace's (indeed, a trace's temporal
+// extent is generally the spanning interval of all its spans).  A span may be
+// created under `cat *trace.Category` via
 //
-//	span := cat.Span(offset, duration, properties...)
+//	span := cat.Span(start, end, properties...)
 //
 // Spans may have nested child spans, which are created via:
 //
-//	childSpan := span.Span(offset, duration, properties...)
+//	childSpan := span.Span(start, end, properties...)
 //
 // Spans may also be annotated with additional properties, via
 //
@@ -73,7 +72,7 @@
 // (e.g., depending below their parent) and may have subspans and children.  A
 // subspan may be created under `span *trace.Span` via:
 //
-//	subspan := span.Subspan(offset, duration, properties...)
+//	subspan := span.Subspan(start, end, properties...)
 //
 // Subspans may also be annotated with additional properties, via
 //
@@ -106,7 +105,7 @@
 // restrictions are recommended:
 //   - It should be an error if any two traces in S have different axis types,
 //     and if all traces in S have 'Duration'-type axes, they must have, or be
-//     corrected to have, the same offset time;
+//     corrected to have, the same start point;
 //   - It should be an error if two different datasources specify a category
 //     with the same path P but with different display names or descriptions.
 //     In other words, categories must be identical to be merged;
@@ -124,7 +123,7 @@
 // trace
 //
 //	properties
-//	  * time axis definition
+//	  * float64, Duration, or Time axis definition
 //	  * <decorators>
 //	children
 //	  * repeated trace categories
@@ -142,8 +141,8 @@
 //
 //	properties
 //	  * nodeTypeKey: spanNodeType
-//	  * offsetKey: Duration (offset from time axis min)
-//	  * durationKey: Duration
+//	  * startKey: axis value type
+//	  * endKey: axis value type
 //	  * <decorators>
 //	children
 //	  * repeated spans, subspans, and payloads
@@ -152,8 +151,8 @@
 //
 //	properties
 //	  * nodeTypeKey: subspanNodeType
-//	  * offsetKey: Duration (offset from time axis min)
-//	  * durationKey: Duration
+//	  * startKey: axis value type
+//	  * endKey: axis value type
 //	  * <decorators>
 //	children
 //	  * repeated payloads
@@ -168,8 +167,8 @@ import (
 )
 
 const (
-	offsetKey   = "trace_offset"
-	durationKey = "trace_duration"
+	startKey    = "trace_start"
+	endKey      = "trace_end"
 	nodeTypeKey = "trace_node_type"
 
 	// Rendering property keys
@@ -184,10 +183,10 @@ const (
 )
 
 // RenderSettings is a collection of rendering settings for traces.  A trace is
-// rendered on a two-dimensional plane, with one axis (typically the x-axis)
-// showing trace temporal duration ('temp') and the other (typically the
-// y-axis) showing the hierarchical and concurrent dimension of the trace via a
-// hierarchy of trace categories ('cat').
+// rendered on a two-dimensional plane, with one continuous axis (typically the
+// x-axis) showing trace temporal duration ('temp') and the other (typically
+// the y-axis) showing the hierarchical and concurrent dimension of the trace
+// via a hierarchy of trace categories ('cat').
 //
 // These settings are generally defined as extents, in units of pixels, along
 // these two axes, so are suffixed 'TempPxKey' for a pixel extent along the
@@ -257,36 +256,38 @@ func traceNode(parentDb util.DataBuilder, nodeType traceNodeType) util.DataBuild
 // phases, and opportunities for improved parallelism and latency among
 // visualized traces.
 // Every trace has a single axis, provided at its creation, extending across
-// the portion of the trace to be visualized.  Spans' and subspans' offsets are
-// reckoned from the minimum extent of this access.
-type Trace struct {
-	db util.DataBuilder
+// the portion of the trace to be visualized.
+type Trace[T float64 | time.Duration | time.Time] struct {
+	db   util.DataBuilder
+	axis *continuousaxis.Axis[T]
 }
 
 // New returns a new Trace populating the provided data builder.
-func New(db util.DataBuilder, axis continuousaxis.Axis, renderSettings *RenderSettings) *Trace {
-	return &Trace{
+func New[T float64 | time.Duration | time.Time](db util.DataBuilder, axis *continuousaxis.Axis[T], renderSettings *RenderSettings) *Trace[T] {
+	return &Trace[T]{
 		db: db.With(
 			axis.Define(),
 			renderSettings.Define(),
 		),
+		axis: axis,
 	}
 }
 
 // With applies a set of properties to the receiving Trace, returning that Span
 // to facilitate chaining.
-func (t *Trace) With(properties ...util.PropertyUpdate) *Trace {
+func (t *Trace[T]) With(properties ...util.PropertyUpdate) *Trace[T] {
 	t.db.With(properties...)
 	return t
 }
 
 // Category adds and returns a Category within the receiving Trace.
-func (t *Trace) Category(category *category.Category, properties ...util.PropertyUpdate) *Category {
+func (t *Trace[T]) Category(category *category.Category, properties ...util.PropertyUpdate) *Category[T] {
 	db := traceNode(t.db, categoryNodeType).
 		With(category.Define()).
 		With(properties...)
-	return &Category{
-		db: db,
+	return &Category[T]{
+		db:   db,
+		axis: t.axis,
 	}
 }
 
@@ -308,83 +309,89 @@ func (t *Trace) Category(category *category.Category, properties ...util.Propert
 // under their parent's; or a system-wide trace might include a Category for
 // each CPU or thread in the system (that is, for each sequential line of
 // execution in the concurrent system.)
-type Category struct {
-	db util.DataBuilder
+type Category[T float64 | time.Duration | time.Time] struct {
+	db   util.DataBuilder
+	axis *continuousaxis.Axis[T]
 }
 
 // Category adds and returns a sub-Category under the receiving Category.
-func (c *Category) Category(category *category.Category, properties ...util.PropertyUpdate) *Category {
+func (c *Category[T]) Category(category *category.Category, properties ...util.PropertyUpdate) *Category[T] {
 	db := traceNode(c.db, categoryNodeType).
 		With(category.Define()).
 		With(properties...)
-	return &Category{
-		db: db,
+	return &Category[T]{
+		db:   db,
+		axis: c.axis,
 	}
 }
 
-// Span creates a new Span with the specified offset (from the axis minimum)
-// and duration under the receiving Category, and returns it.
-func (c *Category) Span(offset, duration time.Duration, properties ...util.PropertyUpdate) *Span {
+// Span creates a new Span with the specified start and end points under the
+// receiving Category, and returns it.
+func (c *Category[T]) Span(start, end T, properties ...util.PropertyUpdate) *Span[T] {
 	db := traceNode(c.db, spanNodeType).
 		With(
-			util.DurationProperty(offsetKey, offset),
-			util.If(duration > 0, util.DurationProperty(durationKey, duration)),
+			c.axis.Value(startKey, start),
+			c.axis.Value(endKey, end),
 		).With(properties...)
-	return &Span{
-		db: db,
+	return &Span[T]{
+		db:   db,
+		axis: c.axis,
 	}
 }
 
 // With applies a set of properties to the receiving Category, returning that Category
 // to facilitate chaining.
-func (c *Category) With(properties ...util.PropertyUpdate) *Category {
+func (c *Category[T]) With(properties ...util.PropertyUpdate) *Category[T] {
 	c.db.With(properties...)
 	return c
 }
 
-// Span is an event within a trace with a start offset and a duration.  Its
-// duration may be zero, in which case it may be called an 'event.
+// Span is an event within a trace with a start and end point.  Its width may
+// be zero, in which case it may be called an 'event.
 // This package distinguishes two types of spans: 'hierarchical spans', which
 // should be rendered separately and represent parent/child relationships, and
 // 'subspans', which should be rendered atop their parent hierarchical span and
 // represent phases of that parent span, or events within it.  Subspans may not
 // have children.
-type Span struct {
-	db util.DataBuilder
+type Span[T float64 | time.Duration | time.Time] struct {
+	db   util.DataBuilder
+	axis *continuousaxis.Axis[T]
 }
 
-// Span creates a new Span with the specified offset (from the axis minimum)
-// and duration under the receiving Span, and returns it.
-func (s *Span) Span(offset, duration time.Duration, properties ...util.PropertyUpdate) *Span {
+// Span creates a new Span with the specified start and end point under the
+// receiving Span, and returns it.
+func (s *Span[T]) Span(start, end T, properties ...util.PropertyUpdate) *Span[T] {
 	db := traceNode(s.db, spanNodeType).
 		With(
-			util.DurationProperty(offsetKey, offset),
-			util.If(duration > 0, util.DurationProperty(durationKey, duration)),
+			s.axis.Value(startKey, start),
+			s.axis.Value(endKey, end),
 		).With(properties...)
-	return &Span{
-		db: db,
+	return &Span[T]{
+		db:   db,
+		axis: s.axis,
 	}
 }
 
 // With applies a set of properties to the receiving Span, returning that Span
 // to facilitate chaining.
-func (s *Span) With(properties ...util.PropertyUpdate) *Span {
+func (s *Span[T]) With(properties ...util.PropertyUpdate) *Span[T] {
 	s.db.With(properties...)
 	return s
 }
 
 // Payload supports attaching arbitrary payloads to spans.  See payload.go
-func (s *Span) Payload() util.DataBuilder {
+func (s *Span[T]) Payload() util.DataBuilder {
 	return s.db.Child()
 }
 
-// Subspan creates a new Subspan with the specified offset (from the axis
-// minimum) and duration under the receiving Span, and returns it.
-func (s *Span) Subspan(offset, duration time.Duration, properties ...util.PropertyUpdate) *Subspan {
+// Subspan creates a new Subspan with the specified start and end points under
+// the receiving Span, and returns it.
+func (s *Span[T]) Subspan(start, end T, properties ...util.PropertyUpdate) *Subspan {
 	db := traceNode(s.db, subspanNodeType).
 		With(
-			util.DurationProperty(offsetKey, offset),
-			util.If(duration > 0, util.DurationProperty(durationKey, duration))).
+			s.axis.Value(startKey, start),
+			s.axis.Value(endKey, end),
+		).
 		With(properties...)
 	return &Subspan{
 		db: db,

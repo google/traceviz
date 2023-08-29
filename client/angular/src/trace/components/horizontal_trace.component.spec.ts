@@ -1,3 +1,16 @@
+/*
+        Copyright 2023 Google Inc.
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+                https://www.apache.org/licenses/LICENSE-2.0
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+*/
+
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
@@ -7,14 +20,10 @@ import {TraceModule} from '../trace.module';
 
 import {HorizontalTraceComponent} from './horizontal_trace.component';
 
-import {GLOBAL_TEST_DATA_FETCHER, StringValue, TimestampValue, Duration, Timestamp, ResponseNode, node, ts, dur, int, str, strs, valueMap} from 'traceviz-client-core';
+import {GLOBAL_TEST_DATA_FETCHER, StringValue, TimestampValue, Timestamp, ResponseNode, node, ts, int, str, strs, valueMap} from 'traceviz-client-core';
 
 function sec(sec: number): Timestamp {
   return new Timestamp(sec, 0);
-}
-
-function d(sec: number): Duration {
-  return new Duration(sec * 1E9);
 }
 
 const testTrace = node(
@@ -47,15 +56,15 @@ const testTrace = node(
         node(
             valueMap(
                 {key: 'trace_node_type', val: int(1)},
-                {key: 'trace_offset', val: dur(d(0))},
-                {key: 'trace_duration', val: dur(d(300))},
+                {key: 'trace_start', val: ts(sec(0))},
+                {key: 'trace_end', val: ts(sec(300))},
                 {key: 'label_format', val: str('a')},
                 ),
             node(
                 valueMap(
                     {key: 'payload_type', val: str('trace_edge_payload')},
                     {key: 'trace_edge_node_id', val: str('a->a/b')},
-                    {key: 'trace_edge_offset', val: dur(d(0))},
+                    {key: 'trace_edge_start', val: ts(sec(0))},
                     {key: 'trace_edge_endpoint_node_ids', val: strs('a/b')},
                     ),
                 ),
@@ -71,15 +80,15 @@ const testTrace = node(
             node(
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(0))},
-                    {key: 'trace_duration', val: dur(d(150))},
+                    {key: 'trace_start', val: ts(sec(0))},
+                    {key: 'trace_end', val: ts(sec(150))},
                     {key: 'label_format', val: str('a/b')},
                     ),
                 node(
                     valueMap(
                         {key: 'payload_type', val: str('trace_edge_payload')},
                         {key: 'trace_edge_node_id', val: str('a/b')},
-                        {key: 'trace_edge_offset', val: dur(d(0))},
+                        {key: 'trace_edge_start', val: ts(sec(0))},
                         {key: 'trace_edge_endpoint_node_ids', val: strs()},
                         ),
                     ),
@@ -97,15 +106,15 @@ const testTrace = node(
         node(
             valueMap(
                 {key: 'trace_node_type', val: int(1)},
-                {key: 'trace_offset', val: dur(d(150))},
-                {key: 'trace_duration', val: dur(d(150))},
+                {key: 'trace_start', val: ts(sec(150))},
+                {key: 'trace_end', val: ts(sec(300))},
                 {key: 'label_format', val: str('c')},
                 ),
             node(
                 valueMap(
                     {key: 'payload_type', val: str('trace_edge_payload')},
                     {key: 'trace_edge_node_id', val: str('c->c/d')},
-                    {key: 'trace_edge_offset', val: dur(d(225))},
+                    {key: 'trace_edge_start', val: ts(sec(225))},
                     {key: 'trace_edge_endpoint_node_ids', val: strs('c/d')},
                     ),
                 ),
@@ -121,8 +130,8 @@ const testTrace = node(
             node(
                 valueMap(
                     {key: 'trace_node_type', val: int(1)},
-                    {key: 'trace_offset', val: dur(d(225))},
-                    {key: 'trace_duration', val: dur(d(75))},
+                    {key: 'trace_start', val: ts(sec(225))},
+                    {key: 'trace_end', val: ts(sec(300))},
                     {key: 'rpc', val: str('d')},
                     {key: 'label_format', val: str('c/d')},
                     ),
@@ -130,7 +139,7 @@ const testTrace = node(
                     valueMap(
                         {key: 'payload_type', val: str('trace_edge_payload')},
                         {key: 'trace_edge_node_id', val: str('c/d')},
-                        {key: 'trace_edge_offset', val: dur(d(225))},
+                        {key: 'trace_edge_start', val: ts(sec(225))},
                         {key: 'trace_edge_endpoint_node_ids', val: strs()},
                         ),
                     ),
@@ -209,10 +218,7 @@ describe('horizontal trace test', () => {
         .configureTestingModule({
           declarations: [TraceTestComponent],
           imports: [
-            CoreModule,
-            TestCoreModule,
-            TraceModule,
-            NoopAnimationsModule,
+            CoreModule, TestCoreModule, TraceModule, NoopAnimationsModule,
           ],
           providers: [{provide: AppCoreService, useValue: appCoreService}]
         })

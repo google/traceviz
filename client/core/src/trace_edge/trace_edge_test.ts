@@ -32,8 +32,8 @@ export function d(sec: number): Duration {
   return new Duration(sec * 1E9);
 }
 
-function findAllEdges(
-    parent: Trace|TraceCategory|Span|Subspan, nodesByID: Map<string, Node>) {
+function findAllEdges<T>(
+    parent: Trace<T>|TraceCategory<T>|Span<T>|Subspan<T>, nodesByID: Map<string, Node>) {
   if (parent instanceof Trace) {
     for (const category of parent.categories) {
       findAllEdges(category, nodesByID);

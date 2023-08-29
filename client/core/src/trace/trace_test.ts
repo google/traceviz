@@ -7,9 +7,9 @@
         Unless required by applicable law or agreed to in writing, software
         distributed under the License is distributed on an "AS IS" BASIS,
         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License for the specific language governing permissions and
+        See the License to the specific language governing permissions and
         limitations under the License.
-*/
+*/ 
 
 import 'jasmine';
 
@@ -49,8 +49,8 @@ describe('trace test', () => {
                         node(
                             valueMap(
                                 {key: 'trace_node_type', val: int(1)},
-                                {key: 'trace_offset', val: dur(d(0))},
-                                {key: 'trace_duration', val: dur(d(100))},
+                                {key: 'trace_start', val: ts(sec(100))},
+                                {key: 'trace_end', val: ts(sec(200))},
                                 ),
                             ),
                         ),
@@ -64,8 +64,8 @@ describe('trace test', () => {
                         node(
                             valueMap(
                                 {key: 'trace_node_type', val: int(1)},
-                                {key: 'trace_offset', val: dur(d(50))},
-                                {key: 'trace_duration', val: dur(d(150))},
+                                {key: 'trace_start', val: ts(sec(150))},
+                                {key: 'trace_end', val: ts(sec(300))},
                                 ),
                             ),
                         ),
@@ -86,8 +86,6 @@ describe('trace test', () => {
                         {key: 'axis_type', val: str('timestamp')},
                         {key: 'axis_min', val: ts(sec(0))},
                         {key: 'axis_max', val: ts(sec(220))},
-                        {key: 'trace_time_basis', val: ts(sec(0))},
-                        {key: 'trace_duration', val: dur(d(220))},
                         ),
                     node(
                         valueMap(
@@ -99,8 +97,8 @@ describe('trace test', () => {
                         node(
                             valueMap(
                                 {key: 'trace_node_type', val: int(1)},
-                                {key: 'trace_offset', val: dur(d(0))},
-                                {key: 'trace_duration', val: dur(d(100))},
+                                {key: 'trace_start', val: ts(sec(0))},
+                                {key: 'trace_end', val: ts(sec(100))},
                                 ),
                             ),
                         ),
@@ -114,8 +112,8 @@ describe('trace test', () => {
                         node(
                             valueMap(
                                 {key: 'trace_node_type', val: int(1)},
-                                {key: 'trace_offset', val: dur(d(50))},
-                                {key: 'trace_duration', val: dur(d(70))},
+                                {key: 'trace_start', val: ts(sec(50))},
+                                {key: 'trace_end', val: ts(sec(120))},
                                 ),
                             ),
                         ),
@@ -123,22 +121,21 @@ describe('trace test', () => {
                 ),
             )))
         .toEqual(`Trace:
-  Axis x_axis 'time from start' (Time from start) (domain ${
-            sec(0).toDate().toString()}, ${sec(300).toDate().toString()})
+  Axis x_axis 'time from start' (Time from start) (domain 0ns, 5.000m)
   Category stuff 'Stuff' (Stuff):
     span-height self:1 total:1
     cat-height 1
     Span (height 1):
-      at 1.667m for 1.667m
+      1.667m to 3.333m
     Span (height 1):
-      at 0ns for 1.667m
+      0ns to 1.667m
   Category things 'Things' (Things):
     span-height self:1 total:1
     cat-height 1
     Span (height 1):
-      at 2.500m for 2.500m
+      2.500m to 5.000m
     Span (height 1):
-      at 50.000s for 1.167m
+      50.000s to 2.000m
 `);
   });
 
@@ -167,7 +164,7 @@ describe('trace test', () => {
               node(
                   valueMap(
                       {key: 'trace_time_basis', val: ts(sec(0))},
-                      {key: 'trace_duration', val: dur(d(300))},
+                      {key: 'trace_end', val: dur(d(300))},
                       {key: 'category_defined_id', val: str('x_axis')},
                       {
                         key: 'category_display_name',
@@ -193,7 +190,7 @@ describe('trace test', () => {
           Trace.fromNode(
               node(
                   valueMap(
-                      {key: 'trace_duration', val: dur(d(300))},
+                      {key: 'trace_end', val: dur(d(300))},
                       {key: 'category_defined_id', val: str('x_axis')},
                       {
                         key: 'category_display_name',
@@ -210,7 +207,7 @@ describe('trace test', () => {
                   node(
                       valueMap(
                           {key: 'trace_node_type', val: int(0)},
-                          {key: 'category_defined_id', val: str('cat 1')},
+                          {key: 'category_defined_id', val: str('c1')},
                           {
                             key: 'category_display_name',
                             val: str('Category 1')
@@ -223,7 +220,7 @@ describe('trace test', () => {
           Trace.fromNode(
               node(
                   valueMap(
-                      {key: 'trace_duration', val: dur(d(300))},
+                      {key: 'trace_end', val: dur(d(300))},
                       {key: 'category_defined_id', val: str('x_axis')},
                       {
                         key: 'category_display_name',
@@ -240,7 +237,7 @@ describe('trace test', () => {
                   node(
                       valueMap(
                           {key: 'trace_node_type', val: int(0)},
-                          {key: 'category_defined_id', val: str('cat 1')},
+                          {key: 'category_defined_id', val: str('c1')},
                           {key: 'category_display_name', val: str('Cat. 1')},
                           {key: 'category_description', val: str('Category 1')},
                           ),
@@ -306,27 +303,27 @@ describe('trace test', () => {
       span-height self:1 total:1
       cat-height 1
       Span (height 1):
-        at 0ns for 1.667m
+        0ns to 1.667m
         with [pid: 100]
       Span (height 1):
-        at 1.667m for 50.000s
+        1.667m to 2.500m
         with [pid: 200]
       Span (height 1):
-        at 2.500m for 2.500m
+        2.500m to 5.000m
         with [pid: 100]
     Category waiting 'Waiting' (Waiting threads):
       span-height self:1 total:1
       cat-height 1
       Span (height 1):
-        at 0ns for 1.667m
+        0ns to 1.667m
       Span (height 1):
-        at 1.667m for 50.000s
+        1.667m to 2.500m
         with [pids: [100]]
       Span (height 1):
-        at 2.500m for 50.000s
+        2.500m to 3.333m
         with [pids: [200]]
       Span (height 1):
-        at 3.333m for 1.667m
+        3.333m to 5.000m
         with [pids: [100, 300]]
 `);
   });
@@ -334,72 +331,71 @@ describe('trace test', () => {
   it('gets RPC trace', () => {
     expect(prettyPrintTrace(Trace.fromNode(rpcNode)))
         .toBe(`Trace:
-  Axis x_axis 'time from start' (Time from start) (domain ${
-            sec(0).toDate().toString()}, ${sec(300).toDate().toString()})
+  Axis x_axis 'time from start' (Time from start) (domain 0ns, 5.000m)
   Category rpc a 'RPC a' (RPC a):
     span-height self:1 total:6
     cat-height 3
     with [label_format: a]
     Span (height 1):
-      at 0ns for 5.000m
+      0ns to 5.000m
       with [rpc: a]
       Payload node:
-        with [payload_type: trace_edge_payload, trace_edge_node_id: a->a/b, trace_edge_offset: 0ns, trace_edge_endpoint_node_ids: [a/b]]
+        with [payload_type: trace_edge_payload, trace_edge_node_id: a->a/b, trace_edge_start: 1970-01-01T00:00:00.000Z, trace_edge_endpoint_node_ids: [a/b]]
       Payload node:
-        with [payload_type: trace_edge_payload, trace_edge_node_id: a->a/e, trace_edge_offset: 3.667m, trace_edge_endpoint_node_ids: [a/e]]
+        with [payload_type: trace_edge_payload, trace_edge_node_id: a->a/e, trace_edge_start: 1970-01-01T00:03:40.000Z, trace_edge_endpoint_node_ids: [a/e]]
     Category rpc b 'RPC a/b' (RPC a/b):
       span-height self:1 total:3
       cat-height 2
       with [label_format: a/b]
       Span (height 1):
-        at 0ns for 3.000m
+        0ns to 3.000m
         with [rpc: b]
         Payload node:
-          with [payload_type: trace_edge_payload, trace_edge_node_id: a/b, trace_edge_offset: 0ns, trace_edge_endpoint_node_ids: []]
+          with [payload_type: trace_edge_payload, trace_edge_node_id: a/b, trace_edge_start: 1970-01-01T00:00:00.000Z, trace_edge_endpoint_node_ids: []]
         Payload node:
-          with [payload_type: trace_edge_payload, trace_edge_node_id: a/b->a/b/c, trace_edge_offset: 20.000s, trace_edge_endpoint_node_ids: [a/b/c]]
+          with [payload_type: trace_edge_payload, trace_edge_node_id: a/b->a/b/c, trace_edge_start: 1970-01-01T00:00:20.000Z, trace_edge_endpoint_node_ids: [a/b/c]]
         Payload node:
-          with [payload_type: trace_edge_payload, trace_edge_node_id: a/b->a/b/d, trace_edge_offset: 2.333m, trace_edge_endpoint_node_ids: [a/b/d]]
+          with [payload_type: trace_edge_payload, trace_edge_node_id: a/b->a/b/d, trace_edge_start: 1970-01-01T00:02:20.000Z, trace_edge_endpoint_node_ids: [a/b/d]]
       Category rpc c 'RPC a/b/c' (RPC a/b/c):
         span-height self:1 total:1
         cat-height 1
         with [label_format: a/b/c]
         Span (height 1):
-          at 20.000s for 1.667m
+          20.000s to 2.000m
           with [rpc: c]
           Payload node:
-            with [payload_type: trace_edge_payload, trace_edge_node_id: a/b/c, trace_edge_offset: 20.000s, trace_edge_endpoint_node_ids: []]
+            with [payload_type: trace_edge_payload, trace_edge_node_id: a/b/c, trace_edge_start: 1970-01-01T00:00:20.000Z, trace_edge_endpoint_node_ids: []]
       Category rpc d 'RPC a/b/d' (RPC a/b/d):
         span-height self:1 total:1
         cat-height 1
         with [label_format: a/b/d]
         Span (height 1):
-          at 2.333m for 20.000s
+          2.333m to 2.667m
           with [rpc: d]
           Payload node:
-            with [payload_type: trace_edge_payload, trace_edge_node_id: a/b/d, trace_edge_offset: 2.333m, trace_edge_endpoint_node_ids: []]
+            with [payload_type: trace_edge_payload, trace_edge_node_id: a/b/d, trace_edge_start: 1970-01-01T00:02:20.000Z, trace_edge_endpoint_node_ids: []]
     Category rpc e 'RPC a/e' (RPC a/e):
       span-height self:1 total:2
       cat-height 2
       with [label_format: a/e]
       Span (height 1):
-        at 3.667m for 1.000m
+        3.667m to 4.667m
         with [rpc: e]
         Payload node:
-          with [payload_type: trace_edge_payload, trace_edge_node_id: a/e, trace_edge_offset: 3.667m, trace_edge_endpoint_node_ids: []]
+          with [payload_type: trace_edge_payload, trace_edge_node_id: a/e, trace_edge_start: 1970-01-01T00:03:40.000Z, trace_edge_endpoint_node_ids: []]
         Payload node:
-          with [payload_type: trace_edge_payload, trace_edge_node_id: a/e->a/e/a, trace_edge_offset: 4.000m, trace_edge_endpoint_node_ids: [a/e/a]]
+          with [payload_type: trace_edge_payload, trace_edge_node_id: a/e->a/e/a, trace_edge_start: 1970-01-01T00:04:00.000Z, trace_edge_endpoint_node_ids: [a/e/a]]
       Category rpc a 'RPC a/e/a' (RPC a/e/a):
         span-height self:1 total:1
         cat-height 1
         with [label_format: a/e/a]
         Span (height 1):
-          at 4.000m for 10.000s
+          4.000m to 4.167m
           with [rpc: a]
           Payload node:
-            with [payload_type: trace_edge_payload, trace_edge_node_id: a/e/a, trace_edge_offset: 4.000m, trace_edge_endpoint_node_ids: []]
+            with [payload_type: trace_edge_payload, trace_edge_node_id: a/e/a, trace_edge_start: 1970-01-01T00:04:00.000Z, trace_edge_endpoint_node_ids: []]
           Subspan:
-            at 4.000m for 10.000s
+            4.000m to 4.167m
             with [state: local]
 `);
   });
@@ -407,40 +403,39 @@ describe('trace test', () => {
   it('gets user-code instrumentation trace', () => {
     expect(prettyPrintTrace(Trace.fromNode(userInstrumentationNode)))
         .toBe(`Trace:
-  Axis x_axis 'time from start' (Time from start) (domain ${
-            sec(0).toDate().toString()}, ${sec(300).toDate().toString()})
+  Axis x_axis 'time from start' (Time from start) (domain 0ns, 5.000m)
   Category pid 100 'PID 100' (PID 100):
     span-height self:3 total:3
     cat-height 1
     Span (height 3):
-      at 0ns for 1.500m
+      0ns to 1.500m
       with [function: foo]
       Span (height 2):
-        at 10.000s for 30.000s
+        10.000s to 40.000s
         with [function: bar]
         Span (height 1):
-          at 15.000s for 10.000s
+          15.000s to 25.000s
           with [function: baz]
       Span (height 2):
-        at 50.000s for 30.000s
+        50.000s to 1.333m
         with [function: bar]
         Span (height 1):
-          at 55.000s for 10.000s
+          55.000s to 1.083m
           with [function: baz]
     Span (height 3):
-      at 1.667m for 1.500m
+      1.667m to 3.167m
       with [function: foo]
       Span (height 2):
-        at 1.833m for 30.000s
+        1.833m to 2.333m
         with [function: bar]
         Span (height 1):
-          at 1.917m for 10.000s
+          1.917m to 2.083m
           with [function: baz]
       Span (height 2):
-        at 2.500m for 30.000s
+        2.500m to 3.000m
         with [function: bar]
         Span (height 1):
-          at 2.583m for 10.000s
+          2.583m to 2.750m
           with [function: baz]
 `);
   });
@@ -448,36 +443,35 @@ describe('trace test', () => {
   it('gets trace with embedded data', () => {
     expect(prettyPrintTrace(Trace.fromNode(embeddedNode)))
         .toBe(`Trace:
-  Axis x_axis 'time from start' (Time from start) (domain ${
-            sec(0).toDate().toString()}, ${sec(500).toDate().toString()})
+  Axis x_axis 'time from start' (Time from start) (domain 0ns, 8.333m)
   Category pid 100 'PID 100' (PID 100):
     span-height self:1 total:4
     cat-height 2
     Span (height 1):
-      at 0ns for 8.333m
+      0ns to 8.333m
       Payload node:
         with [payload_type: thumbnail, normalized_cpu_time: [1, 1, 2, 1, 1]]
     Category pid 110 'PID 110' (PID 110):
       span-height self:1 total:1
       cat-height 1
       Span (height 1):
-        at 0ns for 1.667m
+        0ns to 1.667m
       Span (height 1):
-        at 3.333m for 1.667m
+        3.333m to 5.000m
       Span (height 1):
-        at 6.667m for 1.667m
+        6.667m to 8.333m
     Category pid 120 'PID 120' (PID 120):
       span-height self:1 total:1
       cat-height 1
       Span (height 1):
-        at 1.667m for 1.667m
+        1.667m to 3.333m
       Span (height 1):
-        at 5.000m for 1.667m
+        5.000m to 6.667m
     Category pid 130 'PID 130' (PID 130):
       span-height self:1 total:1
       cat-height 1
       Span (height 1):
-        at 3.333m for 1.667m
+        3.333m to 5.000m
 `);
   });
 });

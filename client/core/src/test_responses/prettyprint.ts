@@ -1,3 +1,8 @@
+/**
+ * @fileoverview A test-only package for pretty-printing TraceViz frontend
+ * response types.
+ */
+
 /*
         Copyright 2023 Google Inc.
         Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,24 +16,18 @@
         limitations under the License.
 */
 
-/**
- * @fileoverview A test-only package for pretty-printing TraceViz frontend
- * response types.
- */
-
 import {Category} from '../category/category.js';
-import {DurationAxis, NumberAxis, TimestampAxis} from '../continuous_axis/continuous_axis.js';
-import {Duration} from '../duration/duration.js';
+import {Axis} from '../continuous_axis/continuous_axis.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 import {Timestamp} from '../timestamp/timestamp.js';
-import {Span, Subspan, Trace, TraceCategory} from '../trace/trace.js';
+import {endKey, Span, startKey, Subspan, Trace, TraceCategory} from '../trace/trace.js';
 import {ValueMap} from '../value/value_map.js';
 
 const INDENT = '  ';
 
 function prettyPrintProperties(
     properties: ValueMap,
-    prefix: string = '',
+    prefix = '',
     ): string {
   if (properties.size === 0) {
     return ``;
@@ -41,7 +40,7 @@ function prettyPrintProperties(
 `;
 }
 
-function prettyPrintNode(node: ResponseNode, prefix: string = ''): string {
+function prettyPrintNode(node: ResponseNode, prefix = ''): string {
   let ret = `${prefix}Payload node:
 `;
   ret = ret + prettyPrintProperties(node.properties, prefix + INDENT);
@@ -50,13 +49,26 @@ function prettyPrintNode(node: ResponseNode, prefix: string = ''): string {
   }
   return ret;
 }
+/** Returns a Timestamp at the specified seconds after epoch. */
+export function sec(sec: number): Timestamp {
+  return new Timestamp(sec, 0);
+}
 
-function prettyPrintSubspan(subspan: Subspan, prefix: string = ''): string {
+function toString<T>(val: T): string {
+  if (val instanceof Timestamp) {
+    return `${val.sub(sec(0)).toString()}`;
+  }
+  return `${val}`;
+}
+
+function prettyPrintSubspan<T>(
+    axis: Axis<T>, subspan: Subspan<T>, prefix = ''): string {
   let ret = `${prefix}Subspan:
-${prefix}${INDENT}at ${subspan.offset.toString()} for ${
-      subspan.duration.toString()}
+${prefix}${INDENT}${toString(subspan.start())} to ${toString(subspan.end())}
 `;
-  ret = ret + prettyPrintProperties(subspan.properties, prefix + INDENT);
+  ret = ret +
+      prettyPrintProperties(
+            subspan.properties.without(startKey, endKey), prefix + INDENT);
   for (const [, payloads] of subspan.payloads) {
     for (const payload of payloads) {
       ret = ret + prettyPrintNode(payload, prefix + INDENT);
@@ -65,27 +77,29 @@ ${prefix}${INDENT}at ${subspan.offset.toString()} for ${
   return ret;
 }
 
-function prettyPrintSpan(span: Span, prefix: string = ''): string {
+function prettyPrintSpan<T>(axis: Axis<T>, span: Span<T>, prefix = ''): string {
   let ret = `${prefix}Span (height ${span.height}):
-${prefix}${INDENT}at ${span.offset.toString()} for ${span.duration.toString()}
+${prefix}${INDENT}${toString(span.start())} to ${toString(span.end())}
 `;
-  ret = ret + prettyPrintProperties(span.properties, prefix + INDENT);
+  ret = ret +
+      prettyPrintProperties(
+            span.properties.without(startKey, endKey), prefix + INDENT);
   for (const [, payloads] of span.payloads) {
     for (const payload of payloads) {
       ret = ret + prettyPrintNode(payload, prefix + INDENT);
     }
   }
   for (const child of span.children) {
-    ret += prettyPrintSpan(child, prefix + INDENT);
+    ret += prettyPrintSpan(axis, child, prefix + INDENT);
   }
   for (const subspan of span.subspans) {
-    ret += prettyPrintSubspan(subspan, prefix + INDENT);
+    ret += prettyPrintSubspan(axis, subspan, prefix + INDENT);
   }
   return ret;
 }
 
-function prettyPrintTraceCategory(
-    tracecat: TraceCategory, prefix: string = ''): string {
+function prettyPrintTraceCategory<T>(
+    axis: Axis<T>, tracecat: TraceCategory<T>, prefix = ''): string {
   let ret = `${prefix}Category ${prettyPrintCategory(tracecat.category)}:
 `;
   ret = ret +
@@ -95,10 +109,10 @@ ${prefix}${INDENT}cat-height ${tracecat.categoryHeight}
 `;
   ret = ret + prettyPrintProperties(tracecat.properties, prefix + INDENT);
   for (const span of tracecat.spans) {
-    ret += prettyPrintSpan(span, prefix + INDENT);
+    ret += prettyPrintSpan(axis, span, prefix + INDENT);
   }
   for (const subcat of tracecat.categories) {
-    ret += prettyPrintTraceCategory(subcat, prefix + INDENT);
+    ret += prettyPrintTraceCategory(axis, subcat, prefix + INDENT);
   }
   return ret;
 }
@@ -109,27 +123,18 @@ export function prettyPrintCategory(category: Category): string {
 }
 
 /** Pretty-prints the provided axis for testing. */
-export function prettyPrintAxis(axis: TimestampAxis|DurationAxis|
-                                NumberAxis): string {
+export function prettyPrintAxis<T>(axis: Axis<T>): string {
   const ret = `Axis ${prettyPrintCategory(axis.category)} `;
-  if (axis.min instanceof Timestamp && axis.max instanceof Timestamp) {
-    return ret +
-        `(domain ${axis.min.toDate().toString()}, ${
-               axis.max.toDate().toString()})`;
-  }
-  if (axis.min instanceof Duration && axis.max instanceof Duration) {
-    return ret + `(domain ${axis.min.toString()}, ${axis.max.toString()})`;
-  }
-  return ret + `(domain ${axis.min}, ${axis.max})`;
+  return ret + `(domain ${toString(axis.min)}, ${toString(axis.max)})`;
 }
 
 /** Pretty-prints the provided trace for testing. */
-export function prettyPrintTrace(trace: Trace, prefix: string = ''): string {
+export function prettyPrintTrace<T>(trace: Trace<T>, prefix = ''): string {
   let ret = `${prefix}Trace:
 ${prefix}${INDENT}${prettyPrintAxis(trace.axis)}
 `;
   for (const cat of trace.categories) {
-    ret += prettyPrintTraceCategory(cat, prefix + INDENT);
+    ret += prettyPrintTraceCategory(trace.axis, cat, prefix + INDENT);
   }
   return ret;
 }

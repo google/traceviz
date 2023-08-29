@@ -1,16 +1,3 @@
-/*
-        Copyright 2023 Google Inc.
-        Licensed under the Apache License, Version 2.0 (the "License");
-        you may not use this file except in compliance with the License.
-        You may obtain a copy of the License at
-                https://www.apache.org/licenses/LICENSE-2.0
-        Unless required by applicable law or agreed to in writing, software
-        distributed under the License is distributed on an "AS IS" BASIS,
-        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        See the License for the specific language governing permissions and
-        limitations under the License.
-*/
-
 /**
  * @fileoverview Axis comopnents for trace categories.
  */
@@ -43,7 +30,7 @@ const supportedActions = new Array<[string, string]>(
  * axis.
  */
 export abstract class TraceCategoryHierarchyYAxis {
-  abstract render(renderedCategories: RenderedTraceCategoryHierarchy): void;
+  abstract render(renderedCategories: RenderedTraceCategoryHierarchy<unknown>): void;
 }
 
 /**
@@ -86,10 +73,18 @@ export class RectangularTraceCategoryHierarchyYAxis extends
   }
 
   ngAfterContentInit() {
-    this.interactions?.get().checkForSupportedActions(supportedActions);
+    this.appCoreService.appCore.onPublish((appCore) => {
+      try {
+        this.interactions?.get().checkForSupportedActions(supportedActions);
+        this.interactions?.get().checkForSupportedReactions([]);
+        this.interactions?.get().checkForSupportedWatches([]);
+      } catch (err: unknown) {
+        appCore.err(err);
+      }
+    });
   }
 
-  handleCategoryMouseout(data: RenderedTraceCategory) {
+  handleCategoryMouseout(data: RenderedTraceCategory<unknown>) {
     try {
       this.interactions?.get().update(
           CATEGORY_HEADERS, ACTION_MOUSEOUT, data.properties);
@@ -99,7 +94,7 @@ export class RectangularTraceCategoryHierarchyYAxis extends
     this.tooltip = '';
   }
 
-  handleCategoryMouseover(data: RenderedTraceCategory) {
+  handleCategoryMouseover(data: RenderedTraceCategory<unknown>) {
     try {
       this.interactions?.get().update(
           CATEGORY_HEADERS, ACTION_MOUSEOVER, data.properties);
@@ -111,7 +106,7 @@ export class RectangularTraceCategoryHierarchyYAxis extends
   }
 
 
-  override render(renderedCategories: RenderedTraceCategoryHierarchy) {
+  override render(renderedCategories: RenderedTraceCategoryHierarchy<unknown>) {
     const coloring = new Coloring(renderedCategories.properties);
     const yAxisArea = d3.select(this.svg.nativeElement);
     yAxisArea.attr('width', renderedCategories.widthPx)
@@ -123,36 +118,24 @@ export class RectangularTraceCategoryHierarchyYAxis extends
     const enteredNodes =
         nodes.enter()
             .append('svg')
-            .attr('x', (rc: RenderedTraceCategory) => rc.x0Px)
-            .attr('y', (rc: RenderedTraceCategory) => rc.y0Px)
-            .attr('width', (rc: RenderedTraceCategory) => rc.width)
-            .attr('height', (rc: RenderedTraceCategory) => rc.height)
+            .attr('x', (rc: RenderedTraceCategory<unknown>) => rc.x0Px)
+            .attr('y', (rc: RenderedTraceCategory<unknown>) => rc.y0Px)
+            .attr('width', (rc: RenderedTraceCategory<unknown>) => rc.width)
+            .attr('height', (rc: RenderedTraceCategory<unknown>) => rc.height)
             .on('mouseover',
-                (event: any, rc: RenderedTraceCategory) => {
-                  // (rc: RenderedTraceCategory, i: number,
-                  //  n: ArrayLike<SVGSVGElement>) => {
-                  const n = nodes.nodes();
-                  const i = n.indexOf(event.target);
+                (rc: RenderedTraceCategory<unknown>, i: number,
+                 n: ArrayLike<SVGSVGElement>) => {
                   d3.select(n[i]).select('rect').attr('stroke', 'lime');
                   this.handleCategoryMouseover(rc);
                 })
             .on('mouseout',
-                (event: any, rc: RenderedTraceCategory) => {
-                  // (rc: RenderedTraceCategory, i: number,
-                  //  n: ArrayLike<SVGSVGElement>) => {
-                  const n = nodes.nodes();
-                  const i = n.indexOf(event.target);
+                (rc: RenderedTraceCategory<unknown>, i: number,
+                 n: ArrayLike<SVGSVGElement>) => {
+                  rc = rc;
                   d3.select(n[i]).select('rect').attr('stroke', 'none');
                   this.handleCategoryMouseout(rc);
                 })
-            // pre-d3 v6 version:
-            // (rc: RenderedTraceCategory, i: number,
-            //      n: ArrayLike<SVGSVGElement>) => {
-            //       rc = rc;
-            //       d3.select(n[i]).select('rect').attr('stroke', 'none');
-            //       this.handleCategoryMouseout(rc);
-            //     })
-            .on('click', (rc: RenderedTraceCategory) => {
+            .on('click', (rc: RenderedTraceCategory<unknown>) => {
               try {
                 this.interactions?.get().update(
                     CATEGORY_HEADERS, ACTION_CLICK, rc.properties);
@@ -162,38 +145,38 @@ export class RectangularTraceCategoryHierarchyYAxis extends
             });
     enteredNodes.append('rect')
         .attr('class', 'cat')
-        .attr('width', (rc: RenderedTraceCategory) => rc.width)
-        .attr('height', (rc: RenderedTraceCategory) => rc.height)
+        .attr('width', (rc: RenderedTraceCategory<unknown>) => rc.width)
+        .attr('height', (rc: RenderedTraceCategory<unknown>) => rc.height)
         .attr(
             'fill',
-            (rc: RenderedTraceCategory) =>
+            (rc: RenderedTraceCategory<unknown>) =>
                 coloring.colors(rc.properties).primary || '');
     enteredNodes.append('rect')
         .attr('class', 'handle')
         .attr(
             'width',
-            (rc: RenderedTraceCategory) =>
+            (rc: RenderedTraceCategory<unknown>) =>
                 rc.renderSettings.categoryHandleTempPx)
         .attr(
             'height',
-            (rc: RenderedTraceCategory) =>
+            (rc: RenderedTraceCategory<unknown>) =>
                 rc.renderSettings.categoryHeaderCatPx)
         .attr(
             'fill',
-            (rc: RenderedTraceCategory) =>
+            (rc: RenderedTraceCategory<unknown>) =>
                 coloring.colors(rc.properties).secondary || '');
     enteredNodes.append('text')
         .attr('dominant-baseline', 'hanging')
-        .attr('y', (rc: RenderedTraceCategory) => 1)
+        .attr('y', (rc: RenderedTraceCategory<unknown>) => 1)
         .attr(
             'x',
-            (rc: RenderedTraceCategory) =>
+            (rc: RenderedTraceCategory<unknown>) =>
                 rc.renderSettings.categoryHandleTempPx)
         .attr(
             'fill',
-            (rc: RenderedTraceCategory) =>
+            (rc: RenderedTraceCategory<unknown>) =>
                 coloring.colors(rc.properties).stroke || '')
-        .text((rc: RenderedTraceCategory) => getLabel(rc.properties));
+        .text((rc: RenderedTraceCategory<unknown>) => getLabel(rc.properties));
     // Update all node svgs, rects, and texts with their new positions, colors,
     // and contents.  This version of d3 update uses a lambda receiving a d3
     // selection; as d3 is untyped, this is `any` for now.
@@ -202,10 +185,10 @@ export class RectangularTraceCategoryHierarchyYAxis extends
         (update: any) => {
           update.transition()
               .duration(this.transitionDurationMs)
-              .attr('x', (rc: RenderedTraceCategory) => rc.x0Px)
-              .attr('y', (rc: RenderedTraceCategory) => rc.y0Px)
-              .attr('width', (rc: RenderedTraceCategory) => rc.width)
-              .attr('height', (rc: RenderedTraceCategory) => rc.height);
+              .attr('x', (rc: RenderedTraceCategory<unknown>) => rc.x0Px)
+              .attr('y', (rc: RenderedTraceCategory<unknown>) => rc.y0Px)
+              .attr('width', (rc: RenderedTraceCategory<unknown>) => rc.width)
+              .attr('height', (rc: RenderedTraceCategory<unknown>) => rc.height);
         });
     nodes.call(
         // tslint:disable-next-line:no-any
@@ -213,11 +196,11 @@ export class RectangularTraceCategoryHierarchyYAxis extends
           update.select('rect.cat')
               .transition()
               .duration(this.transitionDurationMs)
-              .attr('width', (rc: RenderedTraceCategory) => rc.width)
-              .attr('height', (rc: RenderedTraceCategory) => rc.height)
+              .attr('width', (rc: RenderedTraceCategory<unknown>) => rc.width)
+              .attr('height', (rc: RenderedTraceCategory<unknown>) => rc.height)
               .attr(
                   'fill',
-                  (rc: RenderedTraceCategory) =>
+                  (rc: RenderedTraceCategory<unknown>) =>
                       coloring.colors(rc.properties).primary);
         });
     nodes.call(
@@ -228,15 +211,15 @@ export class RectangularTraceCategoryHierarchyYAxis extends
               .duration(this.transitionDurationMs)
               .attr(
                   'width',
-                  (rc: RenderedTraceCategory) =>
+                  (rc: RenderedTraceCategory<unknown>) =>
                       rc.renderSettings.categoryHandleTempPx)
               .attr(
                   'height',
-                  (rc: RenderedTraceCategory) =>
+                  (rc: RenderedTraceCategory<unknown>) =>
                       rc.renderSettings.categoryHeaderCatPx)
               .attr(
                   'fill',
-                  (rc: RenderedTraceCategory) =>
+                  (rc: RenderedTraceCategory<unknown>) =>
                       coloring.colors(rc.properties).secondary || '');
         });
     nodes.call(
@@ -244,16 +227,16 @@ export class RectangularTraceCategoryHierarchyYAxis extends
         (update: any) => {
           update.select('text')
               .attr('dominant-baseline', 'hanging')
-              .attr('y', (rc: RenderedTraceCategory) => 1)
+              .attr('y', (rc: RenderedTraceCategory<unknown>) => 1)
               .attr(
                   'x',
-                  (rc: RenderedTraceCategory) =>
+                  (rc: RenderedTraceCategory<unknown>) =>
                       rc.renderSettings.categoryHandleTempPx)
               .attr(
                   'fill',
-                  (rc: RenderedTraceCategory) =>
+                  (rc: RenderedTraceCategory<unknown>) =>
                       coloring.colors(rc.properties).stroke)
-              .text((rc: RenderedTraceCategory) => getLabel(rc.properties));
+              .text((rc: RenderedTraceCategory<unknown>) => getLabel(rc.properties));
         });
   }
 }

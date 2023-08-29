@@ -13,7 +13,9 @@
 
 import {Component, ElementRef, forwardRef, ViewChild} from '@angular/core';
 import * as d3 from 'd3';  // from //third_party/javascript/typings/d3:bundle
-import {Duration, DurationAxis, NumberAxis, Timestamp, TimestampAxis, ValueMap} from 'traceviz-client-core';
+import {Axis, AxisType, ConfigurationError, Severity, Duration, Timestamp, ValueMap} from 'traceviz-client-core';
+
+const SOURCE = 'continuous_axes.component';
 
 enum Keys {
   X_AXIS_RENDER_LABEL_HEIGHT_PX = 'x_axis_render_label_height_px',
@@ -86,23 +88,28 @@ export function yAxisRenderSettings(properties: ValueMap):
  * Converts TraceViz axis data types (Timestamp, Duration, number) to native
  * JS/d3 data types (Date, number).
  */
-export function axisValue(val: Timestamp|Duration|number): Date|number {
+export function axisValue<T>(val: T): Date|number {
   if (val instanceof Timestamp) {
     return val.toDate();
   }
   if (val instanceof Duration) {
     return val.nanos;
   }
-  return val;
+  if (typeof val === 'number') {
+    return val;
+  }
+  throw new ConfigurationError(
+      `axis value must be number, Duration, or Timestamp`)
+      .from(SOURCE)
+      .at(Severity.ERROR);
 }
 
 /**
  * Returns a d3 scale from the provided axis, across the provided range.
  */
-export function scaleFromAxis(
-    axis: TimestampAxis|DurationAxis|NumberAxis, rangeLowPx: number,
-    rangeHighPx: number) {
-  return (axis instanceof TimestampAxis) ?
+export function scaleFromAxis<T>(
+    axis: Axis<T>, rangeLowPx: number, rangeHighPx: number) {
+  return (axis.type === AxisType.TIMESTAMP) ?
       d3.scaleTime()
           .domain([
             axisValue(axis.min),
@@ -119,8 +126,8 @@ export function scaleFromAxis(
 
 /** A base class for components displaying continuous Y axes. */
 export abstract class ContinuousYAxis {
-  abstract render(
-      axis: TimestampAxis|DurationAxis|NumberAxis, heightPx: number,
+  abstract render<T>(
+      axis: Axis<T>, heightPx: number,
       renderSettings: ContinuousAxisRenderSettings): void;
 }
 
@@ -150,8 +157,8 @@ export abstract class ContinuousYAxis {
 })
 export class StandardContinuousYAxis extends ContinuousYAxis {
   @ViewChild('svg', {static: true}) svg!: ElementRef;
-  override render(
-      axis: TimestampAxis|DurationAxis|NumberAxis, heightPx: number,
+  override render<T>(
+      axis: Axis<T>, heightPx: number,
       renderSettings: ContinuousAxisRenderSettings) {
     const yAxisArea = d3.select(this.svg.nativeElement);
     yAxisArea.attr('height', heightPx)
@@ -184,8 +191,8 @@ export class StandardContinuousYAxis extends ContinuousYAxis {
 
 /** A base class for components displaying continuous X axes. */
 export abstract class ContinuousXAxis {
-  abstract render(
-      axis: TimestampAxis|DurationAxis|NumberAxis, heightPx: number,
+  abstract render<T>(
+      axis: Axis<T>, heightPx: number,
       renderSettings: ContinuousAxisRenderSettings): void;
 }
 
@@ -215,8 +222,8 @@ export abstract class ContinuousXAxis {
 })
 export class StandardContinuousXAxis extends ContinuousXAxis {
   @ViewChild('svg', {static: true}) svg!: ElementRef;
-  override render(
-      axis: TimestampAxis|DurationAxis|NumberAxis, widthPx: number,
+  override render<T>(
+      axis: Axis<T>, widthPx: number,
       renderSettings: ContinuousAxisRenderSettings) {
     const xAxisArea = d3.select(this.svg.nativeElement);
     xAxisArea.attr('width', widthPx)

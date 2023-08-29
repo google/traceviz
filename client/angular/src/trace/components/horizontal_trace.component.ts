@@ -113,11 +113,11 @@ export class HorizontalTraceComponent implements AfterContentInit,
 
   readonly unsubscribe = new Subject<void>();
   readonly redrawDebouncer = new Subject<void>();
-  private trace: Trace|undefined;
+  private trace: Trace<unknown>|undefined;
   tooltip = '';
 
   private renderedSpans: RenderedTraceSpans|undefined;
-  private renderedCategories: RenderedTraceCategoryHierarchy|undefined;
+  private renderedCategories: RenderedTraceCategoryHierarchy<unknown>|undefined;
   // The current width of the trace chart.  This is generally the width of
   // componentDiv less the width of the rendered category y-axis.
   private chartWidthPx = 0;
@@ -320,12 +320,17 @@ export class HorizontalTraceComponent implements AfterContentInit,
                 (rs: RenderedTraceSpan) => rs.width === 0 ? 1 : rs.width)
             .attr('height', (rs: RenderedTraceSpan) => rs.height)
             .on('mouseover',
-                (event: any, d: RenderedTraceSpan) => {
-                  this.handleSpanMouseover(d);
+                (rs: RenderedTraceSpan, i: number,
+                 n: ArrayLike<SVGSVGElement>) => {
+                  d3.select(n[i]).select('rect').attr('stroke', 'lime');
+                  this.handleSpanMouseover(rs);
                 })
             .on('mouseout',
-                (event: any, d: RenderedTraceSpan) => {
-                  this.handleSpanMouseout(d);
+                (rs: RenderedTraceSpan, i: number,
+                 n: ArrayLike<SVGSVGElement>) => {
+                  rs = rs;
+                  d3.select(n[i]).select('rect').attr('stroke', 'none');
+                  this.handleSpanMouseout(rs);
                 })
             .on('click', (rs: RenderedTraceSpan) => {
               try {
@@ -412,8 +417,8 @@ export class HorizontalTraceComponent implements AfterContentInit,
     const brush =
         d3.brushX()
             .extent([[0, 0], [ht.chartWidthPx, heightPx]])
-            .on('end', (event: any) => {
-              ht.brush(event.selection, () => {
+            .on('end', () => {
+              ht.brush(d3.event.selection, () => {
                 chartArea.select<SVGGElement>('.brush').call(brush.move, null);
               });
             });
