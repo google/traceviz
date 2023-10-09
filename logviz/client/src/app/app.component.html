@@ -34,6 +34,9 @@
         <value key="raw_event_search_regex">
           <string></string>
         </value>
+        <!-- Timeline navigation directives -->
+        <value key="pan"><string>none</string></value>
+        <value key="zoom"><string>none</string></value>
       </value-map>
     </global-state>
 
@@ -53,6 +56,8 @@
         <value key="filtered_source_files"><global-ref key="filtered_source_files"></global-ref></value>
         <value key="start_timestamp"><global-ref key="filtered_timerange_start"></global-ref></value>
         <value key="end_timestamp"><global-ref key="filtered_timerange_end"></global-ref></value>
+        <value key="pan"><global-ref key="pan"></global-ref></value>
+        <value key="zoom"><global-ref key="zoom"></global-ref></value>
       </value-map>
     </data-query>
   </app-core>
@@ -97,6 +102,106 @@
       </value-map>
     </encoded>
   </url-hash>
+
+  <!--
+    Monitor WASD keypresses to update pan and zoom.
+   -->
+   <keypress>
+    <interactions>
+      <action target="key" type="press">
+        <switch>
+          <case>
+            <includes>
+              <local-ref key="depressed_key_codes"></local-ref>
+              <string>KeyW</string>
+            </includes>
+            <set>
+              <global-ref key="zoom"></global-ref>
+              <string>in</string>
+            </set>
+          </case>
+          <case>
+            <includes>
+              <local-ref key="depressed_key_codes"></local-ref>
+              <string>KeyS</string>
+            </includes>
+            <set>
+              <global-ref key="zoom"></global-ref>
+              <string>out</string>
+            </set>
+          </case>
+          <case>
+            <includes>
+              <local-ref key="depressed_key_codes"></local-ref>
+              <string>KeyA</string>
+            </includes>
+            <set>
+              <global-ref key="pan"></global-ref>
+              <string>left</string>
+            </set>
+          </case>
+          <case>
+            <includes>
+              <local-ref key="depressed_key_codes"></local-ref>
+              <string>KeyD</string>
+            </includes>
+            <set>
+              <global-ref key="pan"></global-ref>
+              <string>right</string>
+            </set>
+          </case>
+        </switch>
+      </action>
+    </interactions>
+  </keypress>
+
+  <!--
+    When 'pan' or 'zoom' are changed from 'none', issue a 'pan_or_zoom' query
+    that updates the filtered timerange (and clear 'pan' and 'zoom').
+   -->
+  <update-values>
+    <interactions>
+      <action target="response" type="update">
+        <set>
+          <global-ref key="filtered_timerange_start"></global-ref>
+          <local-ref key="start_timestamp"></local-ref>
+        </set>
+        <set>
+          <global-ref key="filtered_timerange_end"></global-ref>
+          <local-ref key="end_timestamp"></local-ref>
+        </set>
+        <set>
+          <global-ref key="pan"></global-ref>
+          <string>none</string>
+        </set>
+        <set>
+          <global-ref key="zoom"></global-ref>
+          <string>none</string>
+        </set>
+      </action>
+    </interactions>
+
+    <data-series>
+      <query>
+        <string>logs.pan_and_zoom</string>
+      </query>
+          <interactions>
+            <reaction target="data-series" type="fetch">
+              <or>
+                <not><equals>
+                  <global-ref key="pan"></global-ref>
+                  <string>none</string>
+                </equals></not>
+                <not><equals>
+                  <global-ref key="zoom"></global-ref>
+                  <string>none</string>
+                </equals></not>
+              </or>
+          </reaction>
+        </interactions>
+      <parameters> </parameters>
+    </data-series>
+  </update-values>
 
   <div class="double-cardrow">
     <!--
@@ -181,6 +286,8 @@
                   <changed><global-ref key="source_file_search_regex"></global-ref></changed>
                   <changed><global-ref key="filtered_timerange_start"></global-ref></changed>
                   <changed><global-ref key="filtered_timerange_end"></global-ref></changed>
+                  <changed><global-ref key="pan"></global-ref></changed>
+                  <changed><global-ref key="zoom"></global-ref></changed>
                 </or>
               </and>
             </reaction>
@@ -259,6 +366,8 @@
                   <changed><global-ref key="filtered_source_files"></global-ref></changed>
                   <changed><global-ref key="filtered_timerange_start"></global-ref></changed>
                   <changed><global-ref key="filtered_timerange_end"></global-ref></changed>
+                  <changed><global-ref key="pan"></global-ref></changed>
+                  <changed><global-ref key="zoom"></global-ref></changed>
                 </or>
               </and>
             </reaction>
@@ -323,6 +432,8 @@
                   <changed><global-ref key="filtered_source_files"></global-ref></changed>
                   <changed><global-ref key="filtered_timerange_start"></global-ref></changed>
                   <changed><global-ref key="filtered_timerange_end"></global-ref></changed>
+                  <changed><global-ref key="pan"></global-ref></changed>
+                  <changed><global-ref key="zoom"></global-ref></changed>
                 </or>
               </and>
             </reaction>

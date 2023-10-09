@@ -13,12 +13,12 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {CoreModule} from '../core.module';
 import {IntegerValue, DurationValue, Duration, int, str, DoubleValue, StringValue, prettyPrintDocumenter, StringSetValue, Timestamp, TimestampValue, ts, valueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 
 import {AppCoreDirective} from './app_core.directive';
-import {CoreModule} from '../core.module';
 import {InteractionsDirective} from './interactions.directive';
 import {TestCoreModule} from '../test_core.module';
 import {Subject} from 'rxjs';

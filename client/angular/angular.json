@@ -168,6 +168,39 @@
         }
       }
     },
+    "keypress": {
+      "projectType": "library",
+      "root": "src/keypress",
+      "sourceRoot": "src/keypress",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "src/keypress/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "src/keypress/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "src/keypress/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "src/keypress/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
     "line-chart": {
       "projectType": "library",
       "root": "src/line_chart",
