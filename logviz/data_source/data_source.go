@@ -37,6 +37,7 @@ const (
 	rawEntriesQuery                = "logs.raw_entries"
 	timeseriesQuery                = "logs.timeseries"
 	traceQuery                     = "logs.trace"
+	panAndZoomQuery 							 = "logs.pan_and_zoom"
 
 	collectionNameKey      = "collection_name"
 	endTimestampKey        = "end_timestamp"
@@ -51,9 +52,23 @@ const (
 	sourceLocNameKey       = "source_loc_name"
 	startTimestampKey      = "start_timestamp"
 	timestampKey           = "timestamp"
+	panKey                 = "pan"
+	zoomKey                = "zoom"
 
 	aggregateByKey = "aggregate_by"
 	binCountKey    = "bin_count"
+)
+
+const (
+	none     = "none"
+	panLeft  = "left"
+	panRight = "right"
+	zoomIn   = "in"
+	zoomOut  = "out"
+
+	zoomFactor = 2
+	panFactor  = .5
+	maxZoom    = 50
 )
 
 // queryFilters is a collection of filters assembled by filterFromGlobalFilters
@@ -93,19 +108,27 @@ func (qf *queryFilters) filters(filterBys ...filterBy) logtrace.Filter {
 	return logtrace.ConcatenateFilters(ret...)
 }
 
+func (qf *queryFilters) clampTimerange(lt *logtracer.LogTrace) {
+	startTs, endTs := lt.TimeRange()
+	if qf.startTimestamp.Before(startTs) {
+		qf.startTimestamp = startTs
+	}
+	if endTs.Before(qf.endTimestamp) || qf.endTimestamp.Before(startTs) {
+		qf.endTimestamp = endTs
+	}
+}
+
 // filterFromGlobalFilters returns a queryFilters constructed from the provided
 // TraceViz DataRequest global filters key-value map.
 func filterFromGlobalFilters(lt *logtrace.LogTrace, options map[string]*util.V) (*queryFilters, error) {
 	qf := &queryFilters{}
 	var err error
+	// Populate the filtered timestamps.
 	startTs, endTs := lt.TimeRange()
 	if tsv, ok := options[startTimestampKey]; ok {
 		qf.startTimestamp, err = util.ExpectTimestampValue(tsv)
 		if err != nil {
 			return nil, err
-		}
-		if qf.startTimestamp.Before(startTs) {
-			qf.startTimestamp = startTs
 		}
 	} else {
 		qf.startTimestamp = startTs
@@ -115,12 +138,55 @@ func filterFromGlobalFilters(lt *logtrace.LogTrace, options map[string]*util.V) 
 		if err != nil {
 			return nil, err
 		}
-		if qf.endTimestamp.Before(startTs) {
-			qf.endTimestamp = endTs
-		}
 	} else {
 		qf.endTimestamp = endTs
 	}
+	qf.clampTimerange(lt)
+	// Adjust the filter timestamps according to pan and zoom.
+	var pan, zoom string
+	if pv, ok := options[panKey]; ok {
+		pan, err = util.ExpectStringValue(pv)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		pan = none
+	}
+	if zv, ok := options[zoomKey]; ok {
+		zoom, err = util.ExpectStringValue(zv)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		zoom = none
+	}
+	halfWidth := qf.endTimestamp.Sub(qf.startTimestamp) / 2
+	midpoint := qf.startTimestamp.Add(halfWidth)
+	switch zoom {
+	case zoomIn:
+		halfWidth = time.Duration(float64(halfWidth) / zoomFactor)
+		if float64(endTs.Sub(startTs))/(2*float64(halfWidth)) > maxZoom {
+			halfWidth = time.Duration(float64(endTs.Sub(startTs)) / (2 * maxZoom))
+		}
+	case zoomOut:
+		halfWidth = time.Duration(float64(halfWidth) * zoomFactor)
+	}
+	switch pan {
+	case panLeft:
+		midpoint = midpoint.Add(-time.Duration(2 * float64(halfWidth) * panFactor))
+		if startTs.Add(halfWidth).After(midpoint) {
+			midpoint = startTs.Add(halfWidth)
+		}
+	case panRight:
+		midpoint = midpoint.Add(time.Duration(2 * float64(halfWidth) * panFactor))
+		if endTs.Add(-halfWidth).Before(midpoint) {
+			midpoint = endTs.Add(-halfWidth)
+		}
+	}
+	qf.endTimestamp = midpoint.Add(halfWidth)
+	qf.startTimestamp = midpoint.Add(-halfWidth)
+	qf.clampTimerange(lt)
+	// Populate the filtered source files.
 	if filteredSourceFiles, ok := options[filteredSourceFilesKey]; ok {
 		filteredSourceFileNames, err := util.ExpectStringsValue(filteredSourceFiles)
 		if err != nil {
@@ -187,6 +253,7 @@ func (ds *DataSource) SupportedDataSeriesQueries() []string {
 		rawEntriesQuery,
 		timeseriesQuery,
 		traceQuery,
+		panAndZoomQuery,
 	}
 }
 
@@ -255,6 +322,8 @@ func (ds *DataSource) HandleDataSeriesRequests(ctx context.Context, globalFilter
 			err = handleTimeseriesQuery(coll, qf, series, req.Options)
 		case traceQuery:
 			err = handleTraceQuery(coll, qf, series, req.Options)
+		case panAndZoomQuery:
+			err = handlePanAndZoomQuery(coll, qf, series, req.Options)
 		default:
 			err = fmt.Errorf("unsupported data query")
 		}
@@ -513,3 +582,13 @@ var (
 		MarkersWidthPx: 30,
 	}
 )
+
+func handlePanAndZoomQuery(coll *collection, qf *queryFilters, series util.DataBuilder, reqOpts map[string]*util.V) error {
+	// Panning and zooming is resolved in filterFromGlobalFilters, and updated
+	// time-range bounds are already in qf.  Simply return them.
+	series.With(
+		util.TimestampProperty(startTimestampKey, qf.startTimestamp),
+		util.TimestampProperty(endTimestampKey, qf.endTimestamp),
+	)
+	return nil
+}

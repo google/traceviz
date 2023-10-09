@@ -29,6 +29,256 @@ import {takeUntil} from 'rxjs/operators';
   <app-core>
     <global-state>
       <value-map>
+        <value key="number_text"><string></string></value>
+        <value key="is_one"><int>0</int></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <action target="item" type="click">
+      <if>
+        <equals>
+          <local-ref key="num"></local-ref>
+          <int>0</int>
+        </equals>
+        <then>
+          <set>
+            <global-ref key="number_text"></global-ref>
+            <string>none</string>
+          </set>
+          <set>
+            <global-ref key="is_one"></global-ref>
+            <int>0</int>
+          </set>
+        </then>
+        <else>
+          <if>
+            <equals>
+              <local-ref key="num"></local-ref>
+              <int>1</int>
+            </equals>
+            <then>
+              <set>
+                <global-ref key="number_text"></global-ref>
+                <string>one</string>
+              </set>
+              <set>
+                <global-ref key="is_one"></global-ref>
+                <int>1</int>
+              </set>
+            </then>
+            <else>
+              <set>
+                <global-ref key="number_text"></global-ref>
+                <string>several</string>
+              </set>
+              <set>
+                <global-ref key="is_one"></global-ref>
+                <int>0</int>
+              </set>
+            </else>
+          </if>
+        </else>
+      </if>
+    </action>
+  </interactions>`
+})
+class IfTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('if test', () => {
+  let fixture: ComponentFixture<IfTestComponent>;
+  const appCoreService = new AppCoreService();
+  let numberText: StringValue;
+  let isOne: IntegerValue;
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [IfTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    });
+    fixture = TestBed.createComponent(IfTestComponent);
+    fixture.detectChanges();
+    numberText =
+        appCoreService.appCore.globalState.get('number_text') as StringValue;
+    isOne = appCoreService.appCore.globalState.get('is_one') as IntegerValue;
+  });
+
+  beforeEach(() => {
+    numberText.val = '';
+    isOne.val = 0;
+  });
+
+  it('conditionally executes properly', () => {
+    const errs: string[] = [];
+    appCoreService.appCore.configurationErrors.subscribe((err) => {
+      errs.push(err.message);
+    });
+    const itc = fixture.componentInstance;
+    itc.ints.get().update(
+        'item', 'click',
+        valueMap(
+            {key: 'num', val: int(0)},
+            ));
+    expect(numberText.val).toEqual('none');
+    expect(isOne.val).toEqual(0);
+    itc.ints.get().update(
+        'item', 'click',
+        valueMap(
+            {key: 'num', val: int(1)},
+            ));
+    expect(numberText.val).toEqual('one');
+    expect(isOne.val).toEqual(1);
+    itc.ints.get().update(
+        'item', 'click',
+        valueMap(
+            {key: 'num', val: int(5)},
+            ));
+    expect(numberText.val).toEqual('several');
+    expect(isOne.val).toEqual(0);
+    expect(errs).toEqual([]);
+  });
+});
+
+@Component({
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="number_text"><string></string></value>
+        <value key="is_one"><int>0</int></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <action target="item" type="click">
+      <switch>
+        <case>
+          <equals>
+            <local-ref key="num"></local-ref>
+            <int>1</int>
+          </equals>
+          <set>
+            <global-ref key="is_one"></global-ref>
+            <int>1</int>
+          </set>
+        </case>
+        <case>
+          <true></true>
+          <set>
+            <global-ref key="is_one"></global-ref>
+            <int>0</int>
+          </set>
+        </case>
+      </switch>
+      <switch>
+        <case>
+          <equals>
+            <local-ref key="num"></local-ref>
+            <int>0</int>
+          </equals>
+          <set>
+            <global-ref key="number_text"></global-ref>
+            <string>none</string>
+          </set>
+        </case>
+        <case>
+          <equals>
+            <local-ref key="num"></local-ref>
+            <int>1</int>
+          </equals>
+          <set>
+            <global-ref key="number_text"></global-ref>
+            <string>one</string>
+          </set>
+        </case>
+        <case>
+          <true></true>
+          <set>
+            <global-ref key="number_text"></global-ref>
+            <string>several</string>
+          </set>
+        </case>
+      </switch>
+    </action>
+  </interactions>`
+})
+class SwitchTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('switch test', () => {
+  let fixture: ComponentFixture<IfTestComponent>;
+  const appCoreService = new AppCoreService();
+  let numberText: StringValue;
+  let isOne: IntegerValue;
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [IfTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    });
+    fixture = TestBed.createComponent(IfTestComponent);
+    fixture.detectChanges();
+    numberText =
+        appCoreService.appCore.globalState.get('number_text') as StringValue;
+    isOne = appCoreService.appCore.globalState.get('is_one') as IntegerValue;
+  });
+
+  beforeEach(() => {
+    numberText.val = '';
+    isOne.val = 0;
+  });
+
+  it('conditionally executes properly', () => {
+    const errs: string[] = [];
+    appCoreService.appCore.configurationErrors.subscribe((err) => {
+      errs.push(err.message);
+    });
+    const itc = fixture.componentInstance;
+    itc.ints.get().update(
+        'item', 'click',
+        valueMap(
+            {key: 'num', val: int(0)},
+            ));
+    expect(numberText.val).toEqual('none');
+    expect(isOne.val).toEqual(0);
+    itc.ints.get().update(
+        'item', 'click',
+        valueMap(
+            {key: 'num', val: int(1)},
+            ));
+    expect(numberText.val).toEqual('one');
+    expect(isOne.val).toEqual(1);
+    itc.ints.get().update(
+        'item', 'click',
+        valueMap(
+            {key: 'num', val: int(5)},
+            ));
+    expect(numberText.val).toEqual('several');
+    expect(isOne.val).toEqual(0);
+    expect(errs).toEqual([]);
+  });
+});
+
+@Component({
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
         <value key="filtered_text"><string></string></value>
         <value key="text_2"><string></string></value>
         <value key="called_out_num"><int></int></value>

@@ -418,7 +418,99 @@ func TestQueries(t *testing.T) {
 		// 	},
 		// 	wantSeries: func(series util.DataBuilder) {
 		// 	},
-	}} {
+		}, {
+			description: "zoom in",
+			req: &util.DataRequest{
+				GlobalFilters: map[string]*util.V{
+					collectionNameKey: util.StringValue("log1"),
+					startTimestampKey: util.TimestampValue(ts(time.Minute * 0)),
+					endTimestampKey:   util.TimestampValue(ts(time.Minute * 30)),
+					zoomKey:           util.StringValue("in"),
+				},
+				SeriesRequests: []*util.DataSeriesRequest{
+					&util.DataSeriesRequest{
+						QueryName: panAndZoomQuery,
+					},
+				},
+			},
+			wantSeries: func(db util.DataBuilder) {
+				// Zooming into 30-minute range centered at 15m, with a zoom factor of 2,
+				// yields a 15-minute range centered at 15m.
+				db.With(
+					util.TimestampProperty(startTimestampKey, ts(time.Second*(7.5*60))),
+					util.TimestampProperty(endTimestampKey, ts(time.Second*(22.5*60))),
+				)
+			},
+		}, {
+			description: "zoom out",
+			req: &util.DataRequest{
+				GlobalFilters: map[string]*util.V{
+					collectionNameKey: util.StringValue("log1"),
+					startTimestampKey: util.TimestampValue(ts(time.Minute * 12)),
+					endTimestampKey:   util.TimestampValue(ts(time.Minute * 18)),
+					zoomKey:           util.StringValue("out"),
+				},
+				SeriesRequests: []*util.DataSeriesRequest{
+					&util.DataSeriesRequest{
+						QueryName: panAndZoomQuery,
+					},
+				},
+			},
+			wantSeries: func(db util.DataBuilder) {
+				// Zooming out from a 6-minute range centered at 15m, with a zoom factor
+				// of 2, yields a 12-minute range centered at 15m.
+				db.With(
+					util.TimestampProperty(startTimestampKey, ts(time.Minute*9)),
+					util.TimestampProperty(endTimestampKey, ts(time.Minute*21)),
+				)
+			},
+		}, {
+			description: "pan left",
+			req: &util.DataRequest{
+				GlobalFilters: map[string]*util.V{
+					collectionNameKey: util.StringValue("log1"),
+					startTimestampKey: util.TimestampValue(ts(time.Minute * 12)),
+					endTimestampKey:   util.TimestampValue(ts(time.Minute * 18)),
+					panKey:            util.StringValue("left"),
+				},
+				SeriesRequests: []*util.DataSeriesRequest{
+					&util.DataSeriesRequest{
+						QueryName: panAndZoomQuery,
+					},
+				},
+			},
+			wantSeries: func(db util.DataBuilder) {
+				// Panning left in a 6-minute range centered at 15m yields a 6-minute
+				// range centered at 12m
+				db.With(
+					util.TimestampProperty(startTimestampKey, ts(time.Minute*9)),
+					util.TimestampProperty(endTimestampKey, ts(time.Minute*15)),
+				)
+			},
+		}, {
+			description: "pan right",
+			req: &util.DataRequest{
+				GlobalFilters: map[string]*util.V{
+					collectionNameKey: util.StringValue("log1"),
+					startTimestampKey: util.TimestampValue(ts(time.Minute * 12)),
+					endTimestampKey:   util.TimestampValue(ts(time.Minute * 18)),
+					panKey:            util.StringValue("right"),
+				},
+				SeriesRequests: []*util.DataSeriesRequest{
+					&util.DataSeriesRequest{
+						QueryName: panAndZoomQuery,
+					},
+				},
+			},
+			wantSeries: func(db util.DataBuilder) {
+				// Panning left in a 6-minute range centered at 15m yields a 6-minute
+				// range centered at 18m
+				db.With(
+					util.TimestampProperty(startTimestampKey, ts(time.Minute*15)),
+					util.TimestampProperty(endTimestampKey, ts(time.Minute*21)),
+				)
+			},
+		}} {
 		t.Run(test.description, func(t *testing.T) {
 			ds, err := New(10, &testLogTraceFetcher{})
 			if err != nil {

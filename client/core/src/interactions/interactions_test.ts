@@ -15,7 +15,7 @@ import 'jasmine';
 
 import {prettyPrintDocumenter} from '../documentation/test_documentation.js';
 
-import {Action, And, Changed, Clear, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Toggle, Update, Watch} from './interactions.js';
+import {Action, And, Case, Changed, Clear, Equals, Extend, GreaterThan, If, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Switch, Toggle, True, Update, Watch} from './interactions.js';
 
 import {int, intSet, str, strs, strSet, valueMap} from '../value/test_value.js';
 import {IntegerValue} from '../value/value.js';
@@ -188,6 +188,57 @@ describe('interactions test', () => {
       '10: false',
       '12: true',
     ]);
+  });
+
+  it('conditionally executes with if', () => {
+    const numberText = str('');
+    const numberTextWrap = new FixedValue(numberText);
+    const val = int(0);
+    const valWrap = new FixedValue(val);
+    const cond = new If(
+        new Equals(valWrap, new FixedValue(int(0))),
+        new SetP(numberTextWrap, new FixedValue(str('none'))),
+        new If(
+            new Equals(valWrap, new FixedValue(int(1))),
+            new SetP(numberTextWrap, new FixedValue(str('one'))),
+            new SetP(numberTextWrap, new FixedValue(str('several'))),
+            ));
+    expect(numberText.val).toEqual('');
+    cond.update();
+    expect(numberText.val).toEqual('none');
+    val.val = 3;
+    cond.update();
+    expect(numberText.val).toEqual('several');
+    val.val = 1;
+    cond.update();
+    expect(numberText.val).toEqual('one');
+  });
+
+  it('conditionally executes with switch', () => {
+    const numberText = str('');
+    const numberTextWrap = new FixedValue(numberText);
+    const val = int(0);
+    const valWrap = new FixedValue(val);
+    const cond = new Switch([
+      new Case(
+          new Equals(valWrap, new FixedValue(int(0))),
+          [new SetP(numberTextWrap, new FixedValue(str('none')))]),
+      new Case(
+          new Equals(valWrap, new FixedValue(int(1))),
+          [new SetP(numberTextWrap, new FixedValue(str('one')))]),
+      new Case(
+          new True(),
+          [new SetP(numberTextWrap, new FixedValue(str('several')))]),
+    ]);
+    expect(numberText.val).toEqual('');
+    cond.update();
+    expect(numberText.val).toEqual('none');
+    val.val = 3;
+    cond.update();
+    expect(numberText.val).toEqual('several');
+    val.val = 1;
+    cond.update();
+    expect(numberText.val).toEqual('one');
   });
 
   it('detects changes', () => {

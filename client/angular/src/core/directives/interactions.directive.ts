@@ -16,8 +16,9 @@
  */
 
 import { AfterContentInit, ContentChild, ContentChildren, Directive, forwardRef, Input, QueryList } from '@angular/core';
-import { Action, And, Changed, ConfigurationError, Equals, Extend, GreaterThan, Includes, Interactions, LessThan, Not, Or, Predicate, Reaction, SetIfEmpty, Severity, Toggle, SetOrClear, ValueRef, Watch } from 'traceviz-client-core';
-import { Clear, Update, Set as SetU } from 'traceviz-client-core';
+import { ConfigurationError, Severity } from 'traceviz-client-core';
+import { Action, And, Case, Changed, Clear, Do, Equals, Extend, False, GreaterThan, If, Includes, Interactions, LessThan, Not, Or, Predicate, Reaction, Set as SetU, SetIfEmpty, SetOrClear, Switch, Toggle, True, Update, Watch } from 'traceviz-client-core';
+import { ValueRef } from 'traceviz-client-core';
 import { ValueDirective } from './value.directive';
 import { ValueMapDirective } from './value_map.directive';
 
@@ -31,6 +32,178 @@ export abstract class UpdateDirective {
         selector}' directive should not be called before ContentInit.`;
   }
   abstract get(): Update;
+}
+
+/** An abstract base type for Predicate directives. */
+export abstract class PredicateDirective {
+  protected errorMessage: string;
+  constructor(selector: string) {
+    this.errorMessage = `'get' method on '${
+        selector}' directive should not be called before ContentInit.`;
+  }
+  abstract get(): Predicate;
+}
+
+/**
+ * An update directive specifying actions to occur on a satisfied <if>
+ * predicate.
+ */
+@Directive({
+  selector: 'then',
+  providers: [
+    {provide: UpdateDirective, useExisting: forwardRef(() => ThenDirective)}
+  ],
+})
+export class ThenDirective extends UpdateDirective {
+  @ContentChildren(UpdateDirective) updateDs = new QueryList<UpdateDirective>();
+  private doP: Do|undefined;
+
+  constructor() {
+    super('then');
+  }
+
+  override get(): Update {
+    if (this.doP === undefined) {
+      const updates: Update[] = [];
+      for (const updateD of this.updateDs) {
+        updates.push(updateD.get());
+      }
+      this.doP = new Do(updates);
+    }
+    return this.doP;
+  }
+}
+
+/**
+ * An update directive specifying actions to occur on an unsatisfied <if>
+ * predicate.
+ */
+@Directive({
+  selector: 'else',
+  providers: [
+    {provide: UpdateDirective, useExisting: forwardRef(() => ElseDirective)}
+  ],
+})
+export class ElseDirective extends UpdateDirective {
+  @ContentChildren(UpdateDirective) updateDs = new QueryList<UpdateDirective>();
+  private doP: Do|undefined;
+
+  constructor() {
+    super('else');
+  }
+
+  override get(): Update {
+    if (this.doP === undefined) {
+      const updates: Update[] = [];
+      for (const updateD of this.updateDs) {
+        updates.push(updateD.get());
+      }
+      this.doP = new Do(updates);
+    }
+    return this.doP;
+  }
+}
+
+/**
+ * An update directive that conditionally executes child updates based on the
+ * status of a child predicate.
+ */
+@Directive({
+  selector: 'if',
+  providers:
+      [{provide: UpdateDirective, useExisting: forwardRef(() => IfDirective)}],
+})
+export class IfDirective extends UpdateDirective {
+  @ContentChild(PredicateDirective) predD: PredicateDirective|undefined;
+  @ContentChild(ThenDirective) thenD: ThenDirective|undefined;
+  @ContentChild(ElseDirective) elseD: ElseDirective|undefined;
+
+  private ifP: If|undefined;
+
+  constructor() {
+    super('if');
+  }
+
+  override get(): Update {
+    if (this.ifP === undefined) {
+      if (this.predD === undefined || this.thenD === undefined) {
+        throw new ConfigurationError(
+            `'if' must specify a predicate and a 'then' clause`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
+      }
+      this.ifP = new If(this.predD.get(), this.thenD.get(), this.elseD?.get());
+    }
+    return this.ifP;
+  }
+}
+
+/**
+ * A directive, used under 'switch', that executes its update if its predicate
+ * is satisfied.
+ */
+@Directive({
+  selector: 'case',
+  providers: [
+    {provide: UpdateDirective, useExisting: forwardRef(() => CaseDirective)}
+  ],
+})
+export class CaseDirective extends UpdateDirective {
+  @ContentChild(PredicateDirective) predD: PredicateDirective|undefined;
+  @ContentChildren(UpdateDirective) updateDs = new QueryList<UpdateDirective>();
+
+  private case: Case|undefined;
+
+  constructor() {
+    super('case');
+  }
+
+  get(): Case {
+    if (this.case === undefined) {
+      if (this.predD === undefined) {
+        throw new ConfigurationError(`'case' must specify a predicate`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
+      }
+      const updates = new Array<Update>();
+      for (const updateD of this.updateDs) {
+        updates.push(updateD.get());
+      }
+      this.case = new Case(this.predD.get(), updates);
+    }
+    return this.case;
+  }
+}
+
+/**
+ * An update directive that evaluates its cases in definition order, returning
+ * when any is satisfied.
+ */
+@Directive({
+  selector: 'switch',
+  providers: [
+    {provide: UpdateDirective, useExisting: forwardRef(() => SwitchDirective)}
+  ],
+})
+export class SwitchDirective extends UpdateDirective {
+  @ContentChildren(CaseDirective) caseDs = new QueryList<CaseDirective>();
+
+  private switchP: Switch|undefined;
+
+  constructor() {
+    super('switch');
+  }
+
+  override get(): Update {
+    if (this.switchP === undefined) {
+      const cases = new Array<Case>();
+      for (const caseD of this.caseDs) {
+        cases.push(caseD.get());
+      }
+      this.switchP = new Switch(cases);
+    }
+    return this.switchP;
+  }
 }
 
 /** An Update directive that clears its argument. */
@@ -86,7 +259,7 @@ export class SetDirective extends UpdateDirective implements AfterContentInit {
   private set: SetU|undefined;
 
   constructor() {
-    super('clear');
+    super('set');
   }
 
   ngAfterContentInit(): void {
@@ -97,7 +270,8 @@ export class SetDirective extends UpdateDirective implements AfterContentInit {
     if (valueRefs.length === 2) {
       this.set = new SetU(valueRefs[0], valueRefs[1]);
     } else {
-      this.errorMessage = `'set' takes exactly two arguments.`;
+      this.errorMessage =
+          `'set' takes exactly two arguments (got ${valueRefs.length}).`;
     }
   }
 
@@ -305,16 +479,6 @@ export class ActionDirective {
   }
 }
 
-/** An abstract base type for Predicate directives. */
-export abstract class PredicateDirective {
-  protected errorMessage: string;
-  constructor(selector: string) {
-    this.errorMessage = `'get' method on '${
-        selector}' directive should not be called before ContentInit.`;
-  }
-  abstract get(): Predicate;
-}
-
 /** A Predicate directive triggered when its argument's value has changed. */
 @Directive({
   selector: 'changed',
@@ -348,6 +512,48 @@ export class ChangedDirective extends PredicateDirective implements
           .at(Severity.ERROR);
     }
     return this.changed;
+  }
+}
+
+/** A Predicate directive that is always satisfied. */
+@Directive({
+  selector: 'true',
+  providers: [
+    {provide: PredicateDirective, useExisting: forwardRef(() => TrueDirective)}
+  ],
+})
+export class TrueDirective extends PredicateDirective {
+  @ContentChild(PredicateDirective)
+  predicateDirective: PredicateDirective|undefined;
+  private readonly t = new True();
+
+  constructor() {
+    super('true');
+  }
+
+  override get(): Predicate {
+    return this.t;
+  }
+}
+
+/** A Predicate directive that is never satisfied. */
+@Directive({
+  selector: 'false',
+  providers: [
+    {provide: PredicateDirective, useExisting: forwardRef(() => FalseDirective)}
+  ],
+})
+export class FalseDirective extends PredicateDirective {
+  @ContentChild(PredicateDirective)
+  predicateDirective: PredicateDirective|undefined;
+  private readonly f = new False();
+
+  constructor() {
+    super('false');
+  }
+
+  override get(): Predicate {
+    return this.f;
   }
 }
 
