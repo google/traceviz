@@ -18,7 +18,7 @@ import {DataQueryDirective} from './directives/data_query.directive';
 import {DataSeriesQueryDirective, ParametersDirective, QueryDirective} from './directives/data_series_query.directive';
 import {GlobalRefDirective} from './directives/global_ref.directive';
 import {GlobalStateDirective} from './directives/global_state.directive';
-import {ActionDirective, AndDirective, CaseDirective, ChangedDirective, ClearDirective, ElseDirective, EqualsDirective, ExtendDirective, FalseDirective, GreaterThanDirective, IfDirective, IncludesDirective, InteractionsDirective, LessThanDirective, NotDirective, OrDirective, ReactionDirective, SetDirective, SetIfEmptyDirective, SetOrClearDirective, SwitchDirective, ThenDirective, ToggleDirective, TrueDirective, WatchDirective}} from './directives/interactions.directive';
+import {ActionDirective, AndDirective, CaseDirective, ChangedDirective, ClearDirective, ElseDirective, EqualsDirective, ExtendDirective, FalseDirective, GreaterThanDirective, IfDirective, IncludesDirective, InteractionsDirective, LessThanDirective, NotDirective, OrDirective, ReactionDirective, SetDirective, SetIfEmptyDirective, SetOrClearDirective, SwitchDirective, ThenDirective, ToggleDirective, TrueDirective, WatchDirective} from './directives/interactions.directive';
 import {DblLiteralDirective, DurationLiteralDirective, EmptyLiteralDirective, IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, TimestampLiteralDirective} from './directives/literal_value.directive';
 import {LocalRefDirective} from './directives/local_ref.directive';
 import {ValueMapDirective, ValueWrapperDirective} from './directives/value_map.directive';

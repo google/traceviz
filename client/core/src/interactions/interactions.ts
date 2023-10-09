@@ -37,13 +37,14 @@
         limitations under the License.
 */
 
-import {Documenter, DocumenterType} from '../documentation/documentation';
-import {ConfigurationError, Severity} from '../errors/errors';
-import {EmptyValue, Value} from '../value/value';
-import {ValueMap} from '../value/value_map';
-import {ValueRef} from '../value/value_reference';
 import {BehaviorSubject, combineLatest, EMPTY, merge, Observable, ReplaySubject, Subject} from 'rxjs';
 import {delay, distinctUntilChanged, map, mergeMap, takeUntil} from 'rxjs/operators';
+
+import {Documenter, DocumenterType} from '../documentation/documentation.js';
+import {ConfigurationError, Severity} from '../errors/errors.js';
+import {EmptyValue, Value} from '../value/value.js';
+import {ValueMap} from '../value/value_map.js';
+import {ValueRef} from '../value/value_reference.js';
 
 const SOURCE = 'interactions';
 

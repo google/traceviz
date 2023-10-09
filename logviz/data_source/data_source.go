@@ -37,7 +37,7 @@ const (
 	rawEntriesQuery                = "logs.raw_entries"
 	timeseriesQuery                = "logs.timeseries"
 	traceQuery                     = "logs.trace"
-	panAndZoomQuery 							 = "logs.pan_and_zoom"
+	panAndZoomQuery                = "logs.pan_and_zoom"
 
 	collectionNameKey      = "collection_name"
 	endTimestampKey        = "end_timestamp"
@@ -108,7 +108,7 @@ func (qf *queryFilters) filters(filterBys ...filterBy) logtrace.Filter {
 	return logtrace.ConcatenateFilters(ret...)
 }
 
-func (qf *queryFilters) clampTimerange(lt *logtracer.LogTrace) {
+func (qf *queryFilters) clampTimerange(lt *logtrace.LogTrace) {
 	startTs, endTs := lt.TimeRange()
 	if qf.startTimestamp.Before(startTs) {
 		qf.startTimestamp = startTs
@@ -583,7 +583,7 @@ var (
 	}
 )
 
-func handlePanAndZoomQuery(coll *collection, qf *queryFilters, series util.DataBuilder, reqOpts map[string]*util.V) error {
+func handlePanAndZoomQuery(coll *Collection, qf *queryFilters, series util.DataBuilder, reqOpts map[string]*util.V) error {
 	// Panning and zooming is resolved in filterFromGlobalFilters, and updated
 	// time-range bounds are already in qf.  Simply return them.
 	series.With(

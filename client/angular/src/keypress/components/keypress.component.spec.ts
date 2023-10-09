@@ -11,14 +11,13 @@
         limitations under the License.
 */
 
-import 'jasmine';
-
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {AppCoreService, CoreModule, TestCoreModule} from 'traceviz-angular-core';
-import {KeypressModule} from '../keypress.module';
 import {IntegerValue, StringSetValue} from 'traceviz-client-core';
+
+import {KeypressModule} from '../keypress.module';
 
 import {KeypressComponent} from './keypress.component';
 
@@ -105,10 +104,10 @@ describe('keypress test', () => {
 
   it('handles keypresses', () => {
     fixture.detectChanges();
-    const ctrlAPressed = appCoreService.appCore.globalState.get('ctrl_a_pressed') as
-        IntegerValue;
+    const ctrlAPressed = appCoreService.appCore.globalState.get(
+                             'ctrl_a_pressed') as IntegerValue;
     const depressedKeyCodes = appCoreService.appCore.globalState.get(
-                            'depressed_key_codes') as StringSetValue;
+                                  'depressed_key_codes') as StringSetValue;
     const kp = fixture.componentInstance;
 
     expect(ctrlAPressed.val).toEqual(0);
