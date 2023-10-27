@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {AppCoreService} from 'traceviz-angular-core';
+import {CoreModule} from 'traceviz';
 
 /** The application component of the LogViz client. */
 @Component({

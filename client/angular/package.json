@@ -7,6 +7,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build core && ng build keypress && ng build hovercard && ng build axes && ng build data-table && ng build error-message && ng build line-chart && ng build text-field && ng build trace && ng build update-values && ng build url-hash && ng build weighted-tree",
+    "postbuild": "node scripts/postbuild.cjs",
     "cb": "npm run clean && npm install && npm run build",
     "watch": "ng build --watch --configuration development",
     "testall": "ng test"
@@ -48,7 +49,7 @@
     "typescript": "~4.9.4"
   },
   "peerDependencies": {
-    "rxjs": "7.8.0",
+    "rxjs": "~7.8.0",
     "traceviz-angular-axes": "file:dist/traceviz-angular-axes",
     "traceviz-angular-core": "file:dist/traceviz-angular-core",
     "traceviz-angular-hovercard": "file:dist/traceviz-angular-hovercard",
