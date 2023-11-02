@@ -1,0 +1,16 @@
+{
+  "name": "traceviz",
+  "version": "0.0.1",
+  "main": "./index.mjs",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./index.mjs"
+    }
+  },
+  "types": "./types/index.d.mts",
+  "files": [
+    "angular/dist/",
+    "core"
+  ]
+}

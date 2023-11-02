@@ -4,16 +4,19 @@ import {MatCardModule} from '@angular/material/card';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {AxesModule} from 'traceviz-angular-axes';
-import {CoreModule} from 'traceviz-angular-core';
-import {DataTableModule} from 'traceviz-angular-data-table';
-import {ErrorMessageModule} from 'traceviz-angular-error-message';
-import {KeypressModule} from 'traceviz-angular-keypress';
-import {HovercardModule} from 'traceviz-angular-hovercard';
-import {LineChartModule} from 'traceviz-angular-line-chart';
-import {TextFieldModule} from 'traceviz-angular-text-field';
-import {UpdateValuesModule} from 'traceviz-angular-update-values';
-import {UrlHashModule} from 'traceviz-angular-url-hash';
+
+import {
+  AxesModule,
+  CoreModule,
+  DataTableModule,
+  ErrorMessageModule,
+  KeypressModule,
+  HovercardModule,
+  LineChartModule,
+  TextFieldModule,
+  UpdateValuesModule,
+  UrlHashModule,
+} from 'traceviz';
 
 import {AppComponent} from './app.component';
 
