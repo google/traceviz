@@ -50,8 +50,8 @@ import {DataSeriesQueryDirective} from './data_series_query.directive';
               <string></string>
             </equals></not>
             <or>
-              <changed><global-ref key="collection_name"></global-ref></changed>
-              <changed><global-ref key="count"></global-ref></changed>
+              <changed noDebounce=true><global-ref key="collection_name"></global-ref></changed>
+              <changed noDebounce=true><global-ref key="count"></global-ref></changed>
             </or>
           </and>
         </reaction>

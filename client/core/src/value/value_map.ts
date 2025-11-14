@@ -228,6 +228,9 @@ export class ValueMap {
     //          vv       v                            v
     const re = /^([^$]*)(\$\$|\$\([a-zA-Z_\-0-9]+\))?((.|\n)*)/;
     let ret = '';
+    if (fmtString.trim().length === 0) {
+      return ret;
+    }
     let formatRemainder: string = fmtString;
     while (true) {
       const matches = formatRemainder.match(re);

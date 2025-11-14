@@ -19,6 +19,7 @@
 import * as d3 from 'd3';
 
 import {Coloring, Colors} from '../color/color.js';
+import {ConfigurationError, Severity} from '../errors/errors.js';
 import {getLabel} from '../label/label.js';
 import {getSelfMagnitude, properties as magnitudeProperties} from '../magnitude/magnitude.js';
 import {children} from '../payload/payload.js';
@@ -26,8 +27,16 @@ import {ResponseNode} from '../protocol/response_interface.js';
 import {StringValue} from '../value/value.js';
 import {ValueMap} from '../value/value_map.js';
 
+const SOURCE = 'weighted_tree';
+
 enum Keys {
-  FRAME_HEIGHT_PX = 'weighted_tree_frame_height_px'
+  FRAME_HEIGHT_PX = 'weighted_tree_frame_height_px',
+  DIRECTION = 'weighted_tree_direction',
+}
+
+enum Directions {
+  TOP_DOWN = 'top_down',
+  BOTTOM_UP = 'bottom_up'
 }
 
 /**
@@ -63,7 +72,7 @@ export class RenderedTreeNode {
   constructor(
       coloring: Coloring, readonly properties: ValueMap,
       private readonly xOffsetPct: number, private readonly widthPct: number,
-      readonly y0Px: number, readonly y1Px: number) {
+      public y0Px: number, public y1Px: number) {
     let tooltip = '';
     try {
       tooltip =
@@ -103,13 +112,13 @@ export class TreeNode {
   readonly payloads: ReadonlyMap<string, ResponseNode[]>;
   readonly children: TreeNode[] = [];
 
-  constructor(tree: Tree, node: ResponseNode, readonly depth = 0) {
+  constructor(node: ResponseNode, readonly depth = 0) {
     this.properties = node.properties.without(...magnitudeProperties);
     let totalWeight = getSelfMagnitude(node.properties);
 
     const c = children(node);
     for (const child of c.structural) {
-      this.children.push(new TreeNode(tree, child, depth + 1));
+      this.children.push(new TreeNode(child, depth + 1));
     }
     this.payloads = c.payload;
 
@@ -129,17 +138,38 @@ export class Tree {
   readonly coloring: Coloring;
   readonly roots: TreeNode[] = [];
   readonly totalWeight: number = 0;
+  public topDown: boolean = true;
 
   constructor(node: ResponseNode) {
     this.weightedTreeRenderSettings = {
-      frameHeightPx: node.properties.expectNumber(Keys.FRAME_HEIGHT_PX),
+      frameHeightPx: node.properties.has(Keys.FRAME_HEIGHT_PX) ?
+      node.properties.expectNumber(Keys.FRAME_HEIGHT_PX) : 0,
     };
-    this.properties = node.properties.without(Keys.FRAME_HEIGHT_PX);
+    if (node.properties.has(Keys.DIRECTION)) {
+      const dir = node.properties.expectString(Keys.DIRECTION);
+      switch (dir) {
+        case Directions.TOP_DOWN:
+          this.topDown = true;
+          break;
+        case Directions.BOTTOM_UP:
+          this.topDown = false;
+          break;
+        default:
+          throw new ConfigurationError(
+              `Unsupported weighted tree direction ${dir}`)
+              .from(SOURCE)
+              .at(Severity.ERROR);
+      }
+    }
+    this.properties = node.properties.without(
+        Keys.FRAME_HEIGHT_PX,
+        Keys.DIRECTION,
+    );
     this.coloring = new Coloring(this.properties);
 
     const c = children(node);
     for (const child of c.structural) {
-      this.roots.push(new TreeNode(this, child, 0));
+      this.roots.push(new TreeNode(child, 0));
     }
 
     for (const root of this.roots) {
@@ -149,11 +179,25 @@ export class Tree {
 
   // Renders a weighted tree with the root nodes at y=0, and children
   // placed below their parents.
-  renderTopDownTree(): RenderedTreeNode[] {
-    return this.renderTopDownTreeNodes(this.roots, 0, 0);
+  renderTree(): RenderedTreeNode[] {
+    const ret = this.renderTreeNodes(this.roots, 0, 0);
+    if (!this.topDown) {
+      // Flip bottom-up trees around the vertical midpoint.
+      const heightPx = ret.reduce(
+          (highestYPx, treeNode) =>
+              (treeNode.y1Px > highestYPx) ? treeNode.y1Px : highestYPx,
+          0);
+      ret.forEach((treeNode) => {
+        const newY0Px = heightPx - treeNode.y1Px;
+        const newY1Px = heightPx - treeNode.y0Px;
+        treeNode.y0Px = newY0Px;
+        treeNode.y1Px = newY1Px;
+      });
+    }
+    return ret;
   }
 
-  private renderTopDownTreeNodes(
+  private renderTreeNodes(
       treeNodes: TreeNode[], horizontalOffsetPct: number,
       verticalOffsetPx: number): RenderedTreeNode[] {
     if (treeNodes.length === 0) {
@@ -167,7 +211,7 @@ export class Tree {
               this.coloring, treeNode.properties, horizontalOffsetPct, widthPct,
               verticalOffsetPx,
               verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx),
-          ...this.renderTopDownTreeNodes(
+          ...this.renderTreeNodes(
               treeNode.children, horizontalOffsetPct,
               verticalOffsetPx + this.weightedTreeRenderSettings.frameHeightPx),
       );

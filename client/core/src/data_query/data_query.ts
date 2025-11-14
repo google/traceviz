@@ -55,6 +55,9 @@ export class DataQuery implements DataSeriesFetcher {
 
   private fetcher: DataFetcherInterface|undefined;
 
+  // loading's current value is true if an update is being processed
+  readonly loading = new BehaviorSubject<boolean>(false);
+
   constructor(private readonly errorReporter: (err: unknown) => void) {}
 
   connect(fetcher: DataFetcherInterface) {
@@ -136,6 +139,7 @@ export class DataQuery implements DataSeriesFetcher {
     }
     const req: Request = {filters: this.globalFilters, seriesRequests};
     // Submit the request via the fetcher.
+    this.loading.next(true);
     this.fetcher.fetch(req).pipe(take(1)).subscribe({
       next: (data) => {
         for (const [seriesName, series] of data.series.entries()) {
@@ -146,11 +150,13 @@ export class DataQuery implements DataSeriesFetcher {
           // Invoke the registered callback for this dataSeries.
           queryInFlight.onResponse(series);
         }
+        this.loading.next(false);
       },
       error: (err) => {
         for (const queryInFlight of queriesInFlightBySeriesName.values()) {
           queryInFlight.cancel();
         }
+        this.loading.next(false);
       }
     });
   }

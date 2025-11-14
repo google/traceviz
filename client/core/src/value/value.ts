@@ -213,6 +213,9 @@ export interface Value extends ReplaySubject<Value> {
   // For scalars, inclusion implies equality; generally, if
   // a.includes(b) && b.includes(a), a and b are equal.
   includes(other: Value): boolean;
+  // prefixOf returns true if the receiver's Value is a prefix of `other`.
+  // Returns false for EmptyValue, scalars, and mismatched types.
+  prefixOf(other: Value): boolean;
   // compare returns >0, 0, or <0 if the receiver compares less than, equal to,
   // or greater than `other`. If the two are incomparable, they should return a
   // nonzero value.
@@ -253,6 +256,10 @@ export class EmptyValue extends ReplaySubject<Value> implements Value {
 
   includes(other: Value): boolean {
     return other instanceof EmptyValue;
+  }
+
+  prefixOf(other: Value): boolean {
+    return false;
   }
 
   compare(other: Value): number {
@@ -302,12 +309,12 @@ export class StringValue extends ReplaySubject<Value> implements Value {
     if (stringTableBuilder === undefined) {
       return [
         ValueType.STRING,
-        this.val,
+        encodeURIComponent(this.val),
       ];
     }
     return [
       ValueType.STRING_INDEX,
-      stringTableBuilder.index(this.val),
+      stringTableBuilder.index(encodeURIComponent(this.val)),
     ];
   }
 
@@ -324,6 +331,13 @@ export class StringValue extends ReplaySubject<Value> implements Value {
 
   includes(other: Value): boolean {
     return this.compare(other) === 0;
+  }
+
+  prefixOf(other: Value): boolean {
+    if (other instanceof StringValue) {
+      return other.val.startsWith(this.val);
+    }
+    return false;
   }
 
   compare(other: Value): number {
@@ -368,7 +382,7 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
   }
 
   get val(): string[] {
-    return this.wrappedStrings;
+    return Array.from(this.wrappedStrings);
   }
 
   set val(wrappedStrings: string[]) {
@@ -443,6 +457,15 @@ export class StringListValue extends ReplaySubject<Value> implements Value {
       }
     }
     return true;
+  }
+
+  prefixOf(other: Value): boolean {
+    if (other instanceof StringListValue) {
+      return this.val.every((element, index) => {
+        return element === other.val[index];
+      });
+    }
+    return false;
   }
 
   // String lists A and B compare:
@@ -581,6 +604,10 @@ export class StringSetValue extends ReplaySubject<Value> implements Value {
     return true;
   }
 
+  prefixOf(other: Value): boolean {
+    return false;
+  }
+
   // String sets A and B compare:
   //   <0 if A has fewer entries than B, or
   //   >0 if B has fewer entries than A, or
@@ -674,6 +701,10 @@ export class IntegerValue extends ReplaySubject<Value> implements Value {
     return this.compare(other) === 0;
   }
 
+  prefixOf(other: Value): boolean {
+    return false;
+  }
+
   compare(other: Value): number {
     if (other instanceof EmptyValue) {
       return this.val - 0;
@@ -718,7 +749,7 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
   }
 
   get val(): number[] {
-    return this.wrappedInts;
+    return Array.from(this.wrappedInts);
   }
 
   set val(wrappedInts: number[]) {
@@ -789,6 +820,15 @@ export class IntegerListValue extends ReplaySubject<Value> implements Value {
       }
     }
     return true;
+  }
+
+  prefixOf(other: Value): boolean {
+    if (other instanceof IntegerListValue) {
+      return this.val.every((element, index) => {
+        return element === other.val[index];
+      });
+    }
+    return false;
   }
 
   // Integer lists A and B compare:
@@ -931,6 +971,10 @@ export class IntegerSetValue extends ReplaySubject<Value> implements Value {
     return true;
   }
 
+  prefixOf(other: Value): boolean {
+    return false;
+  }
+
   // Integer sets A and B compare:
   //   <0 if A has fewer entries than B, or
   //   >0 if B has fewer entries than A, or
@@ -1018,6 +1062,10 @@ export class DoubleValue extends ReplaySubject<Value> implements Value {
     return this.compare(other) === 0;
   }
 
+  prefixOf(other: Value): boolean {
+    return false;
+  }
+
   compare(other: Value): number {
     if (other instanceof EmptyValue) {
       return this.val - 0;
@@ -1088,6 +1136,10 @@ export class DurationValue extends ReplaySubject<Value> implements Value {
 
   includes(other: Value): boolean {
     return this.compare(other) === 0;
+  }
+
+  prefixOf(other: Value): boolean {
+    return false;
   }
 
   compare(other: Value): number {
@@ -1164,6 +1216,10 @@ export class TimestampValue extends ReplaySubject<Value> implements Value {
 
   includes(other: Value): boolean {
     return this.compare(other) === 0;
+  }
+
+  prefixOf(other: Value): boolean {
+    return false;
   }
 
   compare(other: Value): number {

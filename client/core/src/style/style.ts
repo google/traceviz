@@ -31,3 +31,13 @@ export function getStyle(attrName: string, vm: ValueMap): string|undefined {
   }
   return vm.expectString(key);
 }
+
+export function getStyles(vm: ValueMap): {[klass: string]: string} {
+  const ret: {[klass: string]: string;} = {};
+  for (const key of vm.keys()) {
+    if (key.startsWith(STYLE_KEY_PREFIX)) {
+      ret[key.slice(STYLE_KEY_PREFIX.length)] = vm.get(key).toString();
+    }
+  }
+  return ret;
+}

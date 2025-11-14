@@ -14,6 +14,7 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {BrowserModule} from '@angular/platform-browser';
 import {HovercardModule} from 'traceviz-angular-hovercard';
 
 import {WeightedTreeComponent} from './components/weighted_tree.component';
@@ -23,6 +24,7 @@ import {WeightedTreeComponent} from './components/weighted_tree.component';
     WeightedTreeComponent,
   ],
   imports: [
+    BrowserModule,
     CommonModule,
     HovercardModule,
     MatProgressBarModule,

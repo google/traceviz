@@ -38,11 +38,11 @@
 */
 
 import {BehaviorSubject, combineLatest, EMPTY, merge, Observable, ReplaySubject, Subject} from 'rxjs';
-import {delay, distinctUntilChanged, map, mergeMap, takeUntil} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, map, mergeMap, takeUntil} from 'rxjs/operators';
 
 import {Documenter, DocumenterType} from '../documentation/documentation.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';
-import {EmptyValue, Value} from '../value/value.js';
+import {EmptyValue, fromV, IntegerListValue, IntegerValue, StringListValue, StringValue, V, Value} from '../value/value.js';
 import {ValueMap} from '../value/value_map.js';
 import {ValueRef} from '../value/value_reference.js';
 
@@ -378,6 +378,175 @@ export class SetIfEmpty extends Update {
   }
 }
 
+/** On update, swaps its two children's values. */
+export class Swap extends Update {
+  constructor(
+      private readonly firstVR: ValueRef, private readonly secondVR: ValueRef) {
+    super();
+  }
+
+  override update(localState?: ValueMap|undefined) {
+    const firstValue = this.firstVR.get(localState);
+    const secondValue = this.secondVR.get(localState);
+    if (firstValue === undefined || secondValue === undefined) {
+      return;
+    }
+    const tempValue = fromV(firstValue.toV() as V, []) as Value;
+    if (!firstValue.fold(
+            secondValue, /* toggle= */ false, /* replace= */ true)) {
+      throw new ConfigurationError(`Can't set ${this.firstVR.label()} to ${
+                                       this.secondVR.label()} for swap.`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+    }
+    if (!secondValue.fold(
+            tempValue, /* toggle= */ false, /* replace= */ true)) {
+      throw new ConfigurationError(`Can't set ${this.secondVR.label()} to ${
+                                       this.firstVR.label()} for swap.`)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+    }
+  }
+
+  override get autoDocument(): string {
+    return `swaps ${this.firstVR.label()} and ${this.secondVR.label()}.`;
+  }
+}
+
+/**
+ * Pops the leftmost item from the referenced value, which must be list-type.
+ */
+export class PopLeft extends Update {
+  constructor(readonly valueRef: ValueRef) {
+    super();
+  }
+
+  override update(localState?: ValueMap|undefined) {
+    const listVal = this.valueRef.get(localState);
+    if (listVal instanceof StringListValue || listVal instanceof IntegerListValue) {
+      listVal.val = listVal.val.slice(1);
+      return
+    }
+    throw new ConfigurationError(
+        'PopLeft must have a single List-type Value argument.')
+        .from(SOURCE)
+        .at(Severity.ERROR);
+  }
+
+  override get autoDocument(): string {
+    return `pops the leftmost value of ${this.valueRef.label()}`;
+  }
+}
+
+/**
+ * Pushes the second through last referenced arguments' values, in order, onto
+ * the left end of the first argument's referenced value.  The first argument
+ * must reference a list-type value, and subsequent arguments must reference
+ * compatible ordered types.  For example, if the first argument is a
+ * StringList, subsequent arguments may be Strings or StringLists.
+ */
+export class PushLeft extends Update {
+  constructor(readonly valueRefs: ValueRef[]) {
+    super();
+  }
+
+  override update(localState?: ValueMap|undefined) {
+    if (this.valueRefs.length > 0) {
+      let succeeded = true;
+      const listVal = this.valueRefs[0].get(localState);
+      if (listVal instanceof StringListValue) {
+        let newVal = new Array<string>();
+        for (const valueRef of this.valueRefs.slice(1)) {
+          const value = valueRef.get(localState);
+          if (value instanceof StringValue) {
+            newVal.push(value.val);
+          } else if (value instanceof StringListValue) {
+            newVal = newVal.concat(value.val);
+          } else {
+            succeeded = false;
+            break;
+          }
+        }
+        if (succeeded) {
+          newVal = newVal.concat(listVal.val);
+          listVal.val = newVal;
+          return;
+        }
+      }
+      if (listVal instanceof IntegerListValue) {
+        let newVal = new Array<number>();
+        for (const valueRef of this.valueRefs.slice(1)) {
+          const value = valueRef.get(localState);
+          if (value instanceof IntegerValue) {
+            newVal.push(value.val);
+          } else if (value instanceof IntegerListValue) {
+            newVal = newVal.concat(value.val);
+          } else {
+            succeeded = false;
+            break;
+          }
+        }
+        if (succeeded) {
+          newVal = newVal.concat(listVal.val);
+          listVal.val = newVal;
+          return;
+        }
+      }
+    }
+    throw new ConfigurationError(
+        'PushLeft must have at least one argument, which must be a List-type Value.  All subsequent arguments must be of compatible types with the initial List.')
+        .from(SOURCE)
+        .at(Severity.ERROR);
+  }
+
+  override get autoDocument(): string {
+    return `pushes [${
+        this.valueRefs.slice(1)
+            .map((vr) => vr.label())
+            .join(', ')}] on the left of ${this.valueRefs[0].label()}`;
+  }
+}
+
+/**
+ * On update, concatenates the values of children beyond the first child to the
+ * first child.
+ */
+export class Concat extends Update {
+  constructor(readonly valueRefs: ValueRef[]) {
+    super();
+  }
+
+  override update(localState?: ValueMap|undefined) {
+    const vals: StringValue[] = [];
+    for (const vr of this.valueRefs) {
+      const val = vr.get(localState);
+      if (val instanceof StringValue) {
+        vals.push(val);
+      } else {
+        throw new ConfigurationError(
+            `Can't concatenate ${
+                this.valueRefs.map((vr) => vr.label()).join(', ')}.`)
+            .from(SOURCE)
+            .at(Severity.ERROR);
+      }
+    }
+    if (vals.length === 0) {
+      return;
+    }
+
+    let s = '';
+    for (const v of vals) {
+      s += v.val;
+    }
+    vals[0].val = s;
+  }
+
+  override get autoDocument(): string {
+    return `concatenates [${
+        this.valueRefs.map((vr) => vr.label()).join(', ')}]`;
+  }
+}
+
 /**
  * A user action of a specified type on a specified target.  Upon this action,
  * all provided updates are applied.
@@ -437,37 +606,51 @@ export abstract class Predicate implements Documenter {
 }
 
 /**
- * Provides a matcher yielding true when its ValueRef argument has recently
- * changed.
+ * Provides a matcher yielding true when any of its ValueRef arguments has
+ * recently changed.
  */
 export class Changed extends Predicate {
-  constructor(private readonly x: ValueRef, private readonly sinceMs = 0) {
+  constructor(
+      private readonly valRefs: ValueRef[],
+      private readonly sinceMs?: number|undefined) {
     super();
   }
 
   override match(): MatchFn {
     return (localState: ValueMap|undefined): Observable<boolean> => {
-      const val = this.x.get(localState);
-      if (val === undefined) {
-        return EMPTY;
+      const vals = new Array<Value>();
+      for (const valRef of this.valRefs) {
+        const val = valRef.get(localState);
+        if (val !== undefined) {
+          vals.push(val);
+        }
       }
-      if (this.sinceMs === 0) {
-        // If sinceMs is 0, just emit a pulse on the rising edge of the change.
-        return val.pipe(mergeMap(() => [true, false]));
+      // Produce a boolean observable emitting 'true' for a period of time
+      // after any of this.vals changes.
+      const anyValChanged = merge(...vals).pipe(map(() => true));
+      // If sinceMs is undefined, emit an instantaneous (rising-edge) pulse at
+      // the moment of the change.  This functionality is for testing when
+      // fakeAsync() and tick(0 are unavailable, but it can have unexpected
+      // behavior: in particular, when a Changed predicate is a non-final
+      // argument to another predicate using combineLatest, such as And, the
+      // instantaneous 'true' output may never be observed.
+      if (this.sinceMs === undefined) {
+        return anyValChanged.pipe(mergeMap(() => [true, false]));
       }
-      const valueChanged = val.pipe(map(() => true));
-      const changeTimeout =
-          valueChanged.pipe(delay(this.sinceMs), map(() => false));
       return merge(
-                 valueChanged,
-                 changeTimeout,
+                 anyValChanged,
+                 anyValChanged.pipe(
+                     debounceTime(this.sinceMs),
+                     map(() => false),
+                     ),
                  )
           .pipe(distinctUntilChanged());
     };
   }
 
   override get autoDocument(): string {
-    return `when ${this.x.label()} changed within past ${this.sinceMs}ms`;
+    const names = this.valRefs.map((val) => val.label());
+    return `when [${names.join(', ')}] changed within past ${this.sinceMs}ms`;
   }
 }
 
@@ -696,6 +879,32 @@ export class Includes extends Predicate {
 
   override get autoDocument(): string {
     return `when ${this.x.label()} includes ${this.y.label()}`;
+  }
+}
+
+/**
+ * Provides a matcher yielding true when its first ValueRef argument is a prefix
+ * of its second ValueRef argument.
+ */
+export class PrefixOf extends Predicate {
+  constructor(private readonly x: ValueRef, private readonly y: ValueRef) {
+    super();
+  }
+
+  override match(): MatchFn {
+    return (localState: ValueMap|undefined): Observable<boolean> => {
+      const x = this.x.get(localState);
+      const y = this.y.get(localState);
+      if (x !== undefined && y !== undefined) {
+        return combineLatest([x, y]).pipe(
+            map((vals: Value[]) => vals[0].prefixOf(vals[1])));
+      }
+      return EMPTY;
+    };
+  }
+
+  override get autoDocument(): string {
+    return `when ${this.x.label()} is a prefix of ${this.y.label()}`;
   }
 }
 

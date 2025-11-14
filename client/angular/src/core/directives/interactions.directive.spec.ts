@@ -14,10 +14,9 @@
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {CoreModule} from '../core.module';
-import {IntegerValue, DurationValue, Duration, int, str, DoubleValue, StringValue, prettyPrintDocumenter, StringSetValue, Timestamp, TimestampValue, ts, valueMap} from 'traceviz-client-core';
+import {IntegerValue, DurationValue, Duration, IntegerValue, int, str, DoubleValue, StringValue, prettyPrintDocumenter, StringListValue, StringSetValue, Timestamp, TimestampValue, ts, valueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
-
 import {AppCoreDirective} from './app_core.directive';
 import {InteractionsDirective} from './interactions.directive';
 import {TestCoreModule} from '../test_core.module';
@@ -25,6 +24,7 @@ import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 
 @Component({
+  standalone: false,
   template: `
   <app-core>
     <global-state>
@@ -82,7 +82,10 @@ import {takeUntil} from 'rxjs/operators';
         </else>
       </if>
     </action>
-  </interactions>`
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class IfTestComponent {
   @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
@@ -148,6 +151,7 @@ describe('if test', () => {
 });
 
 @Component({
+  standalone: false,
   template: `
   <app-core>
     <global-state>
@@ -209,7 +213,10 @@ describe('if test', () => {
         </case>
       </switch>
     </action>
-  </interactions>`
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class SwitchTestComponent {
   @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
@@ -275,6 +282,239 @@ describe('switch test', () => {
 });
 
 @Component({
+  standalone: false,
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="first_value"><string>first</string></value>
+        <value key="second_value"><string>second</string></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <action target="item" type="click">
+      <swap>
+        <global-ref key="first_value"></global-ref>
+        <global-ref key="second_value"></global-ref>
+      </swap>
+    </action>
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
+})
+class SwapTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('swap test', () => {
+  let fixture: ComponentFixture<SwapTestComponent>;
+  const appCoreService = new AppCoreService();
+  let firstValue: StringValue;
+  let secondValue: StringValue;
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [SwapTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    });
+    fixture = TestBed.createComponent(SwapTestComponent);
+    fixture.detectChanges();
+    firstValue =
+        appCoreService.appCore.globalState.get('first_value') as StringValue;
+    secondValue =
+        appCoreService.appCore.globalState.get('second_value') as StringValue;
+  });
+
+  it('executes properly', () => {
+    const errs: string[] = [];
+    appCoreService.appCore.configurationErrors.subscribe((err) => {
+      errs.push(err.message);
+    });
+    const itc = fixture.componentInstance;
+
+    expect(firstValue.val).toEqual('first');
+    expect(secondValue.val).toEqual('second');
+
+    itc.ints.get().update('item', 'click', valueMap());
+
+    expect(firstValue.val).toEqual('second');
+    expect(secondValue.val).toEqual('first');
+    expect(errs).toEqual([]);
+  });
+});
+
+@Component({
+  standalone: false,
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="strs"><string-list>
+          <string>a</string>
+          <string>b</string>
+          <string>c</string>
+        </string-list></value>
+        <value key="more_strs"><string-list>
+          <string>d</string>
+          <string>e</string>
+          <string>f</string>
+        </string-list></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <action target="item" type="push">
+      <push-left>
+        <global-ref key="strs"></global-ref>
+        <global-ref key="more_strs"></global-ref>
+      </push-left>
+    </action>
+    <action target="item" type="pop">
+      <pop-left>
+        <global-ref key="strs"></global-ref>
+      </pop-left>
+    </action>
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
+})
+class PushPopLeftTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('push-left/pop-left test', () => {
+  let fixture: ComponentFixture<PushPopLeftTestComponent>;
+  const appCoreService = new AppCoreService();
+  let strs: StringListValue;
+  let moreStrs: StringListValue;
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [PushPopLeftTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    });
+    fixture = TestBed.createComponent(PushPopLeftTestComponent);
+    fixture.detectChanges();
+    strs =
+        appCoreService.appCore.globalState.get('strs') as StringListValue;
+    moreStrs =
+        appCoreService.appCore.globalState.get('more_strs') as StringListValue;
+  });
+
+  it('pushes', () => {
+    const errs: string[] = [];
+    appCoreService.appCore.configurationErrors.subscribe((err) => {
+      errs.push(err.message);
+    });
+    const itc = fixture.componentInstance;
+
+    itc.ints.get().update('item', 'push', valueMap());
+
+    expect(strs.val).toEqual(['d', 'e', 'f', 'a', 'b', 'c']);
+    expect(errs).toEqual([]);
+  });
+
+  it('pops', () => {
+    const errs: string[] = [];
+    appCoreService.appCore.configurationErrors.subscribe((err) => {
+      errs.push(err.message);
+    });
+    const itc = fixture.componentInstance;
+
+    itc.ints.get().update('item', 'pop', valueMap());
+
+    expect(strs.val).toEqual(['e', 'f', 'a', 'b', 'c']);
+    expect(errs).toEqual([]);
+  });
+});
+
+@Component({
+  standalone: false,
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="first_value"><string>first</string></value>
+        <value key="second_value"><string>second</string></value>
+      </value-map>
+    </global-state>
+    <test-data-query></test-data-query>
+  </app-core>
+  <interactions>
+    <action target="item" type="click">
+      <concat>
+        <global-ref key="first_value"></global-ref>
+        <string>and</string>
+        <global-ref key="second_value"></global-ref>
+      </concat>
+    </action>
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
+})
+class ConcatTestComponent {
+  @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
+  @ViewChild(AppCoreDirective) appCore!: AppCoreDirective;
+}
+
+describe('concat test', () => {
+  let fixture: ComponentFixture<ConcatTestComponent>;
+  const appCoreService = new AppCoreService();
+  let firstValue: StringValue;
+  let secondValue: StringValue;
+
+  beforeAll(() => {
+    TestBed.configureTestingModule({
+      declarations: [ConcatTestComponent],
+      imports: [CoreModule, TestCoreModule],
+      providers: [{
+        provide: AppCoreService,
+        useValue: appCoreService,
+      }]
+    });
+    fixture = TestBed.createComponent(ConcatTestComponent);
+    fixture.detectChanges();
+    firstValue =
+        appCoreService.appCore.globalState.get('first_value') as StringValue;
+    secondValue =
+        appCoreService.appCore.globalState.get('second_value') as StringValue;
+  });
+
+  it('executes properly', () => {
+    const errs: string[] = [];
+    appCoreService.appCore.configurationErrors.subscribe((err) => {
+      errs.push(err.message);
+    });
+    const itc = fixture.componentInstance;
+
+    expect(firstValue.val).toEqual('first');
+    expect(secondValue.val).toEqual('second');
+
+    itc.ints.get().update('item', 'click', valueMap());
+
+    expect(firstValue.val).toEqual('firstandsecond');
+    expect(errs).toEqual([]);
+  });
+});
+
+@Component({
+  standalone: false,
   template: `
   <app-core>
     <global-state>
@@ -306,7 +546,10 @@ describe('switch test', () => {
         <global-ref key="filtered_text"></global-ref>
       </clear>
     </action>
-  </interactions>`
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class ActionTestComponent {
   @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
@@ -381,6 +624,7 @@ describe('actions test', () => {
 });
 
 @Component({
+  standalone: false,
   template: `
   <app-core>
     <global-state>
@@ -426,7 +670,10 @@ describe('actions test', () => {
         </or>
       </and>
     </reaction>
-  </interactions>`
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class ReactionTestComponent {
   @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
@@ -515,6 +762,7 @@ describe('reactions test', () => {
 });
 
 @Component({
+  standalone: false,
   template: `
   <app-core>
     <global-state>
@@ -527,11 +775,14 @@ describe('reactions test', () => {
   </app-core>
   <interactions>
     <reaction target="item" type="highlight">
-      <changed>
+      <changed noDebounce=true>
         <global-ref key="a"></global-ref>
       </changed>
     </reaction>
-  </interactions>`
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class ChangedTestComponent {
   @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
@@ -596,6 +847,7 @@ describe('changed test', () => {
 });
 
 @Component({
+  standalone: false,
   template: `
   <app-core>
     <global-state>
@@ -625,7 +877,10 @@ describe('changed test', () => {
         </value>
       </value-map>
     </watch>
-  </interactions>`
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class WatchTestComponent {
   @ViewChild(InteractionsDirective) ints!: InteractionsDirective;
@@ -688,6 +943,7 @@ describe('watch test', () => {
 });
 
 @Component({
+  standalone: false,
   template: `
   <app-core>
     <global-state>
@@ -769,7 +1025,10 @@ describe('watch test', () => {
         </value>
       </value-map>
     </watch>
-  </interactions>`
+  </interactions>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class DocTestComponent {
   @ViewChild(InteractionsDirective) ints!: InteractionsDirective;

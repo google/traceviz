@@ -53,6 +53,7 @@ describe('data query test', () => {
   beforeEach(() => {
     tdq.connect(GLOBAL_TEST_DATA_FETCHER);
     tdq.setGlobalFilters(globalFilters);
+    tdq.loading.next(false);
     GLOBAL_TEST_DATA_FETCHER.reset();
   });
 
@@ -77,14 +78,18 @@ describe('data query test', () => {
        tdq.fetchDataSeries(
            seriesReq1,
            (r) => {
+            expect(tdq.loading.getValue()).toBeTrue();
              response = r;
            },
            () => {
+            expect(tdq.loading.getValue()).toBeTrue();
              fail('unexpected cancellation');
            });
        expect(response).toBeUndefined();
+       expect(tdq.loading.getValue()).toBeFalse();
        tdq.triggerUpdates()();
        expect(response).toBeDefined();
+       expect(tdq.loading.getValue()).toBeFalse();
      }));
 
   it('deduplicates multiple DataSeriesRequests with the same series name',
@@ -178,21 +183,27 @@ describe('data query test', () => {
        tdq.fetchDataSeries(
            seriesReq1,
            (r) => {
+             expect(tdq.loading.getValue()).toBeTrue();
              responses++;
            },
            () => {
+             expect(tdq.loading.getValue()).toBeTrue();
              cancellations++;
            });
        tdq.fetchDataSeries(
            seriesReq2,
            (r) => {
+             expect(tdq.loading.getValue()).toBeTrue();
              responses++;
            },
            () => {
+             expect(tdq.loading.getValue()).toBeTrue();
              cancellations++;
            });
+       expect(tdq.loading.getValue()).toBeFalse();
        tdq.triggerUpdates()();
        expect(responses).toEqual(0);
        expect(cancellations).toEqual(2);
+       expect(tdq.loading.getValue()).toBeFalse();
      }));
 });

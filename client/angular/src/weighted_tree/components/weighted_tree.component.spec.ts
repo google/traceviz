@@ -24,16 +24,14 @@ function n(
     primaryColorSpace: string|undefined): ValueMap {
   const props = new Array<{key: string, val: Value}>(
       {key: 'id', val: int(nodeID)},
-      {key: 'tree_datum_type', val: int(0)},
       {key: 'self_magnitude', val: int(selfMagnitude)},
       {key: 'label_format', val: str(label)},
-      {key: 'weighted_tree_datum_type', val: int(0)},
   );
-  if (primaryColorSpace !== undefined) {
+  if (primaryColorSpace) {
     props.push(
         {
           key: 'primary_color_space',
-          val: str(`color_space_${primaryColorSpace}`)
+          val: str('color_space_' + primaryColorSpace)
         },
         {key: 'primary_color_space_value', val: dbl(0)},
     );
@@ -43,7 +41,7 @@ function n(
 
 // Tree structure:
 // |-node 0-----------------------------------------------|
-// |-node 1---||-node4------------------------------------|
+// |-node 1---||-node 4-----------------------------------|
 // |n2||-n3-|  |-node 5-------------||-node 7-----|
 //             |-node 6---|
 const treeData = node(
@@ -73,6 +71,7 @@ const treeData = node(
 );
 
 @Component({
+  standalone: false,
   template: `
     <app-core>
       <global-state>
@@ -84,42 +83,45 @@ const treeData = node(
       <test-data-query>
       </test-data-query>
     </app-core>
-    <weighted-tree>
+    <weighted-tree transitionDurationMs="0">
+      <data-series>
+        <query><value><string>q</string></value></query>
         <interactions>
-            <action target="node" type="click">
-                <set>
-                    <global-ref key="selected_ids"></global-ref>
-                    <local-ref key="id"></local-ref>
-                </set>
-            </action>
-            <reaction target="node" type="highlight">
-                <includes>
-                    <global-ref key="selected_ids"></global-ref>
-                    <local-ref key="id"></local-ref>
-                </includes>
-            </reaction>
+          <reaction type="fetch" target="data-series">
+            <and>
+              <not><equals>
+                <global-ref key="collection_name"></global-ref>
+                <string></string>
+              </equals></not>
+              <changed><global-ref key="collection_name"></global-ref></changed>
+            </and>
+          </reaction>
         </interactions>
-        <data-series>
-            <query><string>flavs</string></query>
-            <interactions>
-                <reaction type="fetch" target="data-series">
-                    <and>
-                        <not><equals>
-                            <global-ref key="collection_name"></global-ref>
-                            <string></string>
-                        </equals></not>
-                        <changed>
-                            <global-ref key="collection_name"></global-ref>
-                        </changed>
-                    </and>
-                </reaction>
-            </interactions>
-        </data-series>
-    </weighted-tree>
-`
+        <parameters></parameters>
+      </data-series>
+
+      <interactions>
+        <action target="nodes" type="click">
+          <set>
+            <global-ref key="selected_ids"></global-ref>
+            <local-ref key="id"></local-ref>
+          </set>
+        </action>
+
+        <reaction target="nodes" type="highlight">
+          <includes>
+            <global-ref key="selected_ids"></global-ref>
+            <local-ref key="id"></local-ref>
+          </includes>
+        </reaction>
+      </interactions>
+    </weighted-tree>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class WeightedTreeTestComponent {
-  @ViewChild(WeightedTreeComponent) weightedTreeComp!: WeightedTreeComponent;
+  @ViewChild(WeightedTree) weightedTree!: WeightedTree;
 }
 
 describe('weighted tree test', () => {
@@ -130,32 +132,92 @@ describe('weighted tree test', () => {
   });
 
   beforeEach(async () => {
-    TestBed.configureTestingModule({
-      declarations: [WeightedTreeTestComponent],
-      imports: [
-        CoreModule, TestCoreModule, WeightedTreeModule, NoopAnimationsModule
-      ],
-      providers: [{provide: AppCoreService, useValue: appCoreService}]
-    });
+    appCoreService.appCore.reset();
+    await TestBed
+        .configureTestingModule({
+          declarations: [WeightedTreeTestComponent],
+          imports: [
+            CoreModule, TestCoreModule, WeightedTreeModule, NoopAnimationsModule
+          ],
+          providers: [{provide: AppCoreService, useValue: appCoreService}]
+        })
+        .compileComponents();
     fixture = TestBed.createComponent(WeightedTreeTestComponent);
+    await fixture.whenStable();
   });
 
   it('renders tree nodes', () => {
     fixture.detectChanges();
-    const tc = fixture.componentInstance;
+    const wt = fixture.componentInstance;
     const collectionName = appCoreService.appCore.globalState.get(
                                'collection_name') as StringValue;
     GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
       series: new Map<string, ResponseNode>([
-        [tc.weightedTreeComp.dataSeriesQuery!.uniqueSeriesName, treeData],
+        [
+          wt.weightedTree.dataSeries!.dataSeriesQuery!.uniqueSeriesName,
+          treeData
+        ],
       ]),
     });
     collectionName.val = 'coll';
-    tc.weightedTreeComp.redraw();
-    const element: HTMLElement = fixture.nativeElement;
-    const nodes = element.querySelectorAll('rect');
-    expect(nodes.length).toBe(8);
+    wt.weightedTree.redraw();  // we can't wait for the debouncer.
 
-    // TODO(ilhamster): finish out the tests
+    const frames = wt.weightedTree.svg.nativeElement.querySelectorAll(
+        'g.chart-area > svg');
+    // Expect eight frames: the root and nodes 1-7.
+    expect(frames.length).toBe(8);
+    const colors: string[] = [];
+    const labels: string[] = [];
+    for (const frame of frames.values()) {
+      const rect = frame.querySelector('rect');
+      colors.push(rect.attributes.getNamedItem('fill').value);
+      const text = frame.querySelector('text');
+      labels.push(text.textContent);
+    }
+    expect(colors).toEqual([
+      'rgb(127, 127, 127)',  // root (grey)
+      'rgb(255, 0, 0)',      // node 1 (red)
+      'rgb(0, 255, 0)',      // node 2 (green)
+      'rgb(0, 255, 0)',      // node 3 (green)
+      'rgb(255, 0, 0)',      // node 4 (red)
+      'rgb(0, 255, 0)',      // node 5 (green)
+      'rgb(0, 0, 255)',      // node 6 (blue)
+      'rgb(0, 255, 0)'       // node 7 (green)
+    ]);
+    expect(labels).toEqual([
+      'root',
+      'Node 1',
+      'Node 2',
+      'Node 3',
+      'Node 4',
+      'Node 5',
+      'Node 6',
+      'Node 7',
+    ]);
+  });
+
+  it('supports click and highlight interactions', () => {
+    fixture.detectChanges();
+    const wt = fixture.componentInstance;
+    const collectionName = appCoreService.appCore.globalState.get(
+                               'collection_name') as StringValue;
+    GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
+      series: new Map<string, ResponseNode>([
+        [
+          wt.weightedTree.dataSeries!.dataSeriesQuery!.uniqueSeriesName,
+          treeData
+        ],
+      ]),
+    });
+    collectionName.val = 'coll';
+    wt.weightedTree.redraw();  // we can't wait for the debouncer.
+
+    expect(wt.weightedTree.highlightedNodes.size).toBe(0);
+
+    wt.weightedTree.interactions?.update(
+        'nodes', 'click', wt.weightedTree.treeNodes[0].properties);
+
+    expect(wt.weightedTree.highlightedNodes)
+        .toEqual(new Set<RenderedTreeNode>([wt.weightedTree.treeNodes[0]]));
   });
 });

@@ -77,7 +77,7 @@ describe('tree test', () => {
 
   it('renders a top-down tree', () => {
     const tree = new Tree(weightedTreeNode);
-    const renderedNodes = tree.renderTopDownTree();
+    const renderedNodes = tree.renderTree();
     renderedNodes.forEach((renderedNode) => {
       renderedNode.resize(100);
     });
@@ -91,4 +91,22 @@ describe('tree test', () => {
           ['x', 50, 20, 20, 20], ['z', 50, 40, 5, 20], ['y', 70, 20, 10, 20]
         ]);
   });
+});
+
+it('renders a bottom-up tree', () => {
+  const tree = new Tree(weightedTreeNode);
+  tree.topDown = false;
+  const renderedNodes = tree.renderTree();
+  renderedNodes.forEach((renderedNode) => {
+    renderedNode.resize(100);
+  });
+  expect(renderedNodes.map(
+             (renderedNode) =>
+                 [renderedNode.label, renderedNode.x0Px, renderedNode.y0Px,
+                  renderedNode.widthPx, renderedNode.heightPx]))
+      .toEqual([ // height is 60
+        ['root 1', 0, 40, 50, 20], ['a', 0, 20, 45, 20], ['c', 0, 0, 20, 20],
+        ['b', 20, 0, 15, 20], ['root 2', 50, 40, 50, 20], ['x', 50, 20, 20, 20],
+        ['z', 50, 0, 5, 20], ['y', 70, 20, 10, 20]
+      ]);
 });

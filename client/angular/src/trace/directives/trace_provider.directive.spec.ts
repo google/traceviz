@@ -52,6 +52,7 @@ function buildTrace(layer: number): ResponseNode {
 }
 
 @Component({
+  standalone: false,
   template: `
     <app-core>
       <global-state>
@@ -81,7 +82,10 @@ function buildTrace(layer: number): ResponseNode {
           <parameters></parameters>
         </data-series>
       </trace>
-    </union-traces>`
+    </union-traces>`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class TraceTestComponent {
   @Input() layerNames: string[] = [];
@@ -116,9 +120,10 @@ describe('trace data test', () => {
     fixture.componentInstance.layerNames = ['a'];
     fixture.detectChanges();
     const t = fixture.componentInstance;
+    // const traces = Array.from(t.unionedTrace.layers);
     const collectionName =
         appCoreService.appCore.globalState.get('trace_name_a') as StringValue;
-    t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames: string[]) => {
+    t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames) => {
       GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
         series: new Map<string, ResponseNode>(
             uniqueSeriesNames.map((seriesName: string, idx: number) => {
@@ -146,11 +151,12 @@ describe('trace data test', () => {
     fixture.componentInstance.layerNames = ['a', 'b'];
     fixture.detectChanges();
     const t = fixture.componentInstance;
+    // const traces = Array.from(t.unionedTrace.layers);
     const collectionAName =
         appCoreService.appCore.globalState.get('trace_name_a') as StringValue;
     const collectionBName =
         appCoreService.appCore.globalState.get('trace_name_b') as StringValue;
-    t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames: string[]) => {
+    t.unionedTrace.uniqueSeriesNames.subscribe((uniqueSeriesNames) => {
       GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
         series: new Map<string, ResponseNode>(
             uniqueSeriesNames.map((seriesName: string, idx: number) => {

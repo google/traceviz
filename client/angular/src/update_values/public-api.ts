@@ -1,3 +1,3 @@
 
-export * from './components/update_values.component';
+export * from './directives/update_values.directive';
 export * from './update_values.module';

@@ -14,7 +14,7 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 
-import {UpdateValuesDirective} from './components/update_values.component';
+import {UpdateValuesDirective} from './directives/update_values.directive';
 
 @NgModule({
   declarations: [

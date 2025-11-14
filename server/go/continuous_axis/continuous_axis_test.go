@@ -81,7 +81,7 @@ func TestAxis(t *testing.T) {
 	}})
 	runTests(t, []testcase[time.Duration]{{
 		description: "duration",
-		axis:        NewDurationAxis(cat, 100*time.Second),
+		axis:        NewDurationAxis(cat, 0*time.Second, 100*time.Second),
 		wantUpdates: []util.PropertyUpdate{
 			cat.Define(),
 			util.StringProperty(axisTypeKey, durationAxisType),

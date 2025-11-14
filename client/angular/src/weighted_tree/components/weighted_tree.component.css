@@ -1,16 +1,19 @@
+:host {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .container {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+}
+
+.highlighted {
+  stroke: White;
 }
 
 .content {
-    flex: 1;
-    max-height: 100%;
-    display: block;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-.svg {
-    display: block;
+  flex: 1;
+  display: block;
+  flex-direction: column;
 }

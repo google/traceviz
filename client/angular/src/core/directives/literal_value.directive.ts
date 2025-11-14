@@ -17,9 +17,9 @@
  */
 
 import { AfterContentInit, ContentChildren, Directive, ElementRef, forwardRef, QueryList } from '@angular/core';
-import { Duration, DurationValue } from 'traceviz-client-core';
-import { Timestamp, ValueMap } from 'traceviz-client-core';
-import { DoubleValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value } from 'traceviz-client-core';
+import { Duration } from 'traceviz-client-core';
+import { Timestamp } from 'traceviz-client-core';
+import { DoubleValue, DurationValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, TimestampValue, Value, ValueMap } from 'traceviz-client-core';
 import { ValueDirective } from './value.directive';
 
 /** An EmptyValue literal in a TraceViz template. */

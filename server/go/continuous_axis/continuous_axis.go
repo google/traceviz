@@ -128,8 +128,11 @@ func NewTimestampAxis(cat *category.Category, extents ...time.Time) *Axis[time.T
 // If the optional extents are provided, the axis' minimum and maximum extents
 // will be initialized to the lowest and highest of those extents.
 func NewDurationAxis(cat *category.Category, extents ...time.Duration) *Axis[time.Duration] {
-	var max time.Duration
+	var min, max time.Duration = time.Duration(math.MaxInt64), time.Duration(math.MinInt64)
 	for _, extent := range extents {
+		if extent < min {
+			min = extent
+		}
 		if extent > max {
 			max = extent
 		}
@@ -138,7 +141,7 @@ func NewDurationAxis(cat *category.Category, extents ...time.Duration) *Axis[tim
 		durationAxisType, cat,
 		func(key string, v time.Duration) util.PropertyUpdate {
 			return util.DurationProperty(key, v)
-		}, 0, max)
+		}, min, max)
 }
 
 // NewDoubleAxis returns a new DoubleAxis with the specified category.

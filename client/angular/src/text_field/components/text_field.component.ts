@@ -11,10 +11,8 @@
         limitations under the License.
 */
 
-import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {AfterContentInit, Component, ContentChild, Input, OnDestroy} from '@angular/core';
-import {pipe, Subject} from 'rxjs';
-import {debounceTime, distinctUntilChanged, takeUntil} from 'rxjs/operators';
+import {Subject} from 'rxjs';
 import {AppCoreService, InteractionsDirective} from 'traceviz-angular-core';
 import {ConfigurationError, Severity, StringValue, Value, ValueMap} from 'traceviz-client-core';
 
@@ -30,59 +28,101 @@ import {ConfigurationError, Severity, StringValue, Value, ValueMap} from 'tracev
 
 const SOURCE = 'text-field';
 
-export const enum ActionType {
+/** The set of supported action types. */
+export enum ActionType {
   /** Invoked when the text field input is updated. */
   UPDATE = 'update',
+
+  /**
+     Invoked when there is a keyup event for the Enter key if updateOnEnter is
+     not set.
+   */
+  ENTER_KEY_UP = 'enter_key_up',
+
+  /** Invoked when the action button in clicked. */
+  ACTION_BUTTON_CLICK = 'action_button_click',
 }
 
-export const enum WatchType {
-  UPDATE_CONTENTS = 'update_contents',
-}
+const UPDATE_CONTENTS = 'update_contents';
 
-export const enum Target {
+/** The set of supported action and reaction targets. */
+export enum InteractionTarget {
   /** The contents of the text field. */
   TEXT_FIELD = 'text_field',
+
+  /** The button to trigger an action (e.g. clear) on the text field. */
+  ACTION_BUTTON = 'action_button',
 }
 
-export const enum Key {
+/** The set of keys for watch ValueMaps. */
+export enum WatchKey {
+  CONTENTS = 'contents',
+}
+
+/** The set of ValueMap keys for interaction items. */
+export enum InteractionItemKey {
   CONTENTS = 'contents',
 }
 
 /**
- * TextField is a text entry box that sets a specified output Value to the
- * contents of the box.  The output must be a String value.
+ * Text is an input box that sets a specified output value to the text stored
+ * in the box. The output must be a String Value.
  */
 @Component({
+  standalone: false,
   selector: 'text-field',
   template: `
-    <mat-form-field appearance="outline" [floatLabel]="placeholder.length ? 'always': 'auto'">
-        <mat-label>{{label}}</mat-label>
-        <input matInput type="text" [ngModel]="contents.val" [placeholder]="placeholder" (keyup.enter)="onEnter()" (ngModelChange)="onText($event)">
-    </mat-form-field>
-    `,
+  <mat-form-field
+        appearance="outline"
+        [floatLabel]="placeholder.length ? 'always': 'auto'">
+    <mat-label>{{label}}</mat-label>
+    <input matInput type="text"
+        [disabled]="disabled"
+        (focusout)="onFocusOut()"
+        (keyup.enter)="onEnterKeyUp()"
+        [ngModel]="contents.val"
+        (ngModelChange)="onText($event)"
+        [placeholder]="placeholder">
+    <mat-chip *ngFor="let chipText of chipsTexts; index as i" disabled matSuffix
+        class="tv-text-field-chip"
+        [ngStyle]="{'background-color': chipsColors[i]}">
+      {{chipText}}
+    </mat-chip>
+    <button matSuffix mat-icon-button *ngIf="actionButtonIcon.length > 0"
+        (click)="onActionButtonClick()"
+        [disabled]="disabled">
+      <mat-icon>{{actionButtonIcon}}</mat-icon>
+    </button>
+  </mat-form-field>
+  `,
   styles: [`
-        mat-form-field {
-            width: 100%;
-        }
-        :host ::ng-deep .mat-form-field-infix {
-            width: auto !important;
-        }
-    `]
+    mat-form-field {
+      width: 100%;
+    }
+    :host ::ng-deep .tv-text-field-chip {
+      margin: 0 4px;
+      opacity: 1 !important;
+      vertical-align: super;
+    }
+    :host ::ng-deep .tv-text-field-chip:last-child {
+      margin-right: 8px;
+    }
+    :host ::ng-deep .mat-form-field-infix {
+      width: auto !important;
+    }
+  `]
 })
 export class TextFieldComponent implements AfterContentInit, OnDestroy {
-  @Input() debounceMs = 250;
   @Input() label = '';
   @Input() placeholder = '';
+  @Input() chipsTexts: string[] = [];
+  @Input() chipsColors: string[] = [];
+  @Input() actionButtonIcon = '';
 
-  @Input()
-  get updateOnEnter() {
-    return this._updateOnEnter;
-  }
-  set updateOnEnter(value: BooleanInput) {
-    this._updateOnEnter = coerceBooleanProperty(value);
-  }
-  private _updateOnEnter = false;
+  @Input() disabled = false;
 
+  @Input() updateOnEnter = false;
+  @Input() updateOnFocusOut = false;
 
   @ContentChild(InteractionsDirective)
   interactionsDirective?: InteractionsDirective;
@@ -94,77 +134,75 @@ export class TextFieldComponent implements AfterContentInit, OnDestroy {
 
   constructor(private readonly appCoreService: AppCoreService) {}
 
-  ngAfterContentInit(): void {
-    const ops = (this.debounceMs > 0) ? pipe(
-                                            debounceTime(250),
-                                            distinctUntilChanged(),
-                                            ) :
-                                        pipe(
-                                            distinctUntilChanged(),
-                                        );
-    this.model.pipe(ops).subscribe((value) => {
-      if (value !== undefined) {
-        this.contents.val = value as string;
-        this.update(value as string);
-      }
-    });
-
-    this.appCoreService.appCore.onPublish((appCore) => {
-      const interactions = this.interactionsDirective?.get();
-      try {
-        interactions?.checkForSupportedWatches([WatchType.UPDATE_CONTENTS]);
-        interactions?.checkForSupportedActions(
-            [[Target.TEXT_FIELD, ActionType.UPDATE]]);
-      } catch (err: unknown) {
-        appCore.err(err);
-      }
-      interactions
-          ?.watch(
-              WatchType.UPDATE_CONTENTS,
-              (vm: ValueMap) => {
-                const contentsVal = vm.get(Key.CONTENTS);
-                if (contentsVal instanceof StringValue) {
-                  this.contents.val = contentsVal.val;
-                } else {
-                  appCore.err(new ConfigurationError(
-                                  `text - field only supports string contents`)
-                                  .from(SOURCE)
-                                  .at(Severity.ERROR));
-                }
-              },
-              this.unsubscribe)
+  ngAfterContentInit() {
+    this.appCoreService.appCore.onPublish(() => {
+      const watchActions = new Map([
+        [
+          UPDATE_CONTENTS,
+          (vm: ValueMap) => {
+            const contentsVal = vm.get(WatchKey.CONTENTS);
+            if (contentsVal instanceof StringValue) {
+              this.contents.val = contentsVal.val;
+            } else {
+              this.appCoreService.appCore.err(
+                  new ConfigurationError(
+                      `text-field only supports string contents`)
+                      .from(SOURCE)
+                      .at(Severity.ERROR));
+            }
+          }
+        ],
+      ]);
+      this.interactionsDirective?.get()
+          .watchAll(watchActions, this.unsubscribe)
           .subscribe((err) => {
-            appCore.err(err);
+            this.appCoreService.appCore.err(err);
           });
     });
   }
 
-  // Invoked when the text box contents change.
   onText(text: string) {
+    this.contents.val = text;
     if (!this.updateOnEnter) {
-      this.model.next(text);
-    } else {
-      this.contents.val = text;
+      this.update(this.contents.val);
     }
   }
 
-  // Invoked when 'enter' is pressed within the text box.
-  onEnter() {
+  onEnterKeyUp() {
     if (this.updateOnEnter) {
-      this.model.next(this.contents.val);
+      this.update(this.contents.val);
+    } else {
+      this.interactionsDirective?.get().update(
+          InteractionTarget.TEXT_FIELD, ActionType.ENTER_KEY_UP,
+          new ValueMap(new Map<string, Value>([
+            [InteractionItemKey.CONTENTS, this.contents],
+          ])));
     }
   }
 
-  private update(value: string) {
-    console.log(`updated with ${this.contents}`);
+  onFocusOut() {
+    if (this.updateOnFocusOut) {
+      this.update(this.contents.val);
+    }
+  }
+
+  onActionButtonClick() {
     this.interactionsDirective?.get().update(
-        Target.TEXT_FIELD, ActionType.UPDATE,
+        InteractionTarget.ACTION_BUTTON, ActionType.ACTION_BUTTON_CLICK,
         new ValueMap(new Map<string, Value>([
-          [Key.CONTENTS, this.contents],
+          [InteractionItemKey.CONTENTS, this.contents],
         ])));
   }
 
-  ngOnDestroy(): void {
+  private update(value: string) {
+    this.interactionsDirective?.get().update(
+        InteractionTarget.TEXT_FIELD, ActionType.UPDATE,
+        new ValueMap(new Map<string, Value>([
+          [InteractionItemKey.CONTENTS, this.contents],
+        ])));
+  }
+
+  ngOnDestroy() {
     this.unsubscribe.next();
     this.unsubscribe.complete();
   }

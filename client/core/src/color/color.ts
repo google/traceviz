@@ -35,9 +35,9 @@ enum Keys {
   STROKE_COLOR_SPACE = 'stroke_color_space',
   STROKE_COLOR_SPACE_VALUE = 'stroke_color_space_value',
   STROKE_COLOR = 'stroke_color',
+  COLOR_SPACE_NAME = 'color_space_name',
+  COLOR_SPACE_NAME_PREFIX = 'color_space_',
 }
-
-const COLOR_SPACE_NAME_PREFIX = 'color_space_';
 
 /** A color space linearly interpolating across a set of colors. */
 function linearColorSpace(...colors: string[]): (colorValue: number) => string {
@@ -74,20 +74,43 @@ export interface Colors {
 }
 
 /**
+ * Returns a list of colors from a color space contained in the map
+ */
+export function getColors(valueMap: ValueMap): string[] {
+    const colorSpaceName = valueMap.has(Keys.COLOR_SPACE_NAME) ?
+        valueMap.expectString(Keys.COLOR_SPACE_NAME) :
+        '';
+    if (colorSpaceName) {
+      return valueMap.expectStringList(
+                 Keys.COLOR_SPACE_NAME_PREFIX + colorSpaceName) ||
+          [];
+    }
+    return [];
+  }
+
+
+/**
  * Provides a single access point for a set of color spaces, and performs
  * color lookup for ValueMaps that include coloring data.
  */
 export class Coloring {
   readonly spacesByName: ReadonlyMap<string, (colorValue: number) => string>;
+  readonly colorRangesByColorSpaceName: ReadonlyMap<string, string[]>;
+
   constructor(vm: ValueMap) {
     const spacesByName = new Map<string, (colorValue: number) => string>();
+    const colorRangesByColorSpaceName = new Map<string, string[]>();
+
     for (const key of vm.keys()) {
-      if (key.startsWith(COLOR_SPACE_NAME_PREFIX)) {
+      if (key.startsWith(Keys.COLOR_SPACE_NAME_PREFIX)) {
         const colors = vm.expectStringList(key);
         spacesByName.set(key, linearColorSpace(...colors));
+        colorRangesByColorSpaceName.set(key, colors);
       }
     }
+
     this.spacesByName = spacesByName;
+    this.colorRangesByColorSpaceName = colorRangesByColorSpaceName;
   }
 
   /**
@@ -107,6 +130,16 @@ export class Coloring {
           vm, Keys.STROKE_COLOR, Keys.STROKE_COLOR_SPACE,
           Keys.STROKE_COLOR_SPACE_VALUE),
     };
+  }
+
+  /**
+   * Returns the color stops for the primary color space specified within the
+   * provided ValueMap, or an empty array if the ValueMap specifies no color.
+   * Throws a ConfigurationError if the ValueMap specifies a nonexistent color
+   * space.
+   */
+  colorSpaceRange(colorSpace: string): string[] {
+    return this.colorRangesByColorSpaceName.get(colorSpace) || [];
   }
 
   private getColorString(

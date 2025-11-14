@@ -65,6 +65,52 @@ func (fa *FileAsset) HTTPHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// AnnotatedFileAsset represents an HTTP-served static asset with an annotation appended to the end
+// of the asset.
+// An example use of annotations is to append a script tag to an HTML file read from disk.
+type AnnotatedFileAsset struct {
+	path        string
+	contentType string
+	annotation  string
+}
+
+// NewAnnotatedFileAsset returns a new AnnotatedFileAsset with the specified content path, type, and
+// annotation.
+func NewAnnotatedFileAsset(path, contentType, annotation string) *AnnotatedFileAsset {
+	return &AnnotatedFileAsset{
+		path:        path,
+		contentType: contentType,
+		annotation:  annotation,
+	}
+}
+
+// fetch returns the contents of the receiving AnnotatedFileAsset, or any error
+// encountered.
+func (afa *AnnotatedFileAsset) fetch() ([]byte, error) {
+	return ioutil.ReadFile(afa.path)
+}
+
+// HTTPHandler fetches and serves the receiving AnnotatedFileAsset.
+func (afa *AnnotatedFileAsset) HTTPHandler(w http.ResponseWriter, req *http.Request) {
+	contents, err := afa.fetch()
+	if err != nil {
+		fmt.Printf("Failed to fetch asset at %s: %s", req.URL.Path, err)
+		http.Error(w, "Failed to fetch asset at "+safehtml.HTMLEscaped(req.URL.Path).String()+": "+safehtml.HTMLEscaped(err.Error()).String(), http.StatusNotFound)
+		return
+	}
+	w.Header().Add("Content-Type", afa.contentType)
+
+	if _, err := fmt.Fprintf(w, "%s", contents); err != nil {
+		fmt.Printf("Failed to write asset at %s: %s", req.URL.Path, err)
+		http.Error(w, "Failed to write asset at "+safehtml.HTMLEscaped(req.URL.Path).String()+": "+safehtml.HTMLEscaped(err.Error()).String(), http.StatusInternalServerError)
+	}
+	if _, err := fmt.Fprint(w, afa.annotation); err != nil {
+		fmt.Printf("Failed to write annotation at %s: %s", req.URL.Path, err)
+		http.Error(w, "Failed to write annotation at "+safehtml.HTMLEscaped(req.URL.Path).String()+": "+safehtml.HTMLEscaped(err.Error()).String(), http.StatusInternalServerError)
+		return
+	}
+}
+
 // AssetHandler implements http.Handler, and serves static assets (HTML, JS,
 // CSS, etc.)
 type AssetHandler struct {

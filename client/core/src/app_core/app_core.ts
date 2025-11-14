@@ -15,13 +15,17 @@
  * @fileoverview The global state of a TraceViz application.
  */
 
-import {ReplaySubject} from 'rxjs';
+import {BehaviorSubject, combineLatest, ReplaySubject} from 'rxjs';
+import {distinctUntilChanged, map} from 'rxjs/operators';
 
 import {DataQuery} from '../data_query/data_query.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {GlobalState} from '../global_state/global_state.js';
 
 const SOURCE = 'app_core';
+
+/** The default data query ID. */
+export const DEFAULT_DATA_QUERY_ID = 'default';
 
 /**
  * A collection of global state for a TraceViz application, such as global
@@ -44,25 +48,66 @@ export class AppCore {
   // ConfigurationError, for example by error-reporting components.  This
   // may be subscribed before the AppCore is published.
   readonly configurationErrors = new ReplaySubject<ConfigurationError>(1);
-  // The shared DataQuery component, responsible for issuing all backend
-  // DataSeries requests and handling their responses.  This should not be
-  // examined until the AppCore is published.
-  readonly dataQuery = new DataQuery((err) => {
-    this.err(err);
-  });
   // The shared global state; a key-value mapping of Values available
   // throughout the application.  This should not be examined until the
   // AppCore is published.
   readonly globalState = new GlobalState();
-
+  // Emits 'true' if any data query is presently loading, or 'false' if none is.
+  readonly anyDataQueryLoading = new BehaviorSubject<boolean>(false);
+  // True if this AppCore is published (ready to serve data queries and global
+  // state).
   private published = false;
+  // A set of callbacks to be invoked with this AppCore as argument when this
+  // AppCore is published.
   private readonly pendingCallbacks: Array<(appCore: AppCore) => void> = [];
+  // The shared DataQuery components, keyed by ID, that are responsible for
+  // issuing all backend DataSeries requests and handling their responses.
+  // This should not be examined until the AppCore is published.
+  private readonly dataQueriesByID = new Map<string, DataQuery>();
+
+  addDataQuery(id: string = DEFAULT_DATA_QUERY_ID): DataQuery {
+    if (this.published) {
+      const err =
+          new ConfigurationError(
+              `DataQueries may only be added before the AppCore is published.`)
+              .from(SOURCE)
+              .at(Severity.FATAL);
+      this.err(err);
+      throw err;
+    }
+    if (this.dataQueriesByID.has(id)) {
+      const err = new ConfigurationError(
+                      `Multiple DataQueries cannot share the same ID '${id}'.`)
+                      .from(SOURCE)
+                      .at(Severity.FATAL);
+      this.err(err);
+      throw err;
+    }
+    const ret = new DataQuery((err) => {
+      this.err(err);
+    });
+    this.dataQueriesByID.set(id, ret);
+    return ret;
+  }
+
+  getDataQuery(id: string = DEFAULT_DATA_QUERY_ID): DataQuery {
+    const ret = this.dataQueriesByID.get(id);
+    if (ret === undefined) {
+      const err = new ConfigurationError(`No defined DataQuery has ID '${id}'.`)
+                      .from(SOURCE)
+                      .at(Severity.FATAL);
+      this.err(err);
+      throw err;
+    }
+    return ret;
+  }
 
   /** Resets the receiver.  Only for use in tests. */
   reset() {
     this.published = false;
     this.pendingCallbacks.splice(0, this.pendingCallbacks.length);
     this.globalState.reset();
+    this.dataQueriesByID.clear();
   }
 
   /** To be invoked once, when the AppCore is populated. */
@@ -80,6 +125,17 @@ export class AppCore {
     this.pendingCallbacks.forEach((cb) => {
       cb(this);
     });
+    combineLatest([...this.dataQueriesByID.values()].map((dq) => dq.loading))
+        .pipe(
+            map((loadingVals: boolean[]) => loadingVals.reduce(
+                    (acc: boolean, current: boolean) => acc || current,
+                    false,
+                    )),
+            distinctUntilChanged(),
+            )
+        .subscribe((loading: boolean) => {
+          this.anyDataQueryLoading.next(loading);
+        });
     this.pendingCallbacks.length = 0;
   }
 

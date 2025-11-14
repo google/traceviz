@@ -1,7 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-// import {BrowserDynamicTestingModule, platformBrowserDynamicTesting} from
-// '@angular/platform-browser-dynamic/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {AppCoreService, CoreModule, TestCoreModule} from 'traceviz-angular-core';
 import {GLOBAL_TEST_DATA_FETCHER, node, ResponseNode, str, StringValue, strs, valueMap} from 'traceviz-client-core';
@@ -108,6 +106,7 @@ const tableData = node(
 );
 
 @Component({
+  standalone: false,
   template: `
     <app-core>
       <global-state>
@@ -123,17 +122,21 @@ const tableData = node(
     </app-core>
     <data-table>
       <interactions>
-        <watch type="sort_rows">
+        <watch type="update_sort_direction">
           <value-map>
-            <value key="direction">
+            <value key="sort_direction">
               <global-ref key="table_sort_direction"></global-ref>
             </value>
-            <value key="column">
+          </value-map>
+        </watch>
+        <watch type="update_sort_column">
+          <value-map>
+            <value key="sort_column">
               <global-ref key="table_sort_column"></global-ref>
             </value>
           </value-map>
         </watch>
-        <action type="click" target="row">
+        <action type="click" target="rows">
           <set>
             <global-ref key="selected_flavor"></global-ref>
             <local-ref key="flavor"></local-ref>
@@ -155,10 +158,13 @@ const tableData = node(
         </interactions>
       </data-series>
     </data-table>
-`
+`,
+// TODO: Make this AOT compatible. See b/352713444
+jit: true,
+
 })
 class DataTableTestComponent {
-  @ViewChild(DataTableComponent) dataTableComp!: DataTableComponent;
+  @ViewChild(DataTable) dataTable!: DataTable;
 }
 
 describe('DataTableComponent', () => {
@@ -169,13 +175,21 @@ describe('DataTableComponent', () => {
   });
 
   beforeEach(async () => {
-    TestBed.configureTestingModule({
-      declarations: [DataTableTestComponent],
-      imports:
-          [CoreModule, TestCoreModule, DataTableModule, NoopAnimationsModule],
-      providers: [{provide: AppCoreService, useValue: appCoreService}]
-    });
+    appCoreService.appCore.reset();
+    await TestBed
+        .configureTestingModule({
+          declarations: [DataTableTestComponent],
+          imports: [
+            CoreModule,
+            TestCoreModule,
+            DataTableModule,
+            NoopAnimationsModule,
+          ],
+          providers: [{provide: AppCoreService, useValue: appCoreService}]
+        })
+        .compileComponents();
     fixture = TestBed.createComponent(DataTableTestComponent);
+    await fixture.whenStable();
   });
 
   it('should populate from backend', () => {
@@ -185,12 +199,15 @@ describe('DataTableComponent', () => {
                                'collection_name') as StringValue;
     GLOBAL_TEST_DATA_FETCHER.responseChannel.next({
       series: new Map<string, ResponseNode>([
-        [tc.dataTableComp.dataSeriesQuery!.uniqueSeriesName, tableData],
+        [
+          tc.dataTable.dataSeriesQueryDir!.dataSeriesQuery!.uniqueSeriesName,
+          tableData
+        ],
       ]),
     });
     collectionName.val = 'coll';
     const element: HTMLElement = fixture.nativeElement;
-    expect(tc.dataTableComp.rows.length).toEqual(3);
+    expect(tc.dataTable.rows.length).toEqual(3);
     const rows = element.querySelectorAll('tr');
     expect(rows.length).toEqual(4);  // one header and three rows.
     // Expect a header row.

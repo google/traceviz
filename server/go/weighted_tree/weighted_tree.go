@@ -66,6 +66,14 @@ import (
 
 const (
 	frameHeightPxKey = "weighted_tree_frame_height_px"
+	// The tree's direction, top-down or bottom-up.  If unspecified, it is
+	// top-down.
+	directionKey = "weighted_tree_direction"
+)
+
+const (
+	topDown  = "top_down"
+	bottomUp = "bottom_up"
 )
 
 // RenderSettings is a collection of rendering settings for trees.
@@ -87,11 +95,28 @@ type Tree struct {
 	db util.DataBuilder
 }
 
-// New returns a new Tree populating the provided data builder.
+// New returns a new Tree populating the provided data builder.  A tree is by
+// default top-down, but can be explicitly marked as top-down or bottom-up with
+// TopDown() and BottomUp() respectively.
 func New(db util.DataBuilder, renderSettings *RenderSettings, properties ...util.PropertyUpdate) *Tree {
 	return &Tree{
 		db: db.With(renderSettings.Define()).With(properties...),
 	}
+}
+
+// TopDown marks the receiver as a top-down tree.  This is the default tree
+// direction.
+func (t *Tree) TopDown() *Tree {
+	return t.With(
+		util.StringProperty(directionKey, topDown),
+	)
+}
+
+// BottomUp marks the receiver as a bottom-up tree.
+func (t *Tree) BottomUp() *Tree {
+	return t.With(
+		util.StringProperty(directionKey, bottomUp),
+	)
 }
 
 // Node creates and returns a new root node with the specified magnitude in the

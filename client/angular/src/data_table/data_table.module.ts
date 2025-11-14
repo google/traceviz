@@ -1,21 +1,25 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatSelectModule} from '@angular/material/select';
 import {MatSortModule} from '@angular/material/sort';
+import {BrowserModule} from '@angular/platform-browser';
 
-import {DataTableComponent} from './components/data_table.component';
+import {DataTable} from './components/data_table.component';
 
 @NgModule({
   declarations: [
-    DataTableComponent,
+    DataTable,
   ],
   imports: [
+    BrowserModule,
     CommonModule,
     MatProgressBarModule,
+    MatSelectModule,
     MatSortModule,
   ],
   exports: [
-    DataTableComponent,
+    DataTable,
   ],
 })
 export class DataTableModule {

@@ -1,0 +1,52 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.highlighted {
+  stroke: White;
+}
+
+.content {
+  flex: 1;
+  max-height: 100%;
+  display: block;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+:host {
+  height: calc(100% - 65px);
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: auto auto;
+  position: relative;
+}
+
+.chart-grid-item {
+}
+
+.reset-zoom-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.help-text-overlay {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.help-text {
+  padding: 10px;
+  background-color: rgba(0, 0, 0, .5);
+  color: white;
+  font-size: 24px;
+}

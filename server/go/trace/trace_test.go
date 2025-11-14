@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/google/traceviz/server/go/category"
+	categoryaxis "github.com/google/traceviz/server/go/category_axis"
 	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
 	"github.com/google/traceviz/server/go/payload"
 	testutil "github.com/google/traceviz/server/go/test_util"
@@ -37,6 +38,19 @@ func ts(offset int) time.Time {
 
 func ns(dur int) time.Duration {
 	return time.Duration(dur) * time.Nanosecond
+}
+
+var rs = &RenderSettings{
+	SpanWidthCatPx:   0,
+	SpanPaddingCatPx: 0,
+	CategoryAxisRenderSettings: &categoryaxis.RenderSettings{
+		CategoryHeaderCatPx:    0,
+		CategoryHandleValPx:    0,
+		CategoryPaddingCatPx:   0,
+		CategoryMarginValPx:    0,
+		CategoryMinWidthCatPx:  0,
+		CategoryBaseWidthValPx: 0,
+	},
 }
 
 func TestTraceData(t *testing.T) {
@@ -90,7 +104,7 @@ func TestTraceData(t *testing.T) {
 		// |- Waiting | [         ][100][200][200,300]
 		description: "non-nested trace",
 		buildTrace: func(db util.DataBuilder) {
-			trace := New(db, continuousaxis.NewDurationAxis(cat, ns(300)), &RenderSettings{})
+			trace := New(db, continuousaxis.NewDurationAxis(cat, ns(0), ns(300)), rs)
 			cpu0 := trace.Category(cpu0Category)
 			cpu0Running := cpu0.Category(runningCategory)
 			cpu0Running.Span(ns(0), ns(100)).With(pid(100))
@@ -104,15 +118,10 @@ func TestTraceData(t *testing.T) {
 		},
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			db.With(
-				continuousaxis.NewDurationAxis(cat, 300*time.Nanosecond).Define(),
+				continuousaxis.NewDurationAxis(cat, 0*time.Nanosecond, 300*time.Nanosecond).Define(),
 				util.IntegerProperty(spanWidthCatPxKey, 0),
 				util.IntegerProperty(spanPaddingCatPxKey, 0),
-				util.IntegerProperty(categoryHeaderCatPxKey, 0),
-				util.IntegerProperty(categoryHandleTempPxKey, 0),
-				util.IntegerProperty(categoryPaddingCatPxKey, 0),
-				util.IntegerProperty(categoryMarginTempPxKey, 0),
-				util.IntegerProperty(categoryMinWidthCatPxKey, 0),
-				util.IntegerProperty(categoryBaseWidthTempPxKey, 0),
+				rs.CategoryAxisRenderSettings.Define(),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(categoryNodeType)),
 				cpu0Category.Define(),
@@ -173,7 +182,7 @@ func TestTraceData(t *testing.T) {
 		//    |- Span 1.0 |                          [f]
 		description: "category-nested concurrent (distributed trace)",
 		buildTrace: func(db util.DataBuilder) {
-			trace := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(300)), &RenderSettings{})
+			trace := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(300)), rs)
 			aCat := trace.Category(rpcACategory)
 			aCat.Span(ts(0), ts(300)).With(rpc("a"))
 			bCat := aCat.Category(rpcABCategory)
@@ -191,7 +200,7 @@ func TestTraceData(t *testing.T) {
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			aCat := db.With( // rpc a category
 				continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(300)).Define(),
-				(&RenderSettings{}).Define(),
+				(rs).Define(),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(categoryNodeType)),
 				rpcACategory.Define(),
@@ -264,7 +273,7 @@ func TestTraceData(t *testing.T) {
 		//         |     [baz]     [baz]          [baz]     [baz]
 		description: "nested sequential (user-instrumentation)",
 		buildTrace: func(db util.DataBuilder) {
-			pid100 := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(200)), &RenderSettings{}).
+			pid100 := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(200)), rs).
 				Category(pidCat(100), pid(100))
 			foo0 := pid100.
 				Span(ts(0), ts(90)).
@@ -296,7 +305,7 @@ func TestTraceData(t *testing.T) {
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			pid100 := db.With(
 				continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(200)).Define(),
-				(&RenderSettings{}).Define(),
+				(rs).Define(),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(categoryNodeType)),
 				pidCat(100).Define(),
@@ -370,7 +379,7 @@ func TestTraceData(t *testing.T) {
 		// |- tid 130 |                     [running ]
 		description: "nested embedded payload",
 		buildTrace: func(db util.DataBuilder) {
-			task100 := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(500)), &RenderSettings{}).
+			task100 := New(db, continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(500)), rs).
 				Category(pidCat(100))
 			payload.New(task100.Span(ts(0), ts(500)), "thumbnail").With(
 				util.IntegersProperty("normalized_cpu_time", 1, 1, 2, 1, 1),
@@ -388,7 +397,7 @@ func TestTraceData(t *testing.T) {
 		buildExplicit: func(db testutil.TestDataBuilder) {
 			task100 := db.With(
 				continuousaxis.NewTimestampAxis(cat, now.Add(0), now.Add(500)).Define(),
-				(&RenderSettings{}).Define(),
+				(rs).Define(),
 			).Child().With(
 				util.IntegerProperty(nodeTypeKey, int64(categoryNodeType)),
 				pidCat(100).Define(),

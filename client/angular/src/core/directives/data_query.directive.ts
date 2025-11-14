@@ -16,7 +16,7 @@
  */
 
 import {AfterContentInit, ContentChild, Directive, forwardRef, Input} from '@angular/core';
-import {AppCore, ConfigurationError, DataFetcherInterface, Severity, ValueMap} from 'traceviz-client-core';
+import {AppCore, ConfigurationError, DataFetcherInterface, DEFAULT_DATA_QUERY_ID, Severity, ValueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 
@@ -31,15 +31,15 @@ const SOURCE = 'data_query.directive';
 export abstract class DataQueryDirectiveBase {
   constructor(
       protected readonly appCoreService: AppCoreService,
-      protected readonly fetcher: DataFetcherInterface) {}
+      readonly fetcher: DataFetcherInterface) {}
 
   abstract filters(): ValueMap;
   abstract debounceMs: number;
+  abstract id: string;
 
-  init(appCore: AppCore) {
-    appCore.dataQuery.connect(this.fetcher);
-    appCore.dataQuery.setGlobalFilters(this.filters());
-    appCore.dataQuery.debounceUpdates(this.debounceMs);
+  setGlobalFilters(appCore: AppCore) {
+    const dq = appCore.getDataQuery(this.id);
+    dq.setGlobalFilters(this.filters());
   }
 }
 
@@ -47,6 +47,7 @@ export abstract class DataQueryDirectiveBase {
  * Describes how data requests are sent to the backend.
  */
 @Directive({
+  standalone: false,
   selector: 'data-query',
   providers: [{
     provide: DataQueryDirectiveBase,
@@ -60,6 +61,9 @@ export class DataQueryDirective extends DataQueryDirectiveBase implements
   // others that arrived in that interval.  This allows the TraceViz backend
   // to handle multiple requests at once, and to reuse intermediate results.
   @Input() debounceMs = 50;
+  // The ID of this data-query.  Different data-series-queries may use different
+  // data-queries.
+  @Input() id: string = DEFAULT_DATA_QUERY_ID;
   // The set of filters sent to the backend with each query.  Carefully
   // selecting these values allows the backend to precompute expensive
   // intermediate results once per data query, then reuse those results in
@@ -85,8 +89,8 @@ export class DataQueryDirective extends DataQueryDirectiveBase implements
   }
 
   ngAfterContentInit(): void {
-    this.appCoreService.appCore.onPublish((appCore) => {
-      this.init(appCore);
+    this.appCoreService.appCore.onPublish((appCore: AppCore) => {
+      this.setGlobalFilters(appCore);
     });
   }
 }

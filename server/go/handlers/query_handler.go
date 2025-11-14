@@ -77,6 +77,21 @@ var (
 	httpReqKey contextKey = "traceviz_http_req"
 )
 
+// RequestOf returns the http Request attached to the provided Context, or nil
+// if no Request is attached.  Returns an error if something other than a
+// Request is stored in the Context.
+func RequestOf(ctx context.Context) (*http.Request, error) {
+	reqIf := ctx.Value(httpReqKey)
+	if reqIf == nil {
+		return nil, nil
+	}
+	req, ok := reqIf.(*http.Request)
+	if !ok {
+		return nil, fmt.Errorf("expected *http.Request to be stored in context, but got something else")
+	}
+	return req, nil
+}
+
 func (qh *queryHandler) Wrap(wrappers ...WrapFunc) Handler {
 	qh.wrappers = append(qh.wrappers, wrappers...)
 	return qh

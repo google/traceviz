@@ -17,11 +17,12 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/google/traceviz/server/go/test_util"
-	"github.com/google/traceviz/server/go/util"
+	"github.com/google/go-cmp/cmp"
 )
 
 type testTreeNode struct {
@@ -113,33 +114,122 @@ const (
 	increasing = false
 )
 
-func CompareBy(valName string, decreasing bool) Compare {
-	return func(a, b TreeNode) (int, error) {
-		aTtn, aOK := a.(*testTreeNode)
-		bTtn, bOK := b.(*testTreeNode)
-		if !aOK || !bOK {
-			return 0, fmt.Errorf("can only compare *testTreeNodes")
+func compareBy(valName string, decreasing bool) CompareFn {
+	return func(a, b Comparable) (int, error) {
+		var aSum, bSum int64
+		for _, tn := range a.TreeNodes {
+			ttn, ok := tn.(*testTreeNode)
+			if !ok {
+				return 0, fmt.Errorf("can only compare *testTreeNodes")
+			}
+			aSum += ttn.totalVals[valName]
 		}
-		// For testing, CompareBy should be deterministic.  If equal, the path
-		// breaks the tie.
-		if aTtn.totalVals[valName] == bTtn.totalVals[valName] {
-			pathLenDiff := len(aTtn.path) - len(bTtn.path)
+		for _, tn := range b.TreeNodes {
+			ttn, ok := tn.(*testTreeNode)
+			if !ok {
+				return 0, fmt.Errorf("can only compare *testTreeNodes")
+			}
+			bSum += ttn.totalVals[valName]
+		}
+		diff := int(aSum - bSum)
+		if diff == 0 {
+			// For testing, CompareBy should be deterministic.  If equal, the path
+			// breaks the tie.
+			pathLenDiff := len(a.Path) - len(b.Path)
 			if pathLenDiff != 0 {
 				return pathLenDiff, nil
 			}
 			// The paths are the same length.  Use the path elements to decide.
-			for idx := 0; idx < len(aTtn.path); idx++ {
-				pathElDiff := aTtn.path[idx] - bTtn.path[idx]
+			for idx := 0; idx < len(a.Path); idx++ {
+				pathElDiff := a.Path[idx] - b.Path[idx]
 				if pathElDiff != 0 {
 					return int(pathElDiff), nil
 				}
 			}
 		}
 		if decreasing {
-			return int(aTtn.totalVals[valName] - bTtn.totalVals[valName]), nil
+			return diff, nil
 		}
-		return int(bTtn.totalVals[valName] - aTtn.totalVals[valName]), nil
+		return -diff, nil
 	}
+}
+
+func pathAsString(path []ScopeID) string {
+	ret := make([]string, len(path))
+	for idx, scopeID := range path {
+		ret[idx] = strconv.Itoa(int(scopeID))
+	}
+	return "/" + strings.Join(ret, "/")
+}
+
+func prettyPrintTreeNode(tn TreeNode, isMergedRoot bool) string {
+	path := tn.Path()
+	if isMergedRoot {
+		// Merged subtree roots
+		mergePoint := len(path) - 1
+		return pathAsString(path[:mergePoint]) + " < " + pathAsString(path[mergePoint:])
+	}
+	return pathAsString(path)
+}
+
+func prettyPrintSubtreeNode(t *testing.T, stn *SubtreeNode, indent string) string {
+	t.Helper()
+	if stn == nil {
+		return "<nil>"
+	}
+	var totalTimeNs, totalEvents, totalSpans int64
+	var hasTotalTimeNs, hasEvents, hasSpans bool
+	for _, tn := range stn.TreeNodes {
+		tn, ok := tn.(*testTreeNode)
+		if !ok {
+			t.Fatalf("expected *testTreeNode, but didn't get it")
+		}
+		v, ok := tn.totalVals[timeNsKey]
+		if ok {
+			hasTotalTimeNs = true
+		}
+		totalTimeNs += v
+		v, ok = tn.totalVals[eventsKey]
+		if ok {
+			hasEvents = true
+		}
+		totalEvents += v
+		v, ok = tn.totalVals[spansKey]
+		if ok {
+			hasSpans = true
+		}
+		totalSpans += v
+	}
+	weights := []string{}
+	if hasTotalTimeNs {
+		weights = append(weights, fmt.Sprintf("%s", time.Duration(totalTimeNs)*time.Nanosecond))
+	}
+	if hasEvents {
+		weights = append(weights, fmt.Sprintf("%de", totalEvents))
+	}
+	if hasSpans {
+		weights = append(weights, fmt.Sprintf("%ds", totalSpans))
+	}
+	prefix := ""
+	if stn.Prefix {
+		prefix = " (prefix)"
+	}
+	ret := []string{
+		indent + pathAsString(stn.Path) +
+			fmt.Sprintf(" (%s)%s:", strings.Join(weights, ", "), prefix),
+	}
+	otnPaths := make([]string, len(stn.TreeNodes))
+	for idx, tn := range stn.TreeNodes {
+		otnPaths[idx] = prettyPrintTreeNode(tn, (len(stn.Path) == 0 && len(stn.TreeNodes) > 1))
+	}
+	sort.Strings(otnPaths)
+	ret = append(ret,
+		indent+"  ["+strings.Join(otnPaths, ", ")+"]",
+	)
+	for _, child := range stn.Children {
+		ret = append(ret, prettyPrintSubtreeNode(t, child, indent+"  "))
+	}
+	return strings.Join(ret, "\n")
 }
 
 const (
@@ -184,279 +274,167 @@ var tree2 = tree(
 	),
 )
 
-func annotatePrefix(stn *SubtreeNode) util.PropertyUpdate {
-	return util.If(stn.Prefix, util.StringProperty("prefix", "true"))
-}
-
-func annotatePath(stn *SubtreeNode) util.PropertyUpdate {
-	ttn := stn.TreeNode.(*testTreeNode)
-	path := make([]int64, len(ttn.path))
-	for idx, pathEl := range ttn.path {
-		path[idx] = int64(pathEl)
-	}
-	return util.IntegersProperty("path", path...)
-}
-
-func annotateTotalWeights(stn *SubtreeNode) util.PropertyUpdate {
-	ttn := stn.TreeNode.(*testTreeNode)
-	fields := make([]string, 0, len(ttn.totalVals))
-	for name := range ttn.totalVals {
-		fields = append(fields, name)
-	}
-	sort.Strings(fields)
-	ret := make([]string, len(fields))
-	for idx, field := range fields {
-		ret[idx] = fmt.Sprintf("%s: %d", field, ttn.totalVals[field])
-	}
-	return util.StringProperty("total_weights", strings.Join(ret, ", "))
-}
+// A very mergeable tree.
+var tree3 = tree(
+	node(1, timeNs(10), // total time 300ns
+		node(2, timeNs(20), // total time 90ns
+			node(3, timeNs(30), // total time 70ns
+				node(4, timeNs(40)), // total time 40ns
+			),
+		),
+		node(1, timeNs(10), // total time 200ns
+			node(2, timeNs(20), // total time 90ns
+				node(3, timeNs(30), // total time 70ns
+					node(4, timeNs(40)), // total time 40ns
+				),
+			),
+			node(1, timeNs(10), // total time 100ns
+				node(2, timeNs(20), // total time 90ns
+					node(3, timeNs(30), // total time 70ns
+						node(4, timeNs(40)), // total time 40ns
+					),
+				),
+			),
+		),
+	),
+)
 
 func TestWalk(t *testing.T) {
 	for _, test := range []struct {
-		description   string
-		tree          TreeNode
-		compare       Compare
-		opts          []WalkOption
-		nodeCallback  func() NodeCallback
-		buildExplicit func(db testutil.TestDataBuilder)
-		wantErr       bool
+		description     string
+		tree            TreeNode
+		compare         CompareFn
+		opts            []WalkOption
+		wantPrettyPrint string
+		wantErr         bool
 	}{{
 		description: "whole tree, ordered by events decreasing",
 		tree:        tree1,
-		compare:     CompareBy(eventsKey, decreasing),
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.IntegersProperty("path", 2),
-				util.StringProperty("total_weights", "events: 11, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2),
-				util.StringProperty("total_weights", "events: 6, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2, 3),
-				util.StringProperty("total_weights", "events: 4"),
-			).AndChild().With(
-				util.IntegersProperty("path", 2, 2, 1),
-				util.StringProperty("total_weights", "events: 2, time_ns: 50"),
-			).Parent().Parent().AndChild().With( // back to root
-				util.IntegersProperty("path", 1),
-				util.StringProperty("total_weights", "events: 6, spans: 5, time_ns: 110"),
-			).Child().With(
-				util.IntegersProperty("path", 1, 2),
-				util.StringProperty("total_weights", "events: 2, spans: 4, time_ns: 10"),
-			).Child().With(
-				util.IntegersProperty("path", 1, 2, 3),
-				util.StringProperty("total_weights", "events: 2"),
-			).Parent().AndChild().With(
-				util.IntegersProperty("path", 1, 3),
-				util.StringProperty("total_weights", "events: 1, spans: 1"),
-			)
-		},
+		compare:     compareBy(eventsKey, decreasing),
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s):
+  [/]
+  /2 (100ns, 11e, 3s):
+    [/2]
+    /2/2 (100ns, 6e, 3s):
+      [/2/2]
+      /2/2/3 (4e):
+        [/2/2/3]
+      /2/2/1 (50ns, 2e):
+        [/2/2/1]
+  /1 (110ns, 6e, 5s):
+    [/1]
+    /1/2 (10ns, 2e, 4s):
+      [/1/2]
+      /1/2/3 (2e):
+        [/1/2/3]
+    /1/3 (1e, 1s):
+      [/1/3]`,
 	}, {
 		description: "whole tree, ordered by spans increasing",
 		tree:        tree1,
-		compare:     CompareBy(spansKey, increasing),
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.IntegersProperty("path", 2),
-				util.StringProperty("total_weights", "events: 11, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2),
-				util.StringProperty("total_weights", "events: 6, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2, 3), // 2/2/3 and 2/2/1 are tied; the path breaks the tie.
-				util.StringProperty("total_weights", "events: 4"),
-			).AndChild().With(
-				util.IntegersProperty("path", 2, 2, 1),
-				util.StringProperty("total_weights", "events: 2, time_ns: 50"),
-			).Parent().Parent().AndChild().With( // back to root
-				util.IntegersProperty("path", 1),
-				util.StringProperty("total_weights", "events: 6, spans: 5, time_ns: 110"),
-			).Child().With(
-				util.IntegersProperty("path", 1, 3),
-				util.StringProperty("total_weights", "events: 1, spans: 1"),
-			).AndChild().With(
-				util.IntegersProperty("path", 1, 2),
-				util.StringProperty("total_weights", "events: 2, spans: 4, time_ns: 10"),
-			).Child().With(
-				util.IntegersProperty("path", 1, 2, 3),
-				util.StringProperty("total_weights", "events: 2"),
-			)
-		},
+		compare:     compareBy(spansKey, increasing),
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s):
+  [/]
+  /2 (100ns, 11e, 3s):
+    [/2]
+    /2/2 (100ns, 6e, 3s):
+      [/2/2]
+      /2/2/3 (4e):
+        [/2/2/3]
+      /2/2/1 (50ns, 2e):
+        [/2/2/1]
+  /1 (110ns, 6e, 5s):
+    [/1]
+    /1/3 (1e, 1s):
+      [/1/3]
+    /1/2 (10ns, 2e, 4s):
+      [/1/2]
+      /1/2/3 (2e):
+        [/1/2/3]`,
 	}, {
 		description: "top two levels, ordered by events decreasing",
 		tree:        tree1,
-		compare:     CompareBy(eventsKey, decreasing),
+		compare:     compareBy(eventsKey, decreasing),
 		opts: []WalkOption{
 			MaxDepth(2),
 		},
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.IntegersProperty("path", 2),
-				util.StringProperty("total_weights", "events: 11, spans: 3, time_ns: 100"),
-			).AndChild().With( // back to root
-				util.IntegersProperty("path", 1),
-				util.StringProperty("total_weights", "events: 6, spans: 5, time_ns: 110"),
-			)
-		},
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s):
+  [/]
+  /2 (100ns, 11e, 3s):
+    [/2]
+  /1 (110ns, 6e, 5s):
+    [/1]`,
 	}, {
 		description: "top one level from prefix 1/, ordered by events decreasing",
 		tree:        tree1,
-		compare:     CompareBy(eventsKey, decreasing),
+		compare:     compareBy(eventsKey, decreasing),
 		opts: []WalkOption{
 			MaxDepth(1),
 			PathPrefix(1),
 		},
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.IntegersProperty("path", 1),
-				util.StringProperty("total_weights", "events: 6, spans: 5, time_ns: 110"),
-			)
-		},
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s) (prefix):
+  [/]
+  /1 (110ns, 6e, 5s):
+    [/1]`,
 	}, {
 		description: "top 4 nodes, ordered by time_ns decreasing",
 		tree:        tree1,
-		compare:     CompareBy(timeNsKey, decreasing),
+		compare:     compareBy(timeNsKey, decreasing),
 		opts: []WalkOption{
 			MaxNodes(4),
 		},
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.IntegersProperty("path", 1),
-				util.StringProperty("total_weights", "events: 6, spans: 5, time_ns: 110"),
-			).AndChild().With(
-				util.IntegersProperty("path", 2),
-				util.StringProperty("total_weights", "events: 11, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2),
-				util.StringProperty("total_weights", "events: 6, spans: 3, time_ns: 100"),
-			)
-		},
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s):
+  [/]
+  /1 (110ns, 6e, 5s):
+    [/1]
+  /2 (100ns, 11e, 3s):
+    [/2]
+    /2/2 (100ns, 6e, 3s):
+      [/2/2]`,
 	}, {
 		description: "subtree at 2/2, prefix elided, ordered by events increasing",
 		tree:        tree1,
-		compare:     CompareBy(eventsKey, increasing),
+		compare:     compareBy(eventsKey, increasing),
 		opts: []WalkOption{
 			ElidePrefix(),
 			PathPrefix(2, 2),
 		},
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2),
-				util.StringProperty("total_weights", "events: 6, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2, 1),
-				util.StringProperty("total_weights", "events: 2, time_ns: 50"),
-			).AndChild().With(
-				util.IntegersProperty("path", 2, 2, 3),
-				util.StringProperty("total_weights", "events: 4"),
-			)
-		},
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s) (prefix):
+  [/]
+  /2 (100ns, 6e, 3s):
+    [/2/2]
+    /2/1 (50ns, 2e):
+      [/2/2/1]
+    /2/3 (4e):
+      [/2/2/3]`,
 	}, {
 		description: "subtree at 2/2, prefix included, ordered by events increasing",
 		tree:        tree1,
-		compare:     CompareBy(eventsKey, increasing),
+		compare:     compareBy(eventsKey, increasing),
 		opts: []WalkOption{
 			PathPrefix(2, 2),
 		},
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePrefix(inputNode),
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.StringProperty("prefix", "true"),
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.StringProperty("prefix", "true"),
-				util.IntegersProperty("path", 2),
-				util.StringProperty("total_weights", "events: 11, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2),
-				util.StringProperty("total_weights", "events: 6, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2, 1),
-				util.StringProperty("total_weights", "events: 2, time_ns: 50"),
-			).AndChild().With(
-				util.IntegersProperty("path", 2, 2, 3),
-				util.StringProperty("total_weights", "events: 4"),
-			)
-		},
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s) (prefix):
+  [/]
+  /2 (100ns, 11e, 3s) (prefix):
+    [/2]
+    /2/2 (100ns, 6e, 3s):
+      [/2/2]
+      /2/2/1 (50ns, 2e):
+        [/2/2/1]
+      /2/2/3 (4e):
+        [/2/2/3]`,
 	}, {
 		description: "custom TreeNode filter dropping node without time_ns, ordered by events decreasing",
 		tree:        tree1,
-		compare:     CompareBy(eventsKey, decreasing),
+		compare:     compareBy(eventsKey, decreasing),
 		opts: []WalkOption{
 			FilterTreeNodes(func(tn TreeNode) bool {
 				ttn := tn.(*testTreeNode)
@@ -464,107 +442,199 @@ func TestWalk(t *testing.T) {
 				return ok && timeNs != 0
 			}),
 		},
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.IntegersProperty("path", 2),
-				util.StringProperty("total_weights", "events: 11, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2),
-				util.StringProperty("total_weights", "events: 6, spans: 3, time_ns: 100"),
-			).Child().With(
-				util.IntegersProperty("path", 2, 2, 1),
-				util.StringProperty("total_weights", "events: 2, time_ns: 50"),
-			).Parent().Parent().AndChild().With( // back to root
-				util.IntegersProperty("path", 1),
-				util.StringProperty("total_weights", "events: 6, spans: 5, time_ns: 110"),
-			).Child().With(
-				util.IntegersProperty("path", 1, 2),
-				util.StringProperty("total_weights", "events: 2, spans: 4, time_ns: 10"),
-			)
-		},
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s):
+  [/]
+  /2 (100ns, 11e, 3s):
+    [/2]
+    /2/2 (100ns, 6e, 3s):
+      [/2/2]
+      /2/2/1 (50ns, 2e):
+        [/2/2/1]
+  /1 (110ns, 6e, 5s):
+    [/1]
+    /1/2 (10ns, 2e, 4s):
+      [/1/2]`,
 	}, {
 		description: "whole tree, all nodes at scope 2 elided, ordered by events decreasing",
 		tree:        tree1,
-		compare:     CompareBy(eventsKey, decreasing),
+		compare:     compareBy(eventsKey, decreasing),
 		opts: []WalkOption{
 			ElideTreeNodes(func(tn TreeNode) bool {
 				return len(tn.Path()) > 0 && tn.Path()[len(tn.Path())-1] == 2
 			}),
 		},
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-				db.With(
-					annotatePath(inputNode),
-					annotateTotalWeights(inputNode),
-				)
-			}
-		},
 		// Nodes marked E on the left are elided on the right:
-		//     <root>                 <root>
-		//     /    \               /    |   \
-		//    1      2E            1   2/2/1  2/2/3
-		//   / \      \      ->   / \
-		//  3   2E     2E        3  2/3
+		//     <root>                       <root>
+		//     /    \                    /        \
+		//    1      2E          1 [1, 2/2/1]   3 [2/2/3]
+		//   / \      \      ->       |
+		//  3   2E     2E        3 [1/2/3, 1/3]
 		//       |    /  \
 		//       3   1    3
-		buildExplicit: func(db testutil.TestDataBuilder) {
-			db.With(
-				util.IntegersProperty("path"),
-				util.StringProperty("total_weights", "events: 17, spans: 8, time_ns: 210"),
-			).Child().With(
-				util.IntegersProperty("path", 1),
-				util.StringProperty("total_weights", "events: 6, spans: 5, time_ns: 110"),
-			).Child().With(
-				util.IntegersProperty("path", 1, 2, 3),
-				util.StringProperty("total_weights", "events: 2"),
-			).AndChild().With( // child of 1
-				util.IntegersProperty("path", 1, 3),
-				util.StringProperty("total_weights", "events: 1, spans: 1"),
-			).Parent().Parent(). // back to <ROOT>
-						AndChild().With(
-				util.IntegersProperty("path", 2, 2, 3),
-				util.StringProperty("total_weights", "events: 4"),
-			).AndChild().With( // child of <ROOT>
-				util.IntegersProperty("path", 2, 2, 1),
-				util.StringProperty("total_weights", "events: 2, time_ns: 50"),
-			)
-		},
+		wantPrettyPrint: `
+/ (210ns, 17e, 8s):
+  [/]
+  /1 (160ns, 8e, 5s):
+    [/1, /2/2/1]
+    /1/3 (3e, 1s):
+      [/1/2/3, /1/3]
+  /3 (4e):
+    [/2/2/3]`,
 	}, {
 		description: "error traversing",
 		tree:        tree2,
-		compare:     CompareBy(timeNsKey, decreasing),
-		nodeCallback: func() NodeCallback {
-			return func(inputNode *SubtreeNode, db util.DataBuilder) {
-			}
+		compare:     compareBy(timeNsKey, decreasing),
+		wantErr:     true,
+	}, {
+		description: "whole tree1 merged at /1/2 and /2",
+		tree:        tree1,
+		compare:     compareBy(eventsKey, decreasing),
+		opts: []WalkOption{
+			MergePrefix(1, 2),
+			MergePrefix(2),
 		},
-		wantErr: true,
+		wantPrettyPrint: `
+/ (110ns, 13e, 7s):
+  [/ < /2, /1 < /2]
+  /2 (110ns, 13e, 7s):
+    [/1/2, /2]
+    /2/2 (100ns, 6e, 3s):
+      [/2/2]
+      /2/2/3 (4e):
+        [/2/2/3]
+      /2/2/1 (50ns, 2e):
+        [/2/2/1]
+    /2/3 (2e):
+      [/1/2/3]`,
+	}, {
+		description: "whole tree3 merged at /1/2, /1/1/2, and /1/1/1/2, max depth 2",
+		tree:        tree3,
+		compare:     compareBy(eventsKey, decreasing),
+		opts: []WalkOption{
+			MergePrefix(1, 2),
+			MergePrefix(1, 1, 2),
+			MergePrefix(1, 1, 1, 2),
+			MaxDepth(2),
+		},
+		wantPrettyPrint: `
+/ (270ns):
+  [/1 < /2, /1/1 < /2, /1/1/1 < /2]
+  /2 (270ns):
+    [/1/1/1/2, /1/1/2, /1/2]
+    /2/3 (210ns):
+      [/1/1/1/2/3, /1/1/2/3, /1/2/3]`,
+	}, {
+		description: "whole tree3 merged at /1/2, /1/1/2, and /1/1/1/2, prefix 2/3",
+		tree:        tree3,
+		compare:     compareBy(eventsKey, decreasing),
+		opts: []WalkOption{
+			MergePrefix(1, 2),
+			MergePrefix(1, 1, 2),
+			MergePrefix(1, 1, 1, 2),
+			PathPrefix(2, 3),
+		},
+		wantPrettyPrint: `
+/ (270ns) (prefix):
+  [/1 < /2, /1/1 < /2, /1/1/1 < /2]
+  /2 (270ns) (prefix):
+    [/1/1/1/2, /1/1/2, /1/2]
+    /2/3 (210ns):
+      [/1/1/1/2/3, /1/1/2/3, /1/2/3]
+      /2/3/4 (120ns):
+        [/1/1/1/2/3/4, /1/1/2/3/4, /1/2/3/4]`,
+	}, {
+		description: "whole tree3 merged at /1/2, /1/1/2, and /1/1/1/2, elide '3' nodes",
+		tree:        tree3,
+		compare:     compareBy(eventsKey, decreasing),
+		opts: []WalkOption{
+			MergePrefix(1, 2),
+			MergePrefix(1, 1, 2),
+			MergePrefix(1, 1, 1, 2),
+			ElideTreeNodes(func(tn TreeNode) bool {
+				path := tn.Path()
+				return path[len(path)-1] == 3
+			}),
+		},
+		wantPrettyPrint: `
+/ (270ns):
+  [/1 < /2, /1/1 < /2, /1/1/1 < /2]
+  /2 (270ns):
+    [/1/1/1/2, /1/1/2, /1/2]
+    /2/4 (120ns):
+      [/1/1/1/2/3/4, /1/1/2/3/4, /1/2/3/4]`,
+	}, {
+		description: "whole tree3 merged at /1/2, /1/1/2, and /1/1/1/2, filter out node 1/1/2/3.",
+		tree:        tree3,
+		compare:     compareBy(eventsKey, decreasing),
+		opts: []WalkOption{
+			MergePrefix(1, 2),
+			MergePrefix(1, 1, 2),
+			MergePrefix(1, 1, 1, 2),
+			FilterTreeNodes(func(tn TreeNode) bool {
+				path := tn.Path()
+				diff := cmp.Diff(path, []ScopeID{1, 1, 2, 3})
+				return diff != ""
+			}),
+		},
+		wantPrettyPrint: `
+/ (270ns):
+  [/1 < /2, /1/1 < /2, /1/1/1 < /2]
+  /2 (270ns):
+    [/1/1/1/2, /1/1/2, /1/2]
+    /2/3 (140ns):
+      [/1/1/1/2/3, /1/2/3]
+      /2/3/4 (80ns):
+        [/1/1/1/2/3/4, /1/2/3/4]`,
+	}, {
+		description: "whole tree3 merged at /1, /1/1, and /1/1/1 (merging includes ancestors)",
+		tree:        tree3,
+		compare:     compareBy(eventsKey, decreasing),
+		opts: []WalkOption{
+			MergePrefix(1),
+			MergePrefix(1, 1),
+			MergePrefix(1, 1, 1),
+			FilterTreeNodes(func(tn TreeNode) bool {
+				path := tn.Path()
+				diff := cmp.Diff(path, []ScopeID{1, 1, 2, 3})
+				return diff != ""
+			}),
+		},
+		wantPrettyPrint: `
+/ (300ns):
+  [/1]
+  /1 (300ns):
+    [/1]
+    /1/2 (90ns):
+      [/1/2]
+      /1/2/3 (70ns):
+        [/1/2/3]
+        /1/2/3/4 (40ns):
+          [/1/2/3/4]
+    /1/1 (200ns):
+      [/1/1]
+      /1/1/2 (90ns):
+        [/1/1/2]
+      /1/1/1 (100ns):
+        [/1/1/1]
+        /1/1/1/2 (90ns):
+          [/1/1/1/2]
+          /1/1/1/2/3 (70ns):
+            [/1/1/1/2/3]
+            /1/1/1/2/3/4 (40ns):
+              [/1/1/1/2/3/4]`,
 	}} {
 		t.Run(test.description, func(t *testing.T) {
-			subtree, err := Walk(test.tree, test.compare, test.opts...)
+			gotSubtree, err := Walk(test.tree, test.compare, test.opts...)
 			if (err != nil) != test.wantErr {
-				t.Errorf("Collection.Subtree yielded unexpected error %v", err)
+				t.Fatalf("Collection.Subtree yielded unexpected error %v", err)
 			}
 			if test.wantErr {
 				return
 			}
-			if subtree == nil {
-				t.Fatalf("Expected a subtree root, got none")
-			}
-			if err := testutil.CompareResponses(t, func(db util.DataBuilder) {
-				subtree.BuildResponse(db, test.nodeCallback())
-			}, test.buildExplicit); err != nil {
-				t.Fatalf("encountered unexpected error building the subtree response: %s", err)
+			gotPrettyPrint := "\n" + prettyPrintSubtreeNode(t, gotSubtree, "")
+			if diff := cmp.Diff(test.wantPrettyPrint, gotPrettyPrint); diff != "" {
+				t.Errorf("got tree\n%s\ndiff (-want +got) %s", gotPrettyPrint, diff)
 			}
 		})
 	}

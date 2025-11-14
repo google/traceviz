@@ -13,11 +13,12 @@
 
 import {NgModule} from '@angular/core';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatButtonModule} from '@angular/material/button';
 import {BrowserModule} from '@angular/platform-browser';
 import {CoreModule} from 'traceviz-angular-core';
 import {HovercardModule} from 'traceviz-angular-hovercard';
 
-import {HorizontalTraceComponent} from './components/horizontal_trace.component';
+import {HorizontalTraceComponent, VerticalRuleColorDirective} from './components/horizontal_trace.component';
 import {TraceDirective, UnionTracesDirective} from './directives/trace_provider.directive';
 
 @NgModule({
@@ -25,10 +26,12 @@ import {TraceDirective, UnionTracesDirective} from './directives/trace_provider.
     HorizontalTraceComponent,
     TraceDirective,
     UnionTracesDirective,
+    VerticalRuleColorDirective,
   ],
   imports: [
     BrowserModule,
     CoreModule,
+    MatButtonModule,
     MatProgressBarModule,
     HovercardModule,
   ],
@@ -36,6 +39,7 @@ import {TraceDirective, UnionTracesDirective} from './directives/trace_provider.
     HorizontalTraceComponent,
     TraceDirective,
     UnionTracesDirective,
+    VerticalRuleColorDirective,
   ],
 })
 export class TraceModule {

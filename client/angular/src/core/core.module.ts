@@ -15,10 +15,11 @@ import {NgModule} from '@angular/core';
 
 import {AppCoreDirective} from './directives/app_core.directive';
 import {DataQueryDirective} from './directives/data_query.directive';
-import {DataSeriesQueryDirective, ParametersDirective, QueryDirective} from './directives/data_series_query.directive';
+import {DataSeriesDirective, ParametersDirective, QueryDirective} from './directives/data_series_query.directive';
+import {DebugDirective} from './directives/debug.directive';
 import {GlobalRefDirective} from './directives/global_ref.directive';
 import {GlobalStateDirective} from './directives/global_state.directive';
-import {ActionDirective, AndDirective, CaseDirective, ChangedDirective, ClearDirective, ElseDirective, EqualsDirective, ExtendDirective, FalseDirective, GreaterThanDirective, IfDirective, IncludesDirective, InteractionsDirective, LessThanDirective, NotDirective, OrDirective, ReactionDirective, SetDirective, SetIfEmptyDirective, SetOrClearDirective, SwitchDirective, ThenDirective, ToggleDirective, TrueDirective, WatchDirective} from './directives/interactions.directive';
+import {ActionDirective, AndDirective, CaseDirective, ChangedDirective, ClearDirective, ConcatDirective, ElseDirective, EqualsDirective, ExtendDirective, FalseDirective, GreaterThanDirective, IfDirective, IncludesDirective, InteractionsDirective, LessThanDirective, NotDirective, OrDirective, PopLeftDirective, PrefixOfDirective, PushLeftDirective, ReactionDirective, SetDirective, SetIfEmptyDirective, SetOrClearDirective, SwapDirective, SwitchDirective, ThenDirective, ToggleDirective, TrueDirective, WatchDirective} from './directives/interactions.directive';
 import {DblLiteralDirective, DurationLiteralDirective, EmptyLiteralDirective, IntLiteralDirective, IntLiteralListDirective, IntLiteralSetDirective, StringLiteralDirective, StringLiteralListDirective, StringLiteralSetDirective, TimestampLiteralDirective} from './directives/literal_value.directive';
 import {LocalRefDirective} from './directives/local_ref.directive';
 import {ValueMapDirective, ValueWrapperDirective} from './directives/value_map.directive';
@@ -31,9 +32,11 @@ import {ValueMapDirective, ValueWrapperDirective} from './directives/value_map.d
     CaseDirective,
     ClearDirective,
     ChangedDirective,
+    ConcatDirective,
     DataQueryDirective,
-    DataSeriesQueryDirective,
+    DataSeriesDirective,
     DblLiteralDirective,
+    DebugDirective,
     DurationLiteralDirective,
     ElseDirective,
     EmptyLiteralDirective,
@@ -54,12 +57,16 @@ import {ValueMapDirective, ValueWrapperDirective} from './directives/value_map.d
     OrDirective,
     NotDirective,
     ParametersDirective,
+    PopLeftDirective,
+    PrefixOfDirective,
+    PushLeftDirective,
     QueryDirective,
     SetDirective,
     SetIfEmptyDirective,
     StringLiteralDirective,
     StringLiteralListDirective,
     StringLiteralSetDirective,
+    SwapDirective,
     SwitchDirective,
     ThenDirective,
     TimestampLiteralDirective,
@@ -79,9 +86,11 @@ import {ValueMapDirective, ValueWrapperDirective} from './directives/value_map.d
     CaseDirective,
     ClearDirective,
     ChangedDirective,
+    ConcatDirective,
     DataQueryDirective,
-    DataSeriesQueryDirective,
+    DataSeriesDirective,
     DblLiteralDirective,
+    DebugDirective,
     DurationLiteralDirective,
     ElseDirective,
     EmptyLiteralDirective,
@@ -102,12 +111,16 @@ import {ValueMapDirective, ValueWrapperDirective} from './directives/value_map.d
     OrDirective,
     NotDirective,
     ParametersDirective,
+    PopLeftDirective,
+    PrefixOfDirective,
+    PushLeftDirective,
     QueryDirective,
     SetDirective,
     SetIfEmptyDirective,
     StringLiteralDirective,
     StringLiteralListDirective,
     StringLiteralSetDirective,
+    SwapDirective,
     SwitchDirective,
     ThenDirective,
     TimestampLiteralDirective,

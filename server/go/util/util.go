@@ -29,6 +29,7 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"net/url"
 	"sort"
 	"strconv"
 
@@ -170,7 +171,11 @@ func (v *V) fromAny(got []any) error {
 		strIfs := tv.([]any)
 		strs := make([]string, len(strIfs))
 		for idx, strIf := range strIfs {
-			strs[idx] = strIf.(string)
+			str, err := url.QueryUnescape(strIf.(string))
+			if err != nil {
+				return err
+			}
+			strs[idx] = str
 		}
 		v.V = strs
 	case DoubleValueType:
@@ -597,7 +602,11 @@ func ExpectStringValue(val *V) (string, error) {
 	if val.T != StringValueType {
 		return "", fmt.Errorf("expected value type 'str'")
 	}
-	return val.V.(string), nil
+	ret, err := url.QueryUnescape(val.V.(string))
+	if err != nil {
+		return "", err
+	}
+	return ret, nil
 }
 
 func expectStringIndexValue(val *V) (int64, error) {

@@ -14,8 +14,8 @@
 import {AfterContentInit, ContentChild, ContentChildren, Directive, forwardRef, OnDestroy, QueryList} from '@angular/core';
 import {BehaviorSubject, combineLatest, ReplaySubject, Subject} from 'rxjs';
 import {map, takeUntil} from 'rxjs/operators';
-import {AppCoreService, DataSeriesQueryDirective} from 'traceviz-angular-core';
-import {AppCore, DataSeriesQuery, Trace} from 'traceviz-client-core';
+import {AppCoreService, DataSeriesDirective} from 'traceviz-angular-core';
+import {DataSeriesQuery, Trace} from 'traceviz-client-core';
 
 /**
  * A directive producing a trace and a 'loading' status.  Trace visualization
@@ -36,14 +36,14 @@ export abstract class TraceProvider {
 
 /** Specifies a trace populated from a single data series. */
 @Directive({
+  standalone: false,
   selector: 'trace',
   providers:
       [{provide: TraceProvider, useExisting: forwardRef(() => TraceDirective)}],
 })
 export class TraceDirective extends TraceProvider implements AfterContentInit,
                                                              OnDestroy {
-  @ContentChild(DataSeriesQueryDirective)
-  dataSeries: DataSeriesQueryDirective|undefined;
+  @ContentChild(DataSeriesDirective) dataSeries: DataSeriesDirective|undefined;
 
   trace = new ReplaySubject<Trace<unknown>>();
   loading = new BehaviorSubject<boolean>(false);
@@ -56,7 +56,7 @@ export class TraceDirective extends TraceProvider implements AfterContentInit,
   }
 
   ngAfterContentInit() {
-    this.appCoreService.appCore.onPublish((appCore: AppCore) => {
+    this.appCoreService.appCore.onPublish((appCore) => {
       try {
         this.dataSeriesQuery = this.dataSeries?.dataSeriesQuery;
       } catch (err: unknown) {
@@ -89,6 +89,7 @@ export class TraceDirective extends TraceProvider implements AfterContentInit,
 
 /** Specifies a trace populated by the union of multiple data series. */
 @Directive({
+  standalone: false,
   selector: 'union-traces',
   providers: [{
     provide: TraceDirective,

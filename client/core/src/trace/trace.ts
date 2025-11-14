@@ -31,6 +31,7 @@ import {ConfigurationError, Severity} from '../errors/errors.js';
 import {children} from '../payload/payload.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 import {ValueMap} from '../value/value_map.js';
+import {RenderSettings as CategoryRenderSettings, renderSettingsFromProperties as categoryRenderSettingsFromProperties} from '../category_axis/category_axis.js'
 
 const SOURCE = 'trace';
 
@@ -43,12 +44,6 @@ enum Key {
   // Rendering properties.
   SPAN_WIDTH_CAT_PX = 'span_width_cat_px',
   SPAN_PADDING_CAT_PX = 'span_padding_cat_px',
-  CATEGORY_HEADER_CAT_PX = 'category_header_cat_px',
-  CATEGORY_HANDLE_TEMP_PX = 'category_handle_temp_px',
-  CATEGORY_PADDING_CAT_PX = 'category_padding_cat_px',
-  CATEGORY_MARGIN_TEMP_PX = 'category_margin_temp_px',
-  CATEGORY_MIN_WIDTH_CAT_PX = 'category_min_width_cat_px',
-  CATEGORY_BASE_WIDTH_TEMP_PX = 'category_base_width_temp_px',
 }
 
 /** The key of the start value of a trace span or subspan. */
@@ -58,44 +53,22 @@ export const endKey = Key.END;
 
 /**
  * A collection of settings for rendering traces.  A trace is rendered on a
- * two-dimensional plane, with one axis (typically the x-axis) showing trace
- * temporal duration ('temp') and the other (typically the y-axis) showing the
- * hierarchical and concurrent dimension of the trace via a hierarchy of trace
- * categories ('cat').
+ * two-dimensional plane, with a temporal value axis (typically X) and a
+ * category axis (typically Y).
  *
  * These settings are generally defined as extents, in units of pixels, along
- * these two axes, so are suffixed 'TempPx' for a pixel extent along the
- * temporal axis, or 'CatPx' for a pixel extent along the category axis.
+ * these two axes, so are suffixed 'ValPx' for a pixel extent along the
+ * value axis, or 'CatPx' for a pixel extent along the category axis.
  */
 export interface RenderSettings {
   // The padding between adjacent spans along the category axis.  If x is the
-  // temporal axis, this is the vertical spacing between spans.
+  // value axis, this is the vertical spacing between spans.
   spanWidthCatPx: number;
-  // The width of a span along the category axis.  If x is the temporal axis,
+  // The width of a span along the category axis.  If x is the value axis,
   // this is the default height of a span.
   spanPaddingCatPx: number;
-  // The width of the category header along the category axis.  If x is the
-  // temporal axis, this is the vertical space at the top of a category header
-  // where a category label may be shown.
-  categoryHeaderCatPx: number;
-  // The width, in pixels along the temporal axis, of a 'handle' rendered at the
-  // distal end of a category header; its height is categoryHeaderCatPx.
-  categoryHandleTempPx: number;
-  // The padding between adjacent categories along the category axis.  If x is
-  // the temporal axis, this is the vertical spacing between categories.
-  categoryPaddingCatPx: number;
-  // The margin between parent and child categories along the temporal axis.
-  // If x is the temporal axis, this is the horizontal indent of a child
-  // category under its parent.
-  categoryMarginTempPx: number;
-  // The minimum width of a category along the category axis.  If x is the
-  // temporal axis, this is the minimum height of a category header.
-  categoryMinWidthCatPx: number;
-  // The base width of a category along the temporal axis, not including
-  // margins.  If x is the temporal axis, this is the minimum horizontal width
-  // of any category header in the trace (though ancestor categories will have
-  // wider headers.)
-  categoryBaseWidthTempPx: number;
+  // The category render settings for this trace.
+  categoryRenderSettings: CategoryRenderSettings;
 }
 
 enum NodeType {
@@ -195,19 +168,8 @@ export class Trace<T> {
   renderSettings(): RenderSettings {
     return {
       spanWidthCatPx: this.properties.expectNumber(Key.SPAN_WIDTH_CAT_PX),
-      categoryHeaderCatPx:
-          this.properties.expectNumber(Key.CATEGORY_HEADER_CAT_PX),
-      categoryHandleTempPx:
-          this.properties.expectNumber(Key.CATEGORY_HANDLE_TEMP_PX),
-      categoryPaddingCatPx:
-          this.properties.expectNumber(Key.CATEGORY_PADDING_CAT_PX),
-      categoryMarginTempPx:
-          this.properties.expectNumber(Key.CATEGORY_MARGIN_TEMP_PX),
-      categoryMinWidthCatPx:
-          this.properties.expectNumber(Key.CATEGORY_MIN_WIDTH_CAT_PX),
       spanPaddingCatPx: this.properties.expectNumber(Key.SPAN_PADDING_CAT_PX),
-      categoryBaseWidthTempPx:
-          this.properties.expectNumber(Key.CATEGORY_BASE_WIDTH_TEMP_PX),
+      categoryRenderSettings: categoryRenderSettingsFromProperties(this.properties),
     };
   }
 }

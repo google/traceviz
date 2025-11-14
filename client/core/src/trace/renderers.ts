@@ -16,13 +16,19 @@
         limitations under the License.
 */
 
+import {RenderedCategory, RenderedCategoryHierarchy} from '../category_axis/category_axis.js'
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {Node, startKey as traceEdgeStartKey} from '../trace_edge/trace_edge.js';
 import {ValueMap} from '../value/value_map.js';
+import {Value, DurationValue, TimestampValue} from '../value/value.js';
 
-import {endKey as traceEndKey, RenderSettings, Span, startKey as traceStartKey, Subspan, Trace, TraceCategory} from './trace.js';
+import {endKey as traceEndKey, RenderSettings as TraceRenderSettings, Span, startKey as traceStartKey, Subspan, Trace, TraceCategory} from './trace.js';
 
 const SOURCE = 'trace_renderers';
+
+enum Keys {
+  DETAIL_FORMAT = 'detail_format',
+}
 
 /**
  * A span or subspan prepared for display.  The span owns the rectangle defined
@@ -31,7 +37,11 @@ const SOURCE = 'trace_renderers';
  * rectangle however it wants, possibly informed by the span's properties.
  */
 export class RenderedTraceSpan {
+  highlighted: boolean = false;
+
   constructor(
+      // unique ID that enables smooth animations when moving span on screen.
+      readonly renderID: string,
       // The properties of this span.
       readonly properties: ValueMap,
       // The coordinates of this span's upper-left corner.
@@ -52,8 +62,11 @@ export class RenderedTraceSpan {
  * An edge overlaid on the trace, between two points within Spans or Subspans.
  */
 export class RenderedTraceEdge {
+  highlighted: boolean = false;
+
   constructor(
-      readonly properties: ValueMap,
+      // unique ID that enables smooth animations when moving edge on screen.
+      readonly renderID: string, readonly properties: ValueMap,
       // The coordinates of this edge's origin
       readonly x0Px: number, readonly y0Px: number,
       // The coordinates of this edge's destination.
@@ -61,57 +74,11 @@ export class RenderedTraceEdge {
 }
 
 /**
- * A category prepared for display.  The category owns the rectangle defined by
- * (x0Px, y0Px), (x1Px, y1Px); only its subcategories may overlap that
- * rectangle.  The rendering axis visualization component may draw the span
- * within that rectangle however it wants, possibly informed by the category's
- * properties and the TraceRenderSettings used in rendering.
- */
-export class RenderedTraceCategory<T> {
-  private readonly childrenInternal: Array<RenderedTraceCategory<T>> = [];
-
-  constructor(
-      readonly cat: TraceCategory<T>, readonly renderSettings: RenderSettings,
-      readonly x0Px: number, readonly y0Px: number, readonly x1Px: number,
-      readonly y1Px: number) {}
-
-  get properties(): ValueMap {
-    return this.cat.properties;
-  }
-
-  get width(): number {
-    return this.x1Px - this.x0Px;
-  }
-
-  get height(): number {
-    return this.y1Px - this.y0Px;
-  }
-
-  addChild(child: RenderedTraceCategory<T>) {
-    this.childrenInternal.push(child);
-  }
-
-  get children(): Array<RenderedTraceCategory<T>> {
-    return this.childrenInternal;
-  }
-
-  /** Returns the receiver and its descendants in prefix traversal order. */
-  flatten(): Array<RenderedTraceCategory<T>> {
-    const ret: Array<RenderedTraceCategory<T>> = [];
-    ret.push(this);
-    for (const child of this.children) {
-      ret.push(...child.flatten());
-    }
-    return ret;
-  }
-}
-
-/**
  * Returns the depth, in pixels, of the provided span and its descendants,
  * given the provided TraceRenderSettings.
  */
 function spanTreeDepthPx<T>(
-    span: Span<T>|Subspan<T>, renderSettings: RenderSettings): number {
+    span: Span<T>|Subspan<T>, renderSettings: TraceRenderSettings): number {
   let depthPx = renderSettings.spanWidthCatPx;
   if (span instanceof Span) {
     let descendantsDepthPx = 0;
@@ -126,120 +93,78 @@ function spanTreeDepthPx<T>(
 }
 
 /**
- * Adds a RenderedTraceCategory for a horizontal-span trace, using the provided
+ * Adds a RenderedCategory for a horizontal-span trace, using the provided
  * TraceRenderSettings and corresponding to the provided TraceCategory, to the
  * provided array of RenderedTraceCategories, and recursively adds its children,
  * returning the new rendered category's depth on the y-axis.  The rendered
  * category's upper left corner is specified by (x0Px, y0Px), its right extent
  * by x1Px, and its other characteristics by the provided TraceRenderSettings.
- * Categories are added to the RenderedTraceCategory array in pre-order
+ * Categories are added to the RenderedCategory array in pre-order
  * traversal order: parents before children, children in declaration order.
  */
 function addCategoryForHorizontalSpans<T>(
     category: TraceCategory<T>, x0Px: number, x1Px: number, y0Px: number,
-    renderSettings: RenderSettings,
-    cats: Array<RenderedTraceCategory<T>>): number {
-  let depthPx = renderSettings.categoryHeaderCatPx;
+    renderSettings: TraceRenderSettings,
+    cats: Array<RenderedCategory>): number {
+  let depthPx = renderSettings.categoryRenderSettings.categoryHeaderCatPx;
   // Add all the category's spans.
   for (const span of category.spans) {
     depthPx = Math.max(depthPx, spanTreeDepthPx(span, renderSettings));
   }
   // Then add all its subcategories.  Add these to a separate array, so that
-  // we can later insert the parent RenderedTraceCategory before its children
+  // we can later insert the parent RenderedCategory before its children
   // for a preorder traversal.
-  const subcats: Array<RenderedTraceCategory<T>> = [];
+  const subcats: Array<RenderedCategory> = [];
   for (const subcategory of category.categories) {
     // Pad prior to every child category.
-    depthPx += renderSettings.categoryPaddingCatPx;
+    depthPx += renderSettings.categoryRenderSettings.categoryPaddingCatPx;
     depthPx += addCategoryForHorizontalSpans(
-        subcategory, x0Px + renderSettings.categoryMarginTempPx, x1Px,
+        subcategory,
+        x0Px + renderSettings.categoryRenderSettings.categoryMarginValPx, x1Px,
         y0Px + depthPx, renderSettings, subcats);
   }
   // If the category height is less than the minimum, set it to the minimum.
-  if (depthPx < renderSettings.categoryMinWidthCatPx) {
-    depthPx = renderSettings.categoryMinWidthCatPx;
+  if (depthPx < renderSettings.categoryRenderSettings.categoryMinWidthCatPx) {
+    depthPx = renderSettings.categoryRenderSettings.categoryMinWidthCatPx;
   }
-  const cat = new RenderedTraceCategory(
-      category, renderSettings, x0Px, y0Px, x1Px, y0Px + depthPx);
+  const cat = new RenderedCategory(
+      category.category, category.properties,
+      renderSettings.categoryRenderSettings, x0Px, y0Px, x1Px, y0Px + depthPx);
   cats.push(cat);
   cats.push(...subcats);
   return depthPx;
 }
 
 /**
- * A rendered trace category hierarchy.  Its widthPx and heightPx fields
- * specify the dimensions of the bounding box for all contained categories.
- */
-export class RenderedTraceCategoryHierarchy<T> {
-  /** The width of the full set of rendered categories. */
-  readonly widthPx: number = 0;
-  /** The height of the full set of rendered categories. */
-  readonly heightPx: number = 0;
-  constructor(
-      readonly properties: ValueMap,
-      readonly rootCategories: Array<RenderedTraceCategory<T>>) {
-    // This algorithm assumes a parent RenderedTraceCategory fully encloses all
-    // its children.  If this changes,
-    if (this.rootCategories.length > 0) {
-      let xMin = this.rootCategories[0].x0Px;
-      let xMax = this.rootCategories[0].x1Px;
-      let yMin = this.rootCategories[0].y0Px;
-      let yMax = this.rootCategories[0].y1Px;
-      for (const rootCategory of this.rootCategories) {
-        if (rootCategory.x0Px < xMin) {
-          xMin = rootCategory.x0Px;
-        }
-        if (rootCategory.x1Px > xMax) {
-          xMax = rootCategory.x1Px;
-        }
-        if (rootCategory.y0Px < yMin) {
-          yMin = rootCategory.y0Px;
-        }
-        if (rootCategory.y1Px > yMax) {
-          yMax = rootCategory.y1Px;
-        }
-      }
-      this.widthPx = xMax - xMin;
-      this.heightPx = yMax - yMin;
-    }
-  }
-
-  get categories(): Array<RenderedTraceCategory<T>> {
-    const ret = new Array<RenderedTraceCategory<T>>();
-    for (const rootCategory of this.rootCategories) {
-      ret.push(...rootCategory.flatten());
-    }
-    return ret;
-  }
-}
-
-/**
- * Returns a RenderedTraceCategoryHierarchy suitable for use on the Y axis
+ * Returns a RenderedCategoryHierarchy suitable for use on the Y axis
  * alongside trace spans rendered by RenderHorizontalTraceSpans(trace, ...,
  * renderSettings).
  */
 export function renderCategoryHierarchyForHorizontalSpans<T>(trace: Trace<T>):
-    RenderedTraceCategoryHierarchy<T> {
+    RenderedCategoryHierarchy {
   const renderSettings = trace.renderSettings();
   const categoryX0Px = 0;
-  let categoryX1Px = renderSettings.categoryBaseWidthTempPx;
+  let categoryX1Px =
+      renderSettings.categoryRenderSettings.categoryBaseWidthValPx;
   let y0Px = 0;
   // Figure out how wide the category bar should be.
   for (const category of trace.categories) {
-    const thisCatWidth = categoryX0Px + renderSettings.categoryBaseWidthTempPx +
-        category.categoryHeight * renderSettings.categoryMarginTempPx;
+    const thisCatWidth = categoryX0Px +
+        renderSettings.categoryRenderSettings.categoryBaseWidthValPx +
+        category.categoryHeight *
+            renderSettings.categoryRenderSettings.categoryMarginValPx;
     if (thisCatWidth > categoryX1Px) {
       categoryX1Px = thisCatWidth;
     }
   }
-  const renderedCats: Array<RenderedTraceCategory<T>> = [];
+  const renderedCats: Array<RenderedCategory> = [];
   // Iterate through trace categories.
   for (const category of trace.categories) {
     y0Px += addCategoryForHorizontalSpans(
         category, categoryX0Px, categoryX1Px, y0Px, renderSettings,
         renderedCats);
   }
-  return new RenderedTraceCategoryHierarchy(trace.properties, renderedCats);
+  return new RenderedCategoryHierarchy(trace.properties, renderedCats);
 }
 
 /** A set of rendered trace spans. */
@@ -263,12 +188,13 @@ export class RenderedTraceSpans {
 function addHorizontalSpan<T>(
     span: Span<T>|Subspan<T>, y0Px: number,
     domainToRange: (properties: ValueMap, key: string) => number,
-    renderSettings: RenderSettings, spans: RenderedTraceSpan[],
+    renderSettings: TraceRenderSettings, spans: RenderedTraceSpan[],
     edgeNodesByID: Map<string, EdgeNode>): number {
   const x0Px = domainToRange(span.properties, traceStartKey);
   const x1Px = domainToRange(span.properties, traceEndKey);
   const renderedSpan = new RenderedTraceSpan(
-      span.properties, x0Px, y0Px, x1Px, y0Px + renderSettings.spanWidthCatPx);
+      getSpanRenderID(span), span.properties, x0Px, y0Px, x1Px,
+      y0Px + renderSettings.spanWidthCatPx);
   spans.push(renderedSpan);
   let y1Px = renderedSpan.y1Px;
   for (const edgeNode of Node.fromSpan(span)) {
@@ -314,9 +240,9 @@ function addHorizontalSpan<T>(
 function addHorizontalCategorySpans<T>(
     category: TraceCategory<T>, y0Px: number,
     domainToRange: (properties: ValueMap, key: string) => number,
-    renderSettings: RenderSettings, spans: RenderedTraceSpan[],
+    renderSettings: TraceRenderSettings, spans: RenderedTraceSpan[],
     edgeNodesByID: Map<string, EdgeNode>): number {
-  let y1Px = y0Px + renderSettings.categoryHeaderCatPx;
+  let y1Px = y0Px + renderSettings.categoryRenderSettings.categoryHeaderCatPx;
   // Add all the category's spans.
   for (const span of category.spans) {
     y1Px = Math.max(
@@ -328,12 +254,14 @@ function addHorizontalCategorySpans<T>(
   for (const subcategory of category.categories) {
     // Pad prior to every child category.
     y1Px = addHorizontalCategorySpans(
-        subcategory, y1Px + renderSettings.categoryPaddingCatPx, domainToRange,
-        renderSettings, spans, edgeNodesByID);
+        subcategory,
+        y1Px + renderSettings.categoryRenderSettings.categoryPaddingCatPx,
+        domainToRange, renderSettings, spans, edgeNodesByID);
   }
   // If the category height is less than the minimum, set it to the minimum.
-  if ((y1Px - y0Px) < renderSettings.categoryMinWidthCatPx) {
-    y1Px = y0Px + renderSettings.categoryMinWidthCatPx;
+  if ((y1Px - y0Px) <
+      renderSettings.categoryRenderSettings.categoryMinWidthCatPx) {
+    y1Px = y0Px + renderSettings.categoryRenderSettings.categoryMinWidthCatPx;
   }
   return y1Px;
 }
@@ -375,6 +303,7 @@ export function renderHorizontalTraceSpans<T>(
       if (edgeNodesByID.has(endpointNodeID)) {
         const endNode = edgeNodesByID.get(endpointNodeID);
         renderedEdges.push(new RenderedTraceEdge(
+            getEdgeRenderID(startNode, endpointNodeID, endNode),
             startNode.properties, startNode.xPx, startNode.yPx, endNode!.xPx,
             endNode!.yPx));
       } else {
@@ -383,4 +312,47 @@ export function renderHorizontalTraceSpans<T>(
     }
   }
   return new RenderedTraceSpans(renderedSpans, renderedEdges);
+}
+
+/**
+ * Returns a unique identifier for the provided span. This ID is used to create
+ * smoother animations when changing the view of the trace. We calculate it
+ * using the start and end time of the span so it will be the same each time the
+ * trace is loaded.
+ */
+function getSpanRenderID<T>(span: Span<T>|Subspan<T>): string {
+  const spanDetail = span.properties.has(Keys.DETAIL_FORMAT) ? '-' +
+          span.properties.format(
+              span.properties.expectString(Keys.DETAIL_FORMAT)) :
+                                                               '';
+  const spanStart = span.properties.get(traceStartKey);
+  const spanEnd = span.properties.get(traceEndKey);
+  return `${timeValueToString(spanStart)}-${timeValueToString(spanEnd)}${
+      spanDetail}`;
+}
+
+/**
+ * Returns a unique identifier for the provided edge. This ID is used to create
+ * smoother animations when changing the view of the trace. We calculate it
+ * using the start times of the start and end nodes of the edge so it will be
+ * the same each time the trace is loaded.
+ */
+function getEdgeRenderID(
+    startNode: EdgeNode, endpointNodeID: string, endNode?: EdgeNode): string {
+  const startNodeVal = startNode.properties.get(traceEdgeStartKey);
+  const endNodeVal = endNode!.properties.get(traceEdgeStartKey);
+  return `${timeValueToString(startNodeVal)}-${timeValueToString(endNodeVal)}-${
+      endpointNodeID}`;
+}
+
+function timeValueToString(value: Value): string {
+  if (value instanceof TimestampValue) {
+    return `${value.val.seconds}_${value.val.nanos}`;
+  } else if (value instanceof DurationValue) {
+    return `${value.val.nanos}`;
+  } else {
+    throw new ConfigurationError(`Type ${typeof value} is not supported`)
+        .from(SOURCE)
+        .at(Severity.ERROR);
+  }
 }

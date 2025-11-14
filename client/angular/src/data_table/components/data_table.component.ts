@@ -16,19 +16,21 @@
  * at ../../../../server/go/table/table.go
  */
 
-import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, Input, OnDestroy, ViewChild} from '@angular/core';
+import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, Inject, InjectionToken, Input, OnDestroy, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
-import {Sort, SortDirection} from '@angular/material/sort';
+import {Sort} from '@angular/material/sort';
+import * as d3 from 'd3';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {AppCoreService, DataSeriesQueryDirective, InteractionsDirective} from 'traceviz-angular-core';
-import {AppCore, CanonicalTable, Cell, ConfigurationError, DataSeriesQuery, getLabel, Header, Interactions, ResponseNode, Row, Severity, ValueMap} from 'traceviz-client-core';
+import {AppCoreService, DataSeriesDirective, InteractionsDirective} from 'traceviz-angular-core';
+import {AppCore, CanonicalTable, Cell, ConfigurationError, DataSeriesQuery, getLabel, getStyles, Header, Interactions, ResponseNode, Row, Severity, StringValue, ValueMap} from 'traceviz-client-core';
 
 const SOURCE = 'data-table';
 
 // Valid interactions targets
-const ROW = 'row';
-const COLUMN = 'column';
+const ROW = 'rows';
+const COLUMN = 'columns';
+const TABLE = 'table';
 
 // Valid action types
 const CLICK = 'click';
@@ -38,18 +40,22 @@ const MOUSEOUT = 'mouseout';
 
 // Valid reaction types
 const HIGHLIGHT = 'highlight';
+const REDRAW = 'redraw';
 
 // Valid watch types
-const SORT_ROWS = 'sort_rows';
+const UPDATE_SORT_DIRECTION = 'update_sort_direction';
+const UPDATE_SORT_COLUMN = 'update_sort_column';
 
 // Sort watch keys
-const SORT_DIRECTION = 'direction';
-const SORT_COLUMN = 'column';
+const SORT_DIRECTION = 'sort_direction';
+const SORT_COLUMN = 'sort_column';
 
 // Valid sort directions
 const SORT_ASC = 'asc';
 const SORT_DESC = 'desc';
 const SORT_NONE = '';
+
+const WINDOW = new InjectionToken<Window>('window', {factory: () => window});
 
 const supportedActions = new Array<[string, string]>(
     [ROW, CLICK],
@@ -59,22 +65,22 @@ const supportedActions = new Array<[string, string]>(
     [COLUMN, CLICK],
 );
 
-const supportedReactions = new Array<[string, string]>(
-    [ROW, HIGHLIGHT],
-);
+const supportedReactions =
+    new Array<[string, string]>([ROW, HIGHLIGHT], [TABLE, REDRAW]);
 
-const supportedWatches = [SORT_ROWS];
+const supportedWatches = [UPDATE_SORT_DIRECTION, UPDATE_SORT_COLUMN];
 
+/** An interactive table. */
 @Component({
+  standalone: false,
   selector: 'data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './data_table.component.html',
-  styleUrls: ['./data_table.component.css']
+  templateUrl: 'data_table.component.html',
+  styleUrls: ['data_table.component.css']
 })
-export class DataTableComponent implements AfterContentInit, AfterViewInit,
-                                           OnDestroy {
-  @ContentChild(DataSeriesQueryDirective, {descendants: false})
-  dataSeriesQueryDir: DataSeriesQueryDirective|undefined;
+export class DataTable implements AfterContentInit, AfterViewInit, OnDestroy {
+  @ContentChild(DataSeriesDirective, {descendants: false})
+  dataSeriesQueryDir: DataSeriesDirective|undefined;
   @ContentChild(InteractionsDirective, {descendants: false})
   interactionsDir: InteractionsDirective|undefined;
   @ContentChild(MatPaginator) paginator: MatPaginator|undefined;
@@ -87,12 +93,15 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit,
   // tabular format as the one expected from a <data-series>.
   @Input('data') dataInput?: ResponseNode;
 
+  @Input() heightAdjustmentRatio = 1.0;
+  @Input() redrawAfterViewInitDelay = 0;
+
   loading = false;
 
   // Ends all subscriptions in the component.
-  private unsubscribe = new Subject<void>();
+  private readonly unsubscribe = new Subject<void>();
   // Ends subscriptions from the last data series.
-  private newSeries = new Subject<void>();
+  private readonly newSeries = new Subject<void>();
   private table: CanonicalTable|undefined;
   columns: Header[] = [];
   rows: Row[] = [];
@@ -104,70 +113,116 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit,
 
   constructor(
       private readonly appCoreService: AppCoreService,
-      private readonly ref: ChangeDetectorRef) {}
+      private readonly ref: ChangeDetectorRef,
+      @Inject(WINDOW) private readonly window: Window,
+  ) {}
 
-  ngAfterContentInit(): void{this.appCoreService.appCore.onPublish((appCore) => {
-    if (this.dataSeriesQueryDir !== undefined && this.dataInput !== undefined) {
-      appCore.err(
-          new ConfigurationError(
-              'data-table cannot specify both a <data-series> child and the "data" property')
-              .from(SOURCE)
-              .at(Severity.ERROR));
-      return;
-    }
+  ngAfterContentInit(): void {
+    this.appCoreService.appCore.onPublish((appCore) => {
+      if (this.dataSeriesQueryDir !== undefined &&
+          this.dataInput !== undefined) {
+        appCore.err(
+            new ConfigurationError(
+                'data-table cannot specify both a <data-series> child and the "data" property')
+                .from(SOURCE)
+                .at(Severity.ERROR));
+        return;
+      }
 
-    if (this.paginator !== undefined) {
-      // Per https://github.com/angular/components/issues/15781, the
-      // paginator's tooltips stick past hover.  Hide them.
-      this.paginator._intl.nextPageLabel = '';
-      this.paginator._intl.previousPageLabel = '';
-      this.paginator._intl.firstPageLabel = '';
-      this.paginator._intl.lastPageLabel = '';
-      this.paginator.page.pipe(takeUntil(this.unsubscribe)).subscribe(() => {
-        this.redraw();
-      });
-    }
+      if (this.paginator !== undefined) {
+        // Per https://github.com/angular/components/issues/15781, the
+        // paginator's tooltips stick past hover.  Hide them.
+        this.paginator._intl.nextPageLabel = '';
+        this.paginator._intl.previousPageLabel = '';
+        this.paginator._intl.firstPageLabel = '';
+        this.paginator._intl.lastPageLabel = '';
+        this.paginator.page.pipe(takeUntil(this.unsubscribe)).subscribe(() => {
+          this.redraw();
+        });
+      }
 
-    // Ensure the user-specified interactions are supported.
-    this.interactions = this.interactionsDir?.get();
-    try {
-      this.interactions?.checkForSupportedActions(supportedActions);
-      this.interactions?.checkForSupportedReactions(supportedReactions);
-      this.interactions?.checkForSupportedWatches(supportedWatches);
-    } catch (err) {
-      appCore.err(err);
-    }
-    // Set up watches
-    this.interactions
-        ?.watch(
-            SORT_ROWS,
-            (vm) => {
-              this.sortRowsWatch(vm);
-            },
-            this.unsubscribe)
-
-            this.dataSeriesQuery = this.dataSeriesQueryDir?.dataSeriesQuery;
-    if (this.dataSeriesQuery) {
-      // Publish loading status.
-      this.dataSeriesQuery.loading.pipe(takeUntil(this.unsubscribe))
-          .subscribe((loading) => {
-            this.loading = loading;
-            this.ref.detectChanges();
+      // Ensure the user-specified interactions are supported.
+      this.interactions = this.interactionsDir?.get();
+      try {
+        this.interactions?.checkForSupportedActions(supportedActions);
+        this.interactions?.checkForSupportedReactions(supportedReactions);
+        this.interactions?.checkForSupportedWatches(supportedWatches);
+      } catch (err) {
+        appCore.err(err);
+      }
+      // Set up watches
+      this.interactions?.watch(UPDATE_SORT_DIRECTION, (vm) => {
+        const sortDirectionVal = vm.get(SORT_DIRECTION);
+        if (sortDirectionVal instanceof StringValue) {
+          if (sortDirectionVal.val === 'asc' ||
+              sortDirectionVal.val === 'desc' || sortDirectionVal.val === '') {
+            this.sort.direction = sortDirectionVal.val;
+          } else {
+            this.appCoreService.appCore.err(
+                new ConfigurationError(
+                    `${SORT_DIRECTION} on the ${
+                        UPDATE_SORT_DIRECTION} watch can only be 'asc', 'desc', or ''`)
+                    .from(SOURCE)
+                    .at(Severity.ERROR));
+          }
+        } else {
+          this.appCoreService.appCore.err(
+              new ConfigurationError(
+                  `${SORT_DIRECTION} on the ${
+                      UPDATE_SORT_DIRECTION} watch only supports string contents`)
+                  .from(SOURCE)
+                  .at(Severity.ERROR));
+        }
+      }, this.unsubscribe);
+      this.interactions?.watch(UPDATE_SORT_COLUMN, (vm) => {
+            const sortColumnVal = vm.get(SORT_COLUMN);
+            if (sortColumnVal instanceof StringValue) {
+              this.sort.active = sortColumnVal.val;
+            } else {
+              this.appCoreService.appCore.err(
+                  new ConfigurationError(
+                      `${SORT_COLUMN} on the ${
+                          UPDATE_SORT_COLUMN} watch only supports string contents`)
+                      .from(SOURCE)
+                      .at(Severity.ERROR));
+            }        
+      }, this.unsubscribe);
+      // Set up redraw on a redraw signal
+      this.interactions?.match(TABLE, REDRAW)(undefined)
+          .pipe(takeUntil(this.unsubscribe))
+          .subscribe((changed: boolean) => {
+            if (changed) {
+              this.window.requestAnimationFrame(() => {
+                this.redraw();
+              });
+            }
           });
 
-      // Handle new data series.
-      this.dataSeriesQuery.response.pipe(takeUntil(this.unsubscribe))
-          .subscribe((response) => {
-            this.updateData(response, appCore);
-          });
-    } else if (this.dataInput) {
-      // If static data was passed in, render it.
-      this.updateData(this.dataInput, appCore)
-    }
-  })}
+      this.dataSeriesQuery = this.dataSeriesQueryDir?.dataSeriesQuery;
+      if (this.dataSeriesQuery) {
+        // Publish loading status.
+        this.dataSeriesQuery.loading.pipe(takeUntil(this.unsubscribe))
+            .subscribe((loading) => {
+              this.loading = loading;
+              this.ref.detectChanges();
+            });
+
+        // Handle new data series.
+        this.dataSeriesQuery.response.pipe(takeUntil(this.unsubscribe))
+            .subscribe((response) => {
+              this.updateData(response, appCore);
+            });
+      } else if (this.dataInput) {
+        // If static data was passed in, render it.
+        this.updateData(this.dataInput, appCore);
+      }
+    });
+  }
 
   ngAfterViewInit(): void {
-    this.redraw();
+    setTimeout(() => {
+      this.redraw();
+    }, this.redrawAfterViewInitDelay);
   }
 
   ngOnDestroy(): void {
@@ -175,24 +230,6 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit,
     this.newSeries.complete();
     this.unsubscribe.next();
     this.unsubscribe.complete();
-  }
-
-  sortRowsWatch(values: ValueMap) {
-    try {
-      const sortDirection = values.expectString(SORT_DIRECTION);
-      if (![SORT_ASC, SORT_DESC, SORT_NONE].includes(sortDirection)) {
-        throw new ConfigurationError(
-            `Unsupported sort direction '${sortDirection}': must be '${
-                SORT_ASC}', '${SORT_DESC}', or '${SORT_NONE}'.`)
-            .from(SOURCE)
-            .at(Severity.ERROR);
-      }
-      const sortColumn = values.expectString(SORT_COLUMN);
-      this.sort.direction = sortDirection as SortDirection;
-      this.sort.active = sortColumn;
-    } catch (err: unknown) {
-      this.appCoreService.appCore.err(err);
-    }
   }
 
   doSort(sort: Sort) {
@@ -237,6 +274,16 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit,
     this.ref.detectChanges();
   }
 
+  sortTable(sort: Sort) {
+    const column = this.columns.find((col) => col.category.id === sort.active);
+    if (column) {
+      const properties = column.properties.with(
+          ['sort_direction', new StringValue(sort.direction)]);
+      this.interactions?.update(COLUMN, CLICK, properties);
+      this.sort = sort;
+    }
+  }
+
   rowClick(row: Row, shiftDepressed: boolean) {
     if (!shiftDepressed) {
       this.interactions?.update(ROW, CLICK, row.properties);
@@ -257,39 +304,50 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit,
     return row.cells(this.columns);
   }
 
-  itemStyle(...items: (Row|Cell)[]): {[klass: string]: string} {
+  rowStyle(row: Row): {[klass: string]: string} {
     const style: {[klass: string]: string;} = {};
-    if (this.table === undefined) {
+    if (!this.table) {
       return style;
     }
     try {
-      const colorings =
-          items.map((item) => this.table!.coloring.colors(item.properties));
-      let bgColor: string|undefined;
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item instanceof Row && item.highlighted &&
-            colorings[i].secondary !== undefined) {
-          bgColor = colorings[i].secondary;
-          break;
-        }
-      }
-      if (bgColor === undefined) {
-        for (let i = 0; i < items.length; i++) {
-          if (colorings[i].primary !== undefined) {
-            bgColor = colorings[i].primary;
-            break;
+      const rowColors = this.table.coloring.colors(row.properties);
+      if (row.highlighted) {
+        if (rowColors.primary) {
+          const d3Color = d3.color(rowColors.primary);
+          if (d3Color) {
+            style['background-color'] = d3Color.brighter(2).toString();
           }
+        } else if (rowColors.secondary) {
+          style['background-color'] = rowColors.secondary;
         }
+      } else if (rowColors.primary) {
+        style['background-color'] = rowColors.primary;
       }
-      if (bgColor !== undefined) {
-        style['background-color'] = bgColor;
+      if (rowColors.stroke) {
+        style['color'] = rowColors.stroke;
       }
-      for (let i = 0; i < items.length; i++) {
-        if (colorings[i].stroke !== undefined) {
-          style['color'] = colorings[i].stroke!;
-          break;
-        }
+    } catch (err: unknown) {
+      this.appCoreService.appCore.err(err);
+    }
+    return style;
+  }
+
+  cellStyle(cell: Cell, column: number, row: Row): {[klass: string]: string} {
+    const style = this.rowStyle(row);
+    if (!this.table) {
+      return {};
+    }
+    const cellStyle = getStyles(cell.properties);
+    for (const key in cellStyle) {
+      style[key] = cellStyle[key];
+    }
+    try {
+      const cellColors = this.table!.coloring.colors(cell.properties);
+      if (cellColors.primary) {
+        style['background-color'] = cellColors.primary;
+      }
+      if (cellColors.stroke) {
+        style['color'] = cellColors.stroke;
       }
     } catch (err: unknown) {
       this.appCoreService.appCore.err(err);
@@ -321,13 +379,14 @@ export class DataTableComponent implements AfterContentInit, AfterViewInit,
       const ne = this.componentDiv.nativeElement;
       // Hide the table to find the available height
       ne.children[0].style.display = 'none';
-      const height = ne.offsetHeight;
+      const height = ne.offsetHeight * this.heightAdjustmentRatio;
       ne.children[0].style.display = 'table';
+      // Account for 2px border spacing on each row.
       const rows = Math.floor(height / (this.rowHeightPx + 2));
-      // Save one row for the header and one for the footer.
-      this.paginator.pageSize = rows - 2;
+      // Save one row for the header.
+      this.paginator.pageSize = rows - 1;
     }
     // And update the rows.
     this.updateRows();
-  };
+  }
 }

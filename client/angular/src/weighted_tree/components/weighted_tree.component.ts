@@ -20,138 +20,135 @@
 import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, HostListener, Input, OnDestroy, ViewChild} from '@angular/core';
 import * as d3 from 'd3';
 import {Subject} from 'rxjs';
-import {distinctUntilChanged, takeUntil} from 'rxjs/operators';
-import {AppCoreService, DataSeriesQueryDirective, InteractionsDirective} from 'traceviz-angular-core';
-import {ConfigurationError, DataSeriesQuery, getStyle, Interactions, RenderedTreeNode, Severity, Tree} from 'traceviz-client-core';
-
-const SOURCE = 'weighted-tree';
+import {debounceTime, distinctUntilChanged, takeUntil} from 'rxjs/operators';
+import {AppCoreService, DataSeriesDirective, InteractionsDirective} from 'traceviz-angular-core';
+import {DataSeriesQuery, getStyle, Interactions, RenderedTreeNode, Tree} from 'traceviz-client-core';
 
 enum Keys {
-  DETAIL_FORMAT = 'detail_format',
+  TOOLTIP = 'tooltip',
 }
 
-// Valid interactions targets
-const NODE = 'node';
+const NODES = 'nodes';
 
-// Valid action types
-const CLICK = 'click';
-const MOUSEOVER = 'mouseover';
-const MOUSEOUT = 'mouseout';
+const ACTION_CLICK = 'click';
+const ACTION_MOUSEOVER = 'mouseover';
+const ACTION_MOUSEOUT = 'mouseout';
 
-// Valid reaction types
-const HIGHLIGHT = 'highlight';
+const REACTION_HIGHLIGHT = 'highlight';
 
 const supportedActions = new Array<[string, string]>(
-    [NODE, CLICK],
-    [NODE, MOUSEOVER],
-    [NODE, MOUSEOUT],
+    [NODES, ACTION_CLICK],
+    [NODES, ACTION_MOUSEOVER],
+    [NODES, ACTION_MOUSEOUT],
 );
 
-const supportedReactions = new Array<[string, string]>(
-    [NODE, HIGHLIGHT],
-);
+const supportedReactions =
+    new Array<[string, string]>([NODES, REACTION_HIGHLIGHT]);
 
-const supportedWatches: string[] = [];
-
+/** Renders a weighted tree from tree data (see TreeDataComponent). */
 @Component({
+  standalone: false,
   selector: 'weighted-tree',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div *ngIf="loading">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>>
-    </div>
-    <div class="content">
-        <hovercard [visible]="tooltip !== ''">>{{tooltip}}</hovercard>
-        <div class="content" #componentDiv (window:resize)="resize()">
-            <svg #svg class='svg'>
-                <g class="chart-area"></g>
-            </svg>
-        </div>
-    </div>`,
+  templateUrl: 'weighted_tree.component.html',
   styleUrls: ['weighted_tree.component.css'],
 })
 export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
-                                              OnDestroy {
-  @ContentChild(DataSeriesQueryDirective, {descendants: false})
-  dataSeriesQueryDir: DataSeriesQueryDirective|undefined;
+                                     OnDestroy {
+  @ContentChild(DataSeriesDirective) dataSeries: DataSeriesDirective|undefined;
   @ContentChild(InteractionsDirective, {descendants: false})
   interactionsDir: InteractionsDirective|undefined;
 
   @ViewChild('svg', {static: true}) svg!: ElementRef;
+  @ViewChild('loadingDiv', {static: true}) loadingDiv: ElementRef|undefined;
   @ViewChild('scopeNameDiv', {static: true}) scopeNameDiv!: ElementRef;
   @ViewChild('componentDiv') componentDiv!: ElementRef;
 
   @Input() transitionDurationMs = 500;
 
-  loading = false;
+  readonly unsubscribe = new Subject<void>();
+  readonly redrawDebouncer = new Subject<void>();
+  tree?: Tree;
+  treeNodes: RenderedTreeNode[] = [];
+  // Used in testing to confirm highlighting, since getting d3 updates to
+  // quiesce in tests is maybe impossible.
+  highlightedNodes = new Set<RenderedTreeNode>();
+  interactions: Interactions|undefined;
+  private dataSeriesQuery: DataSeriesQuery|undefined;
+
+  private readonly resizeObserver = new ResizeObserver(() => {
+    this.redraw();
+  });
   tooltip = '';
-
-  // Ends all subscriptions in the component.
-  private unsubscribe = new Subject<void>();
-  // Signals when a redraw is requested.
-  private redrawDebouncer = new Subject<void>();
-
-  // Fields available after ngAfterContentInit.
-  private interactions: Interactions|undefined;
-  dataSeriesQuery: DataSeriesQuery|undefined;
-  private treeNodes: RenderedTreeNode[] = [];
 
   constructor(
       private readonly appCoreService: AppCoreService,
-      private readonly ref: ChangeDetectorRef) {}
+      private readonly elm: ElementRef, readonly ref: ChangeDetectorRef) {}
 
-  ngAfterContentInit():
-      void{this.appCoreService.appCore.onPublish((appCore) => {
-        if (this.dataSeriesQueryDir === undefined) {
-          appCore.err(
-              new ConfigurationError(
-                  `weighted-tree is missing required 'data-series' child.`)
-                  .from(SOURCE)
-                  .at(Severity.ERROR));
-          return;
-        }
-        this.dataSeriesQuery = this.dataSeriesQueryDir.dataSeriesQuery;
-
-        // Ensure the user-specified interactions are supported.
-        this.interactions = this.interactionsDir?.get();
-        try {
-          this.interactions?.checkForSupportedActions(supportedActions);
-          this.interactions?.checkForSupportedReactions(supportedReactions);
-          this.interactions?.checkForSupportedWatches(supportedWatches);
-        } catch (err) {
-          appCore.err(err);
-        }
-
+  ngAfterContentInit() {
+    this.appCoreService.appCore.onPublish((appCore) => {
+      this.interactions = this.interactionsDir?.get();
+      try {
+        this.interactions?.checkForSupportedActions(supportedActions);
+        this.interactions?.checkForSupportedReactions(supportedReactions);
+        this.interactions?.checkForSupportedWatches([]);
+        this.dataSeriesQuery = this.dataSeries?.dataSeriesQuery;
         // Publish loading status.
         this.dataSeriesQuery?.loading.pipe(takeUntil(this.unsubscribe))
             .subscribe((loading) => {
-              this.loading = loading;
+              if (this.loadingDiv !== undefined) {
+                this.loadingDiv.nativeElement.style.display =
+                    loading ? 'block' : 'none';
+              }
+              // Force change detection.
               this.ref.detectChanges();
             });
-
-        // Handle new data series.
         this.dataSeriesQuery?.response.pipe(takeUntil(this.unsubscribe))
             .subscribe((response) => {
               try {
-                const tree = new Tree(response);
-                this.treeNodes = tree.renderTopDownTree();
-                this.redraw();
+                this.tree = new Tree(response);
+                this.treeNodes = this.tree.renderTree();
               } catch (err: unknown) {
                 appCore.err(err);
               }
               this.redrawDebouncer.next();
             });
-      })}
+      } catch (err: unknown) {
+        appCore.err(err);
+      }
+    });
 
-  ngAfterViewInit(): void {
-    this.redraw();
+    this.redrawDebouncer.pipe(takeUntil(this.unsubscribe), debounceTime(50))
+        .subscribe(() => {
+          try {
+            this.redraw();
+          } catch (err: unknown) {
+            this.appCoreService.appCore.err(err);
+          }
+        });
   }
 
-  ngOnDestroy(): void {
-    this.redrawDebouncer.next();
-    this.redrawDebouncer.complete();
+  ngAfterViewInit() {
+    this.resizeObserver.observe(this.elm.nativeElement);
+    this.resize();
+  }
+
+  ngOnDestroy() {
     this.unsubscribe.next();
     this.unsubscribe.complete();
+    this.resizeObserver.unobserve(this.elm.nativeElement);
+  }
+
+  handleMouseover(treeNode: RenderedTreeNode) {
+    try {
+      this.tooltip = treeNode.properties.expectString(Keys.TOOLTIP);
+    } catch (err: unknown) {
+      this.appCoreService.appCore.err(err);
+    }
+  }
+
+  handleMouseout(treeNode: RenderedTreeNode) {
+    this.tooltip = '';
   }
 
   @HostListener('window:resize')
@@ -159,27 +156,14 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
     this.redrawDebouncer.next();
   }
 
-  handleMouseover(treeNode: RenderedTreeNode) {
-    try {
-      if (treeNode.properties.has(Keys.DETAIL_FORMAT)) {
-        this.tooltip = treeNode.properties.format(
-            treeNode.properties.expectString(Keys.DETAIL_FORMAT));
-      } else {
-        this.tooltip = '';
-      }
-    } catch (err: unknown) {
-      this.appCoreService.appCore.err(err);
-    }
-  }
-
-  handleMouseout() {
-    this.tooltip = '';
-  }
-
   redraw() {
-    if (this.treeNodes.length === 0) {
+    // Empty trees should have a height and width of 0
+    d3.select(this.svg.nativeElement).attr('width', 0).attr('height', 0);
+
+    if (!this.componentDiv || !this.tree) {
       return;
     }
+    // Temporarily hide the SVG so the correct container width is computed.
     const widthPx = this.componentDiv.nativeElement.offsetWidth;
     for (const treeNode of this.treeNodes) {
       treeNode.resize(widthPx);
@@ -188,6 +172,7 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
         (highestYPx, treeNode) =>
             (treeNode.y1Px > highestYPx) ? treeNode.y1Px : highestYPx,
         0);
+    this.svg.nativeElement.style.display = 'none';
     d3.select(this.svg.nativeElement)
         .attr('width', widthPx)
         .attr('height', heightPx)
@@ -196,33 +181,36 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
         .attr('y', 0)
         .attr('width', widthPx)
         .attr('height', heightPx);
-    this.svg.nativeElement.style.display
+    this.svg.nativeElement.style.display = 'block';
 
     const wt = this;
-    // Create a bounding svg for each frame.  Add a colored rectangle and
-    // text to each frame's svg.
-    const nodes = d3.select(this.svg.nativeElement)
-                      .select('.chart-area')
-                      .selectAll('svg')
+    // Create a bounding svg for each frame.  Add a colored rectangle and a
+    // text to each.
+    const nodes = d3.select<SVGSVGElement>(this.svg.nativeElement)
+                      .select<SVGSVGElement>('.chart-area')
+                      .selectAll<SVGSVGElement>('svg')
                       .data(this.treeNodes);
     // Remove any extra nodes.
     nodes.exit().remove();
-    // Add any new nodes.
-    const enteredNodes: any =
+    // Add any new nodes.  Each added node consists of a container SVG,
+    // with a rectangle and text nested beneath it.
+    const enteredNodes =
         nodes.enter()
             .append('svg')
             .on('mouseover',
-                (event: any, d: RenderedTreeNode) => {
-                  this.interactions?.update(NODE, MOUSEOVER, d.properties);
+                (d: RenderedTreeNode) => {
+                  this.interactions?.update(
+                      NODES, ACTION_MOUSEOVER, d.properties);
                   wt.handleMouseover(d);
                 })
             .on('mouseout',
-                (event: any, d: RenderedTreeNode) => {
-                  this.interactions?.update(NODE, MOUSEOUT, d.properties);
-                  wt.handleMouseout();
+                (d: RenderedTreeNode) => {
+                  this.interactions?.update(
+                      NODES, ACTION_MOUSEOUT, d.properties);
+                  wt.handleMouseout(d);
                 })
-            .on('click', (event: any, d: RenderedTreeNode) => {
-              this.interactions?.update(NODE, CLICK, d.properties);
+            .on('click', (d: RenderedTreeNode) => {
+              this.interactions?.update(NODES, ACTION_CLICK, d.properties);
             });
     enteredNodes.append('rect');
     enteredNodes.append('text');
@@ -235,7 +223,11 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
     mergedNodes.select('rect')
         .attr('width', (d: RenderedTreeNode) => d.widthPx)
         .attr('height', (d: RenderedTreeNode) => d.heightPx)
-        .attr('id', (d: RenderedTreeNode) => `rect${d.id}`)
+        .attr(
+            'id',
+            (d: RenderedTreeNode) => {
+              return `rect${d.id}`;
+            })
         .attr(
             'rx',
             (d: RenderedTreeNode) => {
@@ -249,77 +241,92 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
         .attr('height', (d: RenderedTreeNode) => d.heightPx)
         .attr('fill', (d: RenderedTreeNode) => d.fillColor)
         .attr('stroke', (d: RenderedTreeNode) => d.borderColor)
-        .attr('stroke-width', 1);
+        .style('stroke-width', 1);
     mergedNodes.select('text')
         .attr('x', (d: RenderedTreeNode) => 4)
         .attr('y', (d: RenderedTreeNode) => d.heightPx - 4)
-        .attr('id', (d: RenderedTreeNode) => `text${d.id}`)
+        .attr(
+            'id',
+            (d: RenderedTreeNode) => {
+              return `text${d.id}`;
+            })
+        .attr('x', (d: RenderedTreeNode) => 4)
+        .attr('y', (d: RenderedTreeNode) => d.heightPx - 4)
         .attr('fill', (d: RenderedTreeNode) => d.textColor)
         .text((d: RenderedTreeNode) => d.label)
-        .style('font-size', (d: RenderedTreeNode) => {
-          const fontSize = getStyle('font-size', d.properties);
-          if (fontSize) {
-            return fontSize;
-          }
-          return '14px';
+        .style('font-size', '14px');
+
+
+    // Update all node svgs, rects, and texts with their new positions, colors,
+    // and contents.  This version of d3 update uses a lambda receiving a d3
+    // selection; as d3 is untyped, this is `any` for now.
+    // TODO(hamster) Migrate to d3v6 to use the join update API.
+    mergedNodes.call(
+        // tslint:disable-next-line:no-any
+        (update: any) => {
+          update.transition()
+              .duration(this.transitionDurationMs)
+              .attr('x', (d: RenderedTreeNode) => d.x0Px)
+              .attr('y', (d: RenderedTreeNode) => d.y0Px)
+              .attr('width', (d: RenderedTreeNode) => d.widthPx)
+              .attr('height', (d: RenderedTreeNode) => d.heightPx);
+        });
+    mergedNodes.call(
+        // tslint:disable-next-line:no-any
+        (update: any) => {
+          update.select('rect')
+              .transition()
+              .duration(this.transitionDurationMs)
+              .attr(
+                  'rx',
+                  (d: RenderedTreeNode) => {
+                    const rx = getStyle('rx', d.properties);
+                    if (rx) {
+                      return rx;
+                    }
+                    return '0px';
+                  })
+              .attr('width', (d: RenderedTreeNode) => d.widthPx)
+              .attr('height', (d: RenderedTreeNode) => d.heightPx)
+              .attr('fill', (d: RenderedTreeNode) => d.fillColor)
+              .attr('stroke', (d: RenderedTreeNode) => d.borderColor)
+              .style('stroke-width', 1);
+        });
+    mergedNodes.call(
+        // tslint:disable-next-line:no-any
+        (update: any) => {
+          update.select('text')
+              .attr('x', (d: RenderedTreeNode) => 4)
+              .attr('y', (d: RenderedTreeNode) => d.heightPx - 4)
+              .attr('fill', (d: RenderedTreeNode) => d.textColor)
+              .style('font-size', '14px')
+              .text((d: RenderedTreeNode) => d.label);
         });
 
-    // Update all node svgs, rects, and texts with their new positions,
-    // colors, and contents.
-    // TODO(ilhamster): Maybe migrate to d3 v6.
-    mergedNodes.call(
-        (update: any) =>
-            update.transition()
-                .duration(this.transitionDurationMs)
-                .attr(
-                    'rx',
-                    (d: RenderedTreeNode) => {
-                      const rx = getStyle('rx', d.properties);
-                      if (rx) {
-                        return rx;
-                      }
-                      return '0px';
-                    })
-                .attr('width', (d: RenderedTreeNode) => d.widthPx)
-                .attr('height', (d: RenderedTreeNode) => d.heightPx)
-                .attr('fill', (d: RenderedTreeNode) => d.fillColor)
-                .attr('stroke', (d: RenderedTreeNode) => d.borderColor)
-                .attr('stroke-width', 1));
-    mergedNodes.call(
-        (update: any) => update.select('text')
-                             .attr('x', (d: RenderedTreeNode) => 4)
-                             .attr('y', (d: RenderedTreeNode) => d.heightPx - 4)
-                             .attr('id', (d: RenderedTreeNode) => `text${d.id}`)
-                             .attr('fill', (d: RenderedTreeNode) => d.textColor)
-                             .text((d: RenderedTreeNode) => d.label)
-                             .style('font-size', (d: RenderedTreeNode) => {
-                               const fontSize =
-                                   getStyle('font-size', d.properties);
-                               if (fontSize) {
-                                 return fontSize;
-                               }
-                               return '14px';
-                             }));
-
-    const matchFn = this.interactions?.match(NODE, HIGHLIGHT);
-    if (matchFn !== undefined) {
+    const match = this.interactions?.match(NODES, REACTION_HIGHLIGHT);
+    if (match !== undefined) {
       for (const treeNode of this.treeNodes) {
-        matchFn(treeNode.properties)
+        match(treeNode.properties)
             .pipe(
                 takeUntil(this.redrawDebouncer),
                 takeUntil(this.unsubscribe),
                 distinctUntilChanged(),
                 )
             .subscribe((matches) => {
+              const nodes = d3.select<SVGSVGElement>(this.svg.nativeElement)
+                                .select<SVGSVGElement>('.chart-area')
+                                .selectAll<SVGSVGElement>('svg');
               const rect = nodes.select(`#rect${treeNode.id}`);
               const text = nodes.select(`#text${treeNode.id}`);
               if (matches) {
+                this.highlightedNodes.add(treeNode);
                 rect.transition()
                     .duration(this.transitionDurationMs)
                     .attr('fill', treeNode.highlightedFillColor)
                     .attr('stroke', treeNode.highlightedBorderColor);
                 text.attr('fill', treeNode.highlightedTextColor);
               } else {
+                this.highlightedNodes.delete(treeNode);
                 rect.transition()
                     .duration(this.transitionDurationMs)
                     .attr('fill', treeNode.fillColor)

@@ -16,9 +16,8 @@
  */
 
 import { AfterContentInit, ContentChild, ContentChildren, Directive, forwardRef, Input, QueryList } from '@angular/core';
-import { ConfigurationError, Severity } from 'traceviz-client-core';
-import { Action, And, Case, Changed, Clear, Do, Equals, Extend, False, GreaterThan, If, Includes, Interactions, LessThan, Not, Or, Predicate, Reaction, Set as SetU, SetIfEmpty, SetOrClear, Switch, Toggle, True, Update, Watch } from 'traceviz-client-core';
-import { ValueRef } from 'traceviz-client-core';
+import { ConfigurationError, Severity, ValueRef } from 'traceviz-client-core';
+import { Action, And, Case, Changed, Clear, Concat, Do, Equals, Extend, False, GreaterThan, If, Includes, Interactions, LessThan, Not, Or, PopLeft, Predicate, PushLeft, PrefixOf, Reaction, Set as SetU, SetIfEmpty, SetOrClear, Swap, Switch, Toggle, True, Update, Watch } from 'traceviz-client-core';
 import { ValueDirective } from './value.directive';
 import { ValueMapDirective } from './value_map.directive';
 
@@ -49,6 +48,7 @@ export abstract class PredicateDirective {
  * predicate.
  */
 @Directive({
+  standalone: false,
   selector: 'then',
   providers: [
     {provide: UpdateDirective, useExisting: forwardRef(() => ThenDirective)}
@@ -79,6 +79,7 @@ export class ThenDirective extends UpdateDirective {
  * predicate.
  */
 @Directive({
+  standalone: false,
   selector: 'else',
   providers: [
     {provide: UpdateDirective, useExisting: forwardRef(() => ElseDirective)}
@@ -109,6 +110,7 @@ export class ElseDirective extends UpdateDirective {
  * status of a child predicate.
  */
 @Directive({
+  standalone: false,
   selector: 'if',
   providers:
       [{provide: UpdateDirective, useExisting: forwardRef(() => IfDirective)}],
@@ -143,6 +145,7 @@ export class IfDirective extends UpdateDirective {
  * is satisfied.
  */
 @Directive({
+  standalone: false,
   selector: 'case',
   providers: [
     {provide: UpdateDirective, useExisting: forwardRef(() => CaseDirective)}
@@ -180,6 +183,7 @@ export class CaseDirective extends UpdateDirective {
  * when any is satisfied.
  */
 @Directive({
+  standalone: false,
   selector: 'switch',
   providers: [
     {provide: UpdateDirective, useExisting: forwardRef(() => SwitchDirective)}
@@ -208,6 +212,7 @@ export class SwitchDirective extends UpdateDirective {
 
 /** An Update directive that clears its argument. */
 @Directive({
+  standalone: false,
   selector: 'clear',
   providers: [
     {provide: UpdateDirective, useExisting: forwardRef(() => ClearDirective)}
@@ -249,6 +254,7 @@ export class ClearDirective extends UpdateDirective implements
  * of its second argument.
  */
 @Directive({
+  standalone: false,
   selector: 'set',
   providers:
       [{provide: UpdateDirective, useExisting: forwardRef(() => SetDirective)}],
@@ -290,6 +296,7 @@ export class SetDirective extends UpdateDirective implements AfterContentInit {
  * of its second argument.
  */
 @Directive({
+  standalone: false,
   selector: 'toggle',
   providers: [
     {provide: UpdateDirective, useExisting: forwardRef(() => ToggleDirective)}
@@ -332,6 +339,7 @@ export class ToggleDirective extends UpdateDirective implements
  * the value of its second argument.
  */
 @Directive({
+  standalone: false,
   selector: 'set-or-clear',
   providers: [{
     provide: UpdateDirective,
@@ -375,6 +383,7 @@ export class SetOrClearDirective extends UpdateDirective implements
  * of its second argument.
  */
 @Directive({
+  standalone: false,
   selector: 'extend',
   providers: [
     {provide: UpdateDirective, useExisting: forwardRef(() => ExtendDirective)}
@@ -417,6 +426,7 @@ export class ExtendDirective extends UpdateDirective implements
  * of its second argument if the former is empty.
  */
 @Directive({
+  standalone: false,
   selector: 'set-if-empty',
   providers: [{
     provide: UpdateDirective,
@@ -455,8 +465,171 @@ export class SetIfEmptyDirective extends UpdateDirective implements
   }
 }
 
+/** An Update directive that swaps the values of its two arguments. */
+@Directive({
+  standalone: false,
+  selector: 'swap',
+  providers: [
+    {provide: UpdateDirective, useExisting: forwardRef(() => SwapDirective)}
+  ],
+})
+export class SwapDirective extends UpdateDirective implements AfterContentInit {
+  @ContentChildren(ValueDirective)
+  valueDirectives = new QueryList<ValueDirective>();
+  private swap: Swap|undefined;
+
+  constructor() {
+    super('swap');
+  }
+
+  ngAfterContentInit(): void {
+    const valueRefs: ValueRef[] = [];
+    for (const valueDirective of this.valueDirectives) {
+      valueRefs.push(valueDirective);
+    }
+    if (valueRefs.length === 2) {
+      this.swap = new Swap(valueRefs[0], valueRefs[1]);
+    } else {
+      this.errorMessage = `'swap' takes exactly two arguments.`;
+    }
+  }
+
+  override get(): Update {
+    if (this.swap === undefined) {
+      throw new ConfigurationError(this.errorMessage)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+    }
+    return this.swap;
+  }
+}
+
+/**
+ * An Update directive that pushes arguments after the first, in order, onto the
+ * left side of the first argument.
+ */
+@Directive({
+  standalone: false,
+  selector: 'push-left',
+  providers: [
+    {provide: UpdateDirective, useExisting: forwardRef(() => PushLeftDirective)}
+  ],
+})
+export class PushLeftDirective extends UpdateDirective implements
+    AfterContentInit {
+  @ContentChildren(ValueDirective)
+  valueDirectives = new QueryList<ValueDirective>();
+  private pushLeft: PushLeft|undefined;
+
+  constructor() {
+    super('push-left');
+  }
+
+  ngAfterContentInit(): void {
+    const valueRefs: ValueRef[] = [];
+    for (const valueDirective of this.valueDirectives) {
+      valueRefs.push(valueDirective);
+    }
+    if (valueRefs.length > 1) {
+      this.pushLeft = new PushLeft(valueRefs);
+    } else {
+      this.errorMessage = `'push-left' takes at least two arguments.`;
+    }
+  }
+
+  override get(): Update {
+    if (this.pushLeft === undefined) {
+      throw new ConfigurationError(this.errorMessage)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+    }
+    return this.pushLeft;
+  }
+}
+
+/**
+ * An Update directive that pops one element from the left end of the argument.
+ */
+@Directive({
+  standalone: false,
+  selector: 'pop-left',
+  providers: [
+    {provide: UpdateDirective, useExisting: forwardRef(() => PopLeftDirective)}
+  ],
+})
+export class PopLeftDirective extends UpdateDirective implements
+    AfterContentInit {
+  @ContentChild(ValueDirective) valueDirective: ValueDirective|undefined;
+  private popLeft: PopLeft|undefined;
+
+  constructor() {
+    super('pop-left');
+  }
+
+  ngAfterContentInit(): void {
+    if (this.valueDirective !== undefined) {
+      this.popLeft = new PopLeft(this.valueDirective);
+    } else {
+      this.errorMessage = `'pop-left' takes exactly one argument.`;
+    }
+  }
+
+  override get(): Update {
+    if (this.popLeft === undefined) {
+      throw new ConfigurationError(this.errorMessage)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+    }
+    return this.popLeft;
+  }
+}
+
+/**
+ * An Update directive that concatenates the arguments beyond the first
+ * argument to the first argument.
+ */
+@Directive({
+  standalone: false,
+  selector: 'concat',
+  providers: [
+    {provide: UpdateDirective, useExisting: forwardRef(() => ConcatDirective)}
+  ],
+})
+export class ConcatDirective extends UpdateDirective implements
+    AfterContentInit {
+  @ContentChildren(ValueDirective)
+  valueDirectives = new QueryList<ValueDirective>();
+  private concat: Concat|undefined;
+
+  constructor() {
+    super('concat');
+  }
+
+  ngAfterContentInit(): void {
+    const valueRefs: ValueRef[] = [];
+    for (const valueDirective of this.valueDirectives) {
+      valueRefs.push(valueDirective);
+    }
+    if (valueRefs.length > 1) {
+      this.concat = new Concat(valueRefs);
+    } else {
+      this.errorMessage = `'concat' takes at least two arguments.`;
+    }
+  }
+
+  override get(): Update {
+    if (this.concat === undefined) {
+      throw new ConfigurationError(this.errorMessage)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+    }
+    return this.concat;
+  }
+}
+
 /** A directive specifying Updates to be applied upon a user action. */
 @Directive({
+  standalone: false,
   selector: 'action',
 })
 export class ActionDirective {
@@ -479,8 +652,12 @@ export class ActionDirective {
   }
 }
 
-/** A Predicate directive triggered when its argument's value has changed. */
+/**
+ * A Predicate directive triggered for a period of time after any of its
+ * argument values has changed.
+ */
 @Directive({
+  standalone: false,
   selector: 'changed',
   providers: [{
     provide: PredicateDirective,
@@ -489,8 +666,15 @@ export class ActionDirective {
 })
 export class ChangedDirective extends PredicateDirective implements
     AfterContentInit {
-  @ContentChild(ValueDirective) valueDirective: ValueDirective|undefined;
+  @ContentChildren(ValueDirective)
+  valueDirectives = new QueryList<ValueDirective>;
+  // The duration after the change that this predicate remains 'true'.
   @Input() sinceMs = 0;
+  // If true, sinceMs is ignored and the changed directive emits an
+  // instantaneous 'true' pulse on change.  This should be only used for testing
+  // and can result in the <changed> appearing to never emit 'true' when it
+  // appears non-finally in another predicate (such as <and>).
+  @Input() noDebounce = false;
   private changed: Changed|undefined;
 
   constructor() {
@@ -498,11 +682,15 @@ export class ChangedDirective extends PredicateDirective implements
   }
 
   ngAfterContentInit(): void {
-    if (this.valueDirective === undefined) {
-      this.errorMessage = `'changed' takes exactly one argument.`;
-      return;
+    const valueRefs: ValueRef[] = [];
+    for (const valueDirective of this.valueDirectives) {
+      valueRefs.push(valueDirective);
     }
-    this.changed = new Changed(this.valueDirective, this.sinceMs);
+    if (this.noDebounce) {
+      this.changed = new Changed(valueRefs);
+    } else {
+      this.changed = new Changed(valueRefs, this.sinceMs);
+    }
   }
 
   override get(): Predicate {
@@ -517,6 +705,7 @@ export class ChangedDirective extends PredicateDirective implements
 
 /** A Predicate directive that is always satisfied. */
 @Directive({
+  standalone: false,
   selector: 'true',
   providers: [
     {provide: PredicateDirective, useExisting: forwardRef(() => TrueDirective)}
@@ -538,6 +727,7 @@ export class TrueDirective extends PredicateDirective {
 
 /** A Predicate directive that is never satisfied. */
 @Directive({
+  standalone: false,
   selector: 'false',
   providers: [
     {provide: PredicateDirective, useExisting: forwardRef(() => FalseDirective)}
@@ -559,6 +749,7 @@ export class FalseDirective extends PredicateDirective {
 
 /** A Predicate directive inverting the sense of its (predicate) argument. */
 @Directive({
+  standalone: false,
   selector: 'not',
   providers: [
     {provide: PredicateDirective, useExisting: forwardRef(() => NotDirective)}
@@ -591,6 +782,7 @@ export class NotDirective extends PredicateDirective {
  * A Predicate directive triggered when all its (predicate) arguments are true.
  */
 @Directive({
+  standalone: false,
   selector: 'and',
   providers: [
     {provide: PredicateDirective, useExisting: forwardRef(() => AndDirective)}
@@ -628,6 +820,7 @@ export class AndDirective extends PredicateDirective {
  * true.
  */
 @Directive({
+  standalone: false,
   selector: 'or',
   providers: [
     {provide: PredicateDirective, useExisting: forwardRef(() => OrDirective)}
@@ -663,6 +856,7 @@ export class OrDirective extends PredicateDirective {
  * A Predicate directive triggered when its two arguments' values are equal.
  */
 @Directive({
+  standalone: false,
   selector: 'equals',
   providers: [{
     provide: PredicateDirective,
@@ -705,6 +899,7 @@ export class EqualsDirective extends PredicateDirective implements
  * its second argument's value.
  */
 @Directive({
+  standalone: false,
   selector: 'less-than',
   providers: [{
     provide: PredicateDirective,
@@ -747,6 +942,7 @@ export class LessThanDirective extends PredicateDirective implements
  * than its second argument's value.
  */
 @Directive({
+  standalone: false,
   selector: 'greater-than',
   providers: [{
     provide: PredicateDirective,
@@ -789,6 +985,7 @@ export class GreaterThanDirective extends PredicateDirective implements
  * second argument's value.
  */
 @Directive({
+  standalone: false,
   selector: 'includes',
   providers: [{
     provide: PredicateDirective,
@@ -827,10 +1024,54 @@ export class IncludesDirective extends PredicateDirective implements
 }
 
 /**
+ * A Predicate directive triggered when its first argument's is a prefix of its
+ * second argument's value.
+ */
+@Directive({
+  standalone: false,
+  selector: 'prefix-of',
+  providers: [{
+    provide: PredicateDirective,
+    useExisting: forwardRef(() => PrefixOfDirective)
+  }],
+})
+export class PrefixOfDirective extends PredicateDirective implements
+    AfterContentInit {
+  @ContentChildren(ValueDirective)
+  valueDirectives = new QueryList<ValueDirective>();
+  private prefixOf: PrefixOf|undefined;
+
+  constructor() {
+    super('prefix-of');
+  }
+
+  ngAfterContentInit(): void {
+    const left = this.valueDirectives.get(0);
+    const right = this.valueDirectives.get(1);
+    if (left === undefined || right === undefined ||
+        this.valueDirectives.length !== 2) {
+      this.errorMessage = `'prefix-of' takes exactly two arguments.`;
+      return;
+    }
+    this.prefixOf = new PrefixOf(left, right);
+  }
+
+  override get(): Predicate {
+    if (this.prefixOf === undefined) {
+      throw new ConfigurationError(this.errorMessage)
+          .from(SOURCE)
+          .at(Severity.ERROR);
+    }
+    return this.prefixOf;
+  }
+}
+
+/**
  * A directive specifying a set of predicates governing when a specific change
  * should be made in the view.
  */
 @Directive({
+  standalone: false,
   selector: 'reaction',
 })
 export class ReactionDirective {
@@ -859,6 +1100,7 @@ export class ReactionDirective {
  * component, along with the arguments to be passed to that callback.
  */
 @Directive({
+  standalone: false,
   selector: 'watch',
 })
 export class WatchDirective {
@@ -886,6 +1128,7 @@ export class WatchDirective {
  * specific component.
  */
 @Directive({
+  standalone: false,
   selector: 'interactions',
 })
 export class InteractionsDirective {

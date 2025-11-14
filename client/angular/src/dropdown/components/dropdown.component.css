@@ -1,0 +1,7 @@
+:host {
+  display: inline-block;
+}
+
+::ng-deep .cdk-overlay-pane {
+  margin-top: 25px;
+}

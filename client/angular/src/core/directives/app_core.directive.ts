@@ -15,7 +15,7 @@
  * @fileoverview Directives used to define the app core.
  */
 
-import {AfterContentInit, ContentChild, Directive} from '@angular/core';
+import {AfterContentInit, ContentChild, ContentChildren, Directive, QueryList} from '@angular/core';
 import {ConfigurationError, Severity} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
@@ -25,32 +25,45 @@ import {GlobalStateDirective} from './global_state.directive';
 
 const SOURCE = 'app_core.directive';
 
-@Directive({selector: 'app-core'})
+/**
+ * Specifies the application's core state -- its global state initial
+ * definition and its data-query component.
+ */
+@Directive({standalone: false,
+            selector: 'app-core'})
 export class AppCoreDirective implements AfterContentInit {
   @ContentChild(GlobalStateDirective)
   globalState: GlobalStateDirective|undefined;
-  @ContentChild(DataQueryDirectiveBase)
-  dataQuery: DataQueryDirectiveBase|undefined;
+  @ContentChildren(DataQueryDirectiveBase)
+  dataQueries = new QueryList<DataQueryDirectiveBase>();
 
   constructor(readonly appCoreService: AppCoreService) {}
 
   ngAfterContentInit() {
+    const appCore = this.appCoreService.appCore;
     if (this.globalState === undefined) {
       const err = new ConfigurationError(
                       `app-core is missing required 'global-state' child.`)
                       .from(SOURCE)
                       .at(Severity.ERROR);
-      this.appCoreService.appCore.err(err);
+      appCore.err(err);
       throw err;
     }
-    if (this.dataQuery === undefined) {
-      const err = new ConfigurationError(
-                      `app-core is missing required 'data-query' directive`)
-                      .from(SOURCE)
-                      .at(Severity.ERROR);
-      this.appCoreService.appCore.err(err);
+    if (this.dataQueries.length === 0) {
+      const err =
+          new ConfigurationError(
+              `app-core must define at least one 'data-query' directive`)
+              .from(SOURCE)
+              .at(Severity.ERROR);
+      appCore.err(err);
       throw err;
     }
-    this.appCoreService.appCore.publish();
+    for (const dqd of this.dataQueries) {
+      const dq = appCore.addDataQuery(dqd.id);
+      dq.connect(dqd.fetcher);
+      dq.debounceUpdates(dqd.debounceMs);
+    }
+    this.globalState.init(appCore);
+    appCore.publish();
   }
 }

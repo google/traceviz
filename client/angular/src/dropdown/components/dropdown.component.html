@@ -1,0 +1,10 @@
+<div #container>
+  <mat-form-field [appearance]="appearance" [matTooltip]="tooltip" matTooltipPosition="above">
+    <mat-label>{{ label }}</mat-label>
+    <mat-select (selectionChange)="onSelectionChange()" [(value)]="selectedValue" [disabled]="disabled" disableOptionCentering>
+      <mat-option *ngFor="let value of optionValues" [value]="value" class="option">
+        {{ value }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>

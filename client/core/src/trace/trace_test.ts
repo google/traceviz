@@ -270,11 +270,11 @@ describe('trace test', () => {
                            {key: 'span_width_cat_px', val: int(15)},
                            {key: 'span_padding_cat_px', val: int(1)},
                            {key: 'category_header_cat_px', val: int(15)},
-                           {key: 'category_handle_temp_px', val: int(10)},
+                           {key: 'category_handle_val_px', val: int(10)},
                            {key: 'category_padding_cat_px', val: int(1)},
-                           {key: 'category_margin_temp_px', val: int(10)},
+                           {key: 'category_margin_val_px', val: int(10)},
                            {key: 'category_min_width_cat_px', val: int(16)},
-                           {key: 'category_base_width_temp_px', val: int(400)},
+                           {key: 'category_base_width_val_px', val: int(400)},
                            ),
                        ),
                    )
@@ -282,12 +282,14 @@ describe('trace test', () => {
         .toEqual({
           spanWidthCatPx: 15,
           spanPaddingCatPx: 1,
-          categoryHeaderCatPx: 15,
-          categoryHandleTempPx: 10,
-          categoryPaddingCatPx: 1,
-          categoryMarginTempPx: 10,
-          categoryMinWidthCatPx: 16,
-          categoryBaseWidthTempPx: 400,
+          categoryRenderSettings: {
+            categoryHeaderCatPx: 15,
+            categoryHandleValPx: 10,
+            categoryPaddingCatPx: 1,
+            categoryMarginValPx: 10,
+            categoryMinWidthCatPx: 16,
+            categoryBaseWidthValPx: 400,
+          },
         });
   });
 
@@ -330,7 +332,8 @@ describe('trace test', () => {
   });
 
   it('gets RPC trace', () => {
-    expect(prettyPrintTrace(Trace.fromNode(rpcNode))).toBe(`Trace:
+    expect(prettyPrintTrace(Trace.fromNode(rpcNode)))
+        .toBe(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain 0ns, 5.000m)
   Category rpc a 'RPC a' (RPC a):
     span-height self:1 total:6
@@ -441,7 +444,8 @@ describe('trace test', () => {
   });
 
   it('gets trace with embedded data', () => {
-    expect(prettyPrintTrace(Trace.fromNode(embeddedNode))).toBe(`Trace:
+    expect(prettyPrintTrace(Trace.fromNode(embeddedNode)))
+        .toBe(`Trace:
   Axis x_axis 'time from start' (Time from start) (domain 0ns, 8.333m)
   Category pid 100 'PID 100' (PID 100):
     span-height self:1 total:4
