@@ -15,14 +15,15 @@ import 'jasmine';
 
 import {prettyPrintDocumenter} from '../documentation/test_documentation.js';
 
-import {Action, And, Case, Changed, Clear, Equals, Extend, GreaterThan, If, Includes, Interactions, LessThan, Not, Or, Reaction, Set as SetP, SetIfEmpty, Switch, Toggle, True, Update, Watch} from './interactions.js';
+import {Action, And, Case, Changed, Clear, Concat, Equals, Extend, GreaterThan, If, Includes, Interactions, LessThan, Not, Or, PopLeft, PushLeft, Reaction, Set as SetP, SetIfEmpty, Swap, Switch, Toggle, True, Update, Watch} from './interactions.js';
 
-import {int, intSet, str, strs, strSet, valueMap} from '../value/test_value.js';
+import {dbl, int, ints, intSet, str, strs, strSet, valueMap} from '../value/test_value.js';
 import {IntegerValue} from '../value/value.js';
 import {ValueMap} from '../value/value_map.js';
 import {ValueRef} from '../value/value_reference.js';
 import {LocalValue, FixedValue} from '../value/value_reference.js';
 import {Subject} from 'rxjs';
+
 
 describe('interactions test', () => {
   it('clears fixed values', () => {
@@ -151,6 +152,92 @@ describe('interactions test', () => {
     expect(ids.val).toEqual(['a', 'b']);
   });
 
+  it('swaps compatible values', () => {
+    const id = str('a');
+    const otherId = str('b');
+    const swap = new Swap(new FixedValue(id), new FixedValue(otherId));
+    swap.update();
+    expect(id.val).toEqual('b');
+    expect(otherId.val).toEqual('a');
+  });
+
+  it('throws error when trying to swap incompatible values', () => {
+    const id = str('a');
+    const otherId = int(1);
+    const swap = new Swap(new FixedValue(id), new FixedValue(otherId));
+    expect(() => swap.update()).toThrowError();
+  });
+
+  it('pushes compatible values', () => {
+    const sIds = strs('a');
+    const otherSId = str('b');
+    const otherSIds = strs('c', 'd');
+    const spush = new PushLeft([
+      new FixedValue(sIds), new FixedValue(otherSId), new FixedValue(otherSIds)
+    ]);
+    spush.update();
+    expect(sIds.val).toEqual(['b', 'c', 'd', 'a']);
+
+    const iIds = ints(0);
+    const otherIId = int(1);
+    const otherIIds = ints(2, 3);
+    const ipush = new PushLeft([
+      new FixedValue(iIds), new FixedValue(otherIId), new FixedValue(otherIIds)
+    ]);
+    ipush.update();
+    expect(iIds.val).toEqual([1, 2, 3, 0]);
+  });
+
+  it('throws error when trying to push incompatible values', () => {
+    expect(() => (new PushLeft([
+                 ])).update())
+        .toThrowError();
+
+    expect(() => (new PushLeft([
+                   new FixedValue(strs('a')),
+                   new FixedValue(int(0)),
+                 ])).update())
+        .toThrowError();
+
+    expect(() => (new PushLeft([
+                   new FixedValue(str('a')),
+                   new FixedValue(str('b')),
+                 ])).update())
+        .toThrowError();
+
+    expect(() => (new PushLeft([
+                   new FixedValue(ints(0)),
+                   new FixedValue(dbl(1.5)),
+                 ])).update())
+        .toThrowError();
+
+    expect(() => (new PushLeft([
+                   new FixedValue(int(0)),
+                   new FixedValue(int(1)),
+                 ])).update())
+        .toThrowError();
+  });
+
+  it('pops', () => {
+    const sIds = strs('a', 'b', 'c');
+    const spop = new PopLeft(new FixedValue(sIds));
+    spop.update();
+    expect(sIds.val).toEqual(['b', 'c']);
+
+    const iIds = ints(0, 1, 2);
+    const ipop = new PopLeft(new FixedValue(iIds));
+    ipop.update();
+    expect(iIds.val).toEqual([1, 2]);
+  });
+  
+  it('concats compatible values', () => {
+    const id = str('a');
+    const otherId = str('b');
+    const concat = new Concat([new FixedValue(id), new FixedValue(otherId)]);
+    concat.update();
+    expect(id.val).toEqual('ab');
+  });
+
   it('handles complex predicate', () => {
     // Construct a predicate on a local value 'weight' that is only
     // true when 'weight' is above 5 and below 10, with two exceptions:
@@ -243,7 +330,7 @@ describe('interactions test', () => {
 
   it('detects changes', () => {
     const ref = str('a');
-    const changed = new Changed(new FixedValue(ref), 0);
+    const changed = new Changed(new Array(new FixedValue(ref)));
     const out: boolean[] = [];
     changed.match()().subscribe((v) => {
       out.push(v);
