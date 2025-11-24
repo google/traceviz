@@ -13,7 +13,7 @@
 
 import {int, valueMap, rpcNode, Trace, renderCategoryHierarchyForHorizontalSpans} from 'traceviz-client-core';
 import {AxesModule} from './axes.module';
-import {RectangularTraceCategoryHierarchyYAxis} from './trace-category-axes.component';
+import {RectangularCategoryHierarchyYAxis} from './category-axes.component';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {Component, ViewChild} from '@angular/core';
 
@@ -30,12 +30,12 @@ const traceData = rpcNode.with(valueMap(
 
 @Component({
   template: `
-  <rectangular-trace-category-hierarchy-y-axis>
-  </rectangular-trace-category-hierarchy-y-axis>`
+  <rectangular-category-hierarchy-y-axis>
+  </rectangular-category-hierarchy-y-axis>`
 })
 class TraceAxesTestComponent {
-  @ViewChild(RectangularTraceCategoryHierarchyYAxis)
-  traceCatYAxis!: RectangularTraceCategoryHierarchyYAxis;
+  @ViewChild(RectangularCategoryHierarchyYAxis)
+  traceCatYAxis!: RectangularCategoryHierarchyYAxis;
 }
 
 describe('x axis test', () => {
