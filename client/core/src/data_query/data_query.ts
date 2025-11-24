@@ -15,7 +15,7 @@
  * @fileoverview Defines a class mediating all TraceViz data series requests.
  */
 
-import {Subject, timer} from 'rxjs';
+import {BehaviorSubject, Subject, timer} from 'rxjs';
 import {debounce, take} from 'rxjs/operators';
 
 import {DataSeriesFetcher} from '../data_series_query/data_series_fetcher.js';

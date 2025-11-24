@@ -6,7 +6,7 @@ import {GLOBAL_TEST_DATA_FETCHER, node, ResponseNode, str, StringValue, strs, va
 
 import {DataTableModule} from '../data_table.module';
 
-import {DataTableComponent} from './data_table.component';
+import {DataTable} from './data_table.component';
 
 const tableData = node(
     valueMap(),

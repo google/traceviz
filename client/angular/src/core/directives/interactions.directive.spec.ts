@@ -14,7 +14,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {CoreModule} from '../core.module';
-import {IntegerValue, DurationValue, Duration, IntegerValue, int, str, DoubleValue, StringValue, prettyPrintDocumenter, StringListValue, StringSetValue, Timestamp, TimestampValue, ts, valueMap} from 'traceviz-client-core';
+import {DurationValue, Duration, IntegerValue, int, str, DoubleValue, StringValue, prettyPrintDocumenter, StringListValue, StringSetValue, Timestamp, TimestampValue, ts, valueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 import {AppCoreDirective} from './app_core.directive';

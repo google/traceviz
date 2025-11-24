@@ -59,7 +59,7 @@ export class TestDataQueryDirective extends DataQueryDirectiveBase implements
   }
   ngAfterContentInit(): void {
     this.appCoreService.appCore.onPublish((appCore) => {
-      this.init(appCore);
+      this.setGlobalFilters(appCore);
     });
   }
 }

@@ -13,7 +13,7 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {GLOBAL_TEST_DATA_FETCHER, IntegerValue, Request, ResponseNode, str, StringValue, valueMap} from 'traceviz-client-core';
+import {ConfigurationError, GLOBAL_TEST_DATA_FETCHER, IntegerValue, Request, ResponseNode, str, StringValue, valueMap} from 'traceviz-client-core';
 
 import {CoreModule} from '../core.module';
 import {AppCoreService} from '../services/app_core.service';
@@ -67,7 +67,7 @@ class DataSeriesQueryTestComponent {
 describe('data series directive test', () => {
   let fixture: ComponentFixture<DataSeriesQueryTestComponent>;
   const appCoreService = new AppCoreService();
-  appCoreService.appCore.configurationErrors.subscribe((err) => {
+  appCoreService.appCore.configurationErrors.subscribe((err: ConfigurationError) => {
     fail(err);
   });
 

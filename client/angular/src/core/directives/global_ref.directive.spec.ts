@@ -61,4 +61,4 @@ describe('global value directive test', () => {
     const tc = fixture.componentInstance;
     expect((tc.globalRefDir.get(undefined) as StringValue).val).toEqual('yay');
   });
-});
+})

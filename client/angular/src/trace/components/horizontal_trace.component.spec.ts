@@ -39,11 +39,11 @@ const testTrace = node(
         {key: 'span_width_cat_px', val: int(10)},
         {key: 'span_padding_cat_px', val: int(1)},
         {key: 'category_header_cat_px', val: int(0)},
-        {key: 'category_handle_temp_px', val: int(5)},
+        {key: 'category_handle_val_px', val: int(5)},
         {key: 'category_padding_cat_px', val: int(2)},
-        {key: 'category_margin_temp_px', val: int(5)},
+        {key: 'category_margin_val_px', val: int(5)},
         {key: 'category_min_width_cat_px', val: int(20)},
-        {key: 'category_base_width_temp_px', val: int(100)},
+        {key: 'category_base_width_val_px', val: int(100)},
         ),
     node(
         valueMap(
@@ -149,6 +149,7 @@ const testTrace = node(
 );
 
 @Component({
+  standalone: false,
   template: `
     <app-core>
       <global-state>
@@ -199,7 +200,9 @@ const testTrace = node(
           </value-map>
         </watch>
       </interactions>
-    </horizontal-trace>`
+    </horizontal-trace>`,
+jit: true,
+
 })
 class TraceTestComponent {
   @ViewChild(HorizontalTraceComponent) htc!: HorizontalTraceComponent;
@@ -250,7 +253,7 @@ describe('horizontal trace test', () => {
 
     const chartWidth = ht.htc.chart.nativeElement.width.baseVal.value;
     const spans: SVGRectElement[] = Array.from(
-        ht.htc.chart.nativeElement.querySelectorAll('g.chart-area > svg'));
+        ht.htc.chart.nativeElement.querySelectorAll('g.spans > svg'));
     const spanDimensions = spans.map(span => {
       return {
         xPct: Math.round(100 * span.x.baseVal.value / chartWidth),
@@ -293,7 +296,7 @@ describe('horizontal trace test', () => {
 
     // Expect the proper edges to be drawn.
     const lines: SVGLineElement[] = Array.from(
-        ht.htc.chart.nativeElement.querySelectorAll('g.chart-area > line'));
+        ht.htc.chart.nativeElement.querySelectorAll('g.edges > line'));
     const lineDimensions = lines.map(line => {
       return {
         x0Pct: Math.round(100 * line.x1.baseVal.value / chartWidth),

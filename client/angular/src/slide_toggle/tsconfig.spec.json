@@ -2,7 +2,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // "outDir": "../../out-tsc/spec/text-field",
+    // "outDir": "../../out-tsc/spec/slide-toggle",
     "types": [
       "jasmine"
     ]

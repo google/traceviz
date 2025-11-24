@@ -2,12 +2,12 @@
  * @fileoverview Types for working with bar charts.
  */
 
-import {Category, categoryProperties, getDefinedCategory} from '../category/category';
-import {RenderSettings as CategoryRenderSettings, renderSettingsFromProperties as categoryRenderSettingsFromProperties} from '../category_axis/category_axis';
-import {Axis, getAxis} from '../continuous_axis/continuous_axis';
-import {ConfigurationError, Severity} from '../errors/errors';
-import {ResponseNode} from '../protocol/response_interface';
-import {ValueMap} from '../value/value_map';
+import {Category, categoryProperties, getDefinedCategory} from '../category/category.js';
+import {RenderSettings as CategoryRenderSettings, renderSettingsFromProperties as categoryRenderSettingsFromProperties} from '../category_axis/category_axis.js';
+import {Axis, getAxis} from '../continuous_axis/continuous_axis.js';
+import {ConfigurationError, Severity} from '../errors/errors.js';
+import {ResponseNode} from '../protocol/response_interface.js';
+import {ValueMap} from '../value/value_map.js';
 
 /*
     Copyright 2023 Google Inc.

@@ -2,7 +2,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/traceviz-angular-text-field",
+    "outDir": "../../dist/traceviz-angular-text-area",
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,

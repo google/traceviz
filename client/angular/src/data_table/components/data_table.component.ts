@@ -23,7 +23,7 @@ import * as d3 from 'd3';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {AppCoreService, DataSeriesDirective, InteractionsDirective} from 'traceviz-angular-core';
-import {AppCore, CanonicalTable, Cell, ConfigurationError, DataSeriesQuery, getLabel, getStyles, Header, Interactions, ResponseNode, Row, Severity, StringValue, ValueMap} from 'traceviz-client-core';
+import {AppCore, CanonicalTable, Cell, ConfigurationError, DataSeriesQuery, getLabel, getStyles, Header, Interactions, ResponseNode, Row, Severity, StringValue} from 'traceviz-client-core';
 
 const SOURCE = 'data-table';
 

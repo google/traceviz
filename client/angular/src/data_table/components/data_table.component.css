@@ -1,18 +1,30 @@
-.table-cell {
-  overflow: hidden;
-  user-select: none;
-}
-
 .container {
   display: flex;
   flex-direction: column;
   flex: 1;
-  height: 100%
+}
+
+.highlighted {
+  background-color: PowderBlue;
+}
+
+.disable-text-selection {
+  user-select: none;
+}
+
+.table-datum {
+  overflow: hidden;
+  user-select: none;
 }
 
 .content {
   flex: 1;
   white-space: nowrap;
+}
+
+.float {
+  position: absolute;
+  width: 100%;
 }
 
 .table {
