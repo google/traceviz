@@ -36,6 +36,7 @@
     "@angular/cli": "~15.2.1",
     "@angular/compiler-cli": "^15.2.0",
     "@types/d3": "^7.4.0",
+    "@types/d3-dispatch": "3.0.2",
     "@types/jasmine": "~4.3.0",
     "@types/node": "^18.14.1",
     "@types/pako": "^2.0.0",

@@ -14,14 +14,14 @@
 import {NgModule} from '@angular/core';
 import {HovercardModule} from 'traceviz-angular-hovercard';
 
+import {RectangularCategoryHierarchyYAxis} from './category-axes.component';
 import {StandardContinuousXAxis, StandardContinuousYAxis} from './continuous-axes.component';
-import {RectangularTraceCategoryHierarchyYAxis} from './category-axes.component';
 
 @NgModule({
   declarations: [
     StandardContinuousXAxis,
     StandardContinuousYAxis,
-    RectangularTraceCategoryHierarchyYAxis,
+    RectangularCategoryHierarchyYAxis,
   ],
   imports: [
     HovercardModule,
@@ -29,7 +29,7 @@ import {RectangularTraceCategoryHierarchyYAxis} from './category-axes.component'
   exports: [
     StandardContinuousXAxis,
     StandardContinuousYAxis,
-    RectangularTraceCategoryHierarchyYAxis,
+    RectangularCategoryHierarchyYAxis,
   ],
 })
 

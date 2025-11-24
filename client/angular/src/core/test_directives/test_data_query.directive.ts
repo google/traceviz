@@ -16,12 +16,11 @@
  */
 
 import {AfterContentInit, ContentChild, Directive, forwardRef, Input} from '@angular/core';
-import {GLOBAL_TEST_DATA_FETCHER, ValueMap} from 'traceviz-client-core';
-
-import {AppCoreService} from '../services/app_core.service';
+import {DEFAULT_DATA_QUERY_ID, GLOBAL_TEST_DATA_FETCHER, ValueMap} from 'traceviz-client-core';
 
 import {DataQueryDirectiveBase} from '../directives/data_query.directive';
 import {GlobalStateDirective} from '../directives/global_state.directive';
+import {AppCoreService} from '../services/app_core.service';
 
 /**
  * A data query for use in tests.  It forces the debounce interval to 0,
@@ -39,6 +38,7 @@ import {GlobalStateDirective} from '../directives/global_state.directive';
 export class TestDataQueryDirective extends DataQueryDirectiveBase implements
     AfterContentInit {
   @Input() debounceMs = 50;
+  @Input() id = DEFAULT_DATA_QUERY_ID;
   @ContentChild(GlobalStateDirective)
   filtersDir: GlobalStateDirective|undefined;
   constructor(appCoreService: AppCoreService) {

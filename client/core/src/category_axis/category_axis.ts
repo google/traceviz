@@ -39,7 +39,7 @@ enum Key {
  * these two axes, so are suffixed 'ValPx' for a pixel extent along the
  * value axis, or 'CatPx' for a pixel extent along the category axis.
  */
-export interface RenderSettings {
+export interface TraceAxisRenderSettings {
   // The width of the category header along the category axis.  If x is the
   // value axis, this is the vertical space at the top of a category header
   // where a category label may be shown.
@@ -64,7 +64,7 @@ export interface RenderSettings {
 }
 
 export function renderSettingsFromProperties(properties: ValueMap):
-    RenderSettings {
+    TraceAxisRenderSettings {
   return {
     categoryHeaderCatPx: properties.expectNumber(Key.CATEGORY_HEADER_CAT_PX),
     categoryHandleValPx: properties.expectNumber(Key.CATEGORY_HANDLE_VAL_PX),
@@ -89,7 +89,7 @@ export class RenderedCategory {
 
   constructor(
       readonly category: Category, readonly properties: ValueMap,
-      readonly renderSettings: RenderSettings, readonly x0Px: number,
+      readonly renderSettings: TraceAxisRenderSettings, readonly x0Px: number,
       readonly y0Px: number, readonly x1Px: number, readonly y1Px: number) {}
 
   get width(): number {

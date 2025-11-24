@@ -11,33 +11,68 @@
         limitations under the License.
 */
 
-import {AppCoreService, int, str} from 'traceviz-angular-core';
+import {Component, ViewChild} from '@angular/core';
+import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {BrowserModule} from '@angular/platform-browser';
-import {CoreModule} from 'google3/third_party/traceviz/client/angular/src/core/core.module';
-import {WINDOW, UrlHashDirective} from './url_hash.directive';
+import {AppCoreService, CoreModule, TestCoreModule} from 'traceviz-angular-core';
+import {IntegerValue, StringValue} from 'traceviz-client-core';
+
 import {UrlHashModule} from '../url_hash.module';
-import {Component, ContentChild} from '@angular/core';
+
+import {UrlHashDirective, WINDOW} from './url_hash.directive';
+
 
 /** A test component to wrap a <url-hash> so that we can inspect it. */
 @Component({
   standalone: false,
   selector: 'test',
-  template: `<div></div>`,
-jit: true,
+  template: `
+  <app-core>
+    <global-state>
+      <value-map>
+        <value key="bye"><string>bye</string></value>
+        <value key="greeting"><string>hello</string></value>
+        <value key="count"><int>1</int></value>
+      </value-map>
+    </global-state>
+    <test-data-query>
+    </test-data-query>
+  </app-core>
+  <url-hash>
+    <stateful>
+      <string>bye</string>
+      <string>num</string>
+    </stateful>
+    <unencoded>
+      <value-map>
+        <value key="bye"><global-ref key="bye"></global-ref></value>
+      </value-map>
+    </unencoded>
+    <encoded>
+      <value-map>
+        <value key="greets"><global-ref key="greeting"></global-ref></value>
+        <value key="num"><global-ref key="count"></global-ref></value>
+      </value-map>
+    </encoded>
+  </url-hash>`,
+  jit: true,
 
 })
 class TestComponent {
-  @ContentChild(UrlHashDirective) urlHash: UrlHashDirective|undefined;
+  @ViewChild(UrlHashDirective) urlHash!: UrlHashDirective;
 }
 
 const mockWindow = () => {
   const location = {
     pathname: 'test.com',
-    hash: '#bye=bad&state=eJyrVkovSk0tKVayUvJIzcnJVyjJSC1KVVTSUcorzVWyMqwFAL3YCr0%253D',
+    hash:
+        '#bye=bad&state=eMKcwqtWSsKqTFXCslJKSkxRw5JRSi9KTS0pBnI9UnNyw7IVSjJSwotSFcKBw6J5wqXCuUpWwobCtQBEw6gOEg%3D%3D',
   };
 
   function saveURL(url: string) {
-    if (url == null) { return; }
+    if (url == null) {
+      return;
+    }
     const urlParts = url.split('#');
     expect(urlParts.length).toBeGreaterThanOrEqual(1);
     expect(urlParts.length).toBeLessThanOrEqual(2);
@@ -50,7 +85,8 @@ const mockWindow = () => {
   }
 
   return {
-    location, history: {
+    location,
+    history: {
       replaceState: (data: unknown, unused: string, url: string) => {
         saveURL(url);
       },
@@ -62,20 +98,15 @@ const mockWindow = () => {
 };
 
 describe('url-hash test', () => {
+  let fixture: ComponentFixture<TestComponent>;
   const appCoreService = new AppCoreService();
-    const byeVal = str('new');
-    const greetingVal = str('hello');
-    const countVal = int(1);
+  appCoreService.appCore.configurationErrors.subscribe((err) => {
+    fail(err);
+  });
 
-    beforeAll(() => {
-      appCoreService.appCore.globalState.set('bye', byeVal);
-      appCoreService.appCore.globalState.set('greeting', greetingVal);
-      appCoreService.appCore.globalState.set('count', countVal);
-      appCoreService.appCore.publish();
-    });
-
-  beforeEach(() => {
-    setupModule({
+  beforeEach(async () => {
+    appCoreService.appCore.reset();
+    await TestBed.configureTestingModule({
       providers: [
         {
           provide: AppCoreService,
@@ -92,83 +123,67 @@ describe('url-hash test', () => {
       imports: [
         BrowserModule,
         CoreModule,
+        TestCoreModule,
         UrlHashModule,
       ],
     });
+    fixture = TestBed.createComponent(TestComponent);
+    await fixture.whenStable();
   });
 
-  it('should read and write to the URL hash', () => {
-    bootstrapTemplate<TestComponent>(`
-      <test>
-        <url-hash>
-          <stateful>
-            <string>bye</string>
-            <string>num</string>
-          </stateful>
-          <unencoded>
-            <value-map>
-              <value key="bye"><global-ref key="bye"></global-ref></value>
-            </value-map>
-          </unencoded>
-          <encoded>
-            <value-map>
-              <value key="greets"><global-ref key="greeting"></global-ref></value>
-              <value key="num"><global-ref key="count"></global-ref></value>
-            </value-map>
-          </encoded>
-        </url-hash>
-      </test>`);
+  it('should read and write to the URL hash', fakeAsync(() => {
+       fixture.detectChanges();
 
-    const tc = getDebugEl('test').componentInstance;
-    const uh = tc.urlHash;
+       const ci = fixture.componentInstance;
+       const uh = ci.urlHash!;
+       const byeVal =
+           appCoreService.appCore.globalState.get('bye') as StringValue;
+       const greetingVal =
+           appCoreService.appCore.globalState.get('greeting') as StringValue;
+       const countVal =
+           appCoreService.appCore.globalState.get('count') as IntegerValue;
 
-    spyOn(uh, 'updateURL').and.callThrough();
-    flush();
-    expect(uh.updateURL).toHaveBeenCalledTimes(1);
-    expect(byeVal.val).toEqual('bad');
-    expect(greetingVal.val).toEqual('Hello there!');
+       spyOn(uh, 'updateURL').and.callThrough();
+       expect(byeVal.val).toEqual('bad');
+       expect(greetingVal.val).toEqual('Hello there!');
 
-    greetingVal.val = 'howdy';
-    flush();
-    expect(uh.updateURL).toHaveBeenCalledTimes(2);
+       console.log('updating greeting');
+       greetingVal.val = 'howdy';
+       console.log('updated greeting');
+       expect(uh.updateURL).toHaveBeenCalledTimes(1);
 
-    spyOn(uh.window.history, 'pushState').and.callThrough();
-    spyOn(uh.window.history, 'replaceState').and.callThrough();
+       spyOn(uh.window.history, 'pushState').and.callThrough();
+       spyOn(uh.window.history, 'replaceState').and.callThrough();
 
-    uh.urlHashUpdated(uh.unencodedValueMap, {'bye': 'good'});
-    flush();
-    expect(byeVal.val).toEqual('good');
-    expect(uh.window.history.pushState).toHaveBeenCalledTimes(1);
-    // Ensure that not encoding is respected.
-    expect(uh.window.location.hash).toContain('#bye=good');
+       uh.urlHashUpdated(uh.unencodedValueMap!, {'bye': 'good'});
+       expect(byeVal.val).toEqual('good');
+       expect(uh.window.history.pushState).toHaveBeenCalledTimes(1);
+       // Ensure that not encoding is respected.
+       expect(uh.window.location.hash).toContain('#bye=good');
+       uh.urlHashUpdated(uh.encodedValueMap!, {'greets': 'Well met!'});
+       expect(greetingVal.val).toEqual('Well met!');
+       expect(uh.window.history.replaceState).toHaveBeenCalledTimes(1);
+       // Ensure that encoding is respected.
+       expect(uh.window.location.hash).not.toContain('greets=Well met!');
+       expect(uh.window.location.hash)
+           .toContain(
+               'state=eMKcwqtWSi9KTS0pVsKyUgpPw43DiVHDiE0tUVTDklHDiivDjVXCsjLCrAUAwprCiQnCiw%253D%253D');
 
-    uh.urlHashUpdated(uh.encodedValueMap, {'greets': 'Well met!'});
-    flush();
-    expect(greetingVal.val).toEqual('Well met!');
-    expect(uh.window.history.replaceState).toHaveBeenCalledTimes(1);
-    // Ensure that encoding is respected.
-    expect(uh.window.location.hash).not.toContain('greets=Well met!');
-    expect(uh.window.location.hash)
-        .toContain(
-            'state=eJyrVkovSk0tKVayUgpPzclRyE0tUVTSUcorzVWyMqwFAJqJCYs%253D');
+       uh.urlHashUpdated(uh.encodedValueMap!, {'num': 100});
+       expect(countVal.val).toEqual(100);
+       expect(uh.window.history.pushState).toHaveBeenCalledTimes(2);
+       console.log(uh.window.location.hash);
+       expect(
+           uh.window.location.hash.includes(
+               'state=eMKcwqtWSi9KTS0pVsKyUgpPw43DiVHDiE0tUVTDklHDiivDjVXCsjI0MMKoBQDCrcKVCcOr'))
+           .toBeTrue();
 
-    uh.urlHashUpdated(uh.encodedValueMap, {'num': 100});
-    flush();
-    expect(countVal.val).toEqual(100);
-    expect(uh.window.history.pushState).toHaveBeenCalledTimes(2);
-    expect(
-        uh.window.location.hash.includes(
-            'state=eJyrVkovSk0tKVayUgpPzclRyE0tUVTSUcorzVWyMjQwqAUArZUJ6w%253D%253D'))
-        .toBeTrue();
-
-    // Check if unknown properties are filtered out.
-    uh.window.location.hash = '#bye=tada&bad=hi';
-    uh.parseURL();
-    expect(byeVal.val).toEqual('tada');
-    flush();
-    uh.updateURL();
-    flush();
-    expect(uh.window.location.hash).toContain('bye=tada');
-    expect(uh.window.location.hash).not.toContain('bad=hi');
-  });
+       // Check if unknown properties are filtered out.
+       uh.window.location.hash = '#bye=tada&bad=hi';
+       uh.parseURL();
+       expect(byeVal.val).toEqual('tada');
+       uh.updateURL();
+       expect(uh.window.location.hash).toContain('bye=tada');
+       expect(uh.window.location.hash).not.toContain('bad=hi');
+     }));
 });

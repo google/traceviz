@@ -14,6 +14,7 @@
 export * from './app_core/app_core.js';
 export * from './category/category.js';
 export * from './color/color.js';
+export * from './category_axis/category_axis.js';
 export * from './continuous_axis/continuous_axis.js';
 export * from './data_query/data_query.js';
 export * from './data_query/data_fetcher_interface.js';

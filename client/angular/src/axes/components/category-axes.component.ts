@@ -61,8 +61,8 @@ export abstract class CategoryHierarchyYAxis {
     useExisting: forwardRef(() => RectangularCategoryHierarchyYAxis)
   }],
 })
-export class RectangularCategoryHierarchyYAxis extends
-    CategoryHierarchyYAxis implements AfterContentInit {
+export class RectangularCategoryHierarchyYAxis extends CategoryHierarchyYAxis
+    implements AfterContentInit {
   @ContentChild(InteractionsDirective)
   interactions: InteractionsDirective|undefined;
 
@@ -126,16 +126,18 @@ export class RectangularCategoryHierarchyYAxis extends
             .attr('width', (rc: RenderedCategory) => rc.width)
             .attr('height', (rc: RenderedCategory) => rc.height)
             .on('mouseover',
-                (rc: RenderedCategory, i: number,
-                 n: ArrayLike<SVGSVGElement>) => {
+                (event: any, rc: RenderedCategory) => {
+                  const n = nodes.nodes();
+                  const i = n.indexOf(event.target);
                   d3.select(n[i]).select('rect').attr(
                       'stroke',
                       coloring.colors(rc.properties).stroke || '#cecece');
                   this.handleCategoryMouseover(rc);
                 })
             .on('mouseout',
-                (rc: RenderedCategory, i: number,
-                 n: ArrayLike<SVGSVGElement>) => {
+                (event: any, rc: RenderedCategory) => {
+                  const n = nodes.nodes();
+                  const i = n.indexOf(event.target);
                   rc = rc;
                   d3.select(n[i]).select('rect').attr('stroke', 'none');
                   this.handleCategoryMouseout(rc);
@@ -160,12 +162,10 @@ export class RectangularCategoryHierarchyYAxis extends
         .attr('class', 'handle')
         .attr(
             'width',
-            (rc: RenderedCategory) =>
-                rc.renderSettings.categoryHandleValPx)
+            (rc: RenderedCategory) => rc.renderSettings.categoryHandleValPx)
         .attr(
             'height',
-            (rc: RenderedCategory) =>
-                rc.renderSettings.categoryHeaderCatPx)
+            (rc: RenderedCategory) => rc.renderSettings.categoryHeaderCatPx)
         .attr(
             'fill',
             (rc: RenderedCategory) =>

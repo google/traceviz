@@ -19,10 +19,10 @@
 import {RenderedCategory, RenderedCategoryHierarchy} from '../category_axis/category_axis.js'
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {Node, startKey as traceEdgeStartKey} from '../trace_edge/trace_edge.js';
+import {DurationValue, TimestampValue, Value} from '../value/value.js';
 import {ValueMap} from '../value/value_map.js';
-import {Value, DurationValue, TimestampValue} from '../value/value.js';
 
-import {endKey as traceEndKey, RenderSettings as TraceRenderSettings, Span, startKey as traceStartKey, Subspan, Trace, TraceCategory} from './trace.js';
+import {endKey as traceEndKey, Span, startKey as traceStartKey, Subspan, Trace, TraceCategory, TraceRenderSettings as TraceRenderSettings} from './trace.js';
 
 const SOURCE = 'trace_renderers';
 

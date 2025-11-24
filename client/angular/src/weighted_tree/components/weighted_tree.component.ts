@@ -54,7 +54,7 @@ const supportedReactions =
   styleUrls: ['weighted_tree.component.css'],
 })
 export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
-                                     OnDestroy {
+                                              OnDestroy {
   @ContentChild(DataSeriesDirective) dataSeries: DataSeriesDirective|undefined;
   @ContentChild(InteractionsDirective, {descendants: false})
   interactionsDir: InteractionsDirective|undefined;
@@ -186,10 +186,11 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
     const wt = this;
     // Create a bounding svg for each frame.  Add a colored rectangle and a
     // text to each.
-    const nodes = d3.select<SVGSVGElement>(this.svg.nativeElement)
-                      .select<SVGSVGElement>('.chart-area')
-                      .selectAll<SVGSVGElement>('svg')
-                      .data(this.treeNodes);
+    const nodes =
+        d3.select<SVGSVGElement, RenderedTreeNode>(this.svg.nativeElement)
+            .select<SVGSVGElement>('.chart-area')
+            .selectAll<SVGSVGElement, RenderedTreeNode>('svg')
+            .data(this.treeNodes);
     // Remove any extra nodes.
     nodes.exit().remove();
     // Add any new nodes.  Each added node consists of a container SVG,
@@ -313,9 +314,11 @@ export class WeightedTreeComponent implements AfterContentInit, AfterViewInit,
                 distinctUntilChanged(),
                 )
             .subscribe((matches) => {
-              const nodes = d3.select<SVGSVGElement>(this.svg.nativeElement)
-                                .select<SVGSVGElement>('.chart-area')
-                                .selectAll<SVGSVGElement>('svg');
+              const nodes =
+                  d3.select<SVGSVGElement, RenderedTreeNode>(
+                        this.svg.nativeElement)
+                      .select<SVGSVGElement>('.chart-area')
+                      .selectAll<SVGSVGElement, RenderedTreeNode>('svg');
               const rect = nodes.select(`#rect${treeNode.id}`);
               const text = nodes.select(`#text${treeNode.id}`);
               if (matches) {

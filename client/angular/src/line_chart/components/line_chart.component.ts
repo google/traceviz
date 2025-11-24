@@ -250,46 +250,48 @@ export class LineChart implements AfterContentInit, AfterViewInit, OnDestroy {
     // Handle x-axis zooming.
     const lc = this;
     const brush =
-        d3.brushX().extent([[0, 0], [chartWidthPx, chartHeightPx]]).on('end', (event: ResponseNode) => {
-          try {
-            const extent = event.selection;
-            let minValue: Value|undefined;
-            let maxValue: Value|undefined;
-            if (!extent) {
-              minValue = new TimestampValue(new Timestamp(0, 0));
-              maxValue = new TimestampValue(new Timestamp(0, 0));
-            } else {
-              const zoomDomainMin = xScale.invert(extent[0]);
-              const zoomDomainMax = xScale.invert(extent[1]);
-              if (zoomDomainMin instanceof Date &&
-                  zoomDomainMax instanceof Date) {
-                minValue =
-                    new TimestampValue(Timestamp.fromDate(zoomDomainMin));
-                maxValue =
-                    new TimestampValue(Timestamp.fromDate(zoomDomainMax));
-              } else if (
-                  (typeof zoomDomainMin === 'number') &&
-                  (typeof zoomDomainMax === 'number')) {
-                minValue = new DoubleValue(zoomDomainMin);
-                maxValue = new DoubleValue(zoomDomainMax);
+        d3.brushX()
+            .extent([[0, 0], [chartWidthPx, chartHeightPx]])
+            .on('end', (event) => {
+              try {
+                const extent = event.selection;
+                let minValue: Value|undefined;
+                let maxValue: Value|undefined;
+                if (!extent) {
+                  minValue = new TimestampValue(new Timestamp(0, 0));
+                  maxValue = new TimestampValue(new Timestamp(0, 0));
+                } else {
+                  const zoomDomainMin = xScale.invert(extent[0]);
+                  const zoomDomainMax = xScale.invert(extent[1]);
+                  if (zoomDomainMin instanceof Date &&
+                      zoomDomainMax instanceof Date) {
+                    minValue =
+                        new TimestampValue(Timestamp.fromDate(zoomDomainMin));
+                    maxValue =
+                        new TimestampValue(Timestamp.fromDate(zoomDomainMax));
+                  } else if (
+                      (typeof zoomDomainMin === 'number') &&
+                      (typeof zoomDomainMax === 'number')) {
+                    minValue = new DoubleValue(zoomDomainMin);
+                    maxValue = new DoubleValue(zoomDomainMax);
+                  }
+                }
+                if (!minValue || !maxValue) {
+                  throw new ConfigurationError(
+                      `x-axis extents should either both be numbers, or both be Timestamps`)
+                      .from(SOURCE)
+                      .at(Severity.ERROR);
+                }
+                lc.interactions?.update(
+                    // Reset the zoomed range
+                    CHART, ACTION_BRUSH, new ValueMap(new Map([
+                      [ZOOM_START_KEY, minValue],
+                      [ZOOM_END_KEY, maxValue],
+                    ])));
+              } catch (err: unknown) {
+                this.appCoreService.appCore.err(err);
               }
-            }
-            if (!minValue || !maxValue) {
-              throw new ConfigurationError(
-                  `x-axis extents should either both be numbers, or both be Timestamps`)
-                  .from(SOURCE)
-                  .at(Severity.ERROR);
-            }
-            lc.interactions?.update(
-                // Reset the zoomed range
-                CHART, ACTION_BRUSH, new ValueMap(new Map([
-                  [ZOOM_START_KEY, minValue],
-                  [ZOOM_END_KEY, maxValue],
-                ])));
-          } catch (err: unknown) {
-            this.appCoreService.appCore.err(err);
-          }
-        });
+            });
     svg.select('.chart-area').append('g').attr('class', 'brush').call(brush);
   }
 }

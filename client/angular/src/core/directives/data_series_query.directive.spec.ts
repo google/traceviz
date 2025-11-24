@@ -19,7 +19,7 @@ import {CoreModule} from '../core.module';
 import {AppCoreService} from '../services/app_core.service';
 import {TestCoreModule} from '../test_core.module';
 
-import {DataSeriesQueryDirective} from './data_series_query.directive';
+import {DataSeriesDirective} from './data_series_query.directive';
 
 @Component({
   template: `
@@ -60,16 +60,16 @@ import {DataSeriesQueryDirective} from './data_series_query.directive';
 `
 })
 class DataSeriesQueryTestComponent {
-  @ViewChild(DataSeriesQueryDirective)
-  dataSeriesQueryDir!: DataSeriesQueryDirective;
+  @ViewChild(DataSeriesDirective) dataSeriesQueryDir!: DataSeriesDirective;
 }
 
 describe('data series directive test', () => {
   let fixture: ComponentFixture<DataSeriesQueryTestComponent>;
   const appCoreService = new AppCoreService();
-  appCoreService.appCore.configurationErrors.subscribe((err: ConfigurationError) => {
-    fail(err);
-  });
+  appCoreService.appCore.configurationErrors.subscribe(
+      (err: ConfigurationError) => {
+        fail(err);
+      });
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -94,11 +94,11 @@ describe('data series directive test', () => {
       requests.push(request);
     });
     const series: ResponseNode[] = [];
-    dataSeriesQuery?.response.subscribe((responseNode) => {
+    dataSeriesQuery?.response.subscribe((responseNode: ResponseNode) => {
       series.push(responseNode);
     });
     let loading = false;
-    dataSeriesQuery?.loading.subscribe((isLoading) => {
+    dataSeriesQuery?.loading.subscribe((isLoading: boolean) => {
       loading = isLoading;
     });
 

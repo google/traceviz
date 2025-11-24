@@ -26,12 +26,12 @@
 */
 
 import {Category, categoryEquals, categoryProperties, getDefinedCategory} from '../category/category.js';
+import {renderSettingsFromProperties as categoryRenderSettingsFromProperties, TraceAxisRenderSettings as CategoryRenderSettings} from '../category_axis/category_axis.js'
 import {Axis, axisProperties, getAxis} from '../continuous_axis/continuous_axis.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {children} from '../payload/payload.js';
 import {ResponseNode} from '../protocol/response_interface.js';
 import {ValueMap} from '../value/value_map.js';
-import {RenderSettings as CategoryRenderSettings, renderSettingsFromProperties as categoryRenderSettingsFromProperties} from '../category_axis/category_axis.js'
 
 const SOURCE = 'trace';
 
@@ -60,7 +60,7 @@ export const endKey = Key.END;
  * these two axes, so are suffixed 'ValPx' for a pixel extent along the
  * value axis, or 'CatPx' for a pixel extent along the category axis.
  */
-export interface RenderSettings {
+export interface TraceRenderSettings {
   // The padding between adjacent spans along the category axis.  If x is the
   // value axis, this is the vertical spacing between spans.
   spanWidthCatPx: number;
@@ -165,11 +165,12 @@ export class Trace<T> {
     return ret;
   }
 
-  renderSettings(): RenderSettings {
+  renderSettings(): TraceRenderSettings {
     return {
       spanWidthCatPx: this.properties.expectNumber(Key.SPAN_WIDTH_CAT_PX),
       spanPaddingCatPx: this.properties.expectNumber(Key.SPAN_PADDING_CAT_PX),
-      categoryRenderSettings: categoryRenderSettingsFromProperties(this.properties),
+      categoryRenderSettings:
+          categoryRenderSettingsFromProperties(this.properties),
     };
   }
 }

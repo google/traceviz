@@ -7,6 +7,7 @@ export * from './directives/app_core.directive';
 export * from './core.module';
 export * from './directives/data_query.directive';
 export * from './directives/data_series_query.directive';
+export * from './directives/debug.directive';
 export * from './directives/global_ref.directive';
 export * from './directives/global_state.directive';
 export * from './directives/interactions.directive';

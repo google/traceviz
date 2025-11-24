@@ -19,7 +19,7 @@
 
 import {AfterContentInit, ContentChild, Directive, HostListener, Inject, InjectionToken, OnDestroy} from '@angular/core';
 import {merge, Subject} from 'rxjs';
-import {debounceTime, takeUntil} from 'rxjs/operators';
+import {takeUntil} from 'rxjs/operators';
 import {AppCoreService, StringLiteralListDirective, ValueMapDirective} from 'traceviz-angular-core';
 import {compress, ConfigurationError, decompress, ExportedKeyValueMap, serializeHashFragment, Severity, unserializeHashFragment, ValueMap} from 'traceviz-client-core';
 
@@ -94,14 +94,14 @@ export class UrlHashDirective implements AfterContentInit, OnDestroy {
 
   constructor(
       private readonly appCoreService: AppCoreService,
-      @Inject(WINDOW) private readonly window: Window) {
-    this.updateDebouncer.pipe(takeUntil(this.destroyed), debounceTime(50))
-        .subscribe(() => {
-          this.updateURL();
-        });
+      @Inject(WINDOW) readonly window: Window) {
+    this.updateDebouncer.pipe(takeUntil(this.destroyed)).subscribe(() => {
+      this.updateURL();
+    });
   }
 
   updateURL() {
+    console.log('updating');
     let replaceState = true;
     const hash = unserializeHashFragment(this.window.location.hash);
     let decodedStateJSON: ExportedKeyValueMap|undefined;

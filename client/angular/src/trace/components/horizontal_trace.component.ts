@@ -18,9 +18,9 @@ import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetector
 import * as d3 from 'd3';
 import {Subject} from 'rxjs';
 import {debounceTime, takeUntil} from 'rxjs/operators';
-import {ContinuousXAxis, scaleFromAxis, CategoryHierarchyYAxis, xAxisRenderSettings} from 'traceviz-angular-axes';
-import {AppCoreService, InteractionsDirective} from 'traceviz-angular-core';
-import {Coloring, ConfigurationError, DoubleValue,  getLabel, renderCategoryHierarchyForHorizontalSpans, RenderedCategoryHierarchy, RenderedTraceEdge, RenderedTraceSpan, RenderedTraceSpans, renderHorizontalTraceSpans, Severity, StringValue, Timestamp, TimestampValue, Trace, Value, ValueMap} from 'traceviz-client-core';
+import {CategoryHierarchyYAxis, ContinuousXAxis, scaleFromAxis, xAxisRenderSettings} from 'traceviz-angular-axes';
+import {AppCoreService, InteractionsDirective, ValueDirective} from 'traceviz-angular-core';
+import {Coloring, ConfigurationError, DoubleValue, getLabel, renderCategoryHierarchyForHorizontalSpans, RenderedCategoryHierarchy, RenderedTraceEdge, RenderedTraceSpan, RenderedTraceSpans, renderHorizontalTraceSpans, Severity, StringValue, Timestamp, TimestampValue, Trace, Value, ValueMap} from 'traceviz-client-core';
 
 import {TraceProvider} from '../directives/trace_provider.directive';
 
@@ -545,7 +545,7 @@ export class HorizontalTraceComponent implements AfterContentInit,
       // Create a bounding svg for each frame.  Add a colored rectangle and a
       // text to each.
       const nodes = chartArea.select('.spans')
-                        .selectAll<SVGGElement, RenderedTraceSpan>('svg')
+                        .selectAll<SVGSVGElement, RenderedTraceSpan>('svg')
                         .data(this.renderedSpans.spans, d => d.renderID);
       // Remove any extra nodes.
       nodes.exit().remove();
@@ -555,14 +555,16 @@ export class HorizontalTraceComponent implements AfterContentInit,
           nodes.enter()
               .append('svg')
               .on('mouseover',
-                  (rs: RenderedTraceSpan, i: number,
-                   n: ArrayLike<SVGSVGElement>) => {
+                  (event: any, rs: RenderedTraceSpan) => {
+                    const n = nodes.nodes();
+                    const i = n.indexOf(event.target);
                     d3.select(n[i]).select('rect').attr('stroke', 'lime');
                     this.handleSpanMouseover(rs);
                   })
               .on('mouseout',
-                  (rs: RenderedTraceSpan, i: number,
-                   n: ArrayLike<SVGSVGElement>) => {
+                  (event: any, rs: RenderedTraceSpan) => {
+                    const n = nodes.nodes();
+                    const i = n.indexOf(event.target);
                     rs = rs;
                     d3.select(n[i]).select('rect').attr('stroke', 'none');
                     this.handleSpanMouseout(rs);
@@ -647,7 +649,7 @@ export class HorizontalTraceComponent implements AfterContentInit,
 
       // Add trace edges.
       const edges = chartArea.select('.edges')
-                        .selectAll<SVGGElement, RenderedTraceEdge>('line')
+                        .selectAll<SVGLineElement, RenderedTraceEdge>('line')
                         .data(this.renderedSpans.edges, d => d.renderID);
       edges.exit().remove();
       const enteredEdges = edges.enter().append('line');
@@ -679,8 +681,8 @@ export class HorizontalTraceComponent implements AfterContentInit,
       const ht = this;
       const brush = d3.brushX()
                         .extent([[0, 0], [ht.chartWidthPx, heightPx]])
-                        .on('end', () => {
-                          ht.brush(d3.event.selection, () => {
+                        .on('end', (event: any) => {
+                          ht.brush(event.selection, () => {
                             chartArea.select<SVGGElement>('.brush').call(
                                 brush.move, null);
                           });

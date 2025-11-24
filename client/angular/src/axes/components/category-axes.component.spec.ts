@@ -21,11 +21,11 @@ const traceData = rpcNode.with(valueMap(
     {key: 'span_width_cat_px', val: int(10)},
     {key: 'span_padding_cat_px', val: int(1)},
     {key: 'category_header_cat_px', val: int(0)},
-    {key: 'category_handle_temp_px', val: int(0)},
+    {key: 'category_handle_val_px', val: int(0)},
     {key: 'category_padding_cat_px', val: int(2)},
-    {key: 'category_margin_temp_px', val: int(5)},
+    {key: 'category_margin_val_px', val: int(5)},
     {key: 'category_min_width_cat_px', val: int(20)},
-    {key: 'category_base_width_temp_px', val: int(100)},
+    {key: 'category_base_width_val_px', val: int(100)},
     ));
 
 @Component({

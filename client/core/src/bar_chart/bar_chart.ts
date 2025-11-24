@@ -3,7 +3,7 @@
  */
 
 import {Category, categoryProperties, getDefinedCategory} from '../category/category.js';
-import {RenderSettings as CategoryRenderSettings, renderSettingsFromProperties as categoryRenderSettingsFromProperties} from '../category_axis/category_axis.js';
+import {renderSettingsFromProperties as categoryRenderSettingsFromProperties, TraceAxisRenderSettings as CategoryRenderSettings} from '../category_axis/category_axis.js';
 import {Axis, getAxis} from '../continuous_axis/continuous_axis.js';
 import {ConfigurationError, Severity} from '../errors/errors.js';
 import {ResponseNode} from '../protocol/response_interface.js';

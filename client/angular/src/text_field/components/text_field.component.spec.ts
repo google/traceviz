@@ -22,7 +22,7 @@ import {TextFieldComponent} from './text_field.component';
       <test-data-query>
       </test-data-query>
     </app-core>
-    <text-field [updateOnEnter]="updateOnEnter" [debounceMs]="0">
+    <text-field [updateOnEnter]="updateOnEnter">
       <interactions>
         <action type="update" target="text_field">
             <set>

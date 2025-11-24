@@ -13,6 +13,8 @@
 
 import 'jasmine';
 
+import {ExportedKeyValueMap, int, str, Value, ValueMap} from '../core.js';
+
 import {compress, decompress, serializeHashFragment, unserializeHashFragment} from './hash_encoding.js';
 
 describe('hash encoding test', () => {
@@ -54,6 +56,31 @@ describe('hash encoding test', () => {
     testCases.forEach(([hash, parsed]) => {
       expect(unserializeHashFragment(hash)).toEqual(parsed);
       expect(serializeHashFragment(parsed)).toEqual(hash);
+    });
+  });
+
+  it('compresses hashes', () => {
+    const testCases: Array<[string, ExportedKeyValueMap]> = [
+      [
+        'eMKcwqtWSsKqTFXCsgLCkzpKw6lFwqnCqSXCmXnDqUDCgcKMw5TCnMKcfMKgUHJ%2BaV7CicKSwpVhLQAiwp4NwpY%3D',
+        (new ValueMap(new Map<string, Value>([
+          ['bye', str('bye')],
+          ['greeting', str('hello')],
+          ['count', int(1)],
+        ]))).exportKeyValueMap(),
+      ],
+      [
+        'eMKcwqtWSsKqTFXCslJKSkxRw5JRSi9KTS0pBnI9UnNyw7IVSjJSwotSFcKBw6J5wqXCuUpWwobCtQBEw6gOEg%3D%3D',
+        (new ValueMap(new Map<string, Value>([
+          ['bye', str('bad')],
+          ['greets', str('Hello there!')],
+          ['num', int(1)],
+        ]))).exportKeyValueMap(),
+      ],
+    ];
+    testCases.forEach(([compressed, evm]) => {
+      expect(compress(evm)).toEqual(compressed);
+      expect(decompress<ExportedKeyValueMap>(compressed)).toEqual(evm);
     });
   });
 })

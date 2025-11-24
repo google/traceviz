@@ -13,7 +13,9 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+
 import {CoreModule} from '../core.module';
+
 import {DurationValue, Duration, IntegerValue, int, str, DoubleValue, StringValue, prettyPrintDocumenter, StringListValue, StringSetValue, Timestamp, TimestampValue, ts, valueMap} from 'traceviz-client-core';
 
 import {AppCoreService} from '../services/app_core.service';
@@ -83,8 +85,8 @@ import {takeUntil} from 'rxjs/operators';
       </if>
     </action>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class IfTestComponent {
@@ -214,8 +216,8 @@ describe('if test', () => {
       </switch>
     </action>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class SwitchTestComponent {
@@ -301,8 +303,8 @@ describe('switch test', () => {
       </swap>
     </action>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class SwapTestComponent {
@@ -384,8 +386,8 @@ describe('swap test', () => {
       </pop-left>
     </action>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class PushPopLeftTestComponent {
@@ -410,10 +412,13 @@ describe('push-left/pop-left test', () => {
     });
     fixture = TestBed.createComponent(PushPopLeftTestComponent);
     fixture.detectChanges();
-    strs =
-        appCoreService.appCore.globalState.get('strs') as StringListValue;
+    strs = appCoreService.appCore.globalState.get('strs') as StringListValue;
     moreStrs =
         appCoreService.appCore.globalState.get('more_strs') as StringListValue;
+  });
+
+  beforeEach(() => {
+    strs.val = ['a', 'b', 'c'];
   });
 
   it('pushes', () => {
@@ -438,7 +443,7 @@ describe('push-left/pop-left test', () => {
 
     itc.ints.get().update('item', 'pop', valueMap());
 
-    expect(strs.val).toEqual(['e', 'f', 'a', 'b', 'c']);
+    expect(strs.val).toEqual(['b', 'c']);
     expect(errs).toEqual([]);
   });
 });
@@ -464,8 +469,8 @@ describe('push-left/pop-left test', () => {
       </concat>
     </action>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class ConcatTestComponent {
@@ -547,8 +552,8 @@ describe('concat test', () => {
       </clear>
     </action>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class ActionTestComponent {
@@ -671,8 +676,8 @@ describe('actions test', () => {
       </and>
     </reaction>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class ReactionTestComponent {
@@ -780,8 +785,8 @@ describe('reactions test', () => {
       </changed>
     </reaction>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class ChangedTestComponent {
@@ -878,8 +883,8 @@ describe('changed test', () => {
       </value-map>
     </watch>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class WatchTestComponent {
@@ -1026,8 +1031,8 @@ describe('watch test', () => {
       </value-map>
     </watch>
   </interactions>`,
-// TODO: Make this AOT compatible. See b/352713444
-jit: true,
+  // TODO: Make this AOT compatible. See b/352713444
+  jit: true,
 
 })
 class DocTestComponent {

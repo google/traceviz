@@ -189,9 +189,7 @@ describe('interactions test', () => {
   });
 
   it('throws error when trying to push incompatible values', () => {
-    expect(() => (new PushLeft([
-                 ])).update())
-        .toThrowError();
+    expect(() => (new PushLeft([])).update()).toThrowError();
 
     expect(() => (new PushLeft([
                    new FixedValue(strs('a')),
@@ -229,7 +227,7 @@ describe('interactions test', () => {
     ipop.update();
     expect(iIds.val).toEqual([1, 2]);
   });
-  
+
   it('concats compatible values', () => {
     const id = str('a');
     const otherId = str('b');
