@@ -1,47 +1,19 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
-  "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "types": ["node", "zone.js"],
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
-      // Required to avoid incompatible-but-identical copies of rxjs in
-      // traceviz-client-core and ./; see
-      // https://blog.codewithdan.com rxjs-error-types-of-property-source-are-incompatible/
-      "rxjs": [
-        "node_modules/rxjs"
-      ],
-      "rxjs/*": [
-        "node_modules/rxjs/*"
-      ]
-    },
-    "types": [
-      "node"
-    ],
-    "declaration": false,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "ES2022",
-    "useDefineForClassFields": false,
-    "lib": [
-      "ES2022",
-      "dom"
-    ]
+      "@google/traceviz-angular-core": ["projects/core/src/public-api.ts"],
+      "@google/traceviz-angular-core/*": ["projects/core/src/*"],
+      "@google/traceviz-angular-hovercard": ["projects/hovercard/src/public-api.ts"],
+      "@google/traceviz-angular-hovercard/*": ["projects/hovercard/src/*"],
+      "@google/traceviz-angular-axes": ["dist/google/traceviz-angular-axes"],
+      "@google/traceviz-angular-axes/*": ["dist/google/traceviz-angular-axes/*"]
+    }
   },
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  },
+  "include": ["projects/**/*.ts", "projects/**/*.html"],
+  "exclude": ["**/tsconfig.spec.json"]
 }

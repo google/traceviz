@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "jasmine",
+      "node"
+    ],
+    "paths": {
+      "@google/traceviz-angular-core": [
+        "projects/core/src/public-api.ts"
+      ],
+      "@google/traceviz-angular-hovercard": [
+        "projects/hovercard/src/public-api.ts"
+      ],
+      "@google/traceviz-angular-axes": [
+        "projects/axes/src/public-api.ts"
+      ],
+      "@google/traceviz-angular-data-table": [
+        "projects/data_table/src/public-api.ts"
+      ],
+      "@google/traceviz-angular-dropdown": [
+        "projects/dropdown/src/public-api.ts"
+      ]
+
+    }
+  }
+}

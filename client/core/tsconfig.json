@@ -12,10 +12,5 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
-  },
-  "include": ["./"],
-  "exclude": [
-    "node_modules",
-    "lib",
-  ]
+  }
 }

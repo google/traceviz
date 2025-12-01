@@ -1,0 +1,22 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "strict": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@google/traceviz-angular-core": ["dist/google/traceviz-angular-core"],
+      "@google/traceviz-angular-core/*": ["dist/google/traceviz-angular-core/*"],
+      "@google/traceviz-angular-hovercard": ["dist/google/traceviz-angular-hovercard"],
+      "@google/traceviz-angular-hovercard/*": ["dist/google/traceviz-angular-hovercard/*"],
+      "@google/traceviz-angular-axes": ["dist/google/traceviz-angular-axes"],
+      "@google/traceviz-angular-axes/*": ["dist/google/traceviz-angular-axes/*"]
+    }
+  }
+}

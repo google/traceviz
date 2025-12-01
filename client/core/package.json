@@ -14,11 +14,19 @@
     "tslib": "^2.8.1",
     "typescript": "^4.9.5"
   },
-  "name": "traceviz-client-core",
+  "name": "@google/traceviz-client-core",
   "version": "1.0.0",
   "description": "A platform for building highly-reusable performance tools.",
   "exports": {
     ".": "./lib/src/core.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/google/traceviz.git",
+    "directory": "client/core"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "main": "./lib/src/core.js",
   "dependencies": {

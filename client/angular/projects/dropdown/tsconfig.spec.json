@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/spec",
+    "types": ["jasmine"],
+    "baseUrl": "./",
+    "paths": {
+      "@google/traceviz-angular-core": [
+        "../core/src/public-api.ts"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ],
+  "files": ["src/test.ts"]
+}

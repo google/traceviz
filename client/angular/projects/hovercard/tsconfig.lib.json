@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc/traceviz-angular-hovercard",
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true
+  },
+  "exclude": [
+    "**/*.spec.ts",
+    "src/test.ts"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}
