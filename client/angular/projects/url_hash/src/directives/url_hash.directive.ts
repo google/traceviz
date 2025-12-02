@@ -19,7 +19,7 @@
 
 import {AfterContentInit, ContentChild, Directive, HostListener, Inject, InjectionToken, OnDestroy} from '@angular/core';
 import {AppCoreService, StringLiteralListDirective, ValueMapDirective} from '@google/traceviz-angular-core';
-import {compress, ConfigurationError, decompress, ExportedKeyValueMap, serializeHashFragment, Severity, unserializeHashFragment, ValueMap} from '@google/traceviz-client-core';
+import {compress, ConfigurationError, decompress, ExportedKeyValueMap, serializeHashFragment, Severity, unserializeHashFragment, ValueMap} from '@traceviz/client-core';
 import {merge, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 

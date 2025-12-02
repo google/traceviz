@@ -16,7 +16,7 @@
  */
 
 import {AfterContentInit, ContentChild, ContentChildren, Directive, QueryList} from '@angular/core';
-import {ConfigurationError, Severity} from '@google/traceviz-client-core';
+import {ConfigurationError, Severity} from '@traceviz/client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 

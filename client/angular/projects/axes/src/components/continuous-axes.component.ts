@@ -12,7 +12,7 @@
 */
 
 import {Component, ElementRef, forwardRef, ViewChild} from '@angular/core';
-import {Axis, AxisType, ConfigurationError, Duration, Severity, Timestamp, ValueMap} from '@google/traceviz-client-core';
+import {Axis, AxisType, ConfigurationError, Duration, Severity, Timestamp, ValueMap} from '@traceviz/client-core';
 import * as d3 from 'd3';  // from //third_party/javascript/typings/d3:bundle
 
 const SOURCE = 'continuous_axes.component';

@@ -14,7 +14,7 @@
 import {Component, Input, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {GLOBAL_TEST_DATA_FETCHER, ResponseNode, StringValue, Trace, Duration, str, dur, int, valueMap, prettyPrintTrace, node} from '@google/traceviz-client-core';
+import {GLOBAL_TEST_DATA_FETCHER, ResponseNode, StringValue, Trace, Duration, str, dur, int, valueMap, prettyPrintTrace, node} from '@traceviz/client-core';
 import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
 import {TraceModule} from '../trace.module';
 import {UnionTracesDirective} from './trace_provider.directive';

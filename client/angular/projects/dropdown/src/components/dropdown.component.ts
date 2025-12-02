@@ -28,7 +28,7 @@ import {AfterContentInit, Component, ContentChild, ElementRef, Input, OnDestroy,
 import type {MatFormFieldAppearance} from '@angular/material/form-field';
 import {Subject} from 'rxjs';
 import {AppCoreService, InteractionsDirective} from '@google/traceviz-angular-core';
-import {ConfigurationError, IntegerListValue, IntegerSetValue, IntegerValue, Severity, StringListValue, StringSetValue, StringValue, Value, ValueMap} from '@google/traceviz-client-core';
+import {ConfigurationError, IntegerListValue, IntegerSetValue, IntegerValue, Severity, StringListValue, StringSetValue, StringValue, Value, ValueMap} from '@traceviz/client-core';
 
 /**
  * SOURCE is the 'source' provided to ConfigurationErrors generated from this

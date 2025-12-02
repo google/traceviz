@@ -16,7 +16,7 @@
  */
 
 import {AfterContentInit, ContentChild, ContentChildren, Directive, forwardRef, Input, QueryList} from '@angular/core';
-import {Action, And, Case, Changed, Clear, Concat, ConfigurationError, Do, Equals, Extend, False, GreaterThan, If, Includes, Interactions, LessThan, Not, Or, PopLeft, Predicate, PrefixOf, PushLeft, Reaction, Set as SetU, SetIfEmpty, SetOrClear, Severity, Swap, Switch, Toggle, True, Update, ValueRef, Watch} from '@google/traceviz-client-core';
+import {Action, And, Case, Changed, Clear, Concat, ConfigurationError, Do, Equals, Extend, False, GreaterThan, If, Includes, Interactions, LessThan, Not, Or, PopLeft, Predicate, PrefixOf, PushLeft, Reaction, Set as SetU, SetIfEmpty, SetOrClear, Severity, Swap, Switch, Toggle, True, Update, ValueRef, Watch} from '@traceviz/client-core';
 
 import {ValueDirective} from './value.directive';
 import {ValueMapDirective} from './value_map.directive';

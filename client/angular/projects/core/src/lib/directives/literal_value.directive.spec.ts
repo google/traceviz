@@ -13,7 +13,7 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {DoubleValue, Duration, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, Timestamp, TimestampValue} from '@google/traceviz-client-core';
+import {DoubleValue, Duration, DurationValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, Timestamp, TimestampValue} from '@traceviz/client-core';
 
 import {CoreModule} from '../core.module';
 

@@ -4,8 +4,7 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "client/core",
-      "client/angular/libs/*"
+      "client/angular"
     ]
   },
   "devDependencies": {

@@ -12,7 +12,7 @@
 */
 
 import {AfterContentInit, ContentChild, Directive, OnDestroy} from '@angular/core';
-import {ConfigurationError, Severity, ValueMap} from '@google/traceviz-client-core';
+import {ConfigurationError, Severity, ValueMap} from '@traceviz/client-core';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 

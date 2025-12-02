@@ -16,7 +16,7 @@
  */
 
 import {AfterContentInit, ContentChild, Directive, forwardRef, Input} from '@angular/core';
-import {AppCore, ConfigurationError, DataFetcherInterface, DEFAULT_DATA_QUERY_ID, Severity, ValueMap} from '@google/traceviz-client-core';
+import {AppCore, ConfigurationError, DataFetcherInterface, DEFAULT_DATA_QUERY_ID, Severity, ValueMap} from '@traceviz/client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 

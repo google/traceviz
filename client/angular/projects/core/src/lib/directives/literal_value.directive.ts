@@ -17,7 +17,7 @@
  */
 
 import {AfterContentInit, ContentChildren, Directive, ElementRef, forwardRef, QueryList} from '@angular/core';
-import {DoubleValue, Duration, DurationValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, Timestamp, TimestampValue, Value, ValueMap} from '@google/traceviz-client-core';
+import {DoubleValue, Duration, DurationValue, EmptyValue, IntegerListValue, IntegerSetValue, IntegerValue, StringListValue, StringSetValue, StringValue, Timestamp, TimestampValue, Value, ValueMap} from '@traceviz/client-core';
 
 import {ValueDirective} from './value.directive';
 

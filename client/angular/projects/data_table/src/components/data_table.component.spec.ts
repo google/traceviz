@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
-import {GLOBAL_TEST_DATA_FETCHER, node, ResponseNode, str, StringValue, strs, valueMap} from '@google/traceviz-client-core';
+import {GLOBAL_TEST_DATA_FETCHER, node, ResponseNode, str, StringValue, strs, valueMap} from '@traceviz/client-core';
 
 import {DataTable} from './data_table.component';
 import {DataTableModule} from './data_table.module';

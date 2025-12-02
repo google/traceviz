@@ -13,7 +13,7 @@
 
 import {AfterContentInit, Component, ContentChild, Input, OnDestroy} from '@angular/core';
 import {AppCoreService, InteractionsDirective} from '@google/traceviz-angular-core';
-import {ConfigurationError, Severity, StringValue, Value, ValueMap} from '@google/traceviz-client-core';
+import {ConfigurationError, Severity, StringValue, Value, ValueMap} from '@traceviz/client-core';
 import {Subject} from 'rxjs';
 
 /**

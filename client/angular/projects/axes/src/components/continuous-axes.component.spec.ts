@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-import {getAxis, Timestamp, str, dbl, int, ts, valueMap} from '@google/traceviz-client-core';
+import {getAxis, Timestamp, str, dbl, int, ts, valueMap} from '@traceviz/client-core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {Component, ViewChild} from '@angular/core';
 import {AxesModule} from './axes.module';

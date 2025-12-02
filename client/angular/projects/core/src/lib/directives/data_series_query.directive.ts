@@ -16,7 +16,7 @@
  */
 
 import {AfterContentInit, ContentChild, Directive, Input, OnDestroy} from '@angular/core';
-import {ConfigurationError, DataSeriesQuery, DEFAULT_DATA_QUERY_ID, Severity, StringValue, ValueMap} from '@google/traceviz-client-core';
+import {ConfigurationError, DataSeriesQuery, DEFAULT_DATA_QUERY_ID, Severity, StringValue, ValueMap} from '@traceviz/client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 

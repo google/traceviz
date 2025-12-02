@@ -15,7 +15,7 @@
  * @fileoverview A set of interactions directives.
  */
 
-import {Value, ValueMap, ValueRef} from '@google/traceviz-client-core';
+import {Value, ValueMap, ValueRef} from '@traceviz/client-core';
 
 /** A base class for directives specifying Values. */
 export abstract class ValueDirective implements ValueRef {

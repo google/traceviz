@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-import {GLOBAL_TEST_DATA_FETCHER, RenderedTreeNode, ResponseNode, StringValue, Value, ValueMap, dbl, int, node, str, strs, valueMap} from '@google/traceviz-client-core';
+import {GLOBAL_TEST_DATA_FETCHER, RenderedTreeNode, ResponseNode, StringValue, Value, ValueMap, dbl, int, node, str, strs, valueMap} from '@traceviz/client-core';
 import {WeightedTree} from './weighted_tree.component';
 import {Component, ViewChild} from '@angular/core';
 import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';

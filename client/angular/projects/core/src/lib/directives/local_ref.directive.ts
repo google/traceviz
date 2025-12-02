@@ -16,7 +16,7 @@
  */
 
 import {Directive, forwardRef, Input} from '@angular/core';
-import {ConfigurationError, Severity, Value, ValueMap} from '@google/traceviz-client-core';
+import {ConfigurationError, Severity, Value, ValueMap} from '@traceviz/client-core';
 
 import {ValueDirective} from './value.directive';
 

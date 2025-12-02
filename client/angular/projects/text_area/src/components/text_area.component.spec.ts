@@ -5,7 +5,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatInputHarness} from '@angular/material/input/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
-import {StringValue} from '@google/traceviz-client-core';
+import {StringValue} from '@traceviz/client-core';
 
 import {TextArea} from './text_area.component';
 import {TextAreaModule} from './text_area.module';

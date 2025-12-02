@@ -15,7 +15,7 @@ import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {BrowserModule} from '@angular/platform-browser';
 import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
-import {IntegerValue, StringValue} from '@google/traceviz-client-core';
+import {IntegerValue, StringValue} from '@traceviz/client-core';
 
 import {UrlHashDirective, WINDOW} from './url_hash.directive';
 import {UrlHashModule} from './url_hash.module';

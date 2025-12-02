@@ -17,7 +17,7 @@
 
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {ConfigurationError, DataFetcherInterface, fromObject, Request, Response, toObject} from '@google/traceviz-client-core';
+import {ConfigurationError, DataFetcherInterface, fromObject, Request, Response, toObject} from '@traceviz/client-core';
 import {Observable, OperatorFunction, throwError} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 

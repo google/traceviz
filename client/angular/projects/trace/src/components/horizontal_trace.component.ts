@@ -17,7 +17,7 @@ import {animate, style, transition, trigger} from '@angular/animations';
 import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, Directive, ElementRef, HostListener, Input, OnDestroy, ViewChild} from '@angular/core';
 import {CategoryHierarchyYAxis, ContinuousXAxis, scaleFromAxis, xAxisRenderSettings} from '@google/traceviz-angular-axes';
 import {AppCoreService, InteractionsDirective, ValueDirective} from '@google/traceviz-angular-core';
-import {Coloring, ConfigurationError, DoubleValue, getLabel, renderCategoryHierarchyForHorizontalSpans, RenderedCategoryHierarchy, RenderedTraceEdge, RenderedTraceSpan, RenderedTraceSpans, renderHorizontalTraceSpans, Severity, StringValue, Timestamp, TimestampValue, Trace, Value, ValueMap} from '@google/traceviz-client-core';
+import {Coloring, ConfigurationError, DoubleValue, getLabel, renderCategoryHierarchyForHorizontalSpans, RenderedCategoryHierarchy, RenderedTraceEdge, RenderedTraceSpan, RenderedTraceSpans, renderHorizontalTraceSpans, Severity, StringValue, Timestamp, TimestampValue, Trace, Value, ValueMap} from '@traceviz/client-core';
 import * as d3 from 'd3';
 import {Subject} from 'rxjs';
 import {debounceTime, takeUntil} from 'rxjs/operators';

@@ -16,7 +16,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {AppCore} from '@google/traceviz-client-core';
+import {AppCore} from '@traceviz/client-core';
 
 /** An injectable service providing a global AppCore. */
 @Injectable({

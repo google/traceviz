@@ -16,7 +16,7 @@
  */
 
 import {ContentChild, Directive} from '@angular/core';
-import {AppCore, ConfigurationError, Severity} from '@google/traceviz-client-core';
+import {AppCore, ConfigurationError, Severity} from '@traceviz/client-core';
 
 import {ValueMapDirective} from './value_map.directive';
 

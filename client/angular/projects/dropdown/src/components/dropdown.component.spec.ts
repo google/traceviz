@@ -18,7 +18,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatSelectHarness} from '@angular/material/select/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
-import {IntegerListValue, IntegerValue, StringListValue, StringValue} from '@google/traceviz-client-core';
+import {IntegerListValue, IntegerValue, StringListValue, StringValue} from '@traceviz/client-core';
 
 import {Dropdown} from './dropdown.component';
 import {DropdownModule} from './dropdown.module';

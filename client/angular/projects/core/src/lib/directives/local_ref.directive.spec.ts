@@ -13,7 +13,7 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {str, StringValue, valueMap} from '@google/traceviz-client-core';
+import {str, StringValue, valueMap} from '@traceviz/client-core';
 
 import {CoreModule} from '../core.module';
 

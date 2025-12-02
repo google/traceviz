@@ -13,7 +13,7 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {ConfigurationError, GLOBAL_TEST_DATA_FETCHER, IntegerValue, Request, ResponseNode, str, StringValue, valueMap} from '@google/traceviz-client-core';
+import {ConfigurationError, GLOBAL_TEST_DATA_FETCHER, IntegerValue, Request, ResponseNode, str, StringValue, valueMap} from '@traceviz/client-core';
 
 import {CoreModule, DataSeriesDirective} from '../core.module';
 import {AppCoreService} from '../services/app_core.service';

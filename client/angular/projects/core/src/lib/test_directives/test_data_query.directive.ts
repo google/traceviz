@@ -16,7 +16,7 @@
  */
 
 import {AfterContentInit, ContentChild, Directive, forwardRef, Input} from '@angular/core';
-import {DEFAULT_DATA_QUERY_ID, GLOBAL_TEST_DATA_FETCHER, ValueMap} from '@google/traceviz-client-core';
+import {DEFAULT_DATA_QUERY_ID, GLOBAL_TEST_DATA_FETCHER, ValueMap} from '@traceviz/client-core';
 
 import {DataQueryDirectiveBase} from '../directives/data_query.directive';
 import {GlobalStateDirective} from '../directives/global_state.directive';

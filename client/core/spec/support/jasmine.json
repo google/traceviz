@@ -7,6 +7,6 @@
       }
     }
   ],
-  "spec_dir": "lib",
+  "spec_dir": "dist",
   "spec_files": ["**/*_test.js"]
 }

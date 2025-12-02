@@ -1,7 +1,7 @@
 import {AfterContentInit, Component, OnDestroy} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {AppCoreService} from '@google/traceviz-angular-core';
-import {ConfigurationError} from '@google/traceviz-client-core';
+import {ConfigurationError} from '@traceviz/client-core';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 

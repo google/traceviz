@@ -11,7 +11,7 @@
         limitations under the License.
 */
 
-import {int, valueMap, rpcNode, Trace, renderCategoryHierarchyForHorizontalSpans} from '@google/traceviz-client-core';
+import {int, valueMap, rpcNode, Trace, renderCategoryHierarchyForHorizontalSpans} from '@traceviz/client-core';
 import {AxesModule} from './axes.module';
 import {RectangularCategoryHierarchyYAxis} from './category-axes.component';
 import {ComponentFixture, TestBed} from '@angular/core/testing';

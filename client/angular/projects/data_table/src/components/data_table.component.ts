@@ -20,7 +20,7 @@ import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetector
 import {MatPaginator} from '@angular/material/paginator';
 import {Sort} from '@angular/material/sort';
 import {AppCoreService, DataSeriesDirective, InteractionsDirective} from '@google/traceviz-angular-core';
-import {AppCore, CanonicalTable, Cell, ConfigurationError, DataSeriesQuery, getLabel, getStyles, Header, Interactions, ResponseNode, Row, Severity, StringValue} from '@google/traceviz-client-core';
+import {AppCore, CanonicalTable, Cell, ConfigurationError, DataSeriesQuery, getLabel, getStyles, Header, Interactions, ResponseNode, Row, Severity, StringValue} from '@traceviz/client-core';
 import * as d3 from 'd3';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';

@@ -12,7 +12,7 @@
 */
 
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {Request, Response, ResponseNode, SeriesRequest, str, valueMap, ValueMap} from '@google/traceviz-client-core';
+import {Request, Response, ResponseNode, SeriesRequest, str, valueMap, ValueMap} from '@traceviz/client-core';
 import {Observable, Observer} from 'rxjs';
 
 import {AppCoreService} from '../services/app_core.service';

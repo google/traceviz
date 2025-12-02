@@ -20,7 +20,7 @@ import {TraceModule} from '../trace.module';
 
 import {HorizontalTraceComponent} from './horizontal_trace.component';
 
-import {GLOBAL_TEST_DATA_FETCHER, StringValue, TimestampValue, Timestamp, ResponseNode, node, ts, int, str, strs, valueMap} from '@google/traceviz-client-core';
+import {GLOBAL_TEST_DATA_FETCHER, StringValue, TimestampValue, Timestamp, ResponseNode, node, ts, int, str, strs, valueMap} from '@traceviz/client-core';
 
 function sec(sec: number): Timestamp {
   return new Timestamp(sec, 0);

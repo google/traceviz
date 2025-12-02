@@ -17,7 +17,7 @@
  */
 
 import {ContentChild, ContentChildren, Directive, Input, QueryList} from '@angular/core';
-import {ConfigurationError, KeyedValueRef, Severity, Value, ValueMap, ValueRefMap} from '@google/traceviz-client-core';
+import {ConfigurationError, KeyedValueRef, Severity, Value, ValueMap, ValueRefMap} from '@traceviz/client-core';
 
 import {ValueDirective} from './value.directive';
 

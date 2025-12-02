@@ -4,7 +4,11 @@
   "private": true,
   "dependencies": {
     "@angular/material": "^15.2.0",
-    "@angular/cdk": "^15.2.0"
+    "@angular/cdk": "^15.2.0",
+    "@traceviz/client-core": "^1.0.1",
+    "d3": "^7.0.0",
+    "@types/d3": "^7.4.3",
+    "@types/d3-dispatch": "3.0.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.2.0",

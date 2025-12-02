@@ -16,7 +16,7 @@
  */
 
 import {AfterContentInit, Directive, forwardRef, Input} from '@angular/core';
-import {AppCore, ConfigurationError, Severity, Value, ValueMap} from '@google/traceviz-client-core';
+import {AppCore, ConfigurationError, Severity, Value, ValueMap} from '@traceviz/client-core';
 
 import {AppCoreService} from '../services/app_core.service';
 

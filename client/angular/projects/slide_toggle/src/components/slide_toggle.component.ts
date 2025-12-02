@@ -17,7 +17,7 @@
 
 import {AfterContentInit, Component, ContentChild, Input, OnDestroy} from '@angular/core';
 import {AppCoreService, ValueMapDirective} from '@google/traceviz-angular-core';
-import {ConfigurationError, EmptyValue, Severity, Value} from '@google/traceviz-client-core';
+import {ConfigurationError, EmptyValue, Severity, Value} from '@traceviz/client-core';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 

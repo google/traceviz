@@ -21,7 +21,7 @@
 import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, Input, OnDestroy, ViewChild} from '@angular/core';
 import {axisValue, ContinuousXAxis, ContinuousYAxis, scaleFromAxis, xAxisRenderSettings, yAxisRenderSettings} from '@google/traceviz-angular-axes';
 import {AppCoreService, DataSeriesDirective, InteractionsDirective} from '@google/traceviz-angular-core';
-import {AppCore, Coloring, ConfigurationError, DataSeriesQuery, DoubleValue, Interactions, Point, ResponseNode, Series, Severity, Timestamp, TimestampValue, Value, ValueMap, XYChart as XYChartData} from '@google/traceviz-client-core';
+import {AppCore, Coloring, ConfigurationError, DataSeriesQuery, DoubleValue, Interactions, Point, ResponseNode, Series, Severity, Timestamp, TimestampValue, Value, ValueMap, XYChart as XYChartData} from '@traceviz/client-core';
 import {brushX} from 'd3-brush';
 import {select} from 'd3-selection';
 import {curveLinear, line} from 'd3-shape';
