@@ -1,5 +1,5 @@
 {
-  "name": "@google/traceviz-angular-error-message",
+  "name": "@traceviz/angular-error-message",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^15.2.0",

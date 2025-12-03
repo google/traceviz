@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
-  "dest": "../../dist/google/traceviz-angular-text-field",
+  "dest": "../../dist/traceviz/angular/text-field",
   "lib": {
     "entryFile": "src/public-api.ts"
   }

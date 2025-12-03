@@ -27,7 +27,7 @@
 import {AfterContentInit, Component, ContentChild, ElementRef, Input, OnDestroy, ViewChild} from '@angular/core';
 import type {MatFormFieldAppearance} from '@angular/material/form-field';
 import {Subject} from 'rxjs';
-import {AppCoreService, InteractionsDirective} from '@google/traceviz-angular-core';
+import {AppCoreService, InteractionsDirective} from '@traceviz/angular-core';
 import {ConfigurationError, IntegerListValue, IntegerSetValue, IntegerValue, Severity, StringListValue, StringSetValue, StringValue, Value, ValueMap} from '@traceviz/client-core';
 
 /**

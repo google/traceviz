@@ -1,5 +1,5 @@
 {
-  "name": "@google/traceviz-angular-dropdown",
+  "name": "@traceviz/angular-dropdown",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^15.2.0",

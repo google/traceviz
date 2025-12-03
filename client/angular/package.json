@@ -1,15 +1,7 @@
 {
-  "name": "@google/traceviz-angular",
-  "version": "0.0.0",
+  "name": "traceviz-angular-workspace",
   "private": true,
-  "dependencies": {
-    "@angular/material": "^15.2.0",
-    "@angular/cdk": "^15.2.0",
-    "@traceviz/client-core": "^1.0.1",
-    "d3": "^7.0.0",
-    "@types/d3": "^7.4.3",
-    "@types/d3-dispatch": "3.0.2"
-  },
+  "version": "0.0.0",
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.2.0",
     "@angular/animations": "^15.2.0",
@@ -36,10 +28,18 @@
     "tslib": "^2.8.1",
     "typescript": "^4.9.5"
   },
+  "dependencies": {
+    "@angular/material": "^15.2.0",
+    "@angular/cdk": "^15.2.0",
+    "@traceviz/client-core": "^1.0.1",
+    "d3": "^7.0.0",
+    "@types/d3": "^7.4.3",
+    "@types/d3-dispatch": "3.0.2"
+  },
   "scripts": {
     "test": "ng test",
     "build": "echo 'Build from individual libraries'",
-    "clean": "rimraf libs/*/dist",
+    "clean": "rimraf dist .angular node_modules/.cache",
     "build:all": "ng build core && ng build hovercard && ng build axes && ng build data-table && ng build dropdown && ng build error-message && ng build keypress && ng build line-chart && ng build slide-toggle && ng build text-area && ng build text-field && ng build trace && ng build update-values && ng build url-hash && ng build weighted-tree",
     "test:all": "ng test core --watch=false && ng test hovercard --watch=false && ng test axes --watch=false && ng test data-table --watch=false && ng test dropdown --watch=false && ng test error-message --watch=false && ng test keypress --watch=false && ng test line-chart --watch=false && ng test slide-toggle --watch=false && ng test text-area --watch=false && ng test text-field --watch=false && ng test trace --watch=false && ng test update_values --watch=false && ng test url-hash --watch=false && ng test weighted-tree --watch=false"
   }

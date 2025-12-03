@@ -4,7 +4,7 @@
     "outDir": "../../out-tsc/spec",
     "baseUrl": "./",
     "paths": {
-      "@google/traceviz-angular-core": [
+      "@traceviz/angular-core": [
         "../core/src/public-api.ts"
       ]
     }

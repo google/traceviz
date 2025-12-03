@@ -15,7 +15,7 @@ import {NgModule} from '@angular/core';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatSelectModule} from '@angular/material/select';
 import {BrowserModule} from '@angular/platform-browser';
-import {CoreModule} from '@google/traceviz-angular-core';
+import {CoreModule} from '@traceviz/angular-core';
 
 import {LineChart} from './line_chart.component';
 

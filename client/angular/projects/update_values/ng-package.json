@@ -1,6 +1,6 @@
 {
   "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
-  "dest": "../../dist/google/traceviz-angular-update-values",
+  "dest": "../../dist/traceviz/angular/update-values",
   "lib": {
     "entryFile": "src/public-api.ts"
   }

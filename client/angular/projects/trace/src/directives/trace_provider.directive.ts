@@ -12,7 +12,7 @@
 */
 
 import {AfterContentInit, ContentChild, ContentChildren, Directive, forwardRef, OnDestroy, QueryList} from '@angular/core';
-import {AppCoreService, DataSeriesDirective} from '@google/traceviz-angular-core';
+import {AppCoreService, DataSeriesDirective} from '@traceviz/angular-core';
 import {DataSeriesQuery, Trace} from '@traceviz/client-core';
 import {BehaviorSubject, combineLatest, ReplaySubject, Subject} from 'rxjs';
 import {map, takeUntil} from 'rxjs/operators';

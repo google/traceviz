@@ -12,7 +12,7 @@
 */
 
 import {AfterContentInit, ContentChild, Directive, OnDestroy} from '@angular/core';
-import {AppCoreService, DataSeriesDirective, InteractionsDirective, ValueMapDirective} from '@google/traceviz-angular-core';
+import {AppCoreService, DataSeriesDirective, InteractionsDirective, ValueMapDirective} from '@traceviz/angular-core';
 import {Interactions} from '@traceviz/client-core';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';

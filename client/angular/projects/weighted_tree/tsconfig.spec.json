@@ -4,10 +4,10 @@
     "outDir": "../../out-tsc/spec",
     "baseUrl": "./",
     "paths": {
-      "@google/traceviz-angular-core": [
+      "@traceviz/angular-core": [
         "../core/src/public-api.ts"
       ],
-      "@google/traceviz-angular-hovercard": [
+      "@traceviz/angular-hovercard": [
         "../hovercard/src/public-api.ts"
       ]
     }

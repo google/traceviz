@@ -9,7 +9,16 @@
   },
   "devDependencies": {
     "ng-packagr": "^15.2.2",
+    "rimraf": "^6.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "clean": "rimraf dist client/angular/dist client/core/dist client/angular/.angular client/angular/node_modules/.cache client/core/node_modules/.cache .angular",
+    "deep-clean": "rimraf client/angular/node_modules client/core/node_modules node_modules",
+    "reset": "rimraf client/angular/node_modules client/core/node_modules node_modules package-lock.json",
+    "ng": "cd client/angular && npx ng",
+    "build:angular": "cd client/angular && npx ng build",
+    "build:all": "npm run build:all --workspace=traceviz-angular-workspace"
   }
 }

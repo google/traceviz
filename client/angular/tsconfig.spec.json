@@ -6,19 +6,19 @@
       "node"
     ],
     "paths": {
-      "@google/traceviz-angular-core": [
+      "@traceviz/angular-core": [
         "projects/core/src/public-api.ts"
       ],
-      "@google/traceviz-angular-hovercard": [
+      "@traceviz/angular-hovercard": [
         "projects/hovercard/src/public-api.ts"
       ],
-      "@google/traceviz-angular-axes": [
+      "@traceviz/angular-axes": [
         "projects/axes/src/public-api.ts"
       ],
-      "@google/traceviz-angular-data-table": [
+      "@traceviz/angular-data-table": [
         "projects/data_table/src/public-api.ts"
       ],
-      "@google/traceviz-angular-dropdown": [
+      "@traceviz/angular-dropdown": [
         "projects/dropdown/src/public-api.ts"
       ]
 

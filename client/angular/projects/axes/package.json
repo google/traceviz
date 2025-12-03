@@ -1,13 +1,13 @@
 {
-  "name": "@google/traceviz-angular-axes",
+  "name": "@traceviz/angular-axes",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^15.2.0",
     "@angular/core": "^15.2.0",
     "d3": "^7.8.2",
     "rxjs": "~7.8.0",
-    "@google/traceviz-angular-core": "^0.0.1",
-    "@google/traceviz-angular-hovercard": "^0.0.1"
+    "@traceviz/angular-core": "^0.0.1",
+    "@traceviz/angular-hovercard": "^0.0.1"
   },
   "dependencies": {
     "tslib": "^2.3.0"

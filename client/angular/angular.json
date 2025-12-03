@@ -3,6 +3,20 @@
   "version": 1,
   "newProjectRoot": "src",
   "projects": {
+    "angular": {
+      "root": "",
+      "sourceRoot": "projects/angular/src",
+      "projectType": "library",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "projects/angular/tsconfig.lib.json",
+            "project": "projects/angular/ng-package.json"
+          }
+        }
+      }
+    },
     "core": {
       "projectType": "library",
       "root": "projects/core",

@@ -14,7 +14,7 @@
 import {GLOBAL_TEST_DATA_FETCHER, RenderedTreeNode, ResponseNode, StringValue, Value, ValueMap, dbl, int, node, str, strs, valueMap} from '@traceviz/client-core';
 import {WeightedTree} from './weighted_tree.component';
 import {Component, ViewChild} from '@angular/core';
-import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
+import {AppCoreService, CoreModule, TestCoreModule} from '@traceviz/angular-core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {WeightedTreeModule} from './weighted-tree.module';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';

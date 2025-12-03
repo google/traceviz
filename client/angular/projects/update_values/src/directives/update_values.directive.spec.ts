@@ -13,7 +13,7 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
+import {AppCoreService, CoreModule, TestCoreModule} from '@traceviz/angular-core';
 import {GLOBAL_TEST_DATA_FETCHER, int, IntegerValue, node, ResponseNode, str, StringValue, valueMap} from '@traceviz/client-core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {UpdateValuesModule} from './update_values.module';

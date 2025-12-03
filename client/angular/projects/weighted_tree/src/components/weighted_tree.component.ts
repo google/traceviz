@@ -18,7 +18,7 @@
  */
 
 import {AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, HostListener, Input, OnDestroy, ViewChild} from '@angular/core';
-import {AppCoreService, DataSeriesDirective, InteractionsDirective} from '@google/traceviz-angular-core';
+import {AppCoreService, DataSeriesDirective, InteractionsDirective} from '@traceviz/angular-core';
 import {DataSeriesQuery, getStyle, Interactions, RenderedTreeNode, Tree} from '@traceviz/client-core';
 import * as d3 from 'd3';
 import {Subject} from 'rxjs';

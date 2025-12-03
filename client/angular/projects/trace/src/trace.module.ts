@@ -15,8 +15,8 @@ import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {BrowserModule} from '@angular/platform-browser';
-import {CoreModule} from '@google/traceviz-angular-core';
-import {HovercardModule} from '@google/traceviz-angular-hovercard';
+import {CoreModule} from '@traceviz/angular-core';
+import {HovercardModule} from '@traceviz/angular-hovercard';
 
 import {HorizontalTraceComponent, VerticalRuleColorDirective} from './components/horizontal_trace.component';
 import {TraceDirective, UnionTracesDirective} from './directives/trace_provider.directive';

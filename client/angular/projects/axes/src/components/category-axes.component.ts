@@ -3,7 +3,7 @@
  */
 
 import {AfterContentInit, Component, ContentChild, ElementRef, forwardRef, Input, ViewChild} from '@angular/core';
-import {AppCoreService, InteractionsDirective} from '@google/traceviz-angular-core';
+import {AppCoreService, InteractionsDirective} from '@traceviz/angular-core';
 import {Coloring, getLabel, RenderedCategory, RenderedCategoryHierarchy} from '@traceviz/client-core';
 import * as d3 from 'd3';
 

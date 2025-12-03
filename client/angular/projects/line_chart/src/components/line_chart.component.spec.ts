@@ -1,6 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
+import {AppCoreService, CoreModule, TestCoreModule} from '@traceviz/angular-core';
 import {GLOBAL_TEST_DATA_FETCHER, node, Timestamp, dbl, int, str, strs, ts, valueMap, ResponseNode, StringValue, TimestampValue} from '@traceviz/client-core';
 import {LineChart} from './line_chart.component';
 import {LineChartModule} from './line_chart.module';

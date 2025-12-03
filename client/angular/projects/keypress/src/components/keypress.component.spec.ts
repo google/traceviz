@@ -14,7 +14,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {AppCoreService, CoreModule, TestCoreModule} from '@google/traceviz-angular-core';
+import {AppCoreService, CoreModule, TestCoreModule} from '@traceviz/angular-core';
 import {IntegerValue, StringSetValue} from '@traceviz/client-core';
 
 import {KeypressComponent} from './keypress.component';

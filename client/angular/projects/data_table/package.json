@@ -1,5 +1,5 @@
 {
-  "name": "@google/traceviz-angular-data-table",
+  "name": "@traceviz/angular-data-table",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^15.2.0",

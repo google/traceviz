@@ -16,7 +16,7 @@
 */
 
 import {AfterContentInit, ChangeDetectionStrategy, Component, ContentChild, HostListener} from '@angular/core';
-import {AppCoreService, InteractionsDirective} from '@google/traceviz-angular-core';
+import {AppCoreService, InteractionsDirective} from '@traceviz/angular-core';
 import {Interactions, StringSetValue, ValueMap} from '@traceviz/client-core';
 
 const DEPRESSED_KEY_CODES = 'depressed_key_codes';
