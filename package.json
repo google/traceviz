@@ -19,6 +19,7 @@
     "reset": "rimraf client/angular/node_modules client/core/node_modules node_modules package-lock.json",
     "ng": "cd client/angular && npx ng",
     "build:angular": "cd client/angular && npx ng build",
-    "build:all": "npm run build:all --workspace=traceviz-angular-workspace"
+    "build:all": "npm run build:all --workspace=traceviz-angular-workspace",
+    "test:all": "npm run test:all --workspace=traceviz-angular-workspace"
   }
 }
