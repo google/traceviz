@@ -3,15 +3,13 @@
     "target": "ES2020",
     "lib": ["ES2020", "DOM"],
     "types": ["node", "zone.js"],
-    "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
     "paths": {
-      "@traceviz/angular-core": ["projects/core/src/public-api.ts"],
-      "@traceviz/angular-core/*": ["projects/core/src/*"],
-      "@traceviz/angular-hovercard": ["projects/hovercard/src/public-api.ts"],
-      "@traceviz/angular-hovercard/*": ["projects/hovercard/src/*"],
-      "@traceviz/angular-axes": ["dist/traceviz/angular/axes"],
-      "@traceviz/angular-axes/*": ["dist/traceviz/angular/axes/*"]
+      "@traceviz/angular-core": ["./projects/core/src/public-api.ts"],
+      "@traceviz/angular-core/*": ["./projects/core/src/*"],
+      "@traceviz/angular-hovercard": ["./projects/hovercard/src/public-api.ts"],
+      "@traceviz/angular-hovercard/*": ["./projects/hovercard/src/*"],
+      "@traceviz/angular-axes": ["./dist/traceviz/angular/axes"],
+      "@traceviz/angular-axes/*": ["./dist/traceviz/angular/axes/*"]
     }
   },
   "include": ["projects/**/*.ts", "projects/**/*.html"],

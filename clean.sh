@@ -1,0 +1,1 @@
+rm -rf node_modules/ package-lock.json client/core/node_modules/ client/core/package-lock.json client/angular/node_modules client/angular/package-lock.json client/core/dist/ client/angular/dist/ client/angular/.angular

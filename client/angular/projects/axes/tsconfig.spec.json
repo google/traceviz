@@ -1,11 +1,22 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
   "extends": "../../tsconfig.base.json",
-  "files": [
-    "./src/test.ts"
-  ],
+  "compilerOptions": {
+    "outDir": "../../out-tsc/spec",
+    "types": ["jasmine"],
+    "baseUrl": "./",
+    "paths": {
+      "@traceviz/angular-core": [
+        "../core/src/public-api.ts"
+      ],
+      "@traceviz/angular-hovercard": [
+        "../hovercard/src/public-api.ts"
+      ]
+    }
+  },
   "include": [
-    "**/*.spec.ts",
-    "**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
   ],
+  "files": ["src/test.ts"]
 }
