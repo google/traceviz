@@ -22,24 +22,7 @@
     "lib": [
       "ES2022",
       "dom"
-    ],
-    "paths": {
-      "@angular/*": [
-        "./node_modules/@angular/*"
-      ],
-      "traceviz-angular-core": [
-        "./node_modules/traceviz-angular-core",
-      ],
-      // "traceviz-client-core": [
-      //   "./node_modules/traceviz-client-core",
-      // ],
-      "rxjs": [
-        "node_modules/rxjs"
-      ],
-      "rxjs/*": [
-        "node_modules/rxjs/*"
-      ],
-    }
+    ]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
