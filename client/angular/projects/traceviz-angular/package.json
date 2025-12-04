@@ -1,0 +1,14 @@
+{
+  "name": "@traceviz/angular",
+  "version": "0.0.1",
+  "ngPackage": {
+    "$schema": "../../node_modules/ng-packagr/ng-package.schema.json"
+  },
+  "peerDependencies": {
+    "@angular/core": "^17.0.0",
+    "@angular/common": "^17.0.0"
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json"
+  }
+}

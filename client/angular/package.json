@@ -12,18 +12,21 @@
     "@angular/forms": "^17.3.12",
     "@angular/platform-browser": "^17.3.12",
     "@angular/platform-browser-dynamic": "^17.3.12",
+    "@babel/runtime": "^7.28.4",
     "@types/jasmine": "^4.6.5",
+    "@types/node": "^18.19.50",
     "jasmine": "^4.6.0",
     "jasmine-core": "^4.6.1",
     "jasmine-spec-reporter": "^7.0.0",
     "jasmine-ts-console-reporter": "^3.1.1",
-    "karma": "^6.4.2",
+    "karma": "^6.4.4",
     "karma-chrome-launcher": "^3.2.0",
     "karma-coverage": "^2.2.0",
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.0.0",
     "karma-spec-reporter": "^0.0.36",
     "ng-packagr": "^17.3.0",
+    "npm-run-all": "^4.1.5",
     "rimraf": "^4.4.1",
     "tslib": "^2.8.1",
     "typescript": "^5.4.5"
@@ -32,7 +35,7 @@
     "@angular/cdk": "^17.3.0",
     "@angular/cli": "^17.3.17",
     "@angular/material": "^17.3.0",
-    "@traceviz/client-core": "^1.0.1",
+    "@traceviz/client-core": "file:../core",
     "@types/d3": "^7.4.3",
     "@types/d3-dispatch": "3.0.2",
     "d3": "^7.0.0",
@@ -40,10 +43,9 @@
     "zone.js": "^0.14.10"
   },
   "scripts": {
-    "test": "ng test",
-    "build": "echo 'Build from individual libraries'",
     "clean": "rimraf dist .angular node_modules/.cache",
-    "build:all": "ng build core && ng build hovercard && ng build axes && ng build data-table && ng build dropdown && ng build error-message && ng build keypress && ng build line-chart && ng build slide-toggle && ng build text-area && ng build text-field && ng build trace && ng build update-values && ng build url-hash && ng build weighted-tree",
-    "test:all": "ng test core && ng test hovercard && ng test axes && ng test data-table && ng test dropdown && ng test error-message && ng test keypress && ng test line-chart && ng test slide-toggle && ng test text-area && ng test text-field && ng test trace && ng test update_values && ng test url-hash && ng test weighted-tree"
+    "build:lib": "npm --prefix ./projects/traceviz-angular run build",
+    "test:host": "ng test testhost",
+    "test:headless": "ng test --watch=false --browsers=ChromeHeadless",    "test:lib": "npm-run-all build:lib test:host"
   }
 }

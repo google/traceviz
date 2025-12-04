@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.spec.json",
+  "compilerOptions": {
+    "types": ["jasmine", "node"]
+  },
+  "files": ["src/test.ts"],
+  "include": [
+    "../traceviz-angular/**/*.spec.ts"
+  ]
+}

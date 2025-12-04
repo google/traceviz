@@ -1,8 +1,0 @@
-{
-  "name": "@traceviz/angular-core",
-  "version": "0.0.1",
-  "peerDependencies": {
-    "@angular/core": "^15.0.0",
-    "@angular/common": "^15.0.0"
-  }
-}

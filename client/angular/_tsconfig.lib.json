@@ -1,0 +1,39 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./out-tsc/lib",
+    "declaration": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "ES2022",
+    "module": "ES2020",
+    "moduleResolution": "Node",
+    "importHelpers": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "paths": {
+      "@traceviz/angular/axes": ["./projects/traceviz-angular/axes/src/public-api.ts"],
+      "@traceviz/angular/core": ["./projects/traceviz-angular/core/src/public-api.ts"],
+      "@traceviz/angular/data_table": ["./projects/traceviz-angular/data_table/src/public-api.ts"],
+      "@traceviz/angular/dropdown": ["./projects/traceviz-angular/dropdown/src/public-api.ts"],
+      "@traceviz/angular/error_message": ["./projects/traceviz-angular/error_message/src/public-api.ts"],
+      "@traceviz/angular/hovercard": ["./projects/traceviz-angular/hovercard/src/public-api.ts"],
+      "@traceviz/angular/keypress": ["./projects/traceviz-angular/keypress/src/public-api.ts"],
+      "@traceviz/angular/line_chart": ["./projects/traceviz-angular/line_chart/src/public-api.ts"],
+      "@traceviz/angular/slide_toggle": ["./projects/traceviz-angular/slide_toggle/src/public-api.ts"],
+      "@traceviz/angular/text_area": ["./projects/traceviz-angular/text_area/src/public-api.ts"],
+      "@traceviz/angular/text_field": ["./projects/traceviz-angular/text_field/src/public-api.ts"],
+      "@traceviz/angular/trace": ["./projects/traceviz-angular/trace/src/public-api.ts"],
+      "@traceviz/angular/update_values": ["./projects/traceviz-angular/update_values/src/public-api.ts"],
+      "@traceviz/angular/url_hash": ["./projects/traceviz-angular/url_hash/src/public-api.ts"],
+      "@traceviz/angular/weighted_tree": ["./projects/traceviz-angular/weighted_tree/src/public-api.ts"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
+}
