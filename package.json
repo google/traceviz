@@ -4,24 +4,32 @@
   "private": true,
 
   "scripts": {
-    "clean": "rimraf client/angular/dist client/core/dist client/angular/.angular client/core/.angular client/core/.tsbuildinfo",
-    "deep-clean": "rimraf client/angular/node_modules client/angular/package-lock.json client/core/node_modules client/core/package-lock.json node_modules package-lock.json",
+    "clean": "rimraf client/angular/dist client/core/dist client/angular/.angular client/core/.angular client/core/.tsbuildinfo logviz/client/dist logviz/client/.angular",
+    "deep-clean": "rimraf client/angular/node_modules client/angular/package-lock.json client/core/node_modules client/core/package-lock.json logviz/client/node_modules logviz/client/package-lock.json node_modules package-lock.json",
     "reset": "npm install && npm run clean && npm run deep-clean",
 
     "install:all": "npm install && npm run install:core && npm run install:angular",
     "install:core": "cd client/core && npm install",
     "install:angular": "cd client/angular && npm install",
+    "install:logviz": "cd logviz/client && npm install",
 
     "build": "npm run build:core && npm run build:angular",
     "build:core": "cd client/core && npm run build",
     "build:angular": "cd client/angular && npx ng build",
+    "build:logviz": "cd logviz/client && npm run build",
 
     "test": "npm run test:core && npm run test:angular",
     "test:core": "cd client/core && npm run test",
     "test:angular": "cd client/angular && npm run test:headless",
 
     "bt": "npm run build && npm run test",
-    "ibt": "npm run install:all && npm run bt"
+    "ibt": "npm run install:all && npm run bt",
+
+    "ib:logviz": "npm run install:logviz && npm run build:logviz",
+
+    "run:logviz": "cd logviz && go run server/server.go --resource_root ./client/dist/client",
+
+    "demo": "npm run ibt && npm run ib:logviz && npm run run:logviz"
   },
 
   "devDependencies": {

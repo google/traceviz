@@ -223,7 +223,7 @@
       <data-table class="vertical-fill">
         <interactions>
           <!-- Mousing into a row calls out that row's source file. -->
-          <action target="row" type="mouseover">
+          <action target="rows" type="mouseover">
             <set>
               <global-ref key="called_out_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
@@ -231,14 +231,14 @@
           </action>
 
           <!-- Mousing out of a row clears the called out source files. -->
-          <action target="row" type="mouseout">
+          <action target="rows" type="mouseout">
             <clear>
               <global-ref key="called_out_source_files"></global-ref>
             </clear>
           </action>
 
           <!-- Clicking a row sets the filtered-in source file set to that row's source file. -->
-          <action target="row" type="click">
+          <action target="rows" type="click">
             <set-or-clear>
               <global-ref key="filtered_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
@@ -246,7 +246,7 @@
           </action>
 
           <!-- Shift-clicking a row adds that row's source file to the filtered-in set -->
-          <action target="row" type="shift-click">
+          <action target="rows" type="shift-click">
             <toggle>
               <global-ref key="filtered_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
@@ -254,7 +254,7 @@
           </action>
 
           <!-- Rows for filtered-in source files should be highlighted.  -->
-          <reaction target="row" type="highlight">
+          <reaction target="rows" type="highlight">
             <includes>
               <global-ref key="filtered_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>
@@ -324,7 +324,7 @@
       <data-table class="vertical-fill">
         <interactions>
           <!-- Mousing into a row calls out that row's timestamp. -->
-          <action target="row" type="mouseover">
+          <action target="rows" type="mouseover">
             <set>
               <global-ref key="called_out_timestamp"></global-ref>
               <local-ref key="timestamp"></local-ref>
@@ -332,14 +332,14 @@
           </action>
 
           <!-- Mousing out of a row clears the called-out timestamp. -->
-          <action target="row" type="mouseout">
+          <action target="rows" type="mouseout">
             <clear>
               <global-ref key="called_out_timestamp"></global-ref>
             </clear>
           </action>
 
           <!-- A log entry should be highlighted if its source file is called out. -->
-          <reaction target="row" type="highlight">
+          <reaction target="rows" type="highlight">
             <includes>
               <global-ref key="called_out_source_files"></global-ref>
               <local-ref key="source_file"></local-ref>

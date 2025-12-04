@@ -7,4 +7,5 @@ you understand program latency.  But not if they're just going to sit there
 being text files!
 
 LogViz is a rich visualization tool for exploring debug logs, built in the
-TraceViz tool-building platform.  
+TraceViz tool-building platform.
+[You can try it out right way](../docs/get_started.md)

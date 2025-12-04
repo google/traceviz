@@ -21,6 +21,7 @@ import (
 
 	logtrace "github.com/google/traceviz/logviz/analysis/log_trace"
 	"github.com/google/traceviz/server/go/category"
+	categoryaxis "github.com/google/traceviz/server/go/category_axis"
 	continuousaxis "github.com/google/traceviz/server/go/continuous_axis"
 	"github.com/google/traceviz/server/go/trace"
 	"github.com/google/traceviz/server/go/util"
@@ -65,14 +66,16 @@ func (tstn *timeSeriesTreeNode) sortedChildren() []*timeSeriesTreeNode {
 
 var (
 	traceRenderSettings = &trace.RenderSettings{
-		SpanWidthCatPx:          30,
-		SpanPaddingCatPx:        1,
-		CategoryHeaderCatPx:     30,
-		CategoryHandleTempPx:    10,
-		CategoryPaddingCatPx:    3,
-		CategoryMarginTempPx:    10,
-		CategoryMinWidthCatPx:   20,
-		CategoryBaseWidthTempPx: 200,
+		SpanWidthCatPx:   30,
+		SpanPaddingCatPx: 1,
+		CategoryAxisRenderSettings: &categoryaxis.RenderSettings{
+			CategoryHeaderCatPx:    30,
+			CategoryHandleValPx:    10,
+			CategoryPaddingCatPx:   3,
+			CategoryMarginValPx:    10,
+			CategoryMinWidthCatPx:  20,
+			CategoryBaseWidthValPx: 200,
+		},
 	}
 )
 

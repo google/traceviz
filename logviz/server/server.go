@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/google/traceviz/logviz/service"
 )
@@ -26,7 +27,14 @@ func main() {
 	mux := http.DefaultServeMux
 	service.RegisterHandlers(mux)
 	mux.Handle("/", http.FileServer(http.Dir(*resourceRoot)))
-	fmt.Printf("Serving on port %d\n", *port)
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatalf("Failed to get hostname: %s", err)
+	}
+
+	// Provide OSC 8 (https://en.wikipedia.org/wiki/ANSI_escape_code#OSC) link for
+	// compatible terminals.
+	fmt.Printf("Serving LogViz at \x1B]8;;http://%[1]s:%[2]d\x07http://%[1]s:%[2]d\x1B]8;;\x07", hostname, *port)
 	http.ListenAndServe(
 		fmt.Sprintf(":%d", *port),
 		mux,
