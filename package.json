@@ -4,9 +4,9 @@
   "private": true,
 
   "scripts": {
-    "clean": "rimraf client/angular/dist client/core/dist client/core/angular.angular client/core/.tsbuildinfo",
+    "clean": "rimraf client/angular/dist client/core/dist client/angular/.angular client/core/.angular client/core/.tsbuildinfo",
     "deep-clean": "rimraf client/angular/node_modules client/angular/package-lock.json client/core/node_modules client/core/package-lock.json node_modules package-lock.json",
-    "reset": "npm run clean && npm run deep-clean",
+    "reset": "npm install && npm run clean && npm run deep-clean",
 
     "install:all": "npm install && npm run install:core && npm run install:angular",
     "install:core": "cd client/core && npm install",
