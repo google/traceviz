@@ -1,10 +1,9 @@
 {
-  "files": [],
   "compileOnSave": false,
   "angularCompilerOptions": {
     "compilationMode": "partial"
   },
-    "compilerOptions": {
+  "compilerOptions": {
     "outDir": "./out-tsc/lib",
     "declaration": true,
     "sourceMap": true,
@@ -20,6 +19,7 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@traceviz/client-core": ["../core/public-api.ts"],
       "@traceviz/angular/axes": ["projects/traceviz-angular/axes/src/public-api.ts"],
       "@traceviz/angular/core": ["projects/traceviz-angular/core/src/public-api.ts"],
       "@traceviz/angular/data_table": ["projects/traceviz-angular/data_table/src/public-api.ts"],
@@ -37,7 +37,11 @@
       "@traceviz/angular/weighted_tree": ["projects/traceviz-angular/weighted_tree/src/public-api.ts"]
     }
   },
+  "include": [
+    "./projects/**/*"
+  ],
   "exclude": [
+    "./projects/**/test.ts",
     "node_modules",
     "tmp"
   ]

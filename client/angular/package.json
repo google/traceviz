@@ -15,6 +15,7 @@
     "@babel/runtime": "^7.28.4",
     "@types/jasmine": "^4.6.5",
     "@types/node": "^18.19.50",
+    "@types/zone.js": "^0.0.27",
     "jasmine": "^4.6.0",
     "jasmine-core": "^4.6.1",
     "jasmine-spec-reporter": "^7.0.0",
@@ -46,6 +47,7 @@
     "clean": "rimraf dist .angular node_modules/.cache",
     "build:lib": "npm --prefix ./projects/traceviz-angular run build",
     "test:host": "ng test testhost",
-    "test:headless": "ng test --watch=false --browsers=ChromeHeadless",    "test:lib": "npm-run-all build:lib test:host"
+    "test:headless": "ng test --watch=false --browsers=ChromeHeadless",
+    "test:lib": "npm-run-all build:lib test:host"
   }
 }

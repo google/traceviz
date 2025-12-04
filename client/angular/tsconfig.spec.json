@@ -3,7 +3,12 @@
   "compilerOptions": {
     "types": [
       "jasmine",
-      "node"
+      "node",
+      "zone.js",
     ]
-  }
+  },
+  "include": [
+    "./projects/testhost/**",
+    "./projects/**/test.ts"
+  ],
 }
